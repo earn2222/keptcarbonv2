@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  web-bocor:
+    build: .
+    ports:
+      - "8081:80"
+    container_name: web-bocor
+    volumes:
+      - .:/usr/share/nginx/html
