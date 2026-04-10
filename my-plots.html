@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>แปลงของฉัน - KeptCarbon</title>
+  <meta name="description" content="จัดการและดูข้อมูลแปลงยางพาราของคุณทั้งหมด">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- MapLibre -->
+  <link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
+  <link href="assets/css/keptcarbon.css" rel="stylesheet">
+</head>
+
+<body class="plots-page dark-header">
+
+  <!-- Header -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center">
+      <a href="index.html" class="logo d-flex align-items-center me-auto">
+        <h1 class="sitename" style="color:#e0ece4;">Kept<span style="color:#84a98c;">Carbon</span></h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="dashboard.html">แดชบอร์ด</a></li>
+          <li><a href="map-draw.html">วาดแปลงยาง</a></li>
+          <li><a href="my-plots.html" class="active">แปลงของฉัน</a></li>
+          <li><a href="profile.html">โปรไฟล์</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+      <div id="nav-buttons" class="d-flex align-items-center ms-3"></div>
+    </div>
+  </header>
+
+  <main class="plots-page">
+    <!-- Header -->
+    <div class="plots-header">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h1><i class="bi bi-map me-2" style="color:#84a98c;"></i>แปลงของฉัน</h1>
+            <p style="color:rgba(224,236,228,0.5);font-size:14px;">จัดการและดูข้อมูลแปลงยางพาราทั้งหมดของคุณ</p>
+          </div>
+          <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="map-draw.html" class="btn-map-primary d-inline-block" style="width:auto;padding:11px 22px;">
+              <i class="bi bi-plus-circle me-2"></i>เพิ่มแปลงใหม่
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary stats bar -->
+    <div style="background:rgba(132,169,140,0.06);border-bottom:1px solid rgba(132,169,140,0.12);padding:16px 0;">
+      <div class="container">
+        <div class="row g-3 text-center">
+          <div class="col-4">
+            <div style="color:#84a98c;font-size:22px;font-weight:700;" id="summary-plots">0</div>
+            <div style="color:rgba(224,236,228,0.4);font-size:11px;">แปลงทั้งหมด</div>
+          </div>
+          <div class="col-4">
+            <div style="color:#84a98c;font-size:22px;font-weight:700;" id="summary-area">0</div>
+            <div style="color:rgba(224,236,228,0.4);font-size:11px;">พื้นที่รวม (ไร่)</div>
+          </div>
+          <div class="col-4">
+            <div style="color:#84a98c;font-size:22px;font-weight:700;" id="summary-carbon">0</div>
+            <div style="color:rgba(224,236,228,0.4);font-size:11px;">คาร์บอนรวม (tCO₂)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search/Filter Bar -->
+    <div style="padding:20px 0 0;">
+      <div class="container">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-6">
+            <div style="position:relative;">
+              <i class="bi bi-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(224,236,228,0.35);"></i>
+              <input type="text" id="search-input" placeholder="ค้นหาแปลงยาง..." 
+                style="width:100%;padding:10px 14px 10px 38px;background:rgba(255,255,255,0.05);border:1px solid rgba(132,169,140,0.2);border-radius:10px;color:#e0ece4;font-family:'Roboto',sans-serif;font-size:14px;outline:none;"
+                oninput="filterPlots()">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select id="sort-select" onchange="filterPlots()"
+              style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(132,169,140,0.2);border-radius:10px;color:#e0ece4;font-size:13px;outline:none;">
+              <option value="date-desc">ล่าสุดก่อน</option>
+              <option value="date-asc">เก่าสุดก่อน</option>
+              <option value="carbon-desc">คาร์บอนมากสุด</option>
+              <option value="area-desc">พื้นที่มากสุด</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <div style="color:rgba(224,236,228,0.4);font-size:13px;" id="result-count"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plots Grid -->
+    <div class="plots-grid">
+      <div class="container">
+        <div class="row g-4" id="plots-grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Plot Detail Modal -->
+  <div class="modal fade" id="plotDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content" style="background:#0d1a10;border:1px solid rgba(132,169,140,0.2);border-radius:20px;">
+        <div class="modal-header" style="border-bottom:1px solid rgba(132,169,140,0.15);padding:20px 24px;">
+          <h5 class="modal-title" id="modal-plot-name" style="color:#e0ece4;"></h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding:24px;">
+          <div class="row g-3">
+            <div class="col-md-7">
+              <div id="modal-map" style="height:280px;border-radius:12px;overflow:hidden;border:1px solid rgba(132,169,140,0.2);"></div>
+            </div>
+            <div class="col-md-5">
+              <div class="row g-2">
+                <div class="col-12">
+                  <div class="result-card" style="padding:12px;">
+                    <div class="result-label">เจ้าของแปลง</div>
+                    <div class="result-value" id="modal-owner" style="font-size:16px;">—</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="result-card" style="padding:12px;">
+                    <div class="result-label">พื้นที่</div>
+                    <div class="result-value" id="modal-area" style="font-size:16px;">—</div>
+                    <div class="result-unit">ไร่</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="result-card" style="padding:12px;">
+                    <div class="result-label">อายุต้นยาง</div>
+                    <div class="result-value" id="modal-age" style="font-size:16px;">—</div>
+                    <div class="result-unit">ปี</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="result-card" style="padding:12px;">
+                    <div class="result-label">ความสูง H</div>
+                    <div class="result-value" id="modal-height" style="font-size:16px;">—</div>
+                    <div class="result-unit">เมตร</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="result-card" style="padding:12px;">
+                    <div class="result-label">DBH D</div>
+                    <div class="result-value" id="modal-dbh" style="font-size:16px;">—</div>
+                    <div class="result-unit">ซม.</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div style="background:linear-gradient(135deg,rgba(132,169,140,0.2),rgba(82,121,111,0.2));border:1px solid rgba(132,169,140,0.3);border-radius:12px;padding:16px;text-align:center;">
+                    <div style="color:rgba(224,236,228,0.5);font-size:11px;text-transform:uppercase;letter-spacing:1px;">คาร์บอนทั้งแปลง</div>
+                    <div style="color:#84a98c;font-size:28px;font-weight:800;" id="modal-carbon">—</div>
+                    <div style="color:rgba(224,236,228,0.5);font-size:12px;">tCO₂ eq.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid rgba(132,169,140,0.15);padding:16px 24px;">
+          <button type="button" id="modal-delete-btn" class="btn-map-danger" style="width:auto;padding:8px 20px;" onclick="deleteFromModal()">
+            <i class="bi bi-trash me-1"></i>ลบแปลงนี้
+          </button>
+          <button type="button" class="btn-map-secondary d-inline-block" style="width:auto;padding:8px 20px;" data-bs-dismiss="modal">ปิด</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MapLibre -->
+  <script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/navbar.js"></script>
+  <script src="assets/js/main.js"></script>
+
+  <script>
+    if (!Auth.requireAuth()) { /* redirect */ }
+    const user = Auth.getUser();
+    let allPlots = [];
+    let modalMapInstance = null;
+    let currentPlotId = null;
+
+    // Load plots
+    function loadPlots() {
+      allPlots = PlotDB.getPlots(user.id);
+
+      // Update summary stats
+      const totalCarbon = allPlots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
+      const totalArea = allPlots.reduce((s, p) => s + (p.areaRai || 0), 0);
+      document.getElementById('summary-plots').textContent = allPlots.length;
+      document.getElementById('summary-carbon').textContent = totalCarbon.toFixed(1);
+      document.getElementById('summary-area').textContent = totalArea.toFixed(2);
+
+      filterPlots();
+    }
+
+    function filterPlots() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const sort = document.getElementById('sort-select').value;
+
+      let filtered = allPlots.filter(p =>
+        p.name.toLowerCase().includes(search) ||
+        (p.ownerName || '').toLowerCase().includes(search)
+      );
+
+      // Sort
+      if (sort === 'date-desc') filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      else if (sort === 'date-asc') filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      else if (sort === 'carbon-desc') filtered.sort((a, b) => (b.carbonTotal || 0) - (a.carbonTotal || 0));
+      else if (sort === 'area-desc') filtered.sort((a, b) => (b.areaRai || 0) - (a.areaRai || 0));
+
+      document.getElementById('result-count').textContent = `พบ ${filtered.length} แปลง`;
+      renderPlots(filtered);
+    }
+
+    function renderPlots(plots) {
+      const grid = document.getElementById('plots-grid');
+      if (plots.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12">
+            <div class="empty-plots">
+              <i class="bi bi-map"></i>
+              <h3>${allPlots.length === 0 ? 'ยังไม่มีแปลงยาง' : 'ไม่พบแปลงที่ค้นหา'}</h3>
+              <p>${allPlots.length === 0 ? 'เริ่มต้นด้วยการวาดแปลงแรกของคุณ' : 'ลองเปลี่ยนคำค้นหา'}</p>
+              ${allPlots.length === 0 ? '<a href="map-draw.html" class="btn-map-primary d-inline-block" style="width:auto;padding:10px 24px;margin-top:12px;"><i class="bi bi-plus me-2"></i>วาดแปลงใหม่</a>' : ''}
+            </div>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = '';
+      plots.forEach((plot, i) => {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4';
+        col.innerHTML = `
+          <div class="plot-item-card" onclick="openPlotDetail('${plot.id}')">
+            <div class="plot-thumbnail">
+              <div class="mini-map" id="mini-map-${i}"></div>
+            </div>
+            <h3>${escHtml(plot.name)}</h3>
+            <div class="plot-meta-row">
+              <span class="plot-meta-label">เจ้าของ</span>
+              <span class="plot-meta-value">${escHtml(plot.ownerName || '—')}</span>
+            </div>
+            <div class="plot-meta-row">
+              <span class="plot-meta-label">พื้นที่</span>
+              <span class="plot-meta-value">${(plot.areaRai || 0).toFixed(2)} ไร่</span>
+            </div>
+            <div class="plot-meta-row">
+              <span class="plot-meta-label">อายุต้นยาง</span>
+              <span class="plot-meta-value">${plot.treeAge || '—'} ปี</span>
+            </div>
+            <div class="plot-meta-row">
+              <span class="plot-meta-label">วันที่บันทึก</span>
+              <span class="plot-meta-value">${formatDate(plot.createdAt)}</span>
+            </div>
+            <div class="plot-carbon-highlight">
+              <div class="carbon-value">${(plot.carbonTotal || 0).toFixed(2)}</div>
+              <div class="carbon-label">tCO₂ eq. ในแปลงนี้</div>
+            </div>
+            <div class="plot-actions" onclick="event.stopPropagation();">
+              <a class="btn-plot-view" href="map-draw.html">
+                <i class="bi bi-pencil me-1"></i>แก้ไข
+              </a>
+              <button class="btn-plot-delete" onclick="deletePlot('${plot.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>`;
+        grid.appendChild(col);
+
+        // Init mini-map
+        setTimeout(() => {
+          initMiniMap(`mini-map-${i}`, plot);
+        }, 100 + i * 80);
+      });
+    }
+
+    function initMiniMap(containerId, plot) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      const m = new maplibregl.Map({
+        container: containerId,
+        style: {
+          version: 8,
+          sources: { sat: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 } },
+          layers: [{ id: 'sat', type: 'raster', source: 'sat' }]
+        },
+        center: [101.2587, 12.6819],
+        zoom: 9,
+        interactive: false,
+        attributionControl: false
+      });
+
+      m.on('load', () => {
+        if (plot.geojson) {
+          m.addSource('plot', { type: 'geojson', data: plot.geojson });
+          m.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#84a98c', 'fill-opacity': 0.4 } });
+          m.addLayer({ id: 'plot-line', type: 'line', source: 'plot', paint: { 'line-color': '#84a98c', 'line-width': 2 } });
+
+          const coords = plot.geojson.geometry.coordinates[0];
+          const lngs = coords.map(c => c[0]);
+          const lats = coords.map(c => c[1]);
+          m.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 20 });
+        }
+      });
+    }
+
+    function openPlotDetail(plotId) {
+      const plot = allPlots.find(p => p.id === plotId);
+      if (!plot) return;
+      currentPlotId = plotId;
+
+      document.getElementById('modal-plot-name').textContent = plot.name;
+      document.getElementById('modal-owner').textContent = plot.ownerName || '—';
+      document.getElementById('modal-area').textContent = (plot.areaRai || 0).toFixed(2);
+      document.getElementById('modal-age').textContent = plot.treeAge || '—';
+      document.getElementById('modal-height').textContent = plot.treeHeight || '—';
+      document.getElementById('modal-dbh').textContent = plot.dbh || '—';
+      document.getElementById('modal-carbon').textContent = (plot.carbonTotal || 0).toFixed(2);
+
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('plotDetailModal'));
+      modal.show();
+
+      // Init modal map
+      setTimeout(() => {
+        if (modalMapInstance) { modalMapInstance.remove(); modalMapInstance = null; }
+        modalMapInstance = new maplibregl.Map({
+          container: 'modal-map',
+          style: {
+            version: 8,
+            sources: { sat: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 } },
+            layers: [{ id: 'sat', type: 'raster', source: 'sat' }]
+          },
+          center: [101.2587, 12.6819],
+          zoom: 10,
+          attributionControl: false
+        });
+
+        modalMapInstance.on('load', () => {
+          if (plot.geojson) {
+            modalMapInstance.addSource('p', { type: 'geojson', data: plot.geojson });
+            modalMapInstance.addLayer({ id: 'p-fill', type: 'fill', source: 'p', paint: { 'fill-color': '#84a98c', 'fill-opacity': 0.35 } });
+            modalMapInstance.addLayer({ id: 'p-line', type: 'line', source: 'p', paint: { 'line-color': '#84a98c', 'line-width': 2.5 } });
+            const coords = plot.geojson.geometry.coordinates[0];
+            const lngs = coords.map(c => c[0]);
+            const lats = coords.map(c => c[1]);
+            modalMapInstance.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 40 });
+          }
+        });
+      }, 300);
+    }
+
+    function deletePlot(plotId) {
+      if (!confirm('ต้องการลบแปลงนี้ใช่หรือไม่?')) return;
+      PlotDB.deletePlot(user.id, plotId);
+      loadPlots();
+    }
+
+    function deleteFromModal() {
+      if (!currentPlotId) return;
+      if (!confirm('ต้องการลบแปลงนี้ใช่หรือไม่?')) return;
+      PlotDB.deletePlot(user.id, currentPlotId);
+      bootstrap.Modal.getInstance(document.getElementById('plotDetailModal')).hide();
+      loadPlots();
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Initialize
+    loadPlots();
+  </script>
+</body>
+</html>

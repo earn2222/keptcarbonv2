@@ -26,6 +26,7 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css?v=2" rel="stylesheet">
+  <link href="assets/css/keptcarbon.css" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: Bocor
@@ -41,10 +42,8 @@
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center">
 
-      <a href="http://localhost:8081/" class="logo d-flex align-items-center me-auto">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.png" alt=""> -->
-        <h1 class="sitename">KeptCarbon</h1>
+      <a href="index.html" class="logo d-flex align-items-center me-auto">
+        <h1 class="sitename">Kept<span style="color:var(--accent-color)">Carbon</span></h1>
       </a>
 
       <nav id="navmenu" class="navmenu">
@@ -52,13 +51,15 @@
           <li><a href="#hero" class="active">หน้าแรก</a></li>
           <li><a href="#about">เกี่ยวกับเรา</a></li>
           <li><a href="#features">คุณสมบัติ</a></li>
-          <li><a href="#services">บริการของเรา</a></li>
           <li><a href="#contact">ติดต่อเรา</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
-      <a class="btn-getstarted" href="index.html#about">เริ่มต้นใช้งาน</a>
+      <div id="nav-buttons" class="d-flex align-items-center ms-3">
+        <a class="btn-login" href="login.html">เข้าสู่ระบบ</a>
+        <a class="btn-getstarted" href="register.html">สมัครสมาชิก</a>
+      </div>
 
     </div>
   </header>
@@ -74,7 +75,7 @@
             <h1>ยกระดับสวนยางพาราสู่<span style="color: var(--accent-color);">ความยั่งยืน</span></h1>
             <p>แพลตฟอร์มจัดการและประเมินคาร์บอนเครดิตสำหรับเกษตรกรชาวสวนยางพารา</p>
             <div class="d-flex">
-              <a href="#about" class="btn-get-started">เริ่มต้นใช้งาน</a>
+              <a href="register.html" class="btn-get-started">เริ่มต้นใช้งาน</a>
             </div>
           </div>
           <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-out" data-aos-delay="100">
@@ -510,6 +511,10 @@
   <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
   <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+
+  <!-- Auth & Navbar JS -->
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/navbar.js"></script>
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>

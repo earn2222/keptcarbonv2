@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>แดชบอร์ด - KeptCarbon</title>
+  <meta name="description" content="แดชบอร์ดภาพรวมสวนยางพาราและคาร์บอนเครดิต">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- MapLibre -->
+  <link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
+  <link href="assets/css/keptcarbon.css" rel="stylesheet">
+</head>
+
+<body class="dashboard-page dark-header">
+
+  <!-- Header -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center">
+      <a href="index.html" class="logo d-flex align-items-center me-auto">
+        <h1 class="sitename" style="color:#e0ece4;">Kept<span style="color:#84a98c;">Carbon</span></h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="dashboard.html" class="active">แดชบอร์ด</a></li>
+          <li><a href="map-draw.html">วาดแปลงยาง</a></li>
+          <li><a href="my-plots.html">แปลงของฉัน</a></li>
+          <li><a href="profile.html">โปรไฟล์</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+      <div id="nav-buttons" class="d-flex align-items-center ms-3">
+        <!-- Filled by navbar.js -->
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-page">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h1 id="welcome-title">ยินดีต้อนรับ 🌿</h1>
+            <p id="welcome-sub">ภาพรวมสวนยางพาราและคาร์บอนเครดิตของคุณ</p>
+          </div>
+          <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="map-draw.html" class="btn-map-primary d-inline-block" style="width:auto;padding:12px 24px;">
+              <i class="bi bi-plus-circle me-2"></i>วาดแปลงใหม่
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="dashboard-section">
+      <div class="container">
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-map"></i></div>
+              <div class="stat-value" id="stat-plots">0</div>
+              <div class="stat-label">จำนวนแปลงทั้งหมด</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-wind"></i></div>
+              <div class="stat-value" id="stat-carbon">0</div>
+              <div class="stat-label">คาร์บอนรวม (tCO₂)</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-rulers"></i></div>
+              <div class="stat-value" id="stat-area">0</div>
+              <div class="stat-label">พื้นที่รวม (ไร่)</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-tree"></i></div>
+              <div class="stat-value" id="stat-trees">0</div>
+              <div class="stat-label">ต้นยางโดยประมาณ</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Preview -->
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <h2>แผนที่ภาพรวมแปลง</h2>
+            <div class="dashboard-map-preview">
+              <div id="dashboard-map"></div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <h2>การกระจายคาร์บอน</h2>
+            <div class="chart-container" style="padding:20px;">
+              <canvas id="carbon-chart" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Plots -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <h2>แปลงล่าสุด</h2>
+            <div class="row g-3" id="recent-plots-container">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MapLibre -->
+  <script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
+  <!-- Bootstrap -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Auth & Navbar -->
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/navbar.js"></script>
+  <script src="assets/js/main.js"></script>
+
+  <script>
+    // Require login
+    if (!Auth.requireAuth()) { /* redirects */ }
+
+    const user = Auth.getUser();
+
+    // Set welcome message
+    if (user) {
+      document.getElementById('welcome-title').textContent = `ยินดีต้อนรับ, ${user.fullname} 🌿`;
+    }
+
+    // Load plots
+    const plots = user ? PlotDB.getPlots(user.id) : [];
+
+    // Update stats
+    const totalCarbon = plots.reduce((sum, p) => sum + (p.carbonTotal || 0), 0);
+    const totalArea = plots.reduce((sum, p) => sum + (p.areaRai || 0), 0);
+    const totalTrees = plots.reduce((sum, p) => sum + (p.treeCount || 0), 0);
+
+    document.getElementById('stat-plots').textContent = plots.length;
+    document.getElementById('stat-carbon').textContent = totalCarbon.toFixed(1);
+    document.getElementById('stat-area').textContent = totalArea.toFixed(2);
+    document.getElementById('stat-trees').textContent = totalTrees;
+
+    // Dashboard Map (centered on Rayong)
+    const dashMap = new maplibregl.Map({
+      container: 'dashboard-map',
+      style: {
+        version: 8,
+        sources: {
+          'satellite': {
+            type: 'raster',
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+            tileSize: 256,
+            attribution: '© Esri'
+          }
+        },
+        layers: [{ id: 'satellite', type: 'raster', source: 'satellite' }]
+      },
+      center: [101.2587, 12.6819], // Rayong
+      zoom: 9,
+      attributionControl: false
+    });
+
+    dashMap.on('load', () => {
+      // Add Rayong boundary
+      dashMap.addSource('rayong', {
+        type: 'geojson',
+        data: getRayongBoundary()
+      });
+      dashMap.addLayer({
+        id: 'rayong-outline',
+        type: 'line',
+        source: 'rayong',
+        paint: {
+          'line-color': '#84a98c',
+          'line-width': 2,
+          'line-dasharray': [4, 2]
+        }
+      });
+      dashMap.addLayer({
+        id: 'rayong-fill',
+        type: 'fill',
+        source: 'rayong',
+        paint: {
+          'fill-color': '#84a98c',
+          'fill-opacity': 0.05
+        }
+      });
+
+      // Draw saved plots
+      plots.forEach((plot, idx) => {
+        if (plot.geojson) {
+          dashMap.addSource(`plot-${idx}`, { type: 'geojson', data: plot.geojson });
+          dashMap.addLayer({
+            id: `plot-fill-${idx}`,
+            type: 'fill',
+            source: `plot-${idx}`,
+            paint: { 'fill-color': '#84a98c', 'fill-opacity': 0.3 }
+          });
+          dashMap.addLayer({
+            id: `plot-line-${idx}`,
+            type: 'line',
+            source: `plot-${idx}`,
+            paint: { 'line-color': '#84a98c', 'line-width': 2 }
+          });
+        }
+      });
+    });
+
+    // Carbon Chart
+    const carbonCtx = document.getElementById('carbon-chart').getContext('2d');
+    if (plots.length > 0) {
+      new Chart(carbonCtx, {
+        type: 'doughnut',
+        data: {
+          labels: plots.map(p => p.name),
+          datasets: [{
+            data: plots.map(p => p.carbonTotal || 0),
+            backgroundColor: [
+              'rgba(132,169,140,0.8)', 'rgba(82,121,111,0.8)',
+              'rgba(58,78,64,0.8)', 'rgba(168,201,177,0.8)',
+              'rgba(97,140,99,0.8)'
+            ],
+            borderColor: 'rgba(132,169,140,0.3)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: { color: 'rgba(224,236,228,0.7)', font: { size: 11 } }
+            }
+          }
+        }
+      });
+    } else {
+      carbonCtx.canvas.parentElement.innerHTML = `
+        <div style="text-align:center;padding:40px;color:rgba(224,236,228,0.35);">
+          <i class="bi bi-pie-chart" style="font-size:32px;display:block;margin-bottom:8px;"></i>
+          ยังไม่มีข้อมูลแปลง
+        </div>`;
+    }
+
+    // Recent Plots
+    const container = document.getElementById('recent-plots-container');
+    if (plots.length === 0) {
+      container.innerHTML = `
+        <div class="col-12">
+          <div class="empty-plots">
+            <i class="bi bi-map"></i>
+            <h3>ยังไม่มีแปลงยาง</h3>
+            <p>เริ่มต้นด้วยการวาดแปลงแรกของคุณ</p>
+            <a href="map-draw.html" class="btn-map-primary d-inline-block" style="width:auto;padding:10px 24px;margin-top:12px;">
+              <i class="bi bi-plus me-2"></i>วาดแปลงใหม่
+            </a>
+          </div>
+        </div>`;
+    } else {
+      plots.slice(0, 3).forEach(plot => {
+        container.innerHTML += `
+          <div class="col-md-4">
+            <div class="plot-card">
+              <div class="plot-name">${plot.name}</div>
+              <div class="plot-meta">👤 ${plot.ownerName || 'ไม่ระบุ'} · 📅 ${formatDate(plot.createdAt)}</div>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="plot-meta">พื้นที่: ${(plot.areaRai || 0).toFixed(2)} ไร่</span>
+                <span class="carbon-badge">${(plot.carbonTotal || 0).toFixed(1)} tCO₂</span>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      return new Date(iso).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // Rayong approximate boundary (simplified polygon)
+    function getRayongBoundary() {
+      return {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [101.0, 12.4], [101.8, 12.4], [102.0, 12.6],
+              [101.9, 13.0], [101.5, 13.1], [101.0, 13.0],
+              [100.8, 12.8], [100.9, 12.5], [101.0, 12.4]
+            ]]
+          },
+          properties: { name: 'ระยอง' }
+        }]
+      };
+    }
+  </script>
+</body>
+</html>

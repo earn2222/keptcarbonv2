@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>โปรไฟล์ - KeptCarbon</title>
+  <meta name="description" content="จัดการข้อมูลโปรไฟล์ผู้ใช้งาน">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
+  <link href="assets/css/keptcarbon.css" rel="stylesheet">
+</head>
+
+<body class="profile-page dark-header">
+
+  <!-- Header -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center">
+      <a href="index.html" class="logo d-flex align-items-center me-auto">
+        <h1 class="sitename" style="color:#e0ece4;">Kept<span style="color:#84a98c;">Carbon</span></h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="dashboard.html">แดชบอร์ด</a></li>
+          <li><a href="map-draw.html">วาดแปลงยาง</a></li>
+          <li><a href="my-plots.html">แปลงของฉัน</a></li>
+          <li><a href="profile.html" class="active">โปรไฟล์</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+      <div id="nav-buttons" class="d-flex align-items-center ms-3"></div>
+    </div>
+  </header>
+
+  <main class="profile-page">
+    <!-- Header -->
+    <div class="profile-header">
+      <div class="container">
+        <h1><i class="bi bi-person-circle me-2" style="color:#84a98c;"></i>โปรไฟล์ของฉัน</h1>
+        <p style="color:rgba(224,236,228,0.5);font-size:14px;">จัดการข้อมูลบัญชีและการตั้งค่าของคุณ</p>
+      </div>
+    </div>
+
+    <div class="profile-content">
+      <div class="container">
+        <div class="row g-4">
+          <!-- Left column: Avatar & stats -->
+          <div class="col-lg-4">
+            <div class="profile-avatar-section">
+              <div class="profile-avatar" id="profile-avatar-icon">
+                <i class="bi bi-person"></i>
+              </div>
+              <div class="profile-name" id="profile-display-name">—</div>
+              <div class="profile-email" id="profile-display-email">—</div>
+              <div class="profile-stats">
+                <div class="profile-stat">
+                  <div class="val" id="stat-my-plots">0</div>
+                  <div class="lbl">แปลง</div>
+                </div>
+                <div class="profile-stat" style="border-left:1px solid rgba(132,169,140,0.2);padding-left:20px;margin-left:20px;">
+                  <div class="val" id="stat-my-carbon">0</div>
+                  <div class="lbl">tCO₂</div>
+                </div>
+                <div class="profile-stat" style="border-left:1px solid rgba(132,169,140,0.2);padding-left:20px;margin-left:20px;">
+                  <div class="val" id="stat-my-area">0</div>
+                  <div class="lbl">ไร่</div>
+                </div>
+              </div>
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(132,169,140,0.1);">
+                <div style="color:rgba(224,236,228,0.4);font-size:11px;">สมาชิกตั้งแต่</div>
+                <div id="profile-joined" style="color:rgba(224,236,228,0.7);font-size:13px;margin-top:4px;">—</div>
+              </div>
+            </div>
+
+            <!-- Danger zone -->
+            <div class="profile-form-card" style="border-color:rgba(220,53,69,0.15);">
+              <h3 style="color:#ff7980;border-bottom-color:rgba(220,53,69,0.1);">
+                <i class="bi bi-exclamation-triangle me-2"></i>โซนอันตราย
+              </h3>
+              <p style="color:rgba(224,236,228,0.5);font-size:13px;margin-bottom:12px;">การออกจากระบบจะยกเลิก session ปัจจุบัน</p>
+              <button onclick="Auth.logout()" style="width:100%;padding:10px;background:rgba(220,53,69,0.1);border:1px solid rgba(220,53,69,0.3);border-radius:10px;color:#ff7980;font-size:13px;cursor:pointer;font-family:'Roboto',sans-serif;transition:all 0.3s;">
+                <i class="bi bi-box-arrow-right me-2"></i>ออกจากระบบ
+              </button>
+            </div>
+          </div>
+
+          <!-- Right column: Edit forms -->
+          <div class="col-lg-8">
+            <!-- Profile info -->
+            <div class="profile-form-card">
+              <h3><i class="bi bi-person-gear me-2"></i>แก้ไขข้อมูลส่วนตัว</h3>
+              <div id="profile-alert" class="alert-dark" style="display:none;"></div>
+              <form onsubmit="saveProfile(event)">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="form-group-dark">
+                      <label>ชื่อ-นามสกุล</label>
+                      <input type="text" id="edit-fullname" placeholder="ชื่อ-นามสกุล" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group-dark">
+                      <label>อีเมล (ไม่สามารถแก้ไข)</label>
+                      <input type="email" id="edit-email" readonly style="opacity:0.5;cursor:not-allowed;">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group-dark">
+                      <label>เบอร์โทรศัพท์</label>
+                      <input type="tel" id="edit-phone" placeholder="เบอร์โทรศัพท์">
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <button type="submit" class="btn-profile-save">
+                      <i class="bi bi-floppy me-2"></i>บันทึกข้อมูล
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Change password -->
+            <div class="profile-form-card">
+              <h3><i class="bi bi-shield-lock me-2"></i>เปลี่ยนรหัสผ่าน</h3>
+              <div id="pwd-alert" class="alert-dark" style="display:none;"></div>
+              <form onsubmit="changePassword(event)">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="form-group-dark">
+                      <label>รหัสผ่านปัจจุบัน</label>
+                      <input type="password" id="current-pwd" placeholder="กรอกรหัสผ่านปัจจุบัน" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group-dark">
+                      <label>รหัสผ่านใหม่</label>
+                      <input type="password" id="new-pwd" placeholder="อย่างน้อย 6 ตัวอักษร" required minlength="6">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group-dark">
+                      <label>ยืนยันรหัสผ่านใหม่</label>
+                      <input type="password" id="confirm-pwd" placeholder="กรอกซ้ำ" required minlength="6">
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <button type="submit" class="btn-profile-save">
+                      <i class="bi bi-lock me-2"></i>เปลี่ยนรหัสผ่าน
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Activity summary -->
+            <div class="profile-form-card">
+              <h3><i class="bi bi-bar-chart me-2"></i>สรุปกิจกรรม</h3>
+              <div id="activity-list">
+                <div style="text-align:center;padding:20px;color:rgba(224,236,228,0.3);font-size:13px;">กำลังโหลด...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/navbar.js"></script>
+  <script src="assets/js/main.js"></script>
+
+  <script>
+    if (!Auth.requireAuth()) { /* redirect */ }
+    const user = Auth.getUser();
+    const plots = user ? PlotDB.getPlots(user.id) : [];
+
+    // Populate profile display
+    if (user) {
+      document.getElementById('profile-display-name').textContent = user.fullname;
+      document.getElementById('profile-display-email').textContent = user.email;
+      document.getElementById('edit-fullname').value = user.fullname;
+      document.getElementById('edit-email').value = user.email;
+      document.getElementById('edit-phone').value = user.phone || '';
+
+      const initial = user.fullname.charAt(0).toUpperCase();
+      document.getElementById('profile-avatar-icon').innerHTML = `<span style="font-size:36px;font-weight:700;color:#84a98c;">${initial}</span>`;
+      document.getElementById('profile-joined').textContent = formatDate(user.createdAt) || 'ไม่ทราบ';
+    }
+
+    // Stats
+    const totalCarbon = plots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
+    const totalArea = plots.reduce((s, p) => s + (p.areaRai || 0), 0);
+    document.getElementById('stat-my-plots').textContent = plots.length;
+    document.getElementById('stat-my-carbon').textContent = totalCarbon.toFixed(1);
+    document.getElementById('stat-my-area').textContent = totalArea.toFixed(1);
+
+    // Activity
+    const actList = document.getElementById('activity-list');
+    if (plots.length === 0) {
+      actList.innerHTML = `<div style="text-align:center;padding:20px;color:rgba(224,236,228,0.3);font-size:13px;">ยังไม่มีกิจกรรม</div>`;
+    } else {
+      const sorted = [...plots].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      actList.innerHTML = sorted.map(p => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(132,169,140,0.08);">
+          <div>
+            <div style="color:#e0ece4;font-size:14px;font-weight:500;">${escHtml(p.name)}</div>
+            <div style="color:rgba(224,236,228,0.4);font-size:12px;">${formatDate(p.createdAt)} · ${(p.areaRai||0).toFixed(2)} ไร่</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="color:#84a98c;font-weight:600;">${(p.carbonTotal||0).toFixed(2)}</div>
+            <div style="color:rgba(224,236,228,0.4);font-size:11px;">tCO₂</div>
+          </div>
+        </div>`
+      ).join('');
+    }
+
+    // Save profile
+    function saveProfile(e) {
+      e.preventDefault();
+      const fullname = document.getElementById('edit-fullname').value.trim();
+      const phone = document.getElementById('edit-phone').value.trim();
+      const alertEl = document.getElementById('profile-alert');
+
+      const result = Auth.updateProfile({ fullname, phone });
+      if (result.success) {
+        alertEl.className = 'alert-dark success';
+        alertEl.textContent = '✓ บันทึกข้อมูลเรียบร้อยแล้ว';
+        alertEl.style.display = 'block';
+        document.getElementById('profile-display-name').textContent = fullname;
+        setTimeout(() => alertEl.style.display = 'none', 3000);
+      } else {
+        alertEl.className = 'alert-dark error';
+        alertEl.textContent = '✗ ' + result.message;
+        alertEl.style.display = 'block';
+      }
+    }
+
+    // Change password
+    function changePassword(e) {
+      e.preventDefault();
+      const currentPwd = document.getElementById('current-pwd').value;
+      const newPwd = document.getElementById('new-pwd').value;
+      const confirmPwd = document.getElementById('confirm-pwd').value;
+      const alertEl = document.getElementById('pwd-alert');
+
+      if (newPwd !== confirmPwd) {
+        alertEl.className = 'alert-dark error';
+        alertEl.textContent = '✗ รหัสผ่านใหม่ไม่ตรงกัน';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      // Verify current password
+      const loginCheck = Auth.login(user.email, currentPwd);
+      if (!loginCheck.success) {
+        alertEl.className = 'alert-dark error';
+        alertEl.textContent = '✗ รหัสผ่านปัจจุบันไม่ถูกต้อง';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      const result = Auth.updateProfile({ newPassword: newPwd });
+      if (result.success) {
+        alertEl.className = 'alert-dark success';
+        alertEl.textContent = '✓ เปลี่ยนรหัสผ่านเรียบร้อยแล้ว';
+        alertEl.style.display = 'block';
+        document.getElementById('current-pwd').value = '';
+        document.getElementById('new-pwd').value = '';
+        document.getElementById('confirm-pwd').value = '';
+        setTimeout(() => alertEl.style.display = 'none', 3000);
+      }
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('th-TH', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+</body>
+</html>

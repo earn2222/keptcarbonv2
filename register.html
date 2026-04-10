@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>สมัครสมาชิก - KeptCarbon</title>
+  <meta name="description" content="สมัครสมาชิกแพลตฟอร์ม KeptCarbon สำหรับจัดการสวนยางพาราและคาร์บอนเครดิต">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="assets/css/main.css?v=2" rel="stylesheet">
+  <link href="assets/css/keptcarbon.css" rel="stylesheet">
+
+  <style>
+    body { margin: 0; padding: 0; }
+    .floating-leaf {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(132,169,140,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      animation: float-leaf 8s infinite ease-in-out;
+    }
+    @keyframes float-leaf {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="floating-leaf" style="top:5%;left:5%;width:200px;height:200px;animation-delay:0s;"></div>
+  <div class="floating-leaf" style="top:70%;left:75%;width:300px;height:300px;animation-delay:4s;"></div>
+
+  <div class="auth-page">
+    <div class="auth-card" style="max-width:500px;">
+      <!-- Logo -->
+      <div class="auth-logo">
+        <a href="index.html" style="text-decoration:none;">
+          <div class="brand-name">Kept<span>Carbon</span></div>
+        </a>
+        <p>แพลตฟอร์มจัดการสวนยางพาราและคาร์บอนเครดิต</p>
+      </div>
+
+      <h2>สมัครสมาชิก</h2>
+      <p class="subtitle">สร้างบัญชีใหม่เพื่อเริ่มจัดการสวนยางพาราของคุณ</p>
+
+      <!-- Alert -->
+      <div id="reg-alert" class="auth-alert" style="display:none;"></div>
+
+      <!-- Form -->
+      <form id="register-form" onsubmit="handleRegister(event)">
+        <div class="auth-form-group">
+          <label for="reg-fullname">ชื่อ-นามสกุล</label>
+          <div class="input-wrapper">
+            <i class="bi bi-person"></i>
+            <input type="text" id="reg-fullname" placeholder="กรอกชื่อ-นามสกุล" required autocomplete="name">
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label for="reg-email">อีเมล</label>
+          <div class="input-wrapper">
+            <i class="bi bi-envelope"></i>
+            <input type="email" id="reg-email" placeholder="กรอกอีเมล" required autocomplete="email">
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label for="reg-phone">เบอร์โทรศัพท์ (ไม่บังคับ)</label>
+          <div class="input-wrapper">
+            <i class="bi bi-telephone"></i>
+            <input type="tel" id="reg-phone" placeholder="กรอกเบอร์โทรศัพท์">
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label for="reg-password">รหัสผ่าน</label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock"></i>
+            <input type="password" id="reg-password" placeholder="อย่างน้อย 6 ตัวอักษร" required minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="auth-form-group">
+          <label for="reg-confirm">ยืนยันรหัสผ่าน</label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock-fill"></i>
+            <input type="password" id="reg-confirm" placeholder="กรอกรหัสผ่านอีกครั้ง" required minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-auth" id="reg-btn">
+          <i class="bi bi-person-plus me-2"></i>สมัครสมาชิก
+        </button>
+      </form>
+
+      <div class="auth-divider">หรือ</div>
+
+      <div class="auth-link">
+        มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a>
+      </div>
+      <div class="auth-link mt-2">
+        <a href="index.html"><i class="bi bi-arrow-left me-1"></i>กลับสู่หน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const fullname = document.getElementById('reg-fullname').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-confirm').value;
+      const alertEl = document.getElementById('reg-alert');
+      const btn = document.getElementById('reg-btn');
+
+      alertEl.style.display = 'none';
+
+      if (password !== confirm) {
+        alertEl.className = 'auth-alert error';
+        alertEl.textContent = '✗ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังสมัครสมาชิก...';
+
+      setTimeout(() => {
+        const result = Auth.register({ fullname, email, phone, password });
+        if (result.success) {
+          // Auto-login after register
+          Auth.login(email, password);
+          alertEl.className = 'auth-alert success';
+          alertEl.textContent = '✓ สมัครสมาชิกสำเร็จ! กำลังนำไปยังแดชบอร์ด...';
+          alertEl.style.display = 'block';
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+        } else {
+          alertEl.className = 'auth-alert error';
+          alertEl.textContent = '✗ ' + result.message;
+          alertEl.style.display = 'block';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-person-plus me-2"></i>สมัครสมาชิก';
+        }
+      }, 600);
+    }
+  </script>
+</body>
+</html>
