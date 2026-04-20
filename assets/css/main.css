@@ -18,19 +18,27 @@
 }
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
-:root { 
-  --background-color: #ffffff; /* Background color - pure white */
-  --default-color: #3d5a45; /* Default text color - deep forest green */
-  --heading-color: #1a3d2b; /* Headings - rich dark green */
-  --accent-color: #2d9e5f; /* Accent - vibrant fresh green */
-  --surface-color: #ffffff; /* Surface color - white */
-  --contrast-color: #ffffff; /* Contrast text color */
+:root {
+  --background-color: #ffffff;
+  /* Background color - pure white */
+  --default-color: #3d5a45;
+  /* Default text color - deep forest green */
+  --heading-color: #1a3d2b;
+  /* Headings - rich dark green */
+  --accent-color: #2d9e5f;
+  /* Accent - vibrant fresh green */
+  --surface-color: #ffffff;
+  /* Surface color - white */
+  --contrast-color: #ffffff;
+  /* Contrast text color */
 }
 
 /* Nav Menu Colors */
 :root {
-  --nav-color: #2d5a3d;  /* Nav links - deep green */
-  --nav-hover-color: #2d9e5f; /* Nav hover - vibrant green */
+  --nav-color: #2d5a3d;
+  /* Nav links - deep green */
+  --nav-hover-color: #2d9e5f;
+  /* Nav hover - vibrant green */
   --nav-mobile-background-color: #ffffff;
   --nav-dropdown-background-color: #ffffff;
   --nav-dropdown-color: #2d5a3d;
@@ -40,12 +48,14 @@
 /* Color Presets */
 
 .light-background {
-  --background-color: #f0faf4; /* very subtle pale fresh-green background */
+  --background-color: #f0faf4;
+  /* very subtle pale fresh-green background */
   --surface-color: #ffffff;
 }
 
 .dark-background {
-  --background-color: #1a3d2b; /* rich dark green */
+  --background-color: #1a3d2b;
+  /* rich dark green */
   --default-color: #e8f5ee;
   --heading-color: #b8e6cc;
   --surface-color: #235237;
@@ -234,11 +244,56 @@ h6 {
 
 .header .logo {
   line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.header .logo:hover {
+  transform: translateY(-2px);
 }
 
 .header .logo img {
-  max-height: 50px;
-  margin-right: 8px;
+  max-height: 64px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(45, 158, 95, 0.1));
+  transition: all 0.3s ease;
+}
+
+.header .logo img:hover {
+  filter: drop-shadow(0 4px 8px rgba(45, 158, 95, 0.2));
+}
+
+.header .logo .brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.header .logo .brand-name {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--heading-color);
+  letter-spacing: -0.4px;
+}
+
+.header .logo .brand-name .keeper {
+  color: var(--accent-color);
+  margin-right: 1px;
+}
+
+.header .logo .brand-sub {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-top: 2px;
 }
 
 .header .logo h1 {
@@ -246,6 +301,7 @@ h6 {
   margin: 0;
   font-weight: 700;
   color: var(--heading-color);
+  letter-spacing: -0.5px;
 }
 
 .header .logo span {
