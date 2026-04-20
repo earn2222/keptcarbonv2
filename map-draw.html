@@ -18,15 +18,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #0c1510;
-  --surface:  rgba(18, 30, 20, 0.96);
-  --border:   rgba(255,255,255,0.09);
-  --border-g: rgba(132,169,140,0.28);
-  --green:    #84a98c;
-  --green-d:  #52796f;
-  --text:     #daeee1;
-  --text-mid: rgba(210,230,218,0.65);
-  --text-dim: rgba(200,220,210,0.38);
+  --bg:       #f5fdf8;
+  --surface:  rgba(255, 255, 255, 0.97);
+  --border:   rgba(45,158,95,0.12);
+  --border-g: rgba(45,158,95,0.28);
+  --green:    #2d9e5f;
+  --green-d:  #1e7a47;
+  --text:     #1a3d2b;
+  --text-mid: rgba(45,90,61,0.7);
+  --text-dim: rgba(45,90,61,0.45);
   --panel-w:  380px;
   --topbar-h: 56px;
   --font: 'Inter', sans-serif;
@@ -51,10 +51,10 @@ html, body {
 
 /* MapLibre overrides */
 .maplibregl-ctrl-group {
-  background: rgba(10,18,12,0.88) !important;
+  background: rgba(255,255,255,0.95) !important;
   border: 1px solid var(--border) !important;
   border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+  box-shadow: 0 4px 20px rgba(45,158,95,0.12) !important;
   overflow: hidden;
 }
 .maplibregl-ctrl-group button {
@@ -64,12 +64,12 @@ html, body {
   transition: background 0.2s;
 }
 .maplibregl-ctrl-group button:last-child { border-bottom: none !important; }
-.maplibregl-ctrl-group button:hover { background: rgba(132,169,140,0.15) !important; }
-.maplibregl-ctrl-icon { filter: brightness(0) invert(0.7) sepia(0.4) hue-rotate(80deg) brightness(1.3) !important; }
+.maplibregl-ctrl-group button:hover { background: rgba(45,158,95,0.1) !important; }
+.maplibregl-ctrl-icon { filter: hue-rotate(100deg) saturate(1.5) brightness(0.55) !important; }
 .maplibregl-ctrl-bottom-left { bottom: 72px !important; left: 14px !important; }
 .maplibregl-ctrl-bottom-right { bottom: 72px !important; right: calc(var(--panel-w) + 12px) !important; }
 .maplibregl-ctrl-scale {
-  background: rgba(10,18,12,0.78) !important;
+  background: rgba(255,255,255,0.9) !important;
   border: 1px solid var(--border) !important;
   border-radius: 6px !important;
   color: var(--text-mid) !important;
@@ -87,36 +87,56 @@ html, body {
   top: 0; left: 0; right: 0;
   height: var(--topbar-h);
   z-index: 300;
-  background: linear-gradient(180deg, rgba(8,14,10,0.97) 0%, transparent 100%);
+  background: rgba(255,255,255,0.97);
+  border-bottom: 1px solid rgba(45,158,95,0.1);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   padding: 0 18px;
   gap: 16px;
+  box-shadow: 0 2px 16px rgba(45,158,95,0.06);
 }
 
 .logo {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 9px;
   text-decoration: none;
-  letter-spacing: -0.5px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
-.logo span { color: var(--green); }
+.logo .logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--green), #0d9488);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: white;
+  flex-shrink: 0;
+}
+.logo .brand {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.4px;
+}
+.logo .brand span { color: var(--green); }
 
 .topnav {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 4px;
   font-size: 13px;
 }
 .topnav a {
   color: var(--text-mid);
   text-decoration: none;
-  transition: color 0.2s;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 5px;
 }
-.topnav a:hover, .topnav a.active { color: var(--text); }
-.topnav a.active { color: var(--green); font-weight: 500; }
+.topnav a:hover { background: rgba(45,158,95,0.08); color: var(--green-d); }
+.topnav a.active { background: rgba(45,158,95,0.1); color: var(--green); font-weight: 600; }
 
 .topbar-right {
   margin-left: auto;
@@ -134,8 +154,8 @@ html, body {
 }
 .btn-logout {
   font-size: 11px;
-  color: rgba(255,100,110,0.6);
-  border: 1px solid rgba(255,100,110,0.18);
+  color: rgba(192,57,43,0.7);
+  border: 1px solid rgba(192,57,43,0.2);
   border-radius: 6px;
   padding: 4px 10px;
   background: none;
@@ -144,12 +164,12 @@ html, body {
   transition: all 0.2s;
   font-family: var(--font);
 }
-.btn-logout:hover { border-color: rgba(255,100,110,0.4); color: rgba(255,120,128,0.85); }
+.btn-logout:hover { border-color: rgba(192,57,43,0.4); color: rgba(192,57,43,0.95); }
 
 /* Mobile menu toggle */
 #menu-toggle {
   display: none;
-  background: rgba(132,169,140,0.18);
+  background: rgba(45,158,95,0.1);
   border: 1px solid var(--border-g);
   border-radius: 9px;
   width: 36px; height: 36px;
@@ -170,14 +190,15 @@ html, body {
   top: 50%;
   transform: translateY(-50%);
   z-index: 200;
-  background: rgba(10,18,12,0.88);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(45,158,95,0.15);
   border-radius: 14px;
   padding: 7px 5px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-shadow: 0 4px 20px rgba(45,158,95,0.1);
 }
 
 .tool-btn {
@@ -406,8 +427,8 @@ html, body {
 /* Draw status */
 .draw-done {
   display: none;
-  background: rgba(132,169,140,0.09);
-  border: 1px solid rgba(132,169,140,0.3);
+  background: rgba(45,158,95,0.07);
+  border: 1px solid rgba(45,158,95,0.25);
   border-radius: 10px;
   padding: 11px 13px;
   margin-bottom: 12px;
@@ -487,8 +508,8 @@ html, body {
 
 /* Big carbon card */
 .carbon-hero {
-  background: linear-gradient(135deg, rgba(132,169,140,0.14), rgba(82,121,111,0.14));
-  border: 1px solid rgba(132,169,140,0.28);
+  background: linear-gradient(135deg, rgba(45,158,95,0.08), rgba(30,122,71,0.08));
+  border: 1px solid rgba(45,158,95,0.22);
   border-radius: 12px;
   padding: 18px;
   text-align: center;
@@ -566,23 +587,23 @@ html, body {
   letter-spacing: 0.1px;
 }
 .btn-primary {
-  background: linear-gradient(135deg, #6ea87a, #456b56);
-  color: rgba(255,255,255,0.95);
+  background: linear-gradient(135deg, #2d9e5f, #1e7a47);
+  color: #ffffff;
 }
-.btn-primary:hover { background: linear-gradient(135deg, #7cc48c, #527e67); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(110,168,122,0.28); }
-.btn-primary:disabled { background: rgba(132,169,140,0.15); color: rgba(255,255,255,0.25); cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-primary:hover { background: linear-gradient(135deg, #38b26a, #2d9e5f); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(45,158,95,0.28); }
+.btn-primary:disabled { background: rgba(45,158,95,0.12); color: rgba(45,90,61,0.3); cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-outline {
-  background: transparent;
-  border: 1px solid var(--border);
+  background: #f5fdf8;
+  border: 1px solid rgba(45,158,95,0.18);
   color: var(--text-mid);
 }
-.btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.16); color: var(--text); }
+.btn-outline:hover { background: rgba(45,158,95,0.08); border-color: rgba(45,158,95,0.3); color: var(--text); }
 .btn-danger {
   background: transparent;
-  border: 1px solid rgba(220,53,69,0.2);
-  color: rgba(255,100,110,0.55);
+  border: 1px solid rgba(220,53,69,0.18);
+  color: rgba(192,57,43,0.65);
 }
-.btn-danger:hover { background: rgba(220,53,69,0.07); border-color: rgba(220,53,69,0.35); color: rgba(255,120,128,0.9); }
+.btn-danger:hover { background: rgba(220,53,69,0.06); border-color: rgba(220,53,69,0.3); color: #c0392b; }
 .btn-sm {
   width: auto;
   padding: 5px 11px;
@@ -607,9 +628,9 @@ html, body {
   left: 14px;
   right: calc(var(--panel-w) + 14px);
   z-index: 200;
-  background: rgba(8,14,10,0.82);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(45,158,95,0.14);
   border-radius: 10px;
   padding: 8px 13px;
   display: flex;
@@ -617,6 +638,7 @@ html, body {
   gap: 8px;
   font-size: 12px;
   color: var(--text-mid);
+  box-shadow: 0 4px 14px rgba(45,158,95,0.08);
 }
 .sdot {
   width: 6px; height: 6px;
@@ -757,16 +779,19 @@ html, body {
 
 <!-- ======================== TOPBAR ======================== -->
 <div id="topbar">
-  <a class="logo" href="dashboard.html">Kept<span>Carbon</span></a>
+  <a class="logo" href="dashboard.html">
+    <div class="logo-icon">🌿</div>
+    <span class="brand">Kept<span>Carbon</span></span>
+  </a>
   <nav class="topnav">
-    <a href="dashboard.html">แดชบอร์ด</a>
-    <a href="map-draw.html" class="active">วาดแปลง</a>
-    <a href="my-plots.html">แปลงของฉัน</a>
-    <a href="profile.html">โปรไฟล์</a>
+    <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
+    <a href="map-draw.html" class="active"><i class="bi bi-map"></i> วาดแปลง</a>
+    <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
+    <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
   </nav>
   <div class="topbar-right">
-    <span id="nav-user"></span>
-    <button class="btn-logout" onclick="Auth.logout()">ออกระบบ</button>
+    <span id="nav-user" style="font-size:12px;color:var(--text-mid);"></span>
+    <button class="btn-logout" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกระบบ</button>
     <button id="menu-toggle" onclick="togglePanel()"><i class="bi bi-layout-text-sidebar-reverse"></i></button>
   </div>
 </div>
@@ -1123,26 +1148,26 @@ map.on('load', () => {
 
   // Rayong boundary
   map.addSource('rayong', { type: 'geojson', data: rayongGeoJSON() });
-  map.addLayer({ id: 'rayong-fill', type: 'fill', source: 'rayong', paint: { 'fill-color': '#84a98c', 'fill-opacity': 0.05 } });
-  map.addLayer({ id: 'rayong-line', type: 'line', source: 'rayong', paint: { 'line-color': '#84a98c', 'line-width': 1.5, 'line-dasharray': [5, 3] } });
+  map.addLayer({ id: 'rayong-fill', type: 'fill', source: 'rayong', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.05 } });
+  map.addLayer({ id: 'rayong-line', type: 'line', source: 'rayong', paint: { 'line-color': '#2d9e5f', 'line-width': 1.5, 'line-dasharray': [5, 3] } });
   map.addLayer({
     id: 'rayong-lbl', type: 'symbol', source: 'rayong',
     layout: { 'text-field': 'จังหวัดระยอง', 'text-font': ['Open Sans Regular'], 'text-size': 13 },
-    paint: { 'text-color': '#84a98c', 'text-halo-color': 'rgba(8,14,10,0.85)', 'text-halo-width': 2 }
+    paint: { 'text-color': '#2d9e5f', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 2 }
   });
 
   // Drawing line preview
   map.addSource('draw-line', { type: 'geojson', data: empty() });
-  map.addLayer({ id: 'draw-line-l', type: 'line', source: 'draw-line', paint: { 'line-color': '#84a98c', 'line-width': 2, 'line-dasharray': [3, 2] } });
+  map.addLayer({ id: 'draw-line-l', type: 'line', source: 'draw-line', paint: { 'line-color': '#2d9e5f', 'line-width': 2, 'line-dasharray': [3, 2] } });
 
   // Drawing fill preview
   map.addSource('draw-fill', { type: 'geojson', data: empty() });
-  map.addLayer({ id: 'draw-fill-l', type: 'fill', source: 'draw-fill', paint: { 'fill-color': '#84a98c', 'fill-opacity': 0.12 } });
+  map.addLayer({ id: 'draw-fill-l', type: 'fill', source: 'draw-fill', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.12 } });
 
   // Final plot
   map.addSource('plot', { type: 'geojson', data: empty() });
-  map.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#84a98c', 'fill-opacity': 0.22 } });
-  map.addLayer({ id: 'plot-line', type: 'line', source: 'plot', paint: { 'line-color': '#84a98c', 'line-width': 2.5 } });
+  map.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.22 } });
+  map.addLayer({ id: 'plot-line', type: 'line', source: 'plot', paint: { 'line-color': '#2d9e5f', 'line-width': 2.5 } });
 });
 
 /* ================================================================

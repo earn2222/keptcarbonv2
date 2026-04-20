@@ -1,160 +1,271 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>สมัครสมาชิก - KeptCarbon</title>
+  <title>สมัครสมาชิก — KeptCarbon</title>
   <meta name="description" content="สมัครสมาชิกแพลตฟอร์ม KeptCarbon สำหรับจัดการสวนยางพาราและคาร์บอนเครดิต">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Vendor CSS -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Raleway:wght@700;800;900&display=swap" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- Custom CSS -->
-  <link href="assets/css/main.css?v=2" rel="stylesheet">
-  <link href="assets/css/keptcarbon.css" rel="stylesheet">
+<style>
+:root {
+  --green:    #2d9e5f;
+  --green-d:  #1e7a47;
+  --green-50: #edfaf3;
+  --teal:     #0d9488;
+  --font:     'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
 
-  <style>
-    body { margin: 0; padding: 0; }
-    .floating-leaf {
-      position: absolute;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(132,169,140,0.08) 0%, transparent 70%);
-      pointer-events: none;
-      animation: float-leaf 8s infinite ease-in-out;
-    }
-    @keyframes float-leaf {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(5deg); }
-    }
-  </style>
+body {
+  font-family: var(--font);
+  min-height: 100vh;
+  background: linear-gradient(145deg, #071a0f 0%, #0a2e1a 45%, #0d3a20 80%, #0a2824 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bg-orb { position:absolute;border-radius:50%;pointer-events:none;animation:floatOrb 8s ease-in-out infinite; }
+.bg-orb-1 { width:600px;height:600px;background:radial-gradient(circle,rgba(45,158,95,0.15) 0%,transparent 65%);top:-200px;right:-150px; }
+.bg-orb-2 { width:400px;height:400px;background:radial-gradient(circle,rgba(13,148,136,0.12) 0%,transparent 65%);bottom:-100px;left:-100px;animation-delay:-4s;animation-direction:reverse; }
+@keyframes floatOrb { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-20px)} }
+
+body::before {
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(45,158,95,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(45,158,95,0.06) 1px,transparent 1px);
+  background-size:50px 50px;
+}
+
+/* ── CARD ── */
+.auth-card {
+  background: rgba(255,255,255,0.97);
+  border-radius: 28px;
+  padding: 44px 44px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06);
+  position: relative; z-index: 1;
+  animation: cardIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes cardIn { from{opacity:0;transform:translateY(24px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+/* ── LOGO ── */
+.auth-logo { text-align:center;margin-bottom:28px; }
+.logo-mark { width:52px;height:52px;background:linear-gradient(135deg,var(--green),var(--teal));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(45,158,95,0.35); }
+.brand-name { font-family:'Raleway',sans-serif;font-size:24px;font-weight:900;color:#0f172a;letter-spacing:-0.8px;margin-bottom:3px; }
+.brand-name span { color:var(--green); }
+.brand-sub { font-size:13px;color:#64748b; }
+
+/* ── HEADING ── */
+.auth-heading { font-size:21px;font-weight:700;color:#0f172a;margin-bottom:4px; }
+.auth-sub { font-size:13px;color:#64748b;margin-bottom:24px; }
+
+/* ── FORM GRID ── */
+.form-row { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block;font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px; }
+.inp-wrap { position:relative; }
+.inp-wrap i { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:#94a3b8;pointer-events:none; }
+.inp-wrap input {
+  width:100%;padding:11px 13px 11px 40px;
+  background:#f8fafc;border:1.5px solid #e2e8f0;
+  border-radius:11px;font-size:14px;color:#0f172a;
+  font-family:var(--font);outline:none;transition:all 0.2s;
+}
+.inp-wrap input:focus { border-color:var(--green);background:var(--green-50);box-shadow:0 0 0 3px rgba(45,158,95,0.12); }
+.inp-wrap input::placeholder { color:#cbd5e1; }
+
+/* ── PASSWORD STRENGTH ── */
+.pwd-strength { margin-top:6px;height:3px;border-radius:3px;background:#e2e8f0;overflow:hidden; }
+.pwd-bar { height:100%;width:0;border-radius:3px;transition:all 0.3s; }
+
+/* ── SUBMIT ── */
+.btn-submit {
+  width:100%;padding:13px;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  border:none;border-radius:12px;
+  color:white;font-size:15px;font-weight:700;
+  font-family:var(--font);cursor:pointer;transition:all 0.25s;
+  margin-top:4px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 6px 20px rgba(45,158,95,0.35);
+  letter-spacing:0.2px;
+}
+.btn-submit:hover { transform:translateY(-2px);box-shadow:0 10px 28px rgba(45,158,95,0.45); }
+.btn-submit:disabled { opacity:0.65;cursor:not-allowed;transform:none; }
+
+.spin-sm { width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ── DIVIDER & LINKS ── */
+.divider { position:relative;text-align:center;color:#94a3b8;font-size:12px;margin:20px 0; }
+.divider::before,.divider::after { content:'';position:absolute;top:50%;width:calc(50% - 24px);height:1px;background:#e2e8f0; }
+.divider::before { left:0; }
+.divider::after  { right:0; }
+.auth-links { text-align:center;font-size:14px;color:#64748b; }
+.auth-links a { color:var(--green);font-weight:600;text-decoration:none; }
+.auth-links a:hover { color:var(--green-d);text-decoration:underline; }
+.back-link { display:flex;align-items:center;justify-content:center;gap:5px;margin-top:14px;font-size:13px;color:#94a3b8;text-decoration:none;transition:color 0.2s; }
+.back-link:hover { color:#64748b; }
+
+/* ── ALERT ── */
+.auth-alert { display:none;padding:11px 14px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:16px;align-items:center;gap:8px; }
+.auth-alert.show { display:flex; }
+.auth-alert.error   { background:#fef2f2;border:1px solid #fecaca;color:#dc2626; }
+.auth-alert.success { background:var(--green-50);border:1px solid rgba(45,158,95,0.3);color:var(--green-d); }
+
+/* ── TERMS ── */
+.terms-note { font-size:11px;color:#94a3b8;text-align:center;margin-top:12px; }
+.terms-note a { color:var(--green); }
+
+@media (max-width:500px) {
+  .auth-card { padding:32px 20px;border-radius:20px; }
+  .form-row { grid-template-columns:1fr; }
+}
+</style>
 </head>
-
 <body>
-  <div class="floating-leaf" style="top:5%;left:5%;width:200px;height:200px;animation-delay:0s;"></div>
-  <div class="floating-leaf" style="top:70%;left:75%;width:300px;height:300px;animation-delay:4s;"></div>
 
-  <div class="auth-page">
-    <div class="auth-card" style="max-width:500px;">
-      <!-- Logo -->
-      <div class="auth-logo">
-        <a href="index.html" style="text-decoration:none;">
-          <div class="brand-name">Kept<span>Carbon</span></div>
-        </a>
-        <p>แพลตฟอร์มจัดการสวนยางพาราและคาร์บอนเครดิต</p>
-      </div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
 
-      <h2>สมัครสมาชิก</h2>
-      <p class="subtitle">สร้างบัญชีใหม่เพื่อเริ่มจัดการสวนยางพาราของคุณ</p>
-
-      <!-- Alert -->
-      <div id="reg-alert" class="auth-alert" style="display:none;"></div>
-
-      <!-- Form -->
-      <form id="register-form" onsubmit="handleRegister(event)">
-        <div class="auth-form-group">
-          <label for="reg-fullname">ชื่อ-นามสกุล</label>
-          <div class="input-wrapper">
-            <i class="bi bi-person"></i>
-            <input type="text" id="reg-fullname" placeholder="กรอกชื่อ-นามสกุล" required autocomplete="name">
-          </div>
-        </div>
-        <div class="auth-form-group">
-          <label for="reg-email">อีเมล</label>
-          <div class="input-wrapper">
-            <i class="bi bi-envelope"></i>
-            <input type="email" id="reg-email" placeholder="กรอกอีเมล" required autocomplete="email">
-          </div>
-        </div>
-        <div class="auth-form-group">
-          <label for="reg-phone">เบอร์โทรศัพท์ (ไม่บังคับ)</label>
-          <div class="input-wrapper">
-            <i class="bi bi-telephone"></i>
-            <input type="tel" id="reg-phone" placeholder="กรอกเบอร์โทรศัพท์">
-          </div>
-        </div>
-        <div class="auth-form-group">
-          <label for="reg-password">รหัสผ่าน</label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock"></i>
-            <input type="password" id="reg-password" placeholder="อย่างน้อย 6 ตัวอักษร" required minlength="6" autocomplete="new-password">
-          </div>
-        </div>
-        <div class="auth-form-group">
-          <label for="reg-confirm">ยืนยันรหัสผ่าน</label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock-fill"></i>
-            <input type="password" id="reg-confirm" placeholder="กรอกรหัสผ่านอีกครั้ง" required minlength="6" autocomplete="new-password">
-          </div>
-        </div>
-
-        <button type="submit" class="btn-auth" id="reg-btn">
-          <i class="bi bi-person-plus me-2"></i>สมัครสมาชิก
-        </button>
-      </form>
-
-      <div class="auth-divider">หรือ</div>
-
-      <div class="auth-link">
-        มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a>
-      </div>
-      <div class="auth-link mt-2">
-        <a href="index.html"><i class="bi bi-arrow-left me-1"></i>กลับสู่หน้าหลัก</a>
-      </div>
-    </div>
+<div class="auth-card">
+  <!-- Logo -->
+  <div class="auth-logo">
+    <div class="logo-mark">🌿</div>
+    <div class="brand-name">Kept<span>Carbon</span></div>
+    <div class="brand-sub">แพลตฟอร์มจัดการสวนยางพาราและคาร์บอนเครดิต</div>
   </div>
 
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/js/auth.js"></script>
-  <script>
-    if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+  <div class="auth-heading">สมัครสมาชิก</div>
+  <div class="auth-sub">สร้างบัญชีเพื่อเริ่มจัดการสวนยางพาราของคุณ</div>
 
-    function handleRegister(e) {
-      e.preventDefault();
-      const fullname = document.getElementById('reg-fullname').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
-      const phone = document.getElementById('reg-phone').value.trim();
-      const password = document.getElementById('reg-password').value;
-      const confirm = document.getElementById('reg-confirm').value;
-      const alertEl = document.getElementById('reg-alert');
-      const btn = document.getElementById('reg-btn');
+  <!-- Alert -->
+  <div class="auth-alert" id="reg-alert"></div>
 
-      alertEl.style.display = 'none';
+  <!-- Form -->
+  <form id="register-form" onsubmit="handleRegister(event)" autocomplete="on">
+    <div class="form-group">
+      <label for="reg-fullname">ชื่อ-นามสกุล</label>
+      <div class="inp-wrap">
+        <i class="bi bi-person"></i>
+        <input type="text" id="reg-fullname" placeholder="กรอกชื่อ-นามสกุล" required autocomplete="name">
+      </div>
+    </div>
 
-      if (password !== confirm) {
-        alertEl.className = 'auth-alert error';
-        alertEl.textContent = '✗ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
-        alertEl.style.display = 'block';
-        return;
-      }
+    <div class="form-row">
+      <div class="form-group">
+        <label for="reg-email">อีเมล</label>
+        <div class="inp-wrap">
+          <i class="bi bi-envelope"></i>
+          <input type="email" id="reg-email" placeholder="email@example.com" required autocomplete="email">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reg-phone">เบอร์โทร (ไม่บังคับ)</label>
+        <div class="inp-wrap">
+          <i class="bi bi-telephone"></i>
+          <input type="tel" id="reg-phone" placeholder="08X-XXX-XXXX">
+        </div>
+      </div>
+    </div>
 
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังสมัครสมาชิก...';
+    <div class="form-row">
+      <div class="form-group">
+        <label for="reg-password">รหัสผ่าน</label>
+        <div class="inp-wrap">
+          <i class="bi bi-lock"></i>
+          <input type="password" id="reg-password" placeholder="≥ 6 ตัวอักษร" required minlength="6" autocomplete="new-password" oninput="checkStrength(this.value)">
+        </div>
+        <div class="pwd-strength"><div class="pwd-bar" id="pwd-bar"></div></div>
+      </div>
+      <div class="form-group">
+        <label for="reg-confirm">ยืนยันรหัสผ่าน</label>
+        <div class="inp-wrap">
+          <i class="bi bi-lock-fill"></i>
+          <input type="password" id="reg-confirm" placeholder="กรอกซ้ำ" required minlength="6" autocomplete="new-password">
+        </div>
+      </div>
+    </div>
 
-      setTimeout(() => {
-        const result = Auth.register({ fullname, email, phone, password });
-        if (result.success) {
-          // Auto-login after register
-          Auth.login(email, password);
-          alertEl.className = 'auth-alert success';
-          alertEl.textContent = '✓ สมัครสมาชิกสำเร็จ! กำลังนำไปยังแดชบอร์ด...';
-          alertEl.style.display = 'block';
-          setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
-        } else {
-          alertEl.className = 'auth-alert error';
-          alertEl.textContent = '✗ ' + result.message;
-          alertEl.style.display = 'block';
-          btn.disabled = false;
-          btn.innerHTML = '<i class="bi bi-person-plus me-2"></i>สมัครสมาชิก';
-        }
-      }, 600);
+    <button type="submit" class="btn-submit" id="reg-btn">
+      <i class="bi bi-person-plus"></i> สมัครสมาชิก
+    </button>
+    <div class="terms-note">
+      เมื่อสมัครสมาชิก คุณยอมรับ <a href="#">เงื่อนไขการใช้งาน</a> ของเรา
+    </div>
+  </form>
+
+  <div class="divider">หรือ</div>
+
+  <div class="auth-links">
+    มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a>
+  </div>
+  <a class="back-link" href="index.html">
+    <i class="bi bi-arrow-left"></i> กลับสู่หน้าหลัก
+  </a>
+</div>
+
+<script src="assets/js/auth.js"></script>
+<script>
+if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+
+function checkStrength(pwd) {
+  const bar = document.getElementById('pwd-bar');
+  const len = pwd.length;
+  if (len === 0)      { bar.style.width='0';   bar.style.background=''; }
+  else if (len < 4)   { bar.style.width='25%'; bar.style.background='#ef4444'; }
+  else if (len < 6)   { bar.style.width='50%'; bar.style.background='#f97316'; }
+  else if (len < 10)  { bar.style.width='75%'; bar.style.background='#eab308'; }
+  else                { bar.style.width='100%';bar.style.background='#22c55e'; }
+}
+
+function handleRegister(e) {
+  e.preventDefault();
+  const fullname = document.getElementById('reg-fullname').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const phone    = document.getElementById('reg-phone').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+  const al  = document.getElementById('reg-alert');
+  const btn = document.getElementById('reg-btn');
+
+  if (password !== confirm) {
+    showAlert(al, 'error', '✗ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin-sm"></div> กำลังสมัครสมาชิก...';
+
+  setTimeout(() => {
+    const result = Auth.register({ fullname, email, phone, password });
+    if (result.success) {
+      Auth.login(email, password);
+      showAlert(al, 'success', '✓ สมัครสมาชิกสำเร็จ! กำลังนำไปยังแดชบอร์ด...');
+      setTimeout(() => window.location.href = 'dashboard.html', 900);
+    } else {
+      showAlert(al, 'error', '✗ ' + result.message);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-plus"></i> สมัครสมาชิก';
     }
-  </script>
+  }, 600);
+}
+
+function showAlert(el, type, msg) {
+  el.className = `auth-alert ${type} show`;
+  el.innerHTML = `<i class="bi bi-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
+}
+</script>
 </body>
 </html>
