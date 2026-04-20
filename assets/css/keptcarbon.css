@@ -81,7 +81,7 @@
   font-size: 28px;
   font-weight: 700;
   color: #1a3d2b;
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   letter-spacing: -0.5px;
 }
 
@@ -142,7 +142,7 @@
   border-radius: 10px;
   color: #1a3d2b;
   font-size: 14px;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   transition: all 0.3s;
   outline: none;
 }
@@ -542,7 +542,7 @@
   cursor: pointer;
   transition: all 0.25s;
   text-align: center;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
 }
 
 .method-tab.active,
@@ -636,7 +636,7 @@
   border-radius: 9px;
   color: #1a3d2b;
   font-size: 13.5px;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   outline: none;
   transition: all 0.22s;
   margin-bottom: 11px;
@@ -665,7 +665,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   margin-bottom: 8px;
   letter-spacing: 0.1px;
 }
@@ -694,7 +694,7 @@
   font-size: 13px;
   cursor: pointer;
   transition: all 0.22s;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   margin-bottom: 8px;
 }
 
@@ -714,7 +714,7 @@
   font-size: 13px;
   cursor: pointer;
   transition: all 0.22s;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   margin-bottom: 8px;
 }
 
@@ -784,7 +784,7 @@
   border-radius: 9px;
   color: #1a3d2b;
   font-size: 13.5px;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   outline: none;
   transition: border-color 0.2s;
 }

@@ -22,8 +22,8 @@
       navmenu.innerHTML = `
         <ul>
           <li><a href="index.html" ${currentPage === 'index.html' ? 'class="active"' : ''}>หน้าแรก</a></li>
-          <li><a href="index.html#about">เกี่ยวกับเรา</a></li>
-          <li><a href="index.html#features">คุณสมบัติ</a></li>
+          <li><a href="index.html#about">เกี่ยวกับโครงการ</a></li>
+          <li><a href="index.html#features">ทีมงานของเรา</a></li>
           <li><a href="index.html#contact">ติดต่อเรา</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
