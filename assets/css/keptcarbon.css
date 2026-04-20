@@ -641,6 +641,7 @@
   transition: all 0.22s;
   margin-bottom: 11px;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 .map-input:focus {
