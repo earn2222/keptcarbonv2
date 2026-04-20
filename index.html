@@ -50,7 +50,7 @@
         <ul>
           <li><a href="#hero" class="active">หน้าแรก</a></li>
           <li><a href="#project-about">เกี่ยวกับโครงการ</a></li>
-          <li><a href="#team">ทีมงาน</a></li>
+          <li><a href="#team">ทีมงานของเรา</a></li>
           <li><a href="#contact">ติดต่อเรา</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -505,7 +505,7 @@
     </style>
 
     <!-- เกี่ยวกับโครงการ Section -->
-    <section id="project-about" class="project-about-section">
+    <section id="project-about" class="project-about-section" style="scroll-margin-top: 80px;">
       <div class="container">
 
         <!-- Section Header -->
@@ -631,7 +631,7 @@
     <!-- /Project About Section -->
 
     <!-- Team Section -->
-    <section id="team" class="team-section">
+    <section id="team" class="team-section" style="scroll-margin-top: 80px;">
       <div class="container">
 
         <!-- Section Header -->
@@ -849,6 +849,22 @@
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
+
+  <!-- Smooth Scroll for Nav Links -->
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        var targetId = this.getAttribute('href').substring(1);
+        var target = document.getElementById(targetId);
+        if (target) {
+          e.preventDefault();
+          var headerHeight = document.querySelector('#header') ? document.querySelector('#header').offsetHeight : 80;
+          var top = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+          window.scrollTo({ top: top, behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
 
 </body>
 
