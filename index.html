@@ -282,114 +282,21 @@
 
     <!-- Project About & Team Styles -->
     <style>
-      /* ===== Partners Logo Strip ===== */
-      .partners-strip {
-        padding: 36px 0 0 0;
-        position: relative;
-      }
-
-      .partners-strip-label {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 14px;
-        margin-bottom: 28px;
-      }
-
-      .partners-strip-label::before,
-      .partners-strip-label::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(45, 158, 95, 0.25), transparent);
-        max-width: 140px;
-      }
-
-      .partners-strip-label span {
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #7aab8e;
-      }
-
-      .partners-logos {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
-
-      .partner-logo-card {
-        background: #fff;
-        border: 1px solid rgba(45, 158, 95, 0.12);
-        border-radius: 18px;
-        padding: 18px 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 20px rgba(45, 158, 95, 0.06);
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        min-width: 160px;
-        min-height: 90px;
+      /* ===== Project About Section ===== */
+      .project-about-section {
+        padding: 100px 0;
+        background: linear-gradient(180deg, #f8fdfb 0%, #ffffff 100%);
         position: relative;
         overflow: hidden;
       }
 
-      .partner-logo-card::before {
+      .project-about-section::before {
         content: '';
         position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(45, 158, 95, 0.04), rgba(13, 148, 136, 0.04));
-        opacity: 0;
-        transition: opacity 0.35s;
-        border-radius: 18px;
-      }
-
-      .partner-logo-card:hover {
-        transform: translateY(-6px) scale(1.03);
-        box-shadow: 0 16px 40px rgba(45, 158, 95, 0.18);
-        border-color: rgba(45, 158, 95, 0.3);
-      }
-
-      .partner-logo-card:hover::before {
-        opacity: 1;
-      }
-
-      .partner-logo-card img {
-        max-width: 150px;
-        max-height: 80px;
-        object-fit: contain;
-        transition: transform 0.35s;
-        position: relative;
-        z-index: 1;
-      }
-
-      .partner-logo-card:hover img {
-        transform: scale(1.05);
-      }
-
-      @media (max-width: 576px) {
-        .partners-logos {
-          gap: 14px;
-        }
-
-        .partner-logo-card {
-          min-width: 120px;
-          padding: 14px 18px;
-        }
-
-        .partner-logo-card img {
-          max-width: 100px;
-          max-height: 60px;
-        }
-      }
-
-      /* ===== Project About Section ===== */
-      .project-about-section {
-        padding: 80px 0;
-        background: #f8fdfb;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle at 10% 20%, rgba(45, 158, 95, 0.03) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(13, 148, 136, 0.03) 0%, transparent 40%);
+        pointer-events: none;
       }
 
       .project-tag {
@@ -408,10 +315,10 @@
       }
 
       .project-about-section .section-headline {
-        font-size: 36px;
+        font-size: 40px;
         font-weight: 800;
         color: #1a3d2b;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
         line-height: 1.2;
       }
 
@@ -423,103 +330,290 @@
       }
 
       .project-about-body {
-        color: #3d6b52;
+        color: #5a7a65;
         font-size: 16px;
         line-height: 1.9;
         margin-bottom: 20px;
+        font-weight: 400;
       }
 
+      /* KeptCarbon Meaning Card */
       .keptcarbon-meaning-card {
-        background: linear-gradient(135deg, #edf9f2 0%, #e8f8f5 100%);
-        border-left: 5px solid #2d9e5f;
-        border-radius: 16px;
-        padding: 24px 28px;
-        margin: 28px 0;
-        box-shadow: 0 4px 20px rgba(45, 158, 95, 0.08);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-left: 4px solid #2d9e5f;
+        border-radius: 20px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 10px 40px rgba(45, 158, 95, 0.06);
+        border-top: 1px solid rgba(255,255,255,0.7);
+        border-right: 1px solid rgba(255,255,255,0.7);
+        border-bottom: 1px solid rgba(255,255,255,0.7);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .keptcarbon-meaning-card::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(45, 158, 95, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
       }
 
       .keptcarbon-meaning-card .kc-title {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 800;
         color: #1a3d2b;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+      }
+
+      .keptcarbon-meaning-card .kc-title i {
+        background: linear-gradient(135deg, #2d9e5f, #0d9488);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 24px;
       }
 
       .keptcarbon-meaning-card p {
-        color: #3d6b52;
+        color: #4a6d58;
         font-size: 15px;
         line-height: 1.8;
         margin: 0;
       }
 
-      /* Objectives */
+      /* Stats Row */
+      .stats-box {
+        text-align: center;
+        padding: 20px;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        border: 1px solid rgba(45,158,95,0.05);
+        transition: transform 0.3s;
+      }
+      .stats-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(45,158,95,0.08);
+      }
+      .stats-number {
+        font-size: 32px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #2d9e5f, #0d9488);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+      }
+      .stats-label {
+        font-size: 13px;
+        color: #7a9785;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Objectives Redesign */
       .objectives-title {
-        font-size: 26px;
+        font-size: 28px;
         font-weight: 800;
         color: #1a3d2b;
-        margin-bottom: 24px;
-        padding-bottom: 12px;
-        border-bottom: 3px solid rgba(45, 158, 95, 0.2);
+        margin-bottom: 30px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(45, 158, 95, 0.1);
       }
 
-      .objective-card {
+      .objectives-title i {
+        background: linear-gradient(135deg, #2d9e5f, #0d9488);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .objectives-wrapper {
+        position: relative;
+        padding-left: 20px;
+      }
+      .objectives-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 20px;
+        bottom: 20px;
+        width: 2px;
+        background: linear-gradient(180deg, rgba(45,158,95,0.5) 0%, rgba(13,148,136,0.1) 100%);
+        border-radius: 2px;
+      }
+
+      .objective-item {
+        position: relative;
+        margin-bottom: 25px;
         background: #fff;
         border-radius: 20px;
-        padding: 24px;
-        box-shadow: 0 4px 24px rgba(45, 158, 95, 0.07);
-        border: 1px solid rgba(45, 158, 95, 0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
-        height: 100%;
+        padding: 25px 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+        border: 1px solid rgba(45,158,95,0.06);
+        transition: all 0.4s ease;
+      }
+      .objective-item:last-child {
+        margin-bottom: 0;
+      }
+      .objective-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 15px 50px rgba(45,158,95,0.1);
+        border-color: rgba(45,158,95,0.2);
       }
 
-      .objective-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 36px rgba(45, 158, 95, 0.15);
-      }
-
-      .obj-number {
-        width: 52px;
-        height: 52px;
+      .obj-indicator {
+        position: absolute;
+        left: -32px;
+        top: 30px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #2d9e5f, #0d9488);
-        color: #fff;
-        font-size: 18px;
-        font-weight: 900;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 6px 16px rgba(45, 158, 95, 0.3);
-        flex-shrink: 0;
+        background: #fff;
+        border: 4px solid #2d9e5f;
+        box-shadow: 0 0 0 4px rgba(45,158,95,0.1);
+        z-index: 2;
+        transition: all 0.3s;
+      }
+      .objective-item:hover .obj-indicator {
+        background: #2d9e5f;
+        box-shadow: 0 0 0 6px rgba(45,158,95,0.2);
       }
 
       .obj-label {
         font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 1px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        color: #2d9e5f;
-        margin-bottom: 4px;
+        color: #0d9488;
+        margin-bottom: 8px;
+        display: inline-block;
+        padding: 4px 12px;
+        background: rgba(13,148,136,0.05);
+        border-radius: 50px;
       }
 
       .obj-heading {
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 800;
         color: #1a3d2b;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         line-height: 1.4;
       }
 
       .obj-body {
-        font-size: 14px;
+        font-size: 15px;
         color: #5a7a65;
-        line-height: 1.8;
+        line-height: 1.7;
         margin: 0;
+      }
+
+      /* Partners Area (Moved to bottom) */
+      .partners-section {
+        margin-top: 60px;
+        padding-top: 50px;
+        border-top: 1px solid rgba(45,158,95,0.1);
+        text-align: center;
+      }
+      .partners-label {
+        font-size: 16px;
+        font-weight: 800;
+        color: #1a3d2b;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+      }
+      .partners-label::before,
+      .partners-label::after {
+        content: '';
+        flex: 1;
+        max-width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(45,158,95,0.3), transparent);
+      }
+      .partners-grid {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 25px;
+      }
+      .partner-logo-card {
+        background: #fff;
+        border: 1px solid rgba(45, 158, 95, 0.1);
+        border-radius: 18px;
+        padding: 20px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 170px;
+        min-height: 100px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .partner-logo-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(45, 158, 95, 0.05), rgba(13, 148, 136, 0.05));
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+
+      .partner-logo-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 16px 40px rgba(45, 158, 95, 0.12);
+        border-color: rgba(45, 158, 95, 0.25);
+      }
+
+      .partner-logo-card:hover::before {
+        opacity: 1;
+      }
+
+      .partner-logo-card img {
+        max-width: 160px;
+        max-height: 85px;
+        object-fit: contain;
+        transition: transform 0.4s;
+        position: relative;
+        z-index: 1;
+        filter: grayscale(100%) opacity(0.7);
+      }
+
+      .partner-logo-card:hover img {
+        transform: scale(1.05);
+        filter: grayscale(0%) opacity(1);
+      }
+
+      @media (max-width: 576px) {
+        .partners-grid {
+          gap: 15px;
+        }
+        .partner-logo-card {
+          min-width: 130px;
+          padding: 15px 20px;
+        }
+        .partner-logo-card img {
+          max-width: 110px;
+          max-height: 65px;
+        }
       }
 
       /* ===== Team Section ===== */
@@ -744,33 +838,12 @@
       <div class="container">
 
         <!-- Section Header -->
-        <div class="row justify-content-center text-center mb-4" data-aos="fade-up">
+        <div class="row justify-content-center text-center mb-5" data-aos="fade-up">
           <div class="col-lg-8">
             <div class="project-tag"><i class="bi bi-globe-asia-australia"></i> วิจัยและพัฒนา</div>
             <h2 class="section-headline">เกี่ยวกับ<span>โครงการ</span></h2>
             <p class="text-muted" style="font-size:16px; line-height:1.8;">
               โครงการวิจัยพัฒนาแพลตฟอร์มด้านภูมิสารสนเทศและปัญญาประดิษฐ์ เพื่อการจัดการสวนยางพาราอย่างยั่งยืน</p>
-          </div>
-        </div>
-
-        <!-- Partners / Funders Logos -->
-        <div class="partners-strip mb-5" data-aos="fade-up" data-aos-delay="100">
-          <div class="partners-strip-label">
-            <span>หน่วยงานร่วมโครงการ</span>
-          </div>
-          <div class="partners-logos">
-            <div class="partner-logo-card">
-              <img src="assets/img/clients/client-1.png" alt="Partner 1">
-            </div>
-            <div class="partner-logo-card">
-              <img src="assets/img/clients/client-2.png" alt="Partner 2">
-            </div>
-            <div class="partner-logo-card">
-              <img src="assets/img/clients/client-3.png" alt="Partner 3">
-            </div>
-            <div class="partner-logo-card">
-              <img src="assets/img/clients/client-4.png" alt="Partner 4">
-            </div>
           </div>
         </div>
 
@@ -794,7 +867,7 @@
             <!-- KeptCarbon Meaning Card -->
             <div class="keptcarbon-meaning-card" data-aos="fade-up" data-aos-delay="200">
               <div class="kc-title">
-                <i class="bi bi-leaf-fill" style="color:#2d9e5f; font-size:22px;"></i>
+                <i class="bi bi-leaf-fill"></i>
                 ความหมายของ KeptCarbon
               </div>
               <p>
@@ -805,77 +878,86 @@
             </div>
 
             <!-- Stats Row -->
-            <div class="row gy-3 mt-2" data-aos="fade-up" data-aos-delay="300">
-              <div class="col-4 text-center">
-                <div style="font-size:32px; font-weight:900; color:#2d9e5f;">3</div>
-                <div style="font-size:12px; color:#5a7a65; font-weight:600;">วัตถุประสงค์หลัก</div>
+            <div class="row gy-3 mt-4" data-aos="fade-up" data-aos-delay="300">
+              <div class="col-4">
+                <div class="stats-box">
+                  <div class="stats-number">3</div>
+                  <div class="stats-label">วัตถุประสงค์หลัก</div>
+                </div>
               </div>
-              <div class="col-4 text-center">
-                <div style="font-size:26px; font-weight:900; color:#2d9e5f;">GeoAI</div>
-                <div style="font-size:12px; color:#5a7a65; font-weight:600;">เทคโนโลยีหลัก</div>
+              <div class="col-4">
+                <div class="stats-box">
+                  <div class="stats-number">GeoAI</div>
+                  <div class="stats-label">เทคโนโลยีหลัก</div>
+                </div>
               </div>
-              <div class="col-4 text-center">
-                <div style="font-size:22px; font-weight:900; color:#2d9e5f;">Net Zero</div>
-                <div style="font-size:12px; color:#5a7a65; font-weight:600;">เป้าหมายสูงสุด</div>
+              <div class="col-4">
+                <div class="stats-box">
+                  <div class="stats-number">Net Zero</div>
+                  <div class="stats-label">เป้าหมายสูงสุด</div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Right: Objectives -->
           <div class="col-lg-6" data-aos="fade-left" data-aos-delay="100">
-            <h3 class="objectives-title"><i class="bi bi-bullseye" style="color:#2d9e5f;"></i> วัตถุประสงค์</h3>
-            <div class="row gy-4">
-
-              <div class="col-12">
-                <div class="objective-card" data-aos="zoom-in" data-aos-delay="150">
-                  <div class="d-flex align-items-start gap-3">
-                    <div class="obj-number">3.1</div>
-                    <div>
-                      <div class="obj-label">Platform Development</div>
-                      <h4 class="obj-heading">พัฒนาและสาธิตระบบ KeptCarbon Platform</h4>
-                      <p class="obj-body">ประยุกต์ใช้เทคโนโลยีภูมิสารสนเทศและปัญญาประดิษฐ์
-                        เพื่อสร้างฐานข้อมูลสวนยางพารารายแปลง พร้อมฟังก์ชันการพยากรณ์อายุยางพารา
-                        การประเมินศักยภาพคาร์บอนเครดิต และการแสดงผลเชิงพื้นที่และเวลา
-                        สำหรับสนับสนุนการทำงานของเจ้าหน้าที่และหน่วยงานภาครัฐที่เกี่ยวข้อง</p>
-                    </div>
-                  </div>
-                </div>
+            <h3 class="objectives-title"><i class="bi bi-bullseye"></i> วัตถุประสงค์</h3>
+            
+            <div class="objectives-wrapper">
+              
+              <div class="objective-item" data-aos="fade-up" data-aos-delay="150">
+                <div class="obj-indicator"></div>
+                <div class="obj-label">Platform Development</div>
+                <h4 class="obj-heading">พัฒนาและสาธิตระบบ KeptCarbon Platform</h4>
+                <p class="obj-body">ประยุกต์ใช้เทคโนโลยีภูมิสารสนเทศและปัญญาประดิษฐ์
+                  เพื่อสร้างฐานข้อมูลสวนยางพารารายแปลง พร้อมฟังก์ชันการพยากรณ์อายุยางพารา
+                  การประเมินศักยภาพคาร์บอนเครดิต และการแสดงผลเชิงพื้นที่และเวลา
+                  สำหรับสนับสนุนการทำงานของเจ้าหน้าที่และหน่วยงานภาครัฐที่เกี่ยวข้อง</p>
               </div>
 
-              <div class="col-12">
-                <div class="objective-card" data-aos="zoom-in" data-aos-delay="250">
-                  <div class="d-flex align-items-start gap-3">
-                    <div class="obj-number">3.2</div>
-                    <div>
-                      <div class="obj-label">Policy Decision Support</div>
-                      <h4 class="obj-heading">พัฒนาระบบสนับสนุนการตัดสินใจเชิงนโยบาย</h4>
-                      <p class="obj-body">ใช้ข้อมูลคาดการณ์คาร์บอนเครดิตและโครงสร้างอายุยางพาราในหลายระดับพื้นที่
-                        (รายแปลง–อำเภอ–จังหวัด–ภูมิภาค) เพื่อช่วยผู้กำหนดนโยบายจำลองสถานการณ์ วางแผน
-                        และบริหารจัดการสวนยางพาราอย่างยั่งยืน</p>
-                    </div>
-                  </div>
-                </div>
+              <div class="objective-item" data-aos="fade-up" data-aos-delay="250">
+                <div class="obj-indicator"></div>
+                <div class="obj-label">Policy Decision Support</div>
+                <h4 class="obj-heading">พัฒนาระบบสนับสนุนการตัดสินใจเชิงนโยบาย</h4>
+                <p class="obj-body">ใช้ข้อมูลคาดการณ์คาร์บอนเครดิตและโครงสร้างอายุยางพาราในหลายระดับพื้นที่
+                  (รายแปลง–อำเภอ–จังหวัด–ภูมิภาค) เพื่อช่วยผู้กำหนดนโยบายจำลองสถานการณ์ วางแผน
+                  และบริหารจัดการสวนยางพาราอย่างยั่งยืน</p>
               </div>
 
-              <div class="col-12">
-                <div class="objective-card" data-aos="zoom-in" data-aos-delay="350">
-                  <div class="d-flex align-items-start gap-3">
-                    <div class="obj-number">3.3</div>
-                    <div>
-                      <div class="obj-label">Training &amp; Capacity Building</div>
-                      <h4 class="obj-heading">จัดทำคู่มือและระบบการฝึกอบรม</h4>
-                      <p class="obj-body">เสริมศักยภาพการใช้งาน KeptCarbon Platform
-                        ให้กับเจ้าหน้าที่ภาครัฐและผู้กำหนดนโยบาย
-                        ในการสื่อสารและจูงใจเกษตรกรให้เข้าร่วมโครงการคาร์บอนเครดิตได้อย่างมีประสิทธิภาพ</p>
-                    </div>
-                  </div>
-                </div>
+              <div class="objective-item" data-aos="fade-up" data-aos-delay="350">
+                <div class="obj-indicator"></div>
+                <div class="obj-label">Training &amp; Capacity Building</div>
+                <h4 class="obj-heading">จัดทำคู่มือและระบบการฝึกอบรม</h4>
+                <p class="obj-body">เสริมศักยภาพการใช้งาน KeptCarbon Platform
+                  ให้กับเจ้าหน้าที่ภาครัฐและผู้กำหนดนโยบาย
+                  ในการสื่อสารและจูงใจเกษตรกรให้เข้าร่วมโครงการคาร์บอนเครดิตได้อย่างมีประสิทธิภาพ</p>
               </div>
 
             </div>
           </div>
 
         </div>
+
+        <!-- Partners / Funders Logos (Moved to Bottom) -->
+        <div class="partners-section" data-aos="fade-up" data-aos-delay="400">
+          <div class="partners-label">หน่วยงานร่วมโครงการ</div>
+          <div class="partners-grid">
+            <div class="partner-logo-card">
+              <img src="assets/img/clients/client-1.png" alt="Partner 1">
+            </div>
+            <div class="partner-logo-card">
+              <img src="assets/img/clients/client-2.png" alt="Partner 2">
+            </div>
+            <div class="partner-logo-card">
+              <img src="assets/img/clients/client-3.png" alt="Partner 3">
+            </div>
+            <div class="partner-logo-card">
+              <img src="assets/img/clients/client-4.png" alt="Partner 4">
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
     <!-- /Project About Section -->
