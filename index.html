@@ -616,220 +616,141 @@
         }
       }
 
-      /* ===== Team Section ===== */
+      /* ===== Formal Team Section ===== */
       .team-section {
-        padding: 100px 0;
-        background: radial-gradient(circle at top right, rgba(45, 158, 95, 0.03), transparent 40%),
-                    radial-gradient(circle at bottom left, rgba(13, 148, 136, 0.03), transparent 40%);
+        padding: 90px 0;
+        background: linear-gradient(180deg, #f8fbf9 0%, #ffffff 100%);
         position: relative;
-        overflow: hidden;
-      }
-
-      .team-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(45, 158, 95, 0.1), transparent);
+        border-top: 1px solid rgba(45, 158, 95, 0.05);
       }
 
       .team-section .section-headline {
-        font-size: 42px;
+        font-size: 38px;
         font-weight: 800;
         color: #1a3d2b;
-        margin-bottom: 12px;
-        line-height: 1.2;
-        letter-spacing: -0.5px;
+        margin-bottom: 15px;
       }
 
       .team-section .section-headline span {
-        background: linear-gradient(135deg, #2d9e5f, #0d9488);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        position: relative;
+        color: #2d9e5f;
       }
 
       .team-card {
         background: #fff;
-        border-radius: 30px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-        border: 1px solid rgba(45, 158, 95, 0.06);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(45, 158, 95, 0.08);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
         text-align: center;
         height: 100%;
         position: relative;
         z-index: 1;
       }
 
-      .team-card::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 30px;
-        padding: 2px;
-        background: linear-gradient(135deg, #2d9e5f, #0d9488);
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        opacity: 0;
-        transition: opacity 0.4s;
-      }
-
       .team-card:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 22px 60px rgba(45, 158, 95, 0.15);
-      }
-
-      .team-card:hover::after {
-        opacity: 1;
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(45, 158, 95, 0.1);
       }
 
       .team-avatar-wrap {
+        padding: 40px 30px 15px;
         position: relative;
-        padding: 40px 30px 10px;
       }
 
-      .team-avatar-placeholder, .team-avatar-img {
+      .team-avatar-img {
         width: 140px;
         height: 140px;
-        border-radius: 50%;
         margin: 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f0fdf4;
-        color: #2d9e5f;
-        font-size: 54px;
+        border-radius: 50%;
+        background: #fff;
+        padding: 4px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        border: 2px solid rgba(45, 158, 95, 0.15);
         position: relative;
-        transition: all 0.4s;
-        border: 1px solid rgba(45, 158, 95, 0.1);
-        overflow: hidden;
+        transition: all 0.4s ease;
       }
 
       .team-avatar-img img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: all 0.4s;
+        border-radius: 50%;
       }
 
-      .team-card:hover .team-avatar-placeholder,
       .team-card:hover .team-avatar-img {
-        background: linear-gradient(135deg, #2d9e5f, #0d9488);
-        color: #fff;
-        transform: scale(1.05) rotate(5deg);
-        box-shadow: 0 10px 30px rgba(45, 158, 95, 0.3);
-      }
-
-      .team-card:hover .team-avatar-img img {
-        transform: scale(1.1) rotate(-5deg);
+        border-color: #2d9e5f;
+        box-shadow: 0 8px 25px rgba(45, 158, 95, 0.15);
       }
 
       .team-badge {
         position: absolute;
-        bottom: 5px;
-        right: calc(50% - 60px);
-        width: 36px;
-        height: 36px;
+        bottom: 10px;
+        right: calc(50% - 65px);
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
-        background: #fff;
+        background: #2d9e5f;
+        color: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #2d9e5f;
-        font-size: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(45, 158, 95, 0.1);
-        z-index: 2;
-        transition: all 0.4s;
+        font-size: 15px;
+        box-shadow: 0 3px 10px rgba(45, 158, 95, 0.2);
+        border: 2px solid #fff;
+        transition: all 0.4s ease;
       }
-
+      
       .team-card:hover .team-badge {
         background: #0d9488;
-        color: #fff;
         transform: scale(1.1);
       }
 
       .team-card-body {
-        padding: 15px 25px 35px;
+        padding: 10px 25px 40px;
+      }
+
+      .team-role {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0d9488;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
 
       .team-name {
         font-size: 20px;
-        font-weight: 800;
-        color: #1a3d2b;
-        margin-bottom: 6px;
-        line-height: 1.3;
-      }
-
-      .team-role {
-        font-size: 12px;
         font-weight: 700;
-        color: #2d9e5f;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        background: rgba(45, 158, 95, 0.08);
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 50px;
+        color: #1a3d2b;
+        margin-bottom: 15px;
       }
 
       .team-desc {
         font-size: 14px;
         color: #5a7a65;
-        line-height: 1.7;
+        line-height: 1.6;
+        position: relative;
+        padding-top: 15px;
         margin-bottom: 0;
-        font-weight: 500;
       }
 
-      .team-org {
-        font-size: 13px;
-        color: #8fa799;
-        margin-top: 8px;
-        font-style: italic;
-      }
-
-      .team-socials {
-        margin-top: 20px;
-      }
-
-      .team-socials a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        background: #f8fdfb;
-        color: #2d9e5f;
-        font-size: 18px;
-        margin: 0 5px;
-        transition: all 0.3s;
-        border: 1px solid rgba(45, 158, 95, 0.1);
-      }
-
-      .team-socials a:hover {
-        background: linear-gradient(135deg, #2d9e5f, #0d9488);
-        color: #fff;
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(45, 158, 95, 0.2);
-        border-color: transparent;
+      .team-desc::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 2px;
+        background: linear-gradient(90deg, #2d9e5f, #0d9488);
+        border-radius: 2px;
+        opacity: 0.8;
       }
 
       @media (max-width: 768px) {
-        .team-section {
-          padding: 70px 0;
-        }
-
-        .team-section .section-headline {
-          font-size: 32px;
-        }
+        .team-section { padding: 60px 0; }
+        .team-section .section-headline { font-size: 30px; }
       }
     </style>
 
@@ -985,7 +906,6 @@
                 <div class="team-avatar-img">
                   <img src="assets/img/team/team-1.jpg" alt="รศ.ดร.สุเพชร จิรขจรกุล" class="img-fluid">
                 </div>
-                <div class="team-badge"><i class="bi bi-award-fill"></i></div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">ที่ปรึกษาโครงการ</div>
@@ -1002,7 +922,6 @@
                 <div class="team-avatar-img">
                   <img src="assets/img/team/team-2.jpg" alt="รศ.ดร.แสงดาว วงคสาย" class="img-fluid">
                 </div>
-                <div class="team-badge"><i class="bi bi-star-fill"></i></div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">หัวหน้าโครงการ</div>
@@ -1023,7 +942,6 @@
                 <div class="team-avatar-img">
                   <img src="assets/img/team/team-3.jpg" alt="ผศ.ดร. ชนิดา สุวรรณประสิทธิ์" class="img-fluid">
                 </div>
-                <div class="team-badge"><i class="bi bi-check-circle-fill"></i></div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">ผู้ร่วมโครงการ</div>
@@ -1040,7 +958,6 @@
                 <div class="team-avatar-img">
                   <img src="assets/img/team/team-4.jpg" alt="ดร. นพชัย วงค์สาย" class="img-fluid">
                 </div>
-                <div class="team-badge"><i class="bi bi-check-circle-fill"></i></div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">ผู้ร่วมโครงการ</div>
@@ -1057,7 +974,6 @@
                 <div class="team-avatar-img">
                   <img src="assets/img/team/team-1.jpg" alt="ดร. ศักดิ์ดา หอมหวล" class="img-fluid">
                 </div>
-                <div class="team-badge"><i class="bi bi-check-circle-fill"></i></div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">ผู้ร่วมโครงการ</div>
@@ -1078,7 +994,6 @@
                 <div class="team-avatar-img">
                   <img src="assets/img/team/team-2.jpg" alt="รศ.ดร. วีระพงค์ เกิดสิน" class="img-fluid">
                 </div>
-                <div class="team-badge"><i class="bi bi-check-circle-fill"></i></div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">ผู้ร่วมโครงการ</div>
@@ -1095,7 +1010,6 @@
                 <div class="team-avatar-img">
                   <img src="assets/img/team/team-3.jpg" alt="ดร. จุฑาพร เกษร" class="img-fluid">
                 </div>
-                <div class="team-badge"><i class="bi bi-check-circle-fill"></i></div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">ผู้ร่วมโครงการ</div>
