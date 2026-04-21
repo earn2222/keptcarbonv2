@@ -337,9 +337,17 @@
       }
 
       @media (max-width: 768px) {
-        .beautiful-section-header h2 { font-size: 32px; }
-        .title-divider .line { width: 50px; }
-        .title-divider .dash { width: 40px; }
+        .beautiful-section-header h2 {
+          font-size: 32px;
+        }
+
+        .title-divider .line {
+          width: 50px;
+        }
+
+        .title-divider .dash {
+          width: 40px;
+        }
       }
 
       /* ===== Project About Section ===== */
@@ -1089,88 +1097,301 @@
     </section>
     <!-- /Team Section -->
 
+    <!-- Contact Section styles -->
+    <style>
+      /* ===== Contact Section ===== */
+      .contact-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 6px 24px rgba(45, 158, 95, 0.07);
+        border: 1px solid rgba(45, 158, 95, 0.12);
+        transition: all 0.35s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+      }
+
+      .contact-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #2d9e5f, #0d9488);
+        border-radius: 16px 16px 0 0;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+      }
+
+      .contact-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 36px rgba(45, 158, 95, 0.13);
+        border-color: rgba(45, 158, 95, 0.22);
+      }
+
+      .contact-card:hover::after {
+        transform: scaleX(1);
+      }
+
+      .contact-card-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: rgba(45, 158, 95, 0.09);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2d9e5f;
+        font-size: 20px;
+        margin-bottom: 10px;
+        transition: all 0.35s ease;
+      }
+
+      .contact-card:hover .contact-card-icon {
+        background: #2d9e5f;
+        color: #fff;
+        transform: scale(1.1) rotate(-5deg);
+        box-shadow: 0 6px 16px rgba(45, 158, 95, 0.3);
+      }
+
+      .contact-card h3 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1a3d2b;
+        margin-bottom: 16px;
+      }
+
+      .contact-info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 14px;
+        color: #5a7a65;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .contact-info-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .contact-info-row i {
+        color: #0d9488;
+        font-size: 18px;
+        margin-top: 2px;
+        min-width: 20px;
+        flex-shrink: 0;
+      }
+
+      .contact-info-row strong {
+        display: block;
+        color: #1a3d2b;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 3px;
+      }
+
+      /* Override php-email-form template wrapper */
+      .php-email-form {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      /* Beautiful labeled form fields */
+      .contact-form-field {
+        margin-bottom: 10px;
+      }
+
+      .contact-form-field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: #2d9e5f;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .contact-form-field input,
+      .contact-form-field textarea {
+        width: 100%;
+        border: 1.5px solid #ddeee6;
+        border-radius: 10px;
+        padding: 9px 13px;
+        font-size: 14px;
+        color: #1a3d2b;
+        background: #f8fdfb;
+        transition: all 0.25s ease;
+        outline: none;
+        font-family: inherit;
+        resize: none;
+        box-sizing: border-box;
+      }
+
+      .contact-form-field input::placeholder,
+      .contact-form-field textarea::placeholder {
+        color: #b0ccbc;
+        font-size: 13px;
+      }
+
+      .contact-form-field input:focus,
+      .contact-form-field textarea:focus {
+        border-color: #2d9e5f;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(45, 158, 95, 0.08);
+      }
+
+      .contact-submit-btn {
+        background: linear-gradient(135deg, #2d9e5f, #0d9488);
+        border: none;
+        padding: 10px 28px;
+        color: #fff;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 6px 16px rgba(45, 158, 95, 0.3);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .contact-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(45, 158, 95, 0.4);
+      }
+
+      .contact-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      @media (max-width: 576px) {
+        .contact-form-grid { grid-template-columns: 1fr; }
+      }
+
+      .contact-divider {
+        height: 1px;
+        background: rgba(45, 158, 95, 0.1);
+        margin: 14px 0;
+      }
+    </style>
+
     <!-- Contact Section -->
-    <section id="contact" class="contact section light-background">
+    <section id="contact" class="contact section light-background" style="padding: 60px 0;">
 
       <!-- Section Title -->
-      <div class="container beautiful-section-header" data-aos="fade-up" style="margin-bottom: 60px;">
+      <div class="container beautiful-section-header" data-aos="fade-up" style="margin-bottom: 32px;">
         <h2>ติดต่อ<span>เรา</span></h2>
         <div class="title-divider">
           <div class="line"></div>
           <div class="dash"></div>
           <div class="line"></div>
         </div>
-        <p>หากคุณมีคำถามหรือต้องการคำปรึกษาเกี่ยวกับการจัดการสวนยางและคาร์บอนเครดิต</p>
       </div><!-- End Section Title -->
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div class="row gy-4">
-          <div class="col-lg-6 ">
-            <div class="row gy-4">
+        <div class="row gy-4 align-items-stretch">
 
-              <div class="col-lg-12">
-                <div class="info-item d-flex flex-column justify-content-center align-items-center" data-aos="fade-up"
-                  data-aos-delay="200">
-                  <i class="bi bi-geo-alt"></i>
-                  <h3>ที่อยู่</h3>
-                  <p>เลขที่ 123 ถนนต้นยาง กรุงเทพมหานคร 10000</p>
+          <!-- Left: Contact Info Card -->
+          <div class="col-lg-6" data-aos="fade-right" data-aos-delay="150">
+            <div class="contact-card">
+              <div class="contact-card-icon">
+                <i class="bi bi-geo-alt-fill"></i>
+              </div>
+              <h3>ข้อมูลการติดต่อ</h3>
+              <div class="contact-divider"></div>
+
+              <div class="contact-info-row">
+                <i class="bi bi-building"></i>
+                <div>
+                  <strong>ที่อยู่มหาวิทยาลัย</strong>
+                  สาขาวิชาคณิตศาสตร์และสถิติ คณะวิทยาศาสตร์และเทคโนโลยี<br>
+                  มหาวิทยาลัยธรรมศาสตร์ (ศูนย์รังสิต) อ.คลองหลวง จ.ปทุมธานี
                 </div>
-              </div><!-- End Info Item -->
+              </div>
 
-              <div class="col-md-6">
-                <div class="info-item d-flex flex-column justify-content-center align-items-center" data-aos="fade-up"
-                  data-aos-delay="300">
-                  <i class="bi bi-telephone"></i>
-                  <h3>เบอร์โทรศัพท์</h3>
-                  <p>02 123 4567</p>
+              <div class="contact-info-row">
+                <i class="bi bi-door-open"></i>
+                <div>
+                  <strong>ห้องพักอาจารย์</strong>
+                  บร.3-217/10
                 </div>
-              </div><!-- End Info Item -->
+              </div>
 
-              <div class="col-md-6">
-                <div class="info-item d-flex flex-column justify-content-center align-items-center" data-aos="fade-up"
-                  data-aos-delay="400">
-                  <i class="bi bi-envelope"></i>
-                  <h3>อีเมล</h3>
-                  <p>contact@keptcarbon.com</p>
+              <div class="contact-divider"></div>
+
+              <div class="contact-info-row">
+                <i class="bi bi-telephone"></i>
+                <div>
+                  <strong>เบอร์โทรศัพท์</strong>
+                  (02) 564-4440 – 59 ต่อ 2101 – 3 กด 408
                 </div>
-              </div><!-- End Info Item -->
+              </div>
 
+              <div class="contact-info-row">
+                <i class="bi bi-envelope-at"></i>
+                <div>
+                  <strong>อีเมล</strong>
+                  sangdao@mathstat.sci.tu.ac.th
+                </div>
+              </div>
             </div>
-          </div>
+          </div><!-- End Left Card -->
 
-          <div class="col-lg-6">
-            <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up"
-              data-aos-delay="500">
-              <div class="row gy-4">
+          <!-- Right: Contact Form Card -->
+          <div class="col-lg-6" data-aos="fade-left" data-aos-delay="150">
+            <div class="contact-card">
+              <div class="contact-card-icon">
+                <i class="bi bi-send-fill"></i>
+              </div>
+              <h3>ส่งข้อความถึงเรา</h3>
+              <div class="contact-divider"></div>
 
-                <div class="col-md-6">
-                  <input type="text" name="name" class="form-control" placeholder="ชื่อ-นามสกุล" required="">
+              <form action="forms/contact.php" method="post" class="php-email-form">
+
+                <div class="contact-form-grid">
+                  <div class="contact-form-field">
+                    <label>ชื่อ-นามสกุล</label>
+                    <input type="text" name="name" placeholder="กรอกชื่อ-นามสกุล" required>
+                  </div>
+                  <div class="contact-form-field">
+                    <label>อีเมล</label>
+                    <input type="email" name="email" placeholder="example@email.com" required>
+                  </div>
                 </div>
 
-                <div class="col-md-6 ">
-                  <input type="email" class="form-control" name="email" placeholder="อีเมล" required="">
+                <div class="contact-form-field">
+                  <label>หัวข้อติดต่อ</label>
+                  <input type="text" name="subject" placeholder="ระบุหัวข้อที่ต้องการติดต่อ" required>
                 </div>
 
-                <div class="col-md-12">
-                  <input type="text" class="form-control" name="subject" placeholder="หัวข้อติดต่อ" required="">
+                <div class="contact-form-field">
+                  <label>ข้อความถึงเรา</label>
+                  <textarea name="message" rows="4" placeholder="เขียนข้อความของคุณที่นี่..." required></textarea>
                 </div>
 
-                <div class="col-md-12">
-                  <textarea class="form-control" name="message" rows="4" placeholder="ข้อความ" required=""></textarea>
-                </div>
-
-                <div class="col-md-12 text-center">
+                <div class="text-end mt-2">
                   <div class="loading">กำลังโหลด</div>
                   <div class="error-message"></div>
                   <div class="sent-message">ข้อความของคุณถูกส่งเรียบร้อยแล้ว ขอบคุณที่ติดต่อเรา!</div>
-
-                  <button type="submit">ส่งข้อความ</button>
+                  <button type="submit" class="contact-submit-btn">
+                    <i class="bi bi-send"></i> ส่งข้อความ
+                  </button>
                 </div>
 
-              </div>
-            </form>
-          </div><!-- End Contact Form -->
+              </form>
+            </div>
+          </div><!-- End Right Form Card -->
 
         </div>
 
