@@ -385,6 +385,19 @@ h6 {
     justify-content: space-between;
     white-space: nowrap;
     transition: 0.3s;
+    position: relative;
+  }
+
+  .navmenu a::after,
+  .navmenu a:focus::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 12px;
+    left: 15px;
+    background-color: var(--nav-hover-color);
+    transition: width 0.3s ease;
   }
 
   .navmenu a i,
@@ -403,6 +416,18 @@ h6 {
   .navmenu .active,
   .navmenu .active:focus {
     color: var(--nav-hover-color);
+  }
+
+  .navmenu li:hover>a::after,
+  .navmenu .active::after,
+  .navmenu .active:focus::after {
+    width: calc(100% - 30px);
+  }
+
+  .navmenu li:last-child:hover>a::after,
+  .navmenu li:last-child .active::after,
+  .navmenu li:last-child .active:focus::after {
+    width: calc(100% - 15px);
   }
 
   .navmenu .dropdown ul {
