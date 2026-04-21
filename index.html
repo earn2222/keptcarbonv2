@@ -284,6 +284,64 @@
 
     <!-- Project About & Team Styles -->
     <style>
+      /* ===== Global Beautiful Section Header ===== */
+      .beautiful-section-header {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .beautiful-section-header h2 {
+        font-size: 40px;
+        font-weight: 800;
+        color: #1a3d2b;
+        margin-bottom: 15px;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+      }
+
+      .beautiful-section-header h2 span {
+        background: linear-gradient(135deg, #2d9e5f, #0d9488);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .title-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .title-divider .line {
+        height: 1px;
+        width: 80px;
+        background: #cbd5e1;
+      }
+
+      .title-divider .dash {
+        height: 5px;
+        width: 60px;
+        background: #2d9e5f;
+        border-radius: 5px;
+      }
+
+      .beautiful-section-header p {
+        font-size: 16px;
+        color: #5a7a65;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 768px) {
+        .beautiful-section-header h2 { font-size: 32px; }
+        .title-divider .line { width: 50px; }
+        .title-divider .dash { width: 40px; }
+      }
+
       /* ===== Project About Section ===== */
       .project-about-section {
         padding: 100px 0;
@@ -319,20 +377,6 @@
         margin-bottom: 12px;
       }
 
-      .project-about-section .section-headline {
-        font-size: 40px;
-        font-weight: 800;
-        color: #1a3d2b;
-        margin-bottom: 12px;
-        line-height: 1.2;
-      }
-
-      .project-about-section .section-headline span {
-        background: linear-gradient(135deg, #2d9e5f, #0d9488);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
 
       .project-about-body {
         color: #5a7a65;
@@ -642,16 +686,6 @@
         border-top: 1px solid rgba(45, 158, 95, 0.05);
       }
 
-      .team-section .section-headline {
-        font-size: 38px;
-        font-weight: 800;
-        color: #1a3d2b;
-        margin-bottom: 15px;
-      }
-
-      .team-section .section-headline span {
-        color: #2d9e5f;
-      }
 
       .team-card {
         background: #fff;
@@ -783,9 +817,14 @@
 
         <!-- Section Header -->
         <div class="row justify-content-center text-center mb-5" data-aos="fade-up">
-          <div class="col-lg-8">
+          <div class="col-lg-8 beautiful-section-header">
             <div class="project-tag"><i class="bi bi-globe-asia-australia"></i> วิจัยและพัฒนา</div>
-            <h2 class="section-headline">เกี่ยวกับ<span>โครงการ</span></h2>
+            <h2>เกี่ยวกับ<span>โครงการ</span></h2>
+            <div class="title-divider">
+              <div class="line"></div>
+              <div class="dash"></div>
+              <div class="line"></div>
+            </div>
           </div>
         </div>
 
@@ -910,9 +949,14 @@
 
         <!-- Section Header -->
         <div class="row justify-content-center text-center mb-5" data-aos="fade-up">
-          <div class="col-lg-8">
+          <div class="col-lg-8 beautiful-section-header">
             <div class="project-tag"><i class="bi bi-people-fill"></i> คณะผู้ดำเนินงาน</div>
-            <h2 class="section-headline">คณะผู้ปฏิบัติงาน<span>โครงการ</span></h2>
+            <h2>คณะผู้ปฏิบัติงาน<span>โครงการ</span></h2>
+            <div class="title-divider">
+              <div class="line"></div>
+              <div class="dash"></div>
+              <div class="line"></div>
+            </div>
           </div>
         </div>
 
@@ -1049,8 +1093,13 @@
     <section id="contact" class="contact section light-background">
 
       <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>ติดต่อเรา</h2>
+      <div class="container beautiful-section-header" data-aos="fade-up" style="margin-bottom: 60px;">
+        <h2>ติดต่อ<span>เรา</span></h2>
+        <div class="title-divider">
+          <div class="line"></div>
+          <div class="dash"></div>
+          <div class="line"></div>
+        </div>
         <p>หากคุณมีคำถามหรือต้องการคำปรึกษาเกี่ยวกับการจัดการสวนยางและคาร์บอนเครดิต</p>
       </div><!-- End Section Title -->
 
