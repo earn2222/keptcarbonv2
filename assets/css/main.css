@@ -18,19 +18,27 @@
 }
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
-:root { 
-  --background-color: #ffffff; /* Background color - pure white */
-  --default-color: #3d5a45; /* Default text color - deep forest green */
-  --heading-color: #1a3d2b; /* Headings - rich dark green */
-  --accent-color: #2d9e5f; /* Accent - vibrant fresh green */
-  --surface-color: #ffffff; /* Surface color - white */
-  --contrast-color: #ffffff; /* Contrast text color */
+:root {
+  --background-color: #ffffff;
+  /* Background color - pure white */
+  --default-color: #3d5a45;
+  /* Default text color - deep forest green */
+  --heading-color: #1a3d2b;
+  /* Headings - rich dark green */
+  --accent-color: #2d9e5f;
+  /* Accent - vibrant fresh green */
+  --surface-color: #ffffff;
+  /* Surface color - white */
+  --contrast-color: #ffffff;
+  /* Contrast text color */
 }
 
 /* Nav Menu Colors */
 :root {
-  --nav-color: #2d5a3d;  /* Nav links - deep green */
-  --nav-hover-color: #2d9e5f; /* Nav hover - vibrant green */
+  --nav-color: #2d5a3d;
+  /* Nav links - deep green */
+  --nav-hover-color: #2d9e5f;
+  /* Nav hover - vibrant green */
   --nav-mobile-background-color: #ffffff;
   --nav-dropdown-background-color: #ffffff;
   --nav-dropdown-color: #2d5a3d;
@@ -40,12 +48,14 @@
 /* Color Presets */
 
 .light-background {
-  --background-color: #f0faf4; /* very subtle pale fresh-green background */
+  --background-color: #f0faf4;
+  /* very subtle pale fresh-green background */
   --surface-color: #ffffff;
 }
 
 .dark-background {
-  --background-color: #1a3d2b; /* rich dark green */
+  --background-color: #1a3d2b;
+  /* rich dark green */
   --default-color: #e8f5ee;
   --heading-color: #b8e6cc;
   --surface-color: #235237;
@@ -234,23 +244,69 @@ h6 {
 
 .header .logo {
   line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.header .logo:hover {
+  transform: translateY(-2px);
 }
 
 .header .logo img {
-  max-height: 50px;
-  margin-right: 8px;
+  max-height: 64px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(45, 158, 95, 0.1));
+  transition: all 0.3s ease;
+}
+
+.header .logo img:hover {
+  filter: drop-shadow(0 4px 8px rgba(45, 158, 95, 0.2));
+}
+
+.header .logo .brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.header .logo .brand-name {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--heading-color);
+  letter-spacing: -0.4px;
+}
+
+.header .logo .brand-name .keeper {
+  color: var(--accent-color);
+  margin-right: 1px;
+}
+
+.header .logo .brand-sub {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-top: 2px;
 }
 
 .header .logo h1 {
-  font-size: 30px;
+  font-size: 36px;
   margin: 0;
   font-weight: 700;
   color: var(--heading-color);
+  letter-spacing: -0.5px;
 }
 
 .header .logo span {
   color: var(--accent-color);
-  font-size: 30px;
+  font-size: 36px;
   font-weight: 700;
 }
 
@@ -258,7 +314,7 @@ h6 {
 .header .btn-getstarted:focus {
   color: var(--contrast-color);
   background: var(--accent-color);
-  font-size: 14px;
+  font-size: 16px;
   padding: 6px 30px;
   margin: 0 0 0 30px;
   border-radius: 50px;
@@ -321,7 +377,7 @@ h6 {
   .navmenu a:focus {
     color: var(--nav-color);
     padding: 18px 15px;
-    font-size: 16px;
+    font-size: 18px;
     font-family: var(--nav-font);
     font-weight: 400;
     display: flex;
@@ -329,6 +385,19 @@ h6 {
     justify-content: space-between;
     white-space: nowrap;
     transition: 0.3s;
+    position: relative;
+  }
+
+  .navmenu a::after,
+  .navmenu a:focus::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 12px;
+    left: 15px;
+    background-color: var(--nav-hover-color);
+    transition: width 0.3s ease;
   }
 
   .navmenu a i,
@@ -347,6 +416,18 @@ h6 {
   .navmenu .active,
   .navmenu .active:focus {
     color: var(--nav-hover-color);
+  }
+
+  .navmenu li:hover>a::after,
+  .navmenu .active::after,
+  .navmenu .active:focus::after {
+    width: calc(100% - 30px);
+  }
+
+  .navmenu li:last-child:hover>a::after,
+  .navmenu li:last-child .active::after,
+  .navmenu li:last-child .active:focus::after {
+    width: calc(100% - 15px);
   }
 
   .navmenu .dropdown ul {
@@ -371,7 +452,7 @@ h6 {
 
   .navmenu .dropdown ul a {
     padding: 10px 20px;
-    font-size: 15px;
+    font-size: 17px;
     text-transform: none;
     color: var(--nav-dropdown-color);
   }
@@ -442,7 +523,7 @@ h6 {
     color: var(--nav-dropdown-color);
     padding: 10px 20px;
     font-family: var(--nav-font);
-    font-size: 17px;
+    font-size: 20px;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -559,7 +640,7 @@ h6 {
 }
 
 .footer h3 {
-  font-size: 36px;
+  font-size: 43px;
   font-weight: 700;
   position: relative;
   padding: 0;
@@ -567,7 +648,7 @@ h6 {
 }
 
 .footer p {
-  font-size: 15px;
+  font-size: 18px;
   font-style: italic;
   padding: 0;
   margin: 0 0 30px 0;
@@ -578,7 +659,7 @@ h6 {
 }
 
 .footer .social-links a {
-  font-size: 16px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -604,7 +685,7 @@ h6 {
 }
 
 .footer .credits {
-  font-size: 13px;
+  font-size: 16px;
   padding-top: 5px;
 }
 
@@ -701,7 +782,7 @@ h6 {
 }
 
 .page-title .heading h1 {
-  font-size: 38px;
+  font-size: 46px;
   font-weight: 700;
 }
 
@@ -715,7 +796,7 @@ h6 {
   flex-wrap: wrap;
   list-style: none;
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -760,7 +841,7 @@ section,
 }
 
 .section-title h2 {
-  font-size: 32px;
+  font-size: 38px;
   font-weight: 700;
   margin-bottom: 20px;
   padding-bottom: 20px;
@@ -811,16 +892,16 @@ section,
 
 .hero h1 {
   margin: 0;
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 700;
-  line-height: 56px;
+  line-height: 64px;
   color: var(--heading-color);
 }
 
 .hero p {
   color: var(--default-color);
   margin: 5px 0 30px 0;
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 400;
 }
 
@@ -829,7 +910,7 @@ section,
   background: var(--accent-color);
   font-family: var(--heading-font);
   font-weight: 400;
-  font-size: 15px;
+  font-size: 18px;
   letter-spacing: 1px;
   display: inline-block;
   padding: 10px 28px 12px 28px;
@@ -845,7 +926,7 @@ section,
 }
 
 .hero .btn-watch-video {
-  font-size: 16px;
+  font-size: 19px;
   transition: 0.5s;
   margin-left: 25px;
   color: var(--default-color);
@@ -874,19 +955,19 @@ section,
 
 @media (max-width: 640px) {
   .hero h1 {
-    font-size: 28px;
-    line-height: 36px;
+    font-size: 32px;
+    line-height: 40px;
   }
 
   .hero p {
-    font-size: 18px;
+    font-size: 20px;
     line-height: 24px;
     margin-bottom: 30px;
   }
 
   .hero .btn-get-started,
   .hero .btn-watch-video {
-    font-size: 13px;
+    font-size: 16px;
   }
 }
 
@@ -951,12 +1032,12 @@ section,
 }
 
 .about .content ul h5 {
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 700;
 }
 
 .about .content ul p {
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .about .content p:last-child {
@@ -1014,14 +1095,14 @@ section,
 .featured-services .details h3 {
   font-weight: 700;
   margin: 10px 0 15px 0;
-  font-size: 22px;
+  font-size: 26px;
   transition: ease-in-out 0.3s;
 }
 
 .featured-services .details p {
   color: color-mix(in srgb, var(--default-color), transparent 10%);
   line-height: 24px;
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 0;
 }
 
@@ -1061,7 +1142,7 @@ section,
 
 .features .features-item h3 {
   font-weight: 700;
-  font-size: 26px;
+  font-size: 31px;
 }
 
 .features .features-item ul {
@@ -1124,13 +1205,13 @@ section,
 .services .service-item h3 {
   font-weight: 700;
   margin: 10px 0 15px 0;
-  font-size: 22px;
+  font-size: 26px;
   transition: ease-in-out 0.3s;
 }
 
 .services .service-item p {
   line-height: 24px;
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 0;
 }
 
@@ -1166,7 +1247,7 @@ section,
   display: inline-block;
   padding: 8px 20px 10px 20px;
   margin: 0;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   line-height: 1;
   margin-bottom: 5px;
@@ -1191,7 +1272,7 @@ section,
 
 @media (max-width: 575px) {
   .portfolio .portfolio-filters li {
-    font-size: 14px;
+    font-size: 17px;
     margin: 0 0 10px 0;
   }
 }
@@ -1221,7 +1302,7 @@ section,
 
 .portfolio .portfolio-item .portfolio-info p {
   color: color-mix(in srgb, var(--default-color), transparent 30%);
-  font-size: 14px;
+  font-size: 17px;
   margin-bottom: 0;
   padding-right: 50px;
 }
@@ -1317,14 +1398,14 @@ section,
 
 .team .team-member .member-info span {
   display: block;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
   color: color-mix(in srgb, var(--default-color), transparent 40%);
 }
 
 .team .team-member .member-info p {
   font-style: italic;
-  font-size: 14px;
+  font-size: 17px;
   line-height: 26px;
   color: color-mix(in srgb, var(--default-color), transparent 40%);
 }

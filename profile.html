@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -8,496 +9,913 @@
 
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
 
-<style>
-:root {
-  --green:     #2d9e5f;
-  --green-d:   #1e7a47;
-  --green-l:   #3dbf74;
-  --green-50:  #edfaf3;
-  --green-100: #d4f8e4;
-  --green-200: #a8efc3;
-  --teal:      #0d9488;
-  --gray-50:   #f8fafc;
-  --gray-100:  #f1f5f9;
-  --gray-200:  #e2e8f0;
-  --gray-300:  #cbd5e1;
-  --gray-400:  #94a3b8;
-  --gray-500:  #64748b;
-  --gray-700:  #334155;
-  --gray-900:  #0f172a;
-  --white:     #ffffff;
-  --font:      'Noto Sans Thai', 'Noto Sans', sans-serif;
-  --topbar-h:  64px;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { font-family: var(--font); background: var(--gray-50); color: var(--gray-700); -webkit-font-smoothing: antialiased; }
+  <style>
+    :root {
+      --green: #2d9e5f;
+      --green-d: #1e7a47;
+      --green-l: #3dbf74;
+      --green-50: #edfaf3;
+      --green-100: #d4f8e4;
+      --green-200: #a8efc3;
+      --teal: #0d9488;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-900: #0f172a;
+      --white: #ffffff;
+      --font: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+      --topbar-h: 64px;
+    }
 
-/* ── TOPBAR ── */
-#topbar {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: var(--topbar-h);
-  background: rgba(255,255,255,0.97);
-  border-bottom: 1px solid var(--gray-200);
-  backdrop-filter: blur(12px);
-  z-index: 500;
-  display: flex; align-items: center;
-  padding: 0 28px; gap: 20px;
-  box-shadow: 0 1px 16px rgba(0,0,0,0.05);
-}
-.tb-logo { display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0; }
-.tb-logo .logo-icon { width:36px;height:36px;background:linear-gradient(135deg,var(--green),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;color:white; }
-.tb-logo .brand { font-family:'Noto Sans Thai','Noto Sans',sans-serif;font-size:18px;font-weight:800;color:var(--gray-900);letter-spacing:-0.4px; }
-.tb-logo .brand span { color:var(--green); }
-.tb-nav { display:flex;align-items:center;gap:4px;margin-left:16px; }
-.tb-nav a { padding:7px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--gray-500);text-decoration:none;transition:all 0.2s;display:flex;align-items:center;gap:6px; }
-.tb-nav a:hover { background:var(--green-50);color:var(--green-d); }
-.tb-nav a.active { background:var(--green-50);color:var(--green);font-weight:600; }
-.tb-right { margin-left:auto;display:flex;align-items:center;gap:12px; }
-.tb-user { display:flex;align-items:center;gap:8px;background:var(--gray-100);border-radius:50px;padding:5px 14px 5px 6px; }
-.tb-avatar { width:28px;height:28px;background:linear-gradient(135deg,var(--green),var(--teal));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white; }
-.tb-username { font-size:13px;font-weight:600;color:var(--gray-700); }
-.btn-logout-tb { font-size:12px;font-weight:500;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:6px 14px;cursor:pointer;transition:all 0.2s; }
-.btn-logout-tb:hover { background:#fee2e2; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* ── MAIN ── */
-main { padding-top: var(--topbar-h); min-height: 100vh; }
+    html {
+      scroll-behavior: smooth;
+    }
 
-/* ── PAGE HEADER ── */
-.page-header {
-  background: linear-gradient(135deg, #071a0f 0%, #0a2e1a 60%, #0d3b22 100%);
-  padding: 40px 0 100px;
-  position: relative; overflow: hidden;
-}
-.page-header::before {
-  content:'';position:absolute;width:500px;height:500px;
-  background:radial-gradient(circle,rgba(45,158,95,0.2) 0%,transparent 65%);
-  top:-150px;right:-100px;pointer-events:none;
-}
-.page-header::after {
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:linear-gradient(rgba(45,158,95,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(45,158,95,0.05) 1px,transparent 1px);
-  background-size:40px 40px;
-}
-.ph-inner { max-width:1000px;margin:0 auto;padding:0 28px;position:relative;z-index:1; }
-.ph-inner h1 { font-family:'Noto Sans Thai','Noto Sans',sans-serif;font-size:28px;font-weight:800;color:white;letter-spacing:-0.5px;margin-bottom:6px; }
-.ph-inner p { font-size:14px;color:rgba(255,255,255,0.5); }
+    body {
+      font-family: var(--font);
+      background: var(--gray-50);
+      color: var(--gray-700);
+      -webkit-font-smoothing: antialiased;
+    }
 
-/* ── PROFILE LAYOUT ── */
-.profile-wrap {
-  max-width: 1000px;
-  margin: -60px auto 60px;
-  padding: 0 28px;
-  position: relative; z-index: 10;
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 24px;
-  align-items: start;
-}
+    /* ── TOPBAR ── */
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--topbar-h);
+      background: rgba(255, 255, 255, 0.97);
+      border-bottom: 1px solid var(--gray-200);
+      backdrop-filter: blur(12px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 20px;
+      box-shadow: 0 1px 16px rgba(0, 0, 0, 0.05);
+    }
 
-/* ── LEFT COLUMN ── */
-.profile-card {
-  background: white;
-  border: 1px solid var(--gray-200);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-}
-.avatar-section {
-  background: linear-gradient(135deg, var(--green), var(--teal));
-  padding: 36px 24px 24px;
-  text-align: center;
-}
-.big-avatar {
-  width: 80px; height: 80px;
-  background: rgba(255,255,255,0.2);
-  border: 3px solid rgba(255,255,255,0.4);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 34px; font-weight: 800; color: white;
-  margin: 0 auto 14px;
-  backdrop-filter: blur(8px);
-}
-.user-display-name { font-size: 18px; font-weight: 700; color: white; margin-bottom: 3px; }
-.user-display-email { font-size: 13px; color: rgba(255,255,255,0.7); }
+    .tb-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
 
-.profile-stats-row {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  border-top: 1px solid var(--gray-100);
-}
-.ps-item { padding:16px 12px;text-align:center;border-right:1px solid var(--gray-100); }
-.ps-item:last-child { border-right:none; }
-.ps-val { font-size:20px;font-weight:800;color:var(--green);line-height:1; }
-.ps-lbl { font-size:10px;color:var(--gray-400);margin-top:3px;font-weight:500; }
+    .tb-logo:hover {
+      transform: translateY(-2px);
+    }
 
-.profile-info-list { padding:0; }
-.pil-item {
-  display:flex;align-items:center;gap:12px;
-  padding:14px 20px;
-  border-bottom:1px solid var(--gray-100);
-  font-size:13px;
-}
-.pil-item:last-child { border-bottom:none; }
-.pil-icon { width:32px;height:32px;background:var(--green-50);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--green);flex-shrink:0; }
-.pil-content .lbl { font-size:11px;color:var(--gray-400);font-weight:500;margin-bottom:1px; }
-.pil-content .val { font-size:13px;color:var(--gray-700);font-weight:600; }
+    .tb-logo .logo-img {
+      max-height: 48px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 2px 4px rgba(45, 158, 95, 0.1));
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
 
-.danger-zone { padding:20px;border-top:1px solid var(--gray-100); }
-.danger-zone h4 { font-size:12px;font-weight:600;color:#ef4444;margin-bottom:10px;display:flex;align-items:center;gap:6px; }
-.btn-signout { width:100%;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#ef4444;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px; }
-.btn-signout:hover { background:#fee2e2;border-color:#fca5a5; }
+    .tb-logo .logo-img:hover {
+      filter: drop-shadow(0 4px 8px rgba(45, 158, 95, 0.2));
+    }
 
-/* ── RIGHT COLUMN ── */
-.form-card {
-  background: white;
-  border: 1px solid var(--gray-200);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-  margin-bottom: 20px;
-}
-.form-card:last-child { margin-bottom: 0; }
-.form-card-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--gray-100);
-  display: flex; align-items: center; gap: 10px;
-}
-.form-card-header .icon {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size: 17px;
-}
-.form-card-header .icon.green { background: var(--green-100); color: var(--green-d); }
-.form-card-header .icon.blue { background: #dbeafe; color: #1d4ed8; }
-.form-card-header .icon.amber { background: #fef3c7; color: #92400e; }
-.form-card-header h3 { font-size:16px;font-weight:700;color:var(--gray-900); }
-.form-card-body { padding: 24px; }
+    .tb-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      color: white;
+    }
 
-.form-row { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
-.form-row.single { grid-template-columns:1fr; }
-.form-group label { display:block;font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px; }
-.form-group input {
-  width:100%;padding:11px 14px;
-  background:white;border:1.5px solid var(--gray-200);
-  border-radius:10px;font-size:14px;color:var(--gray-900);
-  font-family:var(--font);outline:none;transition:all 0.2s;
-}
-.form-group input:focus { border-color:var(--green);box-shadow:0 0 0 3px rgba(45,158,95,0.1); }
-.form-group input::placeholder { color:var(--gray-300); }
-.form-group input:read-only { background:var(--gray-50);color:var(--gray-400);cursor:not-allowed; }
+    .tb-logo .brand-text {
+      font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gray-900);
+      letter-spacing: -0.4px;
+      display: flex;
+      align-items: center;
+    }
 
-.btn-save {
-  padding:11px 28px;
-  background:linear-gradient(135deg,var(--green),var(--teal));
-  border:none;border-radius:10px;color:white;
-  font-size:14px;font-weight:600;cursor:pointer;
-  transition:all 0.25s;font-family:var(--font);
-  display:inline-flex;align-items:center;gap:8px;
-}
-.btn-save:hover { transform:translateY(-1px);box-shadow:0 6px 20px rgba(45,158,95,0.3); }
+    .tb-logo .brand-text .keeper {
+      color: var(--green);
+      margin-right: 2px;
+    }
 
-/* ── ALERT ── */
-.alert-box {
-  padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;
-  margin-bottom:16px;display:none;align-items:center;gap:8px;
-}
-.alert-box.show { display:flex; }
-.alert-box.success { background:var(--green-50);border:1px solid var(--green-200);color:var(--green-d); }
-.alert-box.error   { background:#fef2f2;border:1px solid #fecaca;color:#dc2626; }
 
-/* ── ACTIVITY ── */
-.activity-item {
-  display:flex;justify-content:space-between;align-items:center;
-  padding:12px 0;border-bottom:1px solid var(--gray-100);
-}
-.activity-item:last-child { border-bottom:none; }
-.ai-name { font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:2px; }
-.ai-sub { font-size:12px;color:var(--gray-400); }
-.ai-carbon { text-align:right; }
-.ai-carbon .val { font-size:15px;font-weight:700;color:var(--green); }
-.ai-carbon .unit { font-size:11px;color:var(--gray-400); }
+    .tb-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 16px;
+    }
 
-/* ── RESPONSIVE ── */
-@media (max-width:768px) {
-  .profile-wrap { grid-template-columns:1fr; margin-top:-40px; }
-  .form-row { grid-template-columns:1fr; }
-  .tb-nav { display:none; }
-  .tb-username { display:none; }
-}
-</style>
+    .tb-nav a {
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+      text-decoration: none;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tb-nav a:hover {
+      background: var(--green-50);
+      color: var(--green-d);
+    }
+
+    .tb-nav a.active {
+      background: var(--green-50);
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .tb-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tb-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gray-100);
+      border-radius: 50px;
+      padding: 5px 14px 5px 6px;
+    }
+
+    .tb-avatar {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .tb-username {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .btn-logout-tb {
+      font-size: 12px;
+      font-weight: 500;
+      color: #ef4444;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout-tb:hover {
+      background: #fee2e2;
+    }
+
+    /* ── MAIN ── */
+    main {
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      background: linear-gradient(135deg, #071a0f 0%, #0a2e1a 60%, #0d3b22 100%);
+      padding: 40px 0 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(45, 158, 95, 0.2) 0%, transparent 65%);
+      top: -150px;
+      right: -100px;
+      pointer-events: none;
+    }
+
+    .page-header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(45, 158, 95, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 158, 95, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .ph-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ph-inner h1 {
+      font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .ph-inner p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* ── PROFILE LAYOUT ── */
+    .profile-wrap {
+      max-width: 1000px;
+      margin: -60px auto 60px;
+      padding: 0 28px;
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── LEFT COLUMN ── */
+    .profile-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .avatar-section {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      padding: 36px 24px 24px;
+      text-align: center;
+    }
+
+    .big-avatar {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 800;
+      color: white;
+      margin: 0 auto 14px;
+      backdrop-filter: blur(8px);
+    }
+
+    .user-display-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 3px;
+    }
+
+    .user-display-email {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .profile-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .ps-item {
+      padding: 16px 12px;
+      text-align: center;
+      border-right: 1px solid var(--gray-100);
+    }
+
+    .ps-item:last-child {
+      border-right: none;
+    }
+
+    .ps-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .ps-lbl {
+      font-size: 10px;
+      color: var(--gray-400);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    .profile-info-list {
+      padding: 0;
+    }
+
+    .pil-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 13px;
+    }
+
+    .pil-item:last-child {
+      border-bottom: none;
+    }
+
+    .pil-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--green-50);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .pil-content .lbl {
+      font-size: 11px;
+      color: var(--gray-400);
+      font-weight: 500;
+      margin-bottom: 1px;
+    }
+
+    .pil-content .val {
+      font-size: 13px;
+      color: var(--gray-700);
+      font-weight: 600;
+    }
+
+    .danger-zone {
+      padding: 20px;
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .danger-zone h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ef4444;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-signout {
+      width: 100%;
+      padding: 10px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      color: #ef4444;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-signout:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+
+    /* ── RIGHT COLUMN ── */
+    .form-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+
+    .form-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-card-header .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+    }
+
+    .form-card-header .icon.green {
+      background: var(--green-100);
+      color: var(--green-d);
+    }
+
+    .form-card-header .icon.blue {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .form-card-header .icon.amber {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .form-card-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .form-card-body {
+      padding: 24px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-row.single {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      background: white;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--gray-900);
+      font-family: var(--font);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(45, 158, 95, 0.1);
+    }
+
+    .form-group input::placeholder {
+      color: var(--gray-300);
+    }
+
+    .form-group input:read-only {
+      background: var(--gray-50);
+      color: var(--gray-400);
+      cursor: not-allowed;
+    }
+
+    .btn-save {
+      padding: 11px 28px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      font-family: var(--font);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(45, 158, 95, 0.3);
+    }
+
+    /* ── ALERT ── */
+    .alert-box {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-box.show {
+      display: flex;
+    }
+
+    .alert-box.success {
+      background: var(--green-50);
+      border: 1px solid var(--green-200);
+      color: var(--green-d);
+    }
+
+    .alert-box.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+    }
+
+    /* ── ACTIVITY ── */
+    .activity-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .ai-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 2px;
+    }
+
+    .ai-sub {
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+
+    .ai-carbon {
+      text-align: right;
+    }
+
+    .ai-carbon .val {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .ai-carbon .unit {
+      font-size: 11px;
+      color: var(--gray-400);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:768px) {
+      .profile-wrap {
+        grid-template-columns: 1fr;
+        margin-top: -40px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .tb-nav {
+        display: none;
+      }
+
+      .tb-username {
+        display: none;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- TOPBAR -->
-<div id="topbar">
-  <a class="tb-logo" href="index.html">
-    <div class="logo-icon">🌿</div>
-    <span class="brand">Kept<span>Carbon</span></span>
-  </a>
-  <nav class="tb-nav">
-    <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
-    <a href="map-draw.html"><i class="bi bi-map"></i> วาดแปลง</a>
-    <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
-    <a href="profile.html" class="active"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
-  </nav>
-  <div class="tb-right">
-    <div class="tb-user">
-      <div class="tb-avatar" id="tb-avatar">—</div>
-      <span class="tb-username" id="tb-username">ผู้ใช้</span>
-    </div>
-    <button class="btn-logout-tb" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกระบบ</button>
-  </div>
-</div>
-
-<main>
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="ph-inner">
-      <h1>👤 โปรไฟล์ของฉัน</h1>
-      <p>จัดการข้อมูลบัญชีและการตั้งค่าของคุณ</p>
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <a class="tb-logo" href="index.html">
+      <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo" class="logo-img"
+        style="max-height: 48px; width: auto;">
+      <span class="brand-text"><span class="keeper">Kept</span>Carbon</span>
+    </a>
+    <nav class="tb-nav">
+      <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
+      <a href="map-draw.html"><i class="bi bi-map"></i> วาดแปลง</a>
+      <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
+      <a href="profile.html" class="active"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
+    </nav>
+    <div class="tb-right">
+      <div class="tb-user">
+        <div class="tb-avatar" id="tb-avatar">—</div>
+        <span class="tb-username" id="tb-username">ผู้ใช้</span>
+      </div>
+      <button class="btn-logout-tb" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกระบบ</button>
     </div>
   </div>
 
-  <!-- PROFILE WRAP -->
-  <div class="profile-wrap">
-
-    <!-- ── LEFT: Avatar Card ── -->
-    <div class="profile-card">
-      <div class="avatar-section">
-        <div class="big-avatar" id="big-avatar">—</div>
-        <div class="user-display-name" id="disp-name">—</div>
-        <div class="user-display-email" id="disp-email">—</div>
-      </div>
-
-      <div class="profile-stats-row">
-        <div class="ps-item">
-          <div class="ps-val" id="ps-plots">0</div>
-          <div class="ps-lbl">แปลง</div>
-        </div>
-        <div class="ps-item">
-          <div class="ps-val" id="ps-carbon">0</div>
-          <div class="ps-lbl">tCO₂</div>
-        </div>
-        <div class="ps-item">
-          <div class="ps-val" id="ps-area">0</div>
-          <div class="ps-lbl">ไร่</div>
-        </div>
-      </div>
-
-      <div class="profile-info-list">
-        <div class="pil-item">
-          <div class="pil-icon"><i class="bi bi-calendar3"></i></div>
-          <div class="pil-content">
-            <div class="lbl">สมาชิกตั้งแต่</div>
-            <div class="val" id="pil-joined">—</div>
-          </div>
-        </div>
-        <div class="pil-item">
-          <div class="pil-icon"><i class="bi bi-telephone"></i></div>
-          <div class="pil-content">
-            <div class="lbl">เบอร์โทรศัพท์</div>
-            <div class="val" id="pil-phone">—</div>
-          </div>
-        </div>
-        <div class="pil-item">
-          <div class="pil-icon"><i class="bi bi-map"></i></div>
-          <div class="pil-content">
-            <div class="lbl">แปลงที่ลงทะเบียน</div>
-            <div class="val" id="pil-plotcount">0 แปลง</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="danger-zone">
-        <h4><i class="bi bi-exclamation-triangle"></i> โซนอันตราย</h4>
-        <button class="btn-signout" onclick="Auth.logout()">
-          <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
-        </button>
+  <main>
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="ph-inner">
+        <h1>👤 โปรไฟล์ของฉัน</h1>
+        <p>จัดการข้อมูลบัญชีและการตั้งค่าของคุณ</p>
       </div>
     </div>
 
-    <!-- ── RIGHT: Forms ── -->
-    <div>
+    <!-- PROFILE WRAP -->
+    <div class="profile-wrap">
 
-      <!-- Edit Profile -->
-      <div class="form-card">
-        <div class="form-card-header">
-          <div class="icon green"><i class="bi bi-person-gear"></i></div>
-          <h3>แก้ไขข้อมูลส่วนตัว</h3>
+      <!-- ── LEFT: Avatar Card ── -->
+      <div class="profile-card">
+        <div class="avatar-section">
+          <div class="big-avatar" id="big-avatar">—</div>
+          <div class="user-display-name" id="disp-name">—</div>
+          <div class="user-display-email" id="disp-email">—</div>
         </div>
-        <div class="form-card-body">
-          <div class="alert-box" id="profile-alert"></div>
-          <form onsubmit="saveProfile(event)">
-            <div class="form-row">
-              <div class="form-group">
-                <label>ชื่อ-นามสกุล</label>
-                <input type="text" id="edit-fullname" placeholder="ชื่อ-นามสกุล" required>
-              </div>
-              <div class="form-group">
-                <label>อีเมล (แก้ไขไม่ได้)</label>
-                <input type="email" id="edit-email" readonly>
-              </div>
+
+        <div class="profile-stats-row">
+          <div class="ps-item">
+            <div class="ps-val" id="ps-plots">0</div>
+            <div class="ps-lbl">แปลง</div>
+          </div>
+          <div class="ps-item">
+            <div class="ps-val" id="ps-carbon">0</div>
+            <div class="ps-lbl">tCO₂</div>
+          </div>
+          <div class="ps-item">
+            <div class="ps-val" id="ps-area">0</div>
+            <div class="ps-lbl">ไร่</div>
+          </div>
+        </div>
+
+        <div class="profile-info-list">
+          <div class="pil-item">
+            <div class="pil-icon"><i class="bi bi-calendar3"></i></div>
+            <div class="pil-content">
+              <div class="lbl">สมาชิกตั้งแต่</div>
+              <div class="val" id="pil-joined">—</div>
             </div>
-            <div class="form-row single">
-              <div class="form-group">
-                <label>เบอร์โทรศัพท์</label>
-                <input type="tel" id="edit-phone" placeholder="เช่น 08X-XXX-XXXX">
-              </div>
+          </div>
+          <div class="pil-item">
+            <div class="pil-icon"><i class="bi bi-telephone"></i></div>
+            <div class="pil-content">
+              <div class="lbl">เบอร์โทรศัพท์</div>
+              <div class="val" id="pil-phone">—</div>
             </div>
-            <button type="submit" class="btn-save">
-              <i class="bi bi-floppy"></i> บันทึกข้อมูล
-            </button>
-          </form>
+          </div>
+          <div class="pil-item">
+            <div class="pil-icon"><i class="bi bi-map"></i></div>
+            <div class="pil-content">
+              <div class="lbl">แปลงที่ลงทะเบียน</div>
+              <div class="val" id="pil-plotcount">0 แปลง</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="danger-zone">
+          <h4><i class="bi bi-exclamation-triangle"></i> โซนอันตราย</h4>
+          <button class="btn-signout" onclick="Auth.logout()">
+            <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+          </button>
         </div>
       </div>
 
-      <!-- Change Password -->
-      <div class="form-card">
-        <div class="form-card-header">
-          <div class="icon blue"><i class="bi bi-shield-lock"></i></div>
-          <h3>เปลี่ยนรหัสผ่าน</h3>
-        </div>
-        <div class="form-card-body">
-          <div class="alert-box" id="pwd-alert"></div>
-          <form onsubmit="changePassword(event)">
-            <div class="form-row single">
-              <div class="form-group">
-                <label>รหัสผ่านปัจจุบัน</label>
-                <input type="password" id="cur-pwd" placeholder="กรอกรหัสผ่านปัจจุบัน" required>
+      <!-- ── RIGHT: Forms ── -->
+      <div>
+
+        <!-- Edit Profile -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <div class="icon green"><i class="bi bi-person-gear"></i></div>
+            <h3>แก้ไขข้อมูลส่วนตัว</h3>
+          </div>
+          <div class="form-card-body">
+            <div class="alert-box" id="profile-alert"></div>
+            <form onsubmit="saveProfile(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" id="edit-fullname" placeholder="ชื่อ-นามสกุล" required>
+                </div>
+                <div class="form-group">
+                  <label>อีเมล (แก้ไขไม่ได้)</label>
+                  <input type="email" id="edit-email" readonly>
+                </div>
               </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>รหัสผ่านใหม่</label>
-                <input type="password" id="new-pwd" placeholder="อย่างน้อย 6 ตัวอักษร" required minlength="6">
+              <div class="form-row single">
+                <div class="form-group">
+                  <label>เบอร์โทรศัพท์</label>
+                  <input type="tel" id="edit-phone" placeholder="เช่น 08X-XXX-XXXX">
+                </div>
               </div>
-              <div class="form-group">
-                <label>ยืนยันรหัสผ่านใหม่</label>
-                <input type="password" id="conf-pwd" placeholder="กรอกซ้ำ" required minlength="6">
+              <button type="submit" class="btn-save">
+                <i class="bi bi-floppy"></i> บันทึกข้อมูล
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <div class="icon blue"><i class="bi bi-shield-lock"></i></div>
+            <h3>เปลี่ยนรหัสผ่าน</h3>
+          </div>
+          <div class="form-card-body">
+            <div class="alert-box" id="pwd-alert"></div>
+            <form onsubmit="changePassword(event)">
+              <div class="form-row single">
+                <div class="form-group">
+                  <label>รหัสผ่านปัจจุบัน</label>
+                  <input type="password" id="cur-pwd" placeholder="กรอกรหัสผ่านปัจจุบัน" required>
+                </div>
               </div>
-            </div>
-            <button type="submit" class="btn-save">
-              <i class="bi bi-lock"></i> เปลี่ยนรหัสผ่าน
-            </button>
-          </form>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>รหัสผ่านใหม่</label>
+                  <input type="password" id="new-pwd" placeholder="อย่างน้อย 6 ตัวอักษร" required minlength="6">
+                </div>
+                <div class="form-group">
+                  <label>ยืนยันรหัสผ่านใหม่</label>
+                  <input type="password" id="conf-pwd" placeholder="กรอกซ้ำ" required minlength="6">
+                </div>
+              </div>
+              <button type="submit" class="btn-save">
+                <i class="bi bi-lock"></i> เปลี่ยนรหัสผ่าน
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
 
-      <!-- Activity Summary -->
-      <div class="form-card">
-        <div class="form-card-header">
-          <div class="icon amber"><i class="bi bi-bar-chart-line"></i></div>
-          <h3>สรุปกิจกรรม</h3>
+        <!-- Activity Summary -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <div class="icon amber"><i class="bi bi-bar-chart-line"></i></div>
+            <h3>สรุปกิจกรรม</h3>
+          </div>
+          <div class="form-card-body" id="activity-body">
+            <div style="text-align:center;padding:20px;color:var(--gray-300);font-size:14px;">กำลังโหลด...</div>
+          </div>
         </div>
-        <div class="form-card-body" id="activity-body">
-          <div style="text-align:center;padding:20px;color:var(--gray-300);font-size:14px;">กำลังโหลด...</div>
-        </div>
-      </div>
 
-    </div><!-- /right -->
-  </div><!-- /profile-wrap -->
-</main>
+      </div><!-- /right -->
+    </div><!-- /profile-wrap -->
+  </main>
 
-<script src="assets/js/auth.js"></script>
-<script>
-if (!Auth.requireAuth()) {}
-const user = Auth.getUser();
-const plots = user ? PlotDB.getPlots(user.id) : [];
+  <script src="assets/js/auth.js"></script>
+  <script>
+    if (!Auth.requireAuth()) { }
+    const user = Auth.getUser();
+    const plots = user ? PlotDB.getPlots(user.id) : [];
 
-// ── Populate display ──
-if (user) {
-  const init = user.fullname.charAt(0).toUpperCase();
-  document.getElementById('big-avatar').textContent = init;
-  document.getElementById('tb-avatar').textContent  = init;
-  document.getElementById('tb-username').textContent = user.fullname;
-  document.getElementById('disp-name').textContent  = user.fullname;
-  document.getElementById('disp-email').textContent = user.email;
-  document.getElementById('edit-fullname').value    = user.fullname;
-  document.getElementById('edit-email').value       = user.email;
-  document.getElementById('edit-phone').value       = user.phone || '';
-  document.getElementById('pil-joined').textContent = fmtDate(user.createdAt) || 'ไม่ทราบ';
-  document.getElementById('pil-phone').textContent  = user.phone || 'ยังไม่ได้กรอก';
-  document.getElementById('pil-plotcount').textContent = `${plots.length} แปลง`;
-}
+    // ── Populate display ──
+    if (user) {
+      const init = user.fullname.charAt(0).toUpperCase();
+      document.getElementById('big-avatar').textContent = init;
+      document.getElementById('tb-avatar').textContent = init;
+      document.getElementById('tb-username').textContent = user.fullname;
+      document.getElementById('disp-name').textContent = user.fullname;
+      document.getElementById('disp-email').textContent = user.email;
+      document.getElementById('edit-fullname').value = user.fullname;
+      document.getElementById('edit-email').value = user.email;
+      document.getElementById('edit-phone').value = user.phone || '';
+      document.getElementById('pil-joined').textContent = fmtDate(user.createdAt) || 'ไม่ทราบ';
+      document.getElementById('pil-phone').textContent = user.phone || 'ยังไม่ได้กรอก';
+      document.getElementById('pil-plotcount').textContent = `${plots.length} แปลง`;
+    }
 
-// Stats
-const totalCarbon = plots.reduce((s,p) => s+(p.carbonTotal||0), 0);
-const totalArea   = plots.reduce((s,p) => s+(p.areaRai||0), 0);
-document.getElementById('ps-plots').textContent  = plots.length;
-document.getElementById('ps-carbon').textContent = totalCarbon.toFixed(1);
-document.getElementById('ps-area').textContent   = totalArea.toFixed(1);
+    // Stats
+    const totalCarbon = plots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
+    const totalArea = plots.reduce((s, p) => s + (p.areaRai || 0), 0);
+    document.getElementById('ps-plots').textContent = plots.length;
+    document.getElementById('ps-carbon').textContent = totalCarbon.toFixed(1);
+    document.getElementById('ps-area').textContent = totalArea.toFixed(1);
 
-// ── Activity ──
-const actBody = document.getElementById('activity-body');
-if (plots.length === 0) {
-  actBody.innerHTML = `<div style="text-align:center;padding:24px;color:var(--gray-300);"><i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:8px;"></i>ยังไม่มีกิจกรรม</div>`;
-} else {
-  const sorted = [...plots].sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
-  actBody.innerHTML = sorted.map(p => `
+    // ── Activity ──
+    const actBody = document.getElementById('activity-body');
+    if (plots.length === 0) {
+      actBody.innerHTML = `<div style="text-align:center;padding:24px;color:var(--gray-300);"><i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:8px;"></i>ยังไม่มีกิจกรรม</div>`;
+    } else {
+      const sorted = [...plots].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      actBody.innerHTML = sorted.map(p => `
     <div class="activity-item">
       <div>
         <div class="ai-name">${esc(p.name)}</div>
-        <div class="ai-sub">${fmtDate(p.createdAt)} · ${(p.areaRai||0).toFixed(2)} ไร่ · อายุ ${p.treeAge||'—'} ปี</div>
+        <div class="ai-sub">${fmtDate(p.createdAt)} · ${(p.areaRai || 0).toFixed(2)} ไร่ · อายุ ${p.treeAge || '—'} ปี</div>
       </div>
       <div class="ai-carbon">
-        <div class="val">${(p.carbonTotal||0).toFixed(2)}</div>
+        <div class="val">${(p.carbonTotal || 0).toFixed(2)}</div>
         <div class="unit">tCO₂</div>
       </div>
     </div>`).join('');
-}
+    }
 
-// ── Save Profile ──
-function saveProfile(e) {
-  e.preventDefault();
-  const fullname = document.getElementById('edit-fullname').value.trim();
-  const phone    = document.getElementById('edit-phone').value.trim();
-  const al = document.getElementById('profile-alert');
-  const result = Auth.updateProfile({ fullname, phone });
-  if (result.success) {
-    showAlert(al, 'success', '✓ บันทึกข้อมูลเรียบร้อยแล้ว');
-    document.getElementById('disp-name').textContent = fullname;
-    document.getElementById('pil-phone').textContent = phone || 'ยังไม่ได้กรอก';
-    document.getElementById('tb-username').textContent = fullname;
-    document.getElementById('big-avatar').textContent = fullname.charAt(0).toUpperCase();
-    document.getElementById('tb-avatar').textContent  = fullname.charAt(0).toUpperCase();
-  } else {
-    showAlert(al, 'error', '✗ ' + result.message);
-  }
-}
+    // ── Save Profile ──
+    function saveProfile(e) {
+      e.preventDefault();
+      const fullname = document.getElementById('edit-fullname').value.trim();
+      const phone = document.getElementById('edit-phone').value.trim();
+      const al = document.getElementById('profile-alert');
+      const result = Auth.updateProfile({ fullname, phone });
+      if (result.success) {
+        showAlert(al, 'success', '✓ บันทึกข้อมูลเรียบร้อยแล้ว');
+        document.getElementById('disp-name').textContent = fullname;
+        document.getElementById('pil-phone').textContent = phone || 'ยังไม่ได้กรอก';
+        document.getElementById('tb-username').textContent = fullname;
+        document.getElementById('big-avatar').textContent = fullname.charAt(0).toUpperCase();
+        document.getElementById('tb-avatar').textContent = fullname.charAt(0).toUpperCase();
+      } else {
+        showAlert(al, 'error', '✗ ' + result.message);
+      }
+    }
 
-// ── Change Password ──
-function changePassword(e) {
-  e.preventDefault();
-  const curPwd  = document.getElementById('cur-pwd').value;
-  const newPwd  = document.getElementById('new-pwd').value;
-  const confPwd = document.getElementById('conf-pwd').value;
-  const al = document.getElementById('pwd-alert');
-  if (newPwd !== confPwd) { showAlert(al, 'error', '✗ รหัสผ่านใหม่ไม่ตรงกัน'); return; }
-  const check = Auth.login(user.email, curPwd);
-  if (!check.success) { showAlert(al, 'error', '✗ รหัสผ่านปัจจุบันไม่ถูกต้อง'); return; }
-  Auth.updateProfile({ newPassword: newPwd });
-  showAlert(al, 'success', '✓ เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
-  document.getElementById('cur-pwd').value  = '';
-  document.getElementById('new-pwd').value  = '';
-  document.getElementById('conf-pwd').value = '';
-}
+    // ── Change Password ──
+    function changePassword(e) {
+      e.preventDefault();
+      const curPwd = document.getElementById('cur-pwd').value;
+      const newPwd = document.getElementById('new-pwd').value;
+      const confPwd = document.getElementById('conf-pwd').value;
+      const al = document.getElementById('pwd-alert');
+      if (newPwd !== confPwd) { showAlert(al, 'error', '✗ รหัสผ่านใหม่ไม่ตรงกัน'); return; }
+      const check = Auth.login(user.email, curPwd);
+      if (!check.success) { showAlert(al, 'error', '✗ รหัสผ่านปัจจุบันไม่ถูกต้อง'); return; }
+      Auth.updateProfile({ newPassword: newPwd });
+      showAlert(al, 'success', '✓ เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
+      document.getElementById('cur-pwd').value = '';
+      document.getElementById('new-pwd').value = '';
+      document.getElementById('conf-pwd').value = '';
+    }
 
-function showAlert(el, type, msg) {
-  el.className = `alert-box ${type} show`;
-  el.innerHTML = `<i class="bi bi-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
-  setTimeout(() => el.classList.remove('show'), 3500);
-}
+    function showAlert(el, type, msg) {
+      el.className = `alert-box ${type} show`;
+      el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+      setTimeout(() => el.classList.remove('show'), 3500);
+    }
 
-function fmtDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('th-TH', { day:'2-digit', month:'long', year:'numeric' });
-}
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-</script>
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('th-TH', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  </script>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -8,300 +9,481 @@
 
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
 
-<style>
-:root {
-  --green:    #2d9e5f;
-  --green-d:  #1e7a47;
-  --green-l:  #3dbf74;
-  --green-50: #edfaf3;
-  --teal:     #0d9488;
-  --font:     'Noto Sans Thai', 'Noto Sans', sans-serif;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
+  <style>
+    :root {
+      --green: #2d9e5f;
+      --green-d: #1e7a47;
+      --green-l: #3dbf74;
+      --green-50: #edfaf3;
+      --teal: #0d9488;
+      --font: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+    }
 
-body {
-  font-family: var(--font);
-  min-height: 100vh;
-  background: linear-gradient(145deg, #071a0f 0%, #0a2e1a 45%, #0d3a20 80%, #0a2824 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* Animated background orbs */
-.bg-orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: floatOrb 8s ease-in-out infinite;
-}
-.bg-orb-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(45,158,95,0.15) 0%, transparent 65%);
-  top: -200px; right: -150px;
-}
-.bg-orb-2 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 65%);
-  bottom: -100px; left: -100px;
-  animation-delay: -4s; animation-direction: reverse;
-}
-@keyframes floatOrb { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-20px)} }
+    html {
+      height: 100%;
+    }
 
-/* Grid overlay */
-body::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(45,158,95,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45,158,95,0.06) 1px, transparent 1px);
-  background-size: 50px 50px;
-  pointer-events: none;
-}
+    body {
+      font-family: var(--font);
+      min-height: 100vh;
+      background: linear-gradient(145deg, #071a0f 0%, #0a2e1a 45%, #0d3a20 80%, #0a2824 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-/* ── CARD ── */
-.auth-card {
-  background: rgba(255,255,255,0.97);
-  border-radius: 28px;
-  padding: 48px 44px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06);
-  position: relative; z-index: 1;
-  animation: cardIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes cardIn { from{opacity:0;transform:translateY(24px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+    /* Animated background orbs */
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatOrb 8s ease-in-out infinite;
+    }
 
-/* ── LOGO ── */
-.auth-logo {
-  text-align: center;
-  margin-bottom: 36px;
-}
-.logo-mark {
-  width: 56px; height: 56px;
-  background: linear-gradient(135deg, var(--green), var(--teal));
-  border-radius: 16px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px;
-  margin: 0 auto 14px;
-  box-shadow: 0 8px 24px rgba(45,158,95,0.35);
-}
-.brand-name {
-  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
-  font-size: 26px; font-weight: 900;
-  color: #0f172a;
-  letter-spacing: -0.8px;
-  margin-bottom: 4px;
-}
-.brand-name span { color: var(--green); }
-.brand-sub { font-size: 13px; color: #64748b; }
+    .bg-orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(45, 158, 95, 0.15) 0%, transparent 65%);
+      top: -200px;
+      right: -150px;
+    }
 
-/* ── HEADING ── */
-.auth-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-.auth-sub { font-size: 14px; color: #64748b; margin-bottom: 28px; }
+    .bg-orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(13, 148, 136, 0.12) 0%, transparent 65%);
+      bottom: -100px;
+      left: -100px;
+      animation-delay: -4s;
+      animation-direction: reverse;
+    }
 
-/* ── FORM ── */
-.form-group { margin-bottom: 18px; }
-.form-group label {
-  display: block;
-  font-size: 12px; font-weight: 600;
-  color: #475569;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  margin-bottom: 7px;
-}
-.inp-wrap { position: relative; }
-.inp-wrap i {
-  position: absolute; left: 14px; top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px; color: #94a3b8;
-  pointer-events: none;
-}
-.inp-wrap input {
-  width: 100%;
-  padding: 12px 14px 12px 42px;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 14px; color: #0f172a;
-  font-family: var(--font);
-  outline: none;
-  transition: all 0.2s;
-}
-.inp-wrap input:focus {
-  border-color: var(--green);
-  background: var(--green-50);
-  box-shadow: 0 0 0 3px rgba(45,158,95,0.12);
-}
-.inp-wrap input::placeholder { color: #cbd5e1; }
+    @keyframes floatOrb {
 
-/* ── SUBMIT BTN ── */
-.btn-submit {
-  width: 100%;
-  padding: 13px;
-  background: linear-gradient(135deg, var(--green), var(--teal));
-  border: none; border-radius: 12px;
-  color: white; font-size: 15px; font-weight: 700;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: all 0.25s;
-  margin-top: 6px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  box-shadow: 0 6px 20px rgba(45,158,95,0.35);
-  letter-spacing: 0.2px;
-}
-.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(45,158,95,0.45); }
-.btn-submit:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
 
-/* Spinner */
-.spin-sm {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+      50% {
+        transform: translate(20px, -20px)
+      }
+    }
 
-/* ── DIVIDER ── */
-.divider {
-  position: relative;
-  text-align: center;
-  color: #94a3b8;
-  font-size: 12px;
-  margin: 22px 0;
-}
-.divider::before, .divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: calc(50% - 24px);
-  height: 1px;
-  background: #e2e8f0;
-}
-.divider::before { left: 0; }
-.divider::after  { right: 0; }
+    /* Grid overlay */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(45, 158, 95, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45, 158, 95, 0.06) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
 
-/* ── LINKS ── */
-.auth-links { text-align: center; font-size: 14px; color: #64748b; }
-.auth-links a { color: var(--green); font-weight: 600; text-decoration: none; }
-.auth-links a:hover { color: var(--green-d); text-decoration: underline; }
-.back-link {
-  display: flex; align-items: center; justify-content: center; gap: 5px;
-  margin-top: 14px;
-  font-size: 13px; color: #94a3b8;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.back-link:hover { color: #64748b; }
+    /* ── CARD ── */
+    .auth-card {
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 28px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      position: relative;
+      z-index: 1;
+      animation: cardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
 
-/* ── ALERT ── */
-.auth-alert {
-  display: none;
-  padding: 11px 14px;
-  border-radius: 10px;
-  font-size: 13px; font-weight: 500;
-  margin-bottom: 18px;
-  align-items: center; gap: 8px;
-}
-.auth-alert.show { display: flex; }
-.auth-alert.error   { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
-.auth-alert.success { background: var(--green-50); border: 1px solid rgba(45,158,95,0.3); color: var(--green-d); }
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96)
+      }
 
-@media (max-width: 480px) {
-  .auth-card { padding: 36px 24px; border-radius: 20px; }
-}
-</style>
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    /* ── LOGO ── */
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .auth-brand {
+      margin-top: 8px;
+    }
+
+    .auth-logo .brand-name {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.8px;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .auth-logo .brand-name span {
+      color: var(--green);
+    }
+
+    .auth-logo .brand-sub {
+      font-size: 12px;
+      color: #64748b;
+      margin: 6px 0 0 0;
+      letter-spacing: 0.3px;
+    }
+
+    .logo-mark {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 24px rgba(45, 158, 95, 0.35);
+    }
+
+    .brand-name {
+      font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.8px;
+      margin-bottom: 4px;
+    }
+
+    .brand-name span {
+      color: var(--green);
+    }
+
+    .brand-sub {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* ── HEADING ── */
+    .auth-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .auth-sub {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    /* ── FORM ── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
+    }
+
+    .inp-wrap {
+      position: relative;
+    }
+
+    .inp-wrap i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .inp-wrap input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #0f172a;
+      font-family: var(--font);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .inp-wrap input:focus {
+      border-color: var(--green);
+      background: var(--green-50);
+      box-shadow: 0 0 0 3px rgba(45, 158, 95, 0.12);
+    }
+
+    .inp-wrap input::placeholder {
+      color: #cbd5e1;
+    }
+
+    /* ── SUBMIT BTN ── */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(45, 158, 95, 0.35);
+      letter-spacing: 0.2px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(45, 158, 95, 0.45);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Spinner */
+    .spin-sm {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      position: relative;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+      margin: 22px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: calc(50% - 24px);
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .divider::before {
+      left: 0;
+    }
+
+    .divider::after {
+      right: 0;
+    }
+
+    /* ── LINKS ── */
+    .auth-links {
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .auth-links a {
+      color: var(--green);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .auth-links a:hover {
+      color: var(--green-d);
+      text-decoration: underline;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #64748b;
+    }
+
+    /* ── ALERT ── */
+    .auth-alert {
+      display: none;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 18px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .auth-alert.show {
+      display: flex;
+    }
+
+    .auth-alert.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+    }
+
+    .auth-alert.success {
+      background: var(--green-50);
+      border: 1px solid rgba(45, 158, 95, 0.3);
+      color: var(--green-d);
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 36px 24px;
+        border-radius: 20px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="bg-orb bg-orb-1"></div>
-<div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
 
-<div class="auth-card">
-  <!-- Logo -->
-  <div class="auth-logo">
-    <div class="logo-mark">🌿</div>
-    <div class="brand-name">Kept<span>Carbon</span></div>
-    <div class="brand-sub">แพลตฟอร์มจัดการสวนยางพาราและคาร์บอนเครดิต</div>
-  </div>
-
-  <div class="auth-heading">เข้าสู่ระบบ</div>
-  <div class="auth-sub">ยินดีต้อนรับกลับ! กรุณากรอกข้อมูลเพื่อดำเนินการต่อ</div>
-
-  <!-- Alert -->
-  <div class="auth-alert" id="login-alert"></div>
-
-  <!-- Form -->
-  <form id="login-form" onsubmit="handleLogin(event)" autocomplete="on">
-    <div class="form-group">
-      <label for="login-email">อีเมล</label>
-      <div class="inp-wrap">
-        <i class="bi bi-envelope"></i>
-        <input type="email" id="login-email" placeholder="กรอกอีเมลของคุณ" required autocomplete="email">
+  <div class="auth-card">
+    <!-- Logo -->
+    <div class="auth-logo">
+      <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo"
+        style="max-width: 100px; height: auto; margin-bottom: 12px;">
+      <div class="auth-brand">
+        <h3 class="brand-name"><span>Kept</span>Carbon</h3>
+        <p class="brand-sub">แพลตฟอร์มจัดการสวนยางพารา</p>
       </div>
     </div>
-    <div class="form-group">
-      <label for="login-password">รหัสผ่าน</label>
-      <div class="inp-wrap">
-        <i class="bi bi-lock"></i>
-        <input type="password" id="login-password" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password">
+
+    <div class="auth-heading">เข้าสู่ระบบ</div>
+    <div class="auth-sub">ยินดีต้อนรับกลับ! กรุณากรอกข้อมูลเพื่อดำเนินการต่อ</div>
+
+    <!-- Alert -->
+    <div class="auth-alert" id="login-alert"></div>
+
+    <!-- Form -->
+    <form id="login-form" onsubmit="handleLogin(event)" autocomplete="on">
+      <div class="form-group">
+        <label for="login-email">อีเมล</label>
+        <div class="inp-wrap">
+          <i class="bi bi-envelope"></i>
+          <input type="email" id="login-email" placeholder="กรอกอีเมลของคุณ" required autocomplete="email">
+        </div>
       </div>
+      <div class="form-group">
+        <label for="login-password">รหัสผ่าน</label>
+        <div class="inp-wrap">
+          <i class="bi bi-lock"></i>
+          <input type="password" id="login-password" placeholder="กรอกรหัสผ่าน" required
+            autocomplete="current-password">
+        </div>
+      </div>
+      <button type="submit" class="btn-submit" id="login-btn">
+        <i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบ
+      </button>
+    </form>
+
+    <div class="divider">หรือ</div>
+
+    <div class="auth-links">
+      ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิกใหม่</a>
     </div>
-    <button type="submit" class="btn-submit" id="login-btn">
-      <i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบ
-    </button>
-  </form>
-
-  <div class="divider">หรือ</div>
-
-  <div class="auth-links">
-    ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิกใหม่</a>
+    <a class="back-link" href="index.html">
+      <i class="bi bi-arrow-left"></i> กลับสู่หน้าหลัก
+    </a>
   </div>
-  <a class="back-link" href="index.html">
-    <i class="bi bi-arrow-left"></i> กลับสู่หน้าหลัก
-  </a>
-</div>
 
-<script src="assets/js/auth.js"></script>
-<script>
-// Redirect if already logged in
-if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+  <script src="assets/js/auth.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
 
-function handleLogin(e) {
-  e.preventDefault();
-  const email    = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const al  = document.getElementById('login-alert');
-  const btn = document.getElementById('login-btn');
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const al = document.getElementById('login-alert');
+      const btn = document.getElementById('login-btn');
 
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spin-sm"></div> กำลังเข้าสู่ระบบ...';
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spin-sm"></div> กำลังเข้าสู่ระบบ...';
 
-  setTimeout(() => {
-    const result = Auth.login(email, password);
-    if (result.success) {
-      showAlert(al, 'success', '✓ เข้าสู่ระบบสำเร็จ! กำลังนำไปยังแดชบอร์ด...');
-      setTimeout(() => window.location.href = 'dashboard.html', 800);
-    } else {
-      showAlert(al, 'error', '✗ ' + result.message);
-      btn.disabled = false;
-      btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบ';
+      setTimeout(() => {
+        const result = Auth.login(email, password);
+        if (result.success) {
+          showAlert(al, 'success', '✓ เข้าสู่ระบบสำเร็จ! กำลังนำไปยังแดชบอร์ด...');
+          setTimeout(() => window.location.href = 'dashboard.html', 800);
+        } else {
+          showAlert(al, 'error', '✗ ' + result.message);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบ';
+        }
+      }, 600);
     }
-  }, 600);
-}
 
-function showAlert(el, type, msg) {
-  el.className = `auth-alert ${type} show`;
-  el.innerHTML = `<i class="bi bi-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
-}
-</script>
+    function showAlert(el, type, msg) {
+      el.className = `auth-alert ${type} show`;
+      el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+    }
+  </script>
 </body>
+
 </html>
