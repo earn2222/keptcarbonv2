@@ -23,28 +23,50 @@
   window.addEventListener('load', toggleScrolled);
 
   /**
-   * Mobile nav toggle
+   * Mobile nav toggle (Slide-in Drawer)
+   * Note: navbar.js handles binding on pages that dynamically render the nav.
+   * This fallback is for pages where the nav HTML is static (e.g. index.html fallback).
    */
-  const mobileNavToggleBtn = document.querySelector('.mobile-nav-toggle');
+  function initMobileNavToggle() {
+    const btn = document.querySelector('.mobile-nav-toggle');
+    if (!btn || btn.dataset.bound) return; // already bound by navbar.js
+    btn.dataset.bound = 'true';
 
-  function mobileNavToogle() {
-    document.querySelector('body').classList.toggle('mobile-nav-active');
-    mobileNavToggleBtn.classList.toggle('bi-list');
-    mobileNavToggleBtn.classList.toggle('bi-x');
-  }
-  mobileNavToggleBtn.addEventListener('click', mobileNavToogle);
+    function toggleNav() {
+      document.body.classList.toggle('mobile-nav-active');
+      btn.classList.toggle('bi-list');
+      btn.classList.toggle('bi-x-lg');
+    }
 
-  /**
-   * Hide mobile nav on same-page/hash links
-   */
-  document.querySelectorAll('#navmenu a').forEach(navmenu => {
-    navmenu.addEventListener('click', () => {
-      if (document.querySelector('.mobile-nav-active')) {
-        mobileNavToogle();
-      }
+    btn.addEventListener('click', toggleNav);
+
+    // Close on nav link click
+    document.querySelectorAll('#navmenu a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        if (document.body.classList.contains('mobile-nav-active')) {
+          document.body.classList.remove('mobile-nav-active');
+          btn.classList.add('bi-list');
+          btn.classList.remove('bi-x-lg');
+        }
+      });
     });
 
-  });
+    // Close on backdrop click
+    const navmenu = document.getElementById('navmenu');
+    if (navmenu) {
+      navmenu.addEventListener('click', function(e) {
+        const ul = navmenu.querySelector('ul');
+        if (ul && !ul.contains(e.target) && !btn.contains(e.target) && document.body.classList.contains('mobile-nav-active')) {
+          document.body.classList.remove('mobile-nav-active');
+          btn.classList.add('bi-list');
+          btn.classList.remove('bi-x-lg');
+        }
+      });
+    }
+  }
+
+  // Run after DOMContentLoaded so navbar.js (which renders dynamically) goes first
+  document.addEventListener('DOMContentLoaded', initMobileNavToggle);
 
   /**
    * Toggle mobile nav dropdowns
