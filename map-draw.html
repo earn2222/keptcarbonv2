@@ -1972,14 +1972,7 @@
           <p id="spin-msg">กำลังวิเคราะห์ข้อมูลดาวเทียม...</p>
         </div>
 
-        <div id="age-action">
-          <button class="btn btn-primary" onclick="detectAge()">
-            <i class="bi bi-cpu me-1"></i> เริ่มการวิเคราะห์
-          </button>
-          <button class="btn btn-outline" onclick="goStep(2)">
-            <i class="bi bi-arrow-left me-1"></i> กลับ
-          </button>
-        </div>
+        <!-- Analysis start action removed as it's now automatic -->
 
         <div id="age-result" style="display:none;">
           <!-- Age Section -->
@@ -2501,20 +2494,60 @@
     }
 
     function clearDraw() {
+      // 1. Reset Drawing
       verts = [];
       markers.forEach(m => m.remove()); markers = [];
       ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
       finalGJ = null;
       drawMode = false;
       document.getElementById('body').classList.remove('drawing');
-      document.getElementById('btnDraw').classList.remove('on');
+      if (document.getElementById('btnDraw')) document.getElementById('btnDraw').classList.remove('on');
       document.getElementById('btnStartDraw').innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
+
       if (map.getSource('draw-line')) map.getSource('draw-line').setData(empty());
       if (map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty());
       if (map.getSource('plot')) map.getSource('plot').setData(empty());
+
       document.getElementById('btnConfirm').disabled = true;
       document.getElementById('draw-done').classList.remove('show');
-      setStatus('ล้างแปลงเรียบร้อย');
+
+      // 2. Reset Data Object
+      pd.name = '';
+      pd.areaSqm = 0;
+      pd.areaRai = 0;
+      pd.treeCount = 0;
+      pd.plantYear = 0;
+      pd.treeAge = 0;
+      pd.H = 0;
+      pd.D = 0;
+      pd.bio = 0;
+      pd.co2 = 0;
+      pd.gj = null;
+      pd.ageDist = null;
+
+      // 3. Reset Inputs
+      document.getElementById('inp-name').value = '';
+      document.getElementById('inp-variety').value = '';
+      document.getElementById('draw-area-preview').textContent = '—';
+      document.getElementById('area-display').textContent = '—';
+
+      // 4. Reset Analysis Results
+      document.getElementById('age-result').style.display = 'none';
+      document.getElementById('carbon-result').style.display = 'none';
+      document.getElementById('age-action').style.display = 'block';
+      document.getElementById('analyze-spin').classList.remove('show');
+      document.getElementById('carbon-spin').classList.remove('show');
+      if (document.getElementById('fc-table-box')) document.getElementById('fc-table-box').style.display = 'none';
+
+      // 5. Clear Charts
+      if (ageChart) { ageChart.destroy(); ageChart = null; }
+      if (carbChart) { carbChart.destroy(); carbChart = null; }
+      if (carbAgeChart) { carbAgeChart.destroy(); carbAgeChart = null; }
+      if (fcChart) { fcChart.destroy(); fcChart = null; }
+
+      // 6. Navigation
+      goStep(1);
+      setStatus('ล้างข้อมูลและแปลงเรียบร้อย — เริ่มวาดแปลงใหม่ได้ทันที');
     }
 
     function startDrawFlow() {
@@ -2684,6 +2717,9 @@
       if (!nm) { alert('กรุณากรอกชื่อแปลงยาง'); return; }
       pd.name = nm; pd.ownerName = document.getElementById('inp-owner').value;
       goStep(3);
+      
+      // Auto-start analysis when entering step 3
+      setTimeout(detectAge, 400); 
     }
 
     function goStep4() { goStep(4); runForecast(); }
@@ -2706,7 +2742,8 @@
     let ageChart = null;
 
     async function detectAge() {
-      document.getElementById('age-action').style.display = 'none';
+      const ageAction = document.getElementById('age-action');
+      if (ageAction) ageAction.style.display = 'none';
       document.getElementById('analyze-spin').classList.add('show');
 
       const msgs = ['ติดต่อ Google Earth Engine...', 'วิเคราะห์ภาพถ่ายดาวเทียม Sentinel-2...', 'ประมวลผลดัชนีพืชพรรณ (NDVI)...', 'คำนวณโครงสร้างอายุยาง...'];
