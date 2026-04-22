@@ -62,155 +62,166 @@
       top: 0;
       left: 0;
       right: 0;
-      height: var(--topbar-h);
-      background: rgba(255, 255, 255, 0.97);
-      border-bottom: 1px solid var(--gray-200);
-      backdrop-filter: blur(12px);
+      height: 60px;
       z-index: 500;
+      background: #ffffff;
+      border-bottom: 1px solid #f0f0f0;
       display: flex;
       align-items: center;
-      padding: 0 28px;
-      gap: 20px;
-      box-shadow: 0 1px 16px rgba(0, 0, 0, 0.05);
+      justify-content: space-between;
+      padding: 0 20px;
     }
 
-    .tb-logo {
+    .topbar-left {
       display: flex;
       align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      flex-shrink: 0;
-      transition: all 0.3s ease;
+      gap: 16px;
     }
 
-    .tb-logo:hover {
-      transform: translateY(-2px);
-    }
-
-    .tb-logo .logo-img {
-      max-height: 48px;
-      width: auto;
-      display: block;
-      filter: drop-shadow(0 2px 4px rgba(45, 158, 95, 0.1));
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-    }
-
-    .tb-logo .logo-img:hover {
-      filter: drop-shadow(0 4px 8px rgba(45, 158, 95, 0.2));
-    }
-
-    .tb-logo .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--green), var(--teal));
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      color: white;
-    }
-
-    .tb-logo .brand-text {
-      font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--gray-900);
-      letter-spacing: -0.4px;
-      display: flex;
-      align-items: center;
-    }
-
-    .tb-logo .brand-text .keeper {
-      color: var(--green);
-      margin-right: 2px;
-    }
-
-    .tb-logo .brand span {
-      color: var(--green);
-    }
-
-    .tb-nav {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-left: 16px;
-    }
-
-    .tb-nav a {
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--gray-500);
-      text-decoration: none;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .tb-nav a:hover {
-      background: var(--green-50);
-      color: var(--green-d);
-    }
-
-    .tb-nav a.active {
-      background: var(--green-50);
-      color: var(--green);
-      font-weight: 600;
-    }
-
-    .tb-right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .tb-user {
+    .topbar-right {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--gray-100);
-      border-radius: 50px;
-      padding: 5px 14px 5px 6px;
     }
 
-    .tb-avatar {
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #e9ecef;
+      color: #000;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      background: #ffffff;
+      z-index: 600;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06);
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar-menu.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sidebar-header .brand {
+      font-weight: 700;
+      color: #e65100;
+      font-size: 16px;
+    }
+
+    .sidebar-header .version {
+      font-size: 10px;
+      background: #ffe0b2;
+      color: #e65100;
+      padding: 2px 6px;
+      border-radius: 12px;
+      margin-left: 8px;
+    }
+
+    .btn-close-sidebar {
       width: 28px;
       height: 28px;
-      background: linear-gradient(135deg, var(--green), var(--teal));
+      background: #ff5252;
+      color: white;
+      border: none;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: white;
-    }
-
-    .tb-username {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--gray-700);
-    }
-
-    .btn-logout-tb {
-      font-size: 12px;
-      font-weight: 500;
-      color: #ef4444;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      padding: 6px 14px;
+      font-size: 14px;
       cursor: pointer;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-nav-title {
+      font-size: 11px;
+      color: #999;
+      padding: 0 24px;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      color: #555;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
       transition: all 0.2s;
     }
 
-    .btn-logout-tb:hover {
-      background: #fee2e2;
+    .sidebar-nav a i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      color: #888;
+    }
+
+    .sidebar-nav a:hover {
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .sidebar-nav a.active {
+      background: rgba(45, 158, 95, 0.08);
+      color: var(--green);
+      border-right: 3px solid var(--green);
+    }
+
+    .sidebar-nav a.active i {
+      color: var(--green);
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+      font-size: 11px;
+      color: #888;
     }
 
     /* ── MAIN ── */
@@ -854,22 +865,41 @@
 
   <!-- TOPBAR -->
   <div id="topbar">
-    <a class="tb-logo" href="index.html">
-      <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo" class="logo-img"
-        style="max-height: 48px; width: auto;">
-    </a>
-    <nav class="tb-nav">
-      <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
-      <a href="map-draw.html"><i class="bi bi-map"></i> วาดแปลง</a>
-      <a href="my-plots.html" class="active"><i class="bi bi-collection"></i> แปลงของฉัน</a>
-      <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
-    </nav>
-    <div class="tb-right">
-      <div class="tb-user">
-        <div class="tb-avatar" id="tb-avatar">—</div>
-        <span class="tb-username" id="tb-username">ผู้ใช้</span>
+    <div class="topbar-left">
+      <button class="icon-btn" onclick="document.getElementById('sidebar-menu').classList.add('open')">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+    <div class="topbar-right">
+      <span id="nav-user" style="font-size:12px;color:var(--text-mid);margin-right:8px;"></span>
+      <button class="icon-btn" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div id="sidebar-menu">
+    <div class="sidebar-header">
+      <div style="display:flex;align-items:center;">
+        <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" style="height: 32px;">
+        <div class="brand" style="color: var(--green);">KeptCarbon</div>
       </div>
-      <button class="btn-logout-tb" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกระบบ</button>
+      <button class="btn-close-sidebar"
+        onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
+    </div>
+    <div class="sidebar-nav">
+      <a href="index.html"><i class="bi bi-house"></i> หน้าหลัก</a>
+      <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
+
+      <div class="sidebar-nav-title">จัดการพื้นที่</div>
+      <a href="map-draw.html"><i class="bi bi-map"></i> วาดแปลง (Map Draw)</a>
+      <a href="my-plots.html" class="active"><i class="bi bi-collection"></i> แปลงของฉัน</a>
+
+      <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
+      <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
+      <a href="#" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
+    </div>
+    <div class="sidebar-footer">
+      <i class="bi bi-tree"></i><br>ระบบประเมินคาร์บอนเครดิต<br>สวนยางพารายั่งยืน
     </div>
   </div>
 
@@ -1206,7 +1236,17 @@
     }
     function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-    loadPlots();
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar-menu');
+      const toggleBtn = document.querySelector('.topbar-left .icon-btn');
+
+      if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    initUser();
   </script>
 </body>
 

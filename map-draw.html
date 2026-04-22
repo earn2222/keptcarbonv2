@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <style>
@@ -57,45 +57,59 @@
       position: fixed;
       inset: 0;
       z-index: 0;
+      background: #ffffff;
     }
 
-    /* MapLibre overrides */
+    /* MapLibre overrides for separated controls */
+    .maplibregl-ctrl-bottom-right {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      bottom: 24px !important;
+      right: 24px !important;
+      align-items: flex-end;
+      z-index: 100;
+    }
+
     .maplibregl-ctrl-group {
-      background: rgba(255, 255, 255, 0.95) !important;
-      border: 1px solid var(--border) !important;
-      border-radius: 12px !important;
-      box-shadow: 0 4px 20px rgba(45, 158, 95, 0.12) !important;
-      overflow: hidden;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0 !important;
     }
 
     .maplibregl-ctrl-group button {
       width: 38px !important;
       height: 38px !important;
-      background: transparent !important;
-      border-bottom: 1px solid var(--border) !important;
-      transition: background 0.2s;
-    }
-
-    .maplibregl-ctrl-group button:last-child {
-      border-bottom: none !important;
+      background: rgba(255, 255, 255, 0.98) !important;
+      border: 1px solid rgba(0, 0, 0, 0.06) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+      transition: all 0.2s !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .maplibregl-ctrl-group button:hover {
-      background: rgba(45, 158, 95, 0.1) !important;
+      background: #ffffff !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
     }
 
+
+
     .maplibregl-ctrl-icon {
-      filter: hue-rotate(100deg) saturate(1.5) brightness(0.55) !important;
+      transform: scale(0.75) !important;
+      filter: opacity(0.65) !important;
     }
 
     .maplibregl-ctrl-bottom-left {
-      bottom: 72px !important;
+      bottom: 24px !important;
       left: 14px !important;
-    }
-
-    .maplibregl-ctrl-bottom-right {
-      bottom: 72px !important;
-      right: calc(var(--panel-w) + 12px) !important;
     }
 
     .maplibregl-ctrl-scale {
@@ -113,33 +127,238 @@
     }
 
     /* ============================================================
-   TOP BAR
+   TOP BAR (NEW)
 ============================================================ */
     #topbar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: var(--topbar-h);
+      height: 60px;
       z-index: 300;
-      background: rgba(255, 255, 255, 0.97);
-      border-bottom: 1px solid rgba(45, 158, 95, 0.1);
-      backdrop-filter: blur(12px);
+      background: #ffffff;
+      border-bottom: 1px solid #f0f0f0;
       display: flex;
       align-items: center;
-      padding: 0 18px;
-      gap: 16px;
-      box-shadow: 0 2px 16px rgba(45, 158, 95, 0.06);
+      justify-content: space-between;
+      padding: 0 20px;
     }
 
-    .logo {
+    .topbar-left {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 16px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #e9ecef;
+      color: #000;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* ============================================================
+   SIDEBAR (LEFT)
+============================================================ */
+    #sidebar-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      background: #ffffff;
+      z-index: 400;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06);
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar-menu.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sidebar-header .brand {
+      font-weight: 700;
+      color: #e65100;
+      font-size: 16px;
+    }
+
+    .sidebar-header .version {
+      font-size: 10px;
+      background: #ffe0b2;
+      color: #e65100;
+      padding: 2px 6px;
+      border-radius: 12px;
+      margin-left: 8px;
+    }
+
+    .btn-close-sidebar {
+      width: 28px;
+      height: 28px;
+      background: #ff5252;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-nav-title {
+      font-size: 11px;
+      color: #999;
+      padding: 0 24px;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      color: #555;
       text-decoration: none;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .sidebar-nav a i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      color: #888;
+    }
+
+    .sidebar-nav a:hover {
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .sidebar-nav a.active {
+      background: rgba(45, 158, 95, 0.08);
+      color: var(--green);
+      border-right: 3px solid var(--green);
+    }
+
+    .sidebar-nav a.active i {
+      color: var(--green);
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+    }
+
+    /* BASEMAP CARD */
+    #basemap-card {
+      position: fixed;
+      bottom: 24px;
+      right: 70px;
+      width: 220px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      opacity: 0;
+      transform: translateX(20px);
+      pointer-events: none;
+      transition: all 0.3s;
+    }
+
+    #basemap-card.open {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .basemap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .basemap-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+
+    .basemap-option:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+
+    .basemap-option.active {
+      background: rgba(45, 158, 95, 0.08);
+      color: var(--green);
+      border-color: var(--green);
+      font-weight: 600;
     }
 
     .logo:hover {
@@ -354,18 +573,73 @@
 ============================================================ */
     #panel {
       position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
+      top: 24px;
+      right: 24px;
+      bottom: auto;
+      max-height: calc(100vh - 48px);
       width: var(--panel-w);
       background: var(--surface);
       backdrop-filter: blur(28px) saturate(150%);
       -webkit-backdrop-filter: blur(28px) saturate(150%);
-      border-left: 1px solid var(--border);
-      z-index: 200;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      z-index: 500;
       display: flex;
       flex-direction: column;
-      padding: calc(var(--topbar-h) + 14px) 0 0;
+      padding: 0;
+      overflow: hidden;
+      transform: translateX(120%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #panel.open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #btn-open-panel {
+      position: fixed;
+      top: 84px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      background: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #555;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      z-index: 200;
+      transition: all 0.2s;
+    }
+
+    #btn-open-panel:hover {
+      background: #f8f9fa;
+      color: #000;
+    }
+
+    #btn-close-panel {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      color: var(--text-dim);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #btn-close-panel:hover {
+      color: var(--text);
     }
 
     .panel-inner {
@@ -963,25 +1237,183 @@
     }
 
     /* ============================================================
+   GEOM FLOATING PANEL
+============================================================ */
+    #geom-panel {
+      position: fixed;
+      bottom: 70px;
+      left: 14px;
+      z-index: 300;
+      background: rgba(10, 30, 20, 0.93);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(45, 158, 95, 0.4);
+      border-radius: 12px;
+      padding: 12px 14px;
+      width: 300px;
+      max-width: calc(100vw - 28px);
+      display: none;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #geom-panel.show {
+      display: block;
+    }
+
+    #geom-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    #geom-panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    #geom-panel-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    #geom-copy-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 5px 0;
+      background: rgba(45, 158, 95, 0.15);
+      border: 1px solid rgba(45, 158, 95, 0.35);
+      border-radius: 7px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.2s;
+    }
+
+    #geom-copy-btn:hover {
+      background: rgba(45, 158, 95, 0.25);
+    }
+
+    #geom-output-pre {
+      font-size: 9px;
+      color: rgba(180, 220, 195, 0.85);
+      max-height: 120px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.5;
+      margin: 0;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      padding: 7px;
+    }
+
+    /* ============================================================
+   SEARCH BAR
+============================================================ */
+    #search-container {
+      display: none !important;
+    }
+
+    #search-box {
+      display: flex;
+      padding: 4px;
+    }
+
+    #loc-search {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px 14px;
+      outline: none;
+      font-size: 13.5px;
+      font-family: var(--font);
+      color: var(--text);
+    }
+
+    #loc-search::placeholder {
+      color: var(--text-dim);
+    }
+
+    #search-btn {
+      background: rgba(45, 158, 95, 0.1);
+      border: none;
+      color: var(--green);
+      border-radius: 9px;
+      width: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    #search-btn:hover {
+      background: rgba(45, 158, 95, 0.2);
+    }
+
+    #search-results {
+      display: none;
+      border-top: 1px solid var(--border);
+      max-height: 220px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.98);
+    }
+
+    #search-results::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #search-results::-webkit-scrollbar-thumb {
+      background: rgba(132, 169, 140, 0.3);
+      border-radius: 4px;
+    }
+
+    .search-item {
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--text-mid);
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      line-height: 1.4;
+    }
+
+    .search-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-item:hover {
+      background: rgba(45, 158, 95, 0.06);
+      color: var(--green);
+    }
+
+    /* ============================================================
    STATUS BAR (BOTTOM)
 ============================================================ */
     #statusbar {
-      position: fixed;
-      bottom: 14px;
-      left: 14px;
-      right: calc(var(--panel-w) + 14px);
-      z-index: 200;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(45, 158, 95, 0.14);
-      border-radius: 10px;
-      padding: 8px 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-mid);
-      box-shadow: 0 4px 14px rgba(45, 158, 95, 0.08);
+      display: none !important;
     }
 
     .sdot {
@@ -1173,7 +1605,11 @@
       }
 
       #panel {
-        transform: none !important;
+        transform: translateY(100%) !important;
+      }
+
+      #panel.open {
+        transform: translateY(0) !important;
       }
 
       #menu-toggle {
@@ -1188,26 +1624,85 @@
   <!-- ======================== MAP ======================== -->
   <div id="map"></div>
 
-  <!-- ======================== TOPBAR ======================== -->
+  <!-- ======================== SEARCH CONTAINER ======================== -->
+  <div id="search-container">
+    <div id="search-box">
+      <input type="text" id="loc-search" placeholder="ค้นหา จังหวัด, อำเภอ, ตำบล...">
+      <button id="search-btn" onclick="searchLocation()" title="ค้นหา">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <!-- ======================== GEOM FLOAT PANEL ======================== -->
+  <div id="geom-panel">
+    <div id="geom-panel-header">
+      <span id="geom-panel-title">📍 GeoJSON Polygon</span>
+      <button id="geom-panel-close" onclick="document.getElementById('geom-panel').classList.remove('show')"
+        title="ปิด">✕</button>
+    </div>
+    <pre id="geom-output-pre"></pre>
+    <button id="geom-copy-btn" onclick="copyGeom()">⧉ คัดลอก GeoJSON</button>
+  </div>
+
+  <!-- ======================== TOP BAR ======================== -->
   <div id="topbar">
-    <a class="logo" href="dashboard.html">
-      <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" class="logo-img">
-    </a>
-    <nav class="topnav">
-      <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
-      <a href="map-draw.html" class="active"><i class="bi bi-map"></i> วาดแปลง</a>
-      <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
-      <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
-    </nav>
+    <div class="topbar-left">
+      <button class="icon-btn" onclick="document.getElementById('sidebar-menu').classList.add('open')">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
     <div class="topbar-right">
-      <span id="nav-user" style="font-size:12px;color:var(--text-mid);"></span>
-      <button class="btn-logout" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกระบบ</button>
-      <button id="menu-toggle" onclick="togglePanel()"><i class="bi bi-layout-text-sidebar-reverse"></i></button>
+      <span id="nav-user" style="font-size:12px;color:var(--text-mid);margin-right:8px;"></span>
+      <button class="icon-btn" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
     </div>
   </div>
 
+  <!-- ======================== SIDEBAR ======================== -->
+  <div id="sidebar-menu">
+    <div class="sidebar-header">
+      <div style="display:flex;align-items:center;">
+        <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" style="height: 32px;">
+        <div class="brand" style="color: var(--green);">KeptCarbon</div>
+      </div>
+      <button class="btn-close-sidebar"
+        onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
+    </div>
+    <div class="sidebar-nav">
+      <a href="index.html"><i class="bi bi-house"></i> หน้าหลัก</a>
+      <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
+
+      <div class="sidebar-nav-title">จัดการพื้นที่</div>
+      <a href="map-draw.html" class="active"><i class="bi bi-map"></i> วาดแปลง (Map Draw)</a>
+      <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
+
+      <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
+      <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
+      <a href="#" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
+    </div>
+    <div class="sidebar-footer">
+      <i class="bi bi-tree"></i><br>ระบบประเมินคาร์บอนเครดิต<br>สวนยางพารายั่งยืน
+    </div>
+  </div>
+
+  <!-- ======================== BASEMAP CARD ======================== -->
+  <div id="basemap-card">
+    <div class="basemap-header">
+      <span><i class="bi bi-map" style="margin-right: 8px;"></i>แผนที่ (Basemap)</span>
+      <i class="bi bi-x" style="cursor:pointer;font-size:18px;"
+        onclick="document.getElementById('basemap-card').classList.remove('open')"></i>
+    </div>
+    <div class="basemap-option active" onclick="switchBasemap('sat', this)"><i class="bi bi-globe-asia-australia"></i>
+      แผนที่ดาวเทียม</div>
+    <div class="basemap-option" onclick="switchBasemap('street', this)"><i class="bi bi-map"></i> แผนที่ถนน (Street)
+    </div>
+    <div class="basemap-option" onclick="switchBasemap('topo', this)"><i class="bi bi-tree"></i> ภูมิประเทศ
+      (Terrain)</div>
+  </div>
+
   <!-- ======================== DRAW TOOLBAR ======================== -->
-  <div id="draw-toolbar">
+  <div id="draw-toolbar" style="display: none;"> <!-- Hidden as requested by full screen globe UI -->
     <button class="tool-btn" id="btnDraw" onclick="toggleDraw()" title="วาดแปลง">
       <i class="bi bi-pencil"></i>
     </button>
@@ -1223,8 +1718,14 @@
     </button>
   </div>
 
+  <!-- FLOATING ICON TO OPEN PANEL -->
+  <button id="btn-open-panel" onclick="togglePanel()" title="กรอกข้อมูลแปลง">
+    <i class="bi bi-pencil-square"></i>
+  </button>
+
   <!-- ======================== SIDE PANEL ======================== -->
   <div id="panel">
+    <button id="btn-close-panel" onclick="togglePanel()">✕</button>
     <!-- Mobile handle -->
     <div class="panel-handle" onclick="togglePanel()">
       <div class="panel-handle-bar"></div>
@@ -1299,8 +1800,23 @@
             </div>
           </div>
 
-          <button class="btn btn-outline" id="btnStartDraw" onclick="toggleDraw()">
-            <i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง
+          <!-- Geom output box -->
+          <div id="geom-box"
+            style="display:none;margin-bottom:12px;background:rgba(45,158,95,0.05);border:1px solid rgba(45,158,95,0.22);border-radius:10px;padding:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+              <span
+                style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.7px;">📍
+                GeoJSON Coordinates</span>
+              <button onclick="copyGeom()"
+                style="font-size:10px;padding:3px 9px;background:rgba(45,158,95,0.12);border:1px solid rgba(45,158,95,0.3);border-radius:6px;color:var(--green);cursor:pointer;font-family:var(--font);"
+                id="copy-geom-btn">คัดลอก</button>
+            </div>
+            <pre id="geom-output"
+              style="font-size:9.5px;color:var(--text-mid);overflow:auto;max-height:110px;margin:0;white-space:pre-wrap;word-break:break-all;line-height:1.5;"></pre>
+          </div>
+
+          <button class="btn btn-outline" id="btnStartDraw" onclick="startDrawFlow()">
+            <i class="bi bi-globe2 me-1"></i> เริ่มวาดแปลง
           </button>
           <button class="btn btn-primary" id="btnConfirm" onclick="confirmDraw()" disabled>
             <i class="bi bi-check-circle me-1"></i> ยืนยันแปลงที่วาด
@@ -1334,22 +1850,78 @@
         <div class="step-title">
           <div class="step-tag"><i class="bi bi-pencil-square"></i> ขั้นตอนที่ 2 / 5</div>
           <h2>ข้อมูลแปลงยาง</h2>
-          <p>กรอกรายละเอียดเพื่อระบุตัวตนแปลงของคุณ</p>
+          <p>กรอกข้อมูลแปลงเพื่อระบุตัวตนและคำนวณคาร์บอน</p>
         </div>
 
-        <div class="metric" style="margin-bottom:14px;">
-          <div class="metric-label">พื้นที่แปลง (โดยประมาณ)</div>
-          <div class="metric-value" id="area-display">—</div>
-          <div class="metric-unit">ไร่</div>
+        <!-- Area summary card -->
+        <div
+          style="background:linear-gradient(135deg,rgba(45,158,95,0.1),rgba(30,122,71,0.06));border:1px solid rgba(45,158,95,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+          <div
+            style="width:40px;height:40px;background:linear-gradient(135deg,#2d9e5f,#1e7a47);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="bi bi-map-fill" style="color:#fff;font-size:16px;"></i>
+          </div>
+          <div>
+            <div
+              style="font-size:9.5px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;">
+              พื้นที่แปลง</div>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span style="font-size:22px;font-weight:800;color:var(--green);" id="area-display">—</span>
+              <span style="font-size:12px;color:var(--text-dim);">ไร่</span>
+            </div>
+          </div>
         </div>
 
-        <div class="field">
-          <label>ชื่อแปลงยาง *</label>
-          <input type="text" id="inp-name" placeholder="เช่น แปลงยางหลัก 1">
-        </div>
-        <div class="field">
-          <label>เจ้าของแปลง</label>
-          <input type="text" id="inp-owner" placeholder="ชื่อเจ้าของ" readonly>
+        <!-- Form fields -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+          <div class="field" style="margin-bottom:0;">
+            <label><i class="bi bi-tag" style="margin-right:4px;color:var(--green);"></i>ชื่อแปลงยาง <span
+                style="color:#e05;">*</span></label>
+            <input type="text" id="inp-name" placeholder="เช่น แปลงยางหลัก 1">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label><i class="bi bi-person" style="margin-right:4px;color:var(--green);"></i>เจ้าของแปลง</label>
+            <input type="text" id="inp-owner" placeholder="ชื่อเจ้าของ" readonly>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label><i class="bi bi-geo-alt" style="margin-right:4px;color:var(--green);"></i>จังหวัด</label>
+            <select id="inp-province"
+              style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
+              <option value="">-- เลือกจังหวัด --</option>
+              <option>ระยอง</option>
+              <option>ชุมพร</option>
+              <option>สุราษฎร์ธานี</option>
+              <option>นครศรีธรรมราช</option>
+              <option>ตรัง</option>
+              <option>สงขลา</option>
+              <option>ยะลา</option>
+              <option>นราธิวาส</option>
+              <option>พัทลุง</option>
+              <option>กระบี่</option>
+              <option>พังงา</option>
+              <option>ภูเก็ต</option>
+              <option>ปัตตานี</option>
+              <option>สตูล</option>
+              <option>อื่นๆ</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label><i class="bi bi-calendar3" style="margin-right:4px;color:var(--green);"></i>ปีที่ปลูก (พ.ศ.)</label>
+            <input type="number" id="inp-plantyear" placeholder="เช่น 2558" min="2500" max="2570">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label><i class="bi bi-tree" style="margin-right:4px;color:var(--green);"></i>พันธุ์ยาง</label>
+            <select id="inp-variety"
+              style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
+              <option value="">-- เลือกพันธุ์ --</option>
+              <option>RRIM 600</option>
+              <option>BPM 24</option>
+              <option>GT 1</option>
+              <option>PR 255</option>
+              <option>PB 260</option>
+              <option>RRIT 226</option>
+              <option>อื่นๆ</option>
+            </select>
+          </div>
         </div>
 
         <button class="btn btn-primary" onclick="goStep3()">
@@ -1526,7 +2098,7 @@
   </div>
 
   <!-- ======================== SCRIPTS ======================== -->
-  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://unpkg.com/shapefile@0.6.6/dist/shapefile.js"></script>
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -1550,37 +2122,81 @@
       container: 'map',
       style: {
         version: 8,
+        projection: { type: 'globe' },
         glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
         sources: {
           sat: {
             type: 'raster',
             tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-            tileSize: 256
+            tileSize: 256,
+            attribution: ''
+          },
+          street: {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: ''
+          },
+          topo: {
+            type: 'raster',
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
+            tileSize: 256,
+            attribution: ''
           }
         },
-        layers: [{ id: 'sat', type: 'raster', source: 'sat' }]
+        layers: [
+          { id: 'sat', type: 'raster', source: 'sat', layout: { visibility: 'visible' } },
+          { id: 'street', type: 'raster', source: 'street', layout: { visibility: 'none' } },
+          { id: 'topo', type: 'raster', source: 'topo', layout: { visibility: 'none' } }
+        ]
       },
-      center: [101.258, 12.682],
-      zoom: 9.5,
-      pitch: 20,
+      center: [101.258, 15],
+      zoom: 1.8,
+      pitch: 0,
+      bearing: 0,
       attributionControl: false
     });
 
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-left');
-    map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+
+    // Add Geolocate Control
+    map.addControl(new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true
+    }), 'bottom-right');
+
+    // Add Custom Layer Switcher (Mock)
+    class MapLayerControl {
+      onAdd(map) {
+        this.map = map;
+        this.container = document.createElement('div');
+        this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.title = 'เปลี่ยนชั้นข้อมูลแผนที่';
+        btn.innerHTML = '<span class="maplibregl-ctrl-icon" style="display:flex;align-items:center;justify-content:center;font-size:18px;color:#555;"><i class="bi bi-map"></i></span>';
+
+        // When clicked, toggle basemap card
+        btn.onclick = () => {
+          document.getElementById('basemap-card').classList.toggle('open');
+        };
+
+        this.container.appendChild(btn);
+        return this.container;
+      }
+      onRemove() {
+        this.container.parentNode.removeChild(this.container);
+        this.map = undefined;
+      }
+    }
+    map.addControl(new MapLayerControl(), 'bottom-right');
 
     map.on('load', () => {
-      setStatus('แผนที่ดาวเทียมโหลดเรียบร้อย — เริ่มวาดแปลงที่แผงด้านขวา');
+      // Ensure globe projection (fallback)
+      try { map.setProjection({ type: 'globe' }); } catch (e) { }
 
-      // Rayong boundary
-      map.addSource('rayong', { type: 'geojson', data: rayongGeoJSON() });
-      map.addLayer({ id: 'rayong-fill', type: 'fill', source: 'rayong', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.05 } });
-      map.addLayer({ id: 'rayong-line', type: 'line', source: 'rayong', paint: { 'line-color': '#2d9e5f', 'line-width': 1.5, 'line-dasharray': [5, 3] } });
-      map.addLayer({
-        id: 'rayong-lbl', type: 'symbol', source: 'rayong',
-        layout: { 'text-field': 'จังหวัดระยอง', 'text-font': ['Open Sans Regular'], 'text-size': 13 },
-        paint: { 'text-color': '#2d9e5f', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 2 }
-      });
+      setStatus('🌍 แผนที่ลูกโลก — กด "เริ่มวาดแปลง" เพื่อบินไปยังประเทศไทย');
 
       // Drawing line preview
       map.addSource('draw-line', { type: 'geojson', data: empty() });
@@ -1695,7 +2311,56 @@
       setStatus('ล้างแปลงเรียบร้อย');
     }
 
-    function confirmDraw() { if (!finalGJ) return; updateArea(finalGJ); goStep(2); }
+    function startDrawFlow() {
+      stopSpin();
+      toggleDraw();
+      if (map.getZoom() < 8) {
+        map.flyTo({ center: [101.258, 12.682], zoom: 10, pitch: 20, bearing: 0, duration: 2000 });
+      }
+    }
+
+    function confirmDraw() {
+      if (!finalGJ) return;
+      updateArea(finalGJ);
+
+      // Build geom object
+      const coords = finalGJ.geometry.coordinates[0];
+      const geomObj = {
+        type: 'Polygon',
+        coordinates: [coords.map(([lng, lat]) => [+lng.toFixed(6), +lat.toFixed(6)])]
+      };
+      const geomStr = JSON.stringify(geomObj, null, 2);
+
+      // Log to console
+      console.log('=== GeoJSON Polygon ===');
+      console.log(geomStr);
+      console.log('Vertices:', coords.length);
+      console.table(coords.map(([lng, lat]) => ({ lng: +lng.toFixed(6), lat: +lat.toFixed(6) })));
+
+      // Show floating panel
+      document.getElementById('geom-output-pre').textContent = geomStr;
+      document.getElementById('geom-panel').classList.add('show');
+
+      goStep(2);
+    }
+
+    function copyGeom() {
+      const text = document.getElementById('geom-output-pre').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('geom-copy-btn');
+        btn.textContent = '✓ คัดลอกแล้ว!';
+        btn.style.background = 'rgba(45,158,95,0.3)';
+        setTimeout(() => { btn.textContent = '⧉ คัดลอก GeoJSON'; btn.style.background = ''; }, 2500);
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        const btn = document.getElementById('geom-copy-btn');
+        btn.textContent = '✓ คัดลอกแล้ว!';
+        setTimeout(() => btn.textContent = '⧉ คัดลอก GeoJSON', 2500);
+      });
+    }
 
     function fitPlot() {
       if (!finalGJ) return;
@@ -1940,8 +2605,96 @@
     function togglePanel() {
       const p = document.getElementById('panel');
       const ic = document.getElementById('panel-toggle-icon');
-      p.classList.toggle('open');
-      ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
+      if (p) p.classList.toggle('open');
+      if (ic) ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
+      document.body.classList.toggle('panel-open');
+    }
+
+    /* ================================================================
+       SEARCH LOCATIONS (NOMINATIM API)
+    ================================================================ */
+    document.getElementById('loc-search').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') searchLocation();
+    });
+
+    // Switch basemap globally
+    function switchBasemap(mode, el) {
+      document.querySelectorAll('.basemap-option').forEach(opt => opt.classList.remove('active'));
+      el.classList.add('active');
+
+      const modes = ['sat', 'street', 'topo'];
+      modes.forEach(m => {
+        if (map.getLayer(m)) {
+          map.setLayoutProperty(m, 'visibility', m === mode ? 'visible' : 'none');
+        }
+      });
+    }
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function (e) {
+      const sidebar = document.getElementById('sidebar-menu');
+      const toggleBtn = document.querySelector('.topbar-left .icon-btn');
+
+      if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+        sidebar.classList.remove('open');
+      }
+
+      // Close search results
+      const searchContainer = document.getElementById('search-container');
+      if (searchContainer && !searchContainer.contains(e.target)) {
+        const results = document.getElementById('search-results');
+        if (results) results.style.display = 'none';
+      }
+    });
+
+    async function searchLocation() {
+      const q = document.getElementById('loc-search').value.trim();
+      const resultsDiv = document.getElementById('search-results');
+      if (!q) {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+
+      const btn = document.getElementById('search-btn');
+      btn.innerHTML = '<div class="spinner-border spinner-border-sm text-success" role="status"></div>';
+      btn.disabled = true;
+
+      try {
+        // Query nominatim restricted to Thailand
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=th&limit=5&q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+
+        resultsDiv.innerHTML = '';
+        if (data.length === 0) {
+          resultsDiv.innerHTML = '<div class="search-item" style="text-align:center;color:rgba(220,53,69,0.8);">ไม่พบสถานที่ที่ค้นหา</div>';
+        } else {
+          data.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'search-item';
+            el.innerHTML = `<i class="bi bi-geo-alt me-2" style="color:var(--green);"></i>${item.display_name}`;
+            el.onclick = () => {
+              stopSpin();
+              map.flyTo({
+                center: [parseFloat(item.lon), parseFloat(item.lat)],
+                zoom: 12,
+                pitch: 0,
+                duration: 2500
+              });
+              resultsDiv.style.display = 'none';
+              document.getElementById('loc-search').value = item.display_name;
+            };
+            resultsDiv.appendChild(el);
+          });
+        }
+        resultsDiv.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        resultsDiv.innerHTML = '<div class="search-item" style="text-align:center;color:rgba(220,53,69,0.8);">เกิดข้อผิดพลาดในการค้นหา</div>';
+        resultsDiv.style.display = 'block';
+      }
+
+      btn.innerHTML = '<i class="bi bi-search"></i>';
+      btn.disabled = false;
     }
 
     /* ================================================================
@@ -1973,9 +2726,6 @@
       setTimeout(() => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 2200);
     }
 
-    function rayongGeoJSON() {
-      return { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[101.038, 12.421], [101.40, 12.35], [101.70, 12.40], [101.95, 12.50], [102.05, 12.65], [101.95, 12.90], [101.75, 13.05], [101.45, 13.12], [101.15, 13.08], [100.90, 12.92], [100.82, 12.72], [100.88, 12.55], [101.038, 12.421]]] }, properties: { name: 'จังหวัดระยอง' } }] };
-    }
   </script>
 </body>
 
