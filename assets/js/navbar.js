@@ -1,29 +1,12 @@
 /**
  * KeptCarbon Dynamic Navbar
  * Renders different navbars based on authentication state
- * Unified Sidebar Mobile Menu for all pages
  */
 
 (function () {
   document.addEventListener('DOMContentLoaded', function () {
     renderNavbar();
   });
-
-  window.openSidebar = function() {
-    const sidebar = document.getElementById('sidebar-menu');
-    const overlay = document.querySelector('.sidebar-overlay');
-    if (sidebar) sidebar.classList.add('open');
-    if (overlay) overlay.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  };
-
-  window.closeSidebar = function() {
-    const sidebar = document.getElementById('sidebar-menu');
-    const overlay = document.querySelector('.sidebar-overlay');
-    if (sidebar) sidebar.classList.remove('open');
-    if (overlay) overlay.classList.remove('show');
-    document.body.style.overflow = '';
-  };
 
   function renderNavbar() {
     const user = Auth.getUser();
@@ -33,14 +16,25 @@
 
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-    // ─── DESKTOP NAVBAR CONTENT ───
     if (!user) {
+      // ─── Guest navbar ───
       navmenu.innerHTML = `
         <ul>
-          <li><a href="index.html" ${currentPage === 'index.html' || currentPage === '' ? 'class="active"' : ''}>หน้าแรก</a></li>
+          <li><a href="index.html" ${currentPage === 'index.html' ? 'class="active"' : ''}>หน้าแรก</a></li>
           <li><a href="index.html#project-about">เกี่ยวกับโครงการ</a></li>
           <li><a href="index.html#team">ทีมงานของเรา</a></li>
           <li><a href="index.html#contact">ติดต่อเรา</a></li>
+          <li class="d-xl-none"><div class="mobile-auth-divider"></div></li>
+          <li class="d-xl-none">
+            <div class="mobile-auth-buttons">
+              <a class="mobile-btn-login" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                เข้าสู่ระบบ
+              </a>
+              <a class="mobile-btn-register" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">
+                สมัครสมาชิก
+              </a>
+            </div>
+          </li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       `;
@@ -51,12 +45,24 @@
         `;
       }
     } else {
+      // ─── Authenticated navbar ───
       navmenu.innerHTML = `
         <ul>
           <li><a href="dashboard.html" ${currentPage === 'dashboard.html' ? 'class="active"' : ''}>แดชบอร์ด</a></li>
           <li><a href="map-draw.html" ${currentPage === 'map-draw.html' ? 'class="active"' : ''}>วาดแปลงยาง</a></li>
           <li><a href="my-plots.html" ${currentPage === 'my-plots.html' ? 'class="active"' : ''}>แปลงของฉัน</a></li>
           <li><a href="profile.html" ${currentPage === 'profile.html' ? 'class="active"' : ''}>โปรไฟล์</a></li>
+          <li class="d-xl-none"><div class="mobile-auth-divider"></div></li>
+          <li class="d-xl-none">
+            <div class="mobile-auth-buttons">
+              <div class="mobile-user-info">
+                <i class="bi bi-person-circle"></i> ${user.fullname}
+              </div>
+              <a class="mobile-btn-logout" href="#" onclick="Auth.logout(); return false;">
+                <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+              </a>
+            </div>
+          </li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       `;
@@ -68,71 +74,8 @@
       }
     }
 
-    // ─── INJECT SIDEBAR & OVERLAY ───
-    injectSidebar(user, currentPage);
-
-    // Re-bind mobile nav toggle with a slight delay to ensure DOM is settled
-    setTimeout(bindMobileNavToggle, 50);
-  }
-
-  function injectSidebar(user, currentPage) {
-    // Remove existing if any
-    const oldSidebar = document.getElementById('sidebar-menu');
-    const oldOverlay = document.querySelector('.sidebar-overlay');
-    if (oldSidebar) oldSidebar.remove();
-    if (oldOverlay) oldOverlay.remove();
-
-    const sidebar = document.createElement('div');
-    sidebar.id = 'sidebar-menu';
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'sidebar-overlay';
-    overlay.onclick = window.closeSidebar;
-
-    let navHtml = '';
-    if (!user) {
-      navHtml = `
-        <div class="sidebar-nav-title">เมนูหลัก</div>
-        <a href="index.html" ${currentPage === 'index.html' || currentPage === '' ? 'class="active"' : ''} onclick="closeSidebar()"><i class="bi bi-house"></i> หน้าแรก</a>
-        <a href="index.html#project-about" onclick="closeSidebar()"><i class="bi bi-info-circle"></i> เกี่ยวกับโครงการ</a>
-        <a href="index.html#team" onclick="closeSidebar()"><i class="bi bi-people"></i> ทีมงานของเรา</a>
-        <a href="index.html#contact" onclick="closeSidebar()"><i class="bi bi-envelope"></i> ติดต่อเรา</a>
-        <div class="sidebar-nav-title">บัญชีผู้ใช้</div>
-        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="closeSidebar()"><i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบ</a>
-        <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeSidebar()"><i class="bi bi-person-plus"></i> สมัครสมาชิก</a>
-      `;
-    } else {
-      navHtml = `
-        <div class="sidebar-nav-title">เมนูหลัก</div>
-        <a href="index.html" onclick="closeSidebar()"><i class="bi bi-house"></i> หน้าหลัก</a>
-        <div class="sidebar-nav-title">จัดการพื้นที่</div>
-        <a href="dashboard.html" ${currentPage === 'dashboard.html' ? 'class="active"' : ''} onclick="closeSidebar()"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
-        <a href="map-draw.html" ${currentPage === 'map-draw.html' ? 'class="active"' : ''} onclick="closeSidebar()"><i class="bi bi-map"></i> วาดแปลงยาง</a>
-        <a href="my-plots.html" ${currentPage === 'my-plots.html' ? 'class="active"' : ''} onclick="closeSidebar()"><i class="bi bi-collection"></i> แปลงของฉัน</a>
-        <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
-        <a href="profile.html" ${currentPage === 'profile.html' ? 'class="active"' : ''} onclick="closeSidebar()"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
-        <a href="#" onclick="Auth.logout(); return false;"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
-      `;
-    }
-
-    sidebar.innerHTML = `
-      <div class="sidebar-header">
-        <div style="display:flex;align-items:center;">
-          <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" style="height: 32px;">
-          <div class="brand">KeptCarbon</div>
-        </div>
-        <button class="btn-close-sidebar" onclick="closeSidebar()">✕</button>
-      </div>
-      <div class="sidebar-nav">
-        ${navHtml}
-      </div>
-      <div class="sidebar-footer">
-        <i class="bi bi-tree"></i><br>ระบบประเมินคาร์บอนเครดิต<br>สวนยางพารายั่งยืน
-      </div>
-    `;
-
-    document.body.appendChild(sidebar);
-    document.body.appendChild(overlay);
+    // Re-bind mobile nav toggle after dynamic render
+    bindMobileNavToggle();
   }
 
   function bindMobileNavToggle() {
@@ -142,14 +85,34 @@
     // Mark as bound so main.js skips duplicate binding
     btn.dataset.bound = 'true';
 
-    // Remove any existing listeners by cloning
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
+    btn.addEventListener('click', function () {
+      document.body.classList.toggle('mobile-nav-active');
+      btn.classList.toggle('bi-list');
+      btn.classList.toggle('bi-x-lg');
+    });
 
-    newBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      window.openSidebar();
+    // Close on backdrop click
+    const navmenu = document.getElementById('navmenu');
+    if (navmenu) {
+      navmenu.addEventListener('click', function (e) {
+        const ul = navmenu.querySelector('ul');
+        if (ul && !ul.contains(e.target) && !btn.contains(e.target) && document.body.classList.contains('mobile-nav-active')) {
+          document.body.classList.remove('mobile-nav-active');
+          btn.classList.add('bi-list');
+          btn.classList.remove('bi-x-lg');
+        }
+      });
+    }
+
+    // Close on nav link click
+    navmenu.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (document.body.classList.contains('mobile-nav-active')) {
+          document.body.classList.remove('mobile-nav-active');
+          btn.classList.add('bi-list');
+          btn.classList.remove('bi-x-lg');
+        }
+      });
     });
   }
 })();

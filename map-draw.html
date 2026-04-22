@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>วาดแปลงยาง – KeptCarbon</title>
   <meta name="description" content="วาดแปลงยางพาราบนแผนที่และคำนวณคาร์บอนเครดิต">
-  <link href="assets/img/favicon.png" rel="icon">
 
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
@@ -39,24 +38,6 @@
       --panel-w: 380px;
       --topbar-h: 56px;
       --font: 'Noto Sans Thai', 'Noto Sans', sans-serif;
-    }
-
-    .desktop-only {
-      display: block;
-    }
-
-    .mobile-only {
-      display: none;
-    }
-
-    @media (max-width: 768px) {
-      .desktop-only {
-        display: none;
-      }
-
-      .mobile-only {
-        display: block;
-      }
     }
 
     html,
@@ -577,6 +558,7 @@
       background: var(--green);
       border: 2px solid rgba(255, 255, 255, 0.9);
       border-radius: 50%;
+      margin: -5px 0 0 -5px;
       cursor: pointer;
       box-shadow: 0 0 0 3px rgba(132, 169, 140, 0.22);
       transition: transform .15s;
@@ -584,23 +566,6 @@
 
     .vdot:hover {
       transform: scale(1.5);
-    }
-
-    /* ghost dot (midpoint) */
-    .vdot.ghost {
-      width: 8px;
-      height: 8px;
-      background: rgba(45, 158, 95, 0.4);
-      border: 1.5px solid rgba(255, 255, 255, 0.6);
-      box-shadow: none;
-      opacity: 0.6;
-      cursor: copy;
-    }
-
-    .vdot.ghost:hover {
-      background: var(--green);
-      opacity: 1;
-      transform: scale(1.6);
     }
 
     /* ============================================================
@@ -1272,34 +1237,97 @@
     }
 
     /* ============================================================
-   GEOM STATUS (CONSOLE ONLY)
+   GEOM FLOATING PANEL
 ============================================================ */
-    #geom-status-indicator {
+    #geom-panel {
       position: fixed;
-      bottom: 24px;
-      left: 24px;
+      bottom: 70px;
+      left: 14px;
       z-index: 300;
-      background: rgba(45, 158, 95, 0.1);
-      backdrop-filter: blur(8px);
-      border: 1px solid var(--border-g);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 11px;
-      color: var(--green);
+      background: rgba(10, 30, 20, 0.93);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(45, 158, 95, 0.4);
+      border-radius: 12px;
+      padding: 12px 14px;
+      width: 300px;
+      max-width: calc(100vw - 28px);
       display: none;
-      align-items: center;
-      gap: 8px;
-      animation: fadeIn 0.3s ease;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      animation: slideUp 0.3s ease;
     }
 
-    @keyframes fadeIn {
+    @keyframes slideUp {
       from {
         opacity: 0;
+        transform: translateY(10px);
       }
 
       to {
         opacity: 1;
+        transform: translateY(0);
       }
+    }
+
+    #geom-panel.show {
+      display: block;
+    }
+
+    #geom-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    #geom-panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    #geom-panel-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    #geom-copy-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 5px 0;
+      background: rgba(45, 158, 95, 0.15);
+      border: 1px solid rgba(45, 158, 95, 0.35);
+      border-radius: 7px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.2s;
+    }
+
+    #geom-copy-btn:hover {
+      background: rgba(45, 158, 95, 0.25);
+    }
+
+    #geom-output-pre {
+      font-size: 9px;
+      color: rgba(180, 220, 195, 0.85);
+      max-height: 120px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.5;
+      margin: 0;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      padding: 7px;
     }
 
     /* ============================================================
@@ -1417,17 +1445,6 @@
         --panel-w: 0px;
       }
 
-      #topbar {
-        padding: 0 12px;
-        height: 56px;
-      }
-
-      .icon-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 13px;
-      }
-
       .topnav {
         display: none !important;
       }
@@ -1448,7 +1465,7 @@
       #draw-toolbar {
         left: 10px;
         top: auto;
-        bottom: 100px;
+        bottom: 180px;
         transform: none;
         flex-direction: column;
         padding: 6px 5px;
@@ -1558,77 +1575,20 @@
       #statusbar {
         left: 10px;
         right: 10px;
-        bottom: 10px;
+        bottom: calc(64px + 10px);
+        /* above collapsed panel */
         font-size: 11px;
-        transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-      }
-
-      body.panel-open #statusbar {
-        bottom: calc(65vh + 10px);
       }
 
       /* MapLibre controls */
       .maplibregl-ctrl-bottom-left {
-        bottom: 12px !important;
-        left: 12px !important;
-        transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-      }
-
-      body.panel-open .maplibregl-ctrl-bottom-left {
-        bottom: calc(65vh + 12px) !important;
+        bottom: calc(64px + 90px) !important;
+        left: 58px !important;
       }
 
       .maplibregl-ctrl-bottom-right {
-        bottom: 20px !important;
-        top: auto !important;
-        right: 12px !important;
-        gap: 6px;
-        z-index: 600 !important;
-        transition: none !important;
-      }
-
-      body.panel-open .maplibregl-ctrl-bottom-right {
-        bottom: 20px !important;
-        top: auto !important;
-      }
-
-      .maplibregl-ctrl-group button {
-        width: 34px !important;
-        height: 34px !important;
-        border-radius: 8px !important;
-      }
-
-      /* Adjust pencil button on mobile */
-      #btn-open-panel {
-        top: 72px;
-        right: 12px;
-        width: 42px;
-        height: 42px;
-        font-size: 16px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Basemap card adjustment */
-      #basemap-card {
-        right: 60px;
-        bottom: 20px;
-        top: auto;
-        width: 220px;
-        min-width: 200px;
-        max-width: calc(100% - 80px);
-        transform: translateX(20px);
-        z-index: 610;
-        transition: all 0.3s;
-      }
-
-      body.panel-open #basemap-card {
-        bottom: 20px;
-        top: auto;
-      }
-
-      #basemap-card.open {
-        transform: translateX(0);
+        bottom: calc(64px + 10px) !important;
+        right: 10px !important;
       }
     }
 
@@ -1675,10 +1635,15 @@
     <div id="search-results"></div>
   </div>
 
-  <!-- ======================== GEOM STATUS INDICATOR ======================== -->
-  <div id="geom-status-indicator">
-    <i class="bi bi-terminal"></i>
-    <span>Geometry logged to console & sent to backend</span>
+  <!-- ======================== GEOM FLOAT PANEL ======================== -->
+  <div id="geom-panel">
+    <div id="geom-panel-header">
+      <span id="geom-panel-title">📍 GeoJSON Polygon</span>
+      <button id="geom-panel-close" onclick="document.getElementById('geom-panel').classList.remove('show')"
+        title="ปิด">✕</button>
+    </div>
+    <pre id="geom-output-pre"></pre>
+    <button id="geom-copy-btn" onclick="copyGeom()">⧉ คัดลอก GeoJSON</button>
   </div>
 
   <!-- ======================== TOP BAR ======================== -->
@@ -1783,10 +1748,14 @@
       </div>
       <div class="step-item" id="si-3">
         <div class="step-dot" id="sd-3">3</div>
-        <div class="step-lbl">วิเคราะห์</div>
+        <div class="step-lbl">ตรวจอายุ</div>
       </div>
       <div class="step-item" id="si-4">
         <div class="step-dot" id="sd-4">4</div>
+        <div class="step-lbl">คาร์บอน</div>
+      </div>
+      <div class="step-item" id="si-5">
+        <div class="step-dot" id="sd-5">5</div>
         <div class="step-lbl">พยากรณ์</div>
       </div>
     </div>
@@ -1797,7 +1766,7 @@
       <!-- ===== STEP 1 ===== -->
       <div class="pstep active" id="step-1">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-map"></i> ขั้นตอนที่ 1 / 4</div>
+          <div class="step-tag"><i class="bi bi-map"></i> ขั้นตอนที่ 1 / 5</div>
           <h2>กำหนดขอบเขตแปลง</h2>
           <p>วาดแปลงบนแผนที่ หรือนำเข้าไฟล์ Shapefile</p>
         </div>
@@ -1814,34 +1783,13 @@
         <!-- DRAW TAB -->
         <div id="ct-draw">
           <div class="info-box">
-            <div class="info-box-title">วิธีวาดแปลง</div>
-
-            <!-- Desktop Instructions -->
-            <div class="desktop-only">
-              <ol class="info-steps">
-                <li><span class="sn">1</span>คลิก ✏️ หรือปุ่ม "เริ่มวาด"</li>
-                <li><span class="sn">2</span>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต</li>
-                <li><span class="sn">3</span>คลิกที่ "จุดแรก" หรือ Double-click เพื่อจบงาน</li>
-                <li><span class="sn">4</span><strong>แก้ไข:</strong> ลากจุดเพื่อขยับ หรือลากจุดจางเพื่อเพิ่มจุด</li>
-              </ol>
-            </div>
-
-            <!-- Mobile Instructions -->
-            <div class="mobile-only">
-              <ol class="info-steps">
-                <li><span class="sn">1</span>แตะปุ่ม ✏️ เพื่อเริ่มวาด</li>
-                <li><span class="sn">2</span>แตะบนแผนที่เพื่อวางจุดตามขอบแปลง</li>
-                <li><span class="sn">3</span>แตะ "จุดแรก" หรือปุ่ม "หยุดวาด" เพื่อจบงาน</li>
-                <li><span class="sn">4</span><strong>แก้ไข:</strong> แตะค้างที่จุดแล้วลากเพื่อขยับตำแหน่ง</li>
-              </ol>
-            </div>
-
-            <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border); font-size:11px;">
-              <div style="color:var(--green);font-weight:700;margin-bottom:4px;"><i class="bi bi-info-circle me-1"></i>
-                ข้อกำหนดพื้นที่</div>
-              <p style="color:var(--text-mid);line-height:1.4;">ขนาดแปลงต้องมีพื้นที่ไม่น้อยกว่า <strong>1 ไร่</strong>
-                (หรือ <strong>40 × 40 เมตร</strong>) เพื่อความแม่นยำของข้อมูล</p>
-            </div>
+            <div class="info-box-title">วิธีวาด</div>
+            <ol class="info-steps">
+              <li><span class="sn">1</span>กดปุ่ม ✏️ ในแถบซ้ายเพื่อเข้าโหมดวาด</li>
+              <li><span class="sn">2</span>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต</li>
+              <li><span class="sn">3</span>ดับเบิลคลิกเพื่อปิดและบันทึกแปลง</li>
+              <li><span class="sn">4</span>กด "ยืนยันแปลง" ด้านล่าง</li>
+            </ol>
           </div>
 
           <div class="draw-done" id="draw-done">
@@ -1900,7 +1848,7 @@
       <!-- ===== STEP 2 ===== -->
       <div class="pstep" id="step-2">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-pencil-square"></i> ขั้นตอนที่ 2 / 4</div>
+          <div class="step-tag"><i class="bi bi-pencil-square"></i> ขั้นตอนที่ 2 / 5</div>
           <h2>ข้อมูลแปลงยาง</h2>
           <p>กรอกข้อมูลแปลงเพื่อระบุตัวตนและคำนวณคาร์บอน</p>
         </div>
@@ -1934,7 +1882,32 @@
             <label><i class="bi bi-person" style="margin-right:4px;color:var(--green);"></i>เจ้าของแปลง</label>
             <input type="text" id="inp-owner" placeholder="ชื่อเจ้าของ" readonly>
           </div>
-
+          <div class="field" style="margin-bottom:0;">
+            <label><i class="bi bi-geo-alt" style="margin-right:4px;color:var(--green);"></i>จังหวัด</label>
+            <select id="inp-province"
+              style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
+              <option value="">-- เลือกจังหวัด --</option>
+              <option>ระยอง</option>
+              <option>ชุมพร</option>
+              <option>สุราษฎร์ธานี</option>
+              <option>นครศรีธรรมราช</option>
+              <option>ตรัง</option>
+              <option>สงขลา</option>
+              <option>ยะลา</option>
+              <option>นราธิวาส</option>
+              <option>พัทลุง</option>
+              <option>กระบี่</option>
+              <option>พังงา</option>
+              <option>ภูเก็ต</option>
+              <option>ปัตตานี</option>
+              <option>สตูล</option>
+              <option>อื่นๆ</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label><i class="bi bi-calendar3" style="margin-right:4px;color:var(--green);"></i>ปีที่ปลูก (พ.ศ.)</label>
+            <input type="number" id="inp-plantyear" placeholder="เช่น 2558" min="2500" max="2570">
+          </div>
           <div class="field" style="margin-bottom:0;">
             <label><i class="bi bi-tree" style="margin-right:4px;color:var(--green);"></i>พันธุ์ยาง</label>
             <select id="inp-variety"
@@ -1962,9 +1935,9 @@
       <!-- ===== STEP 3 ===== -->
       <div class="pstep" id="step-3">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-cpu"></i> ขั้นตอนที่ 3 / 4</div>
-          <h2>วิเคราะห์ผลลัพธ์</h2>
-          <p>วิเคราะห์ข้อมูลดาวเทียมและคำนวณคาร์บอนเครดิต</p>
+          <div class="step-tag"><i class="bi bi-cpu"></i> ขั้นตอนที่ 3 / 5</div>
+          <h2>ตรวจจับอายุต้นยาง</h2>
+          <p>วิเคราะห์ดาวเทียมเพื่อประมาณปีปลูกและอายุต้นยาง</p>
         </div>
 
         <div class="analyzing" id="analyze-spin">
@@ -1972,13 +1945,19 @@
           <p id="spin-msg">กำลังวิเคราะห์ข้อมูลดาวเทียม...</p>
         </div>
 
-        <!-- Analysis start action removed as it's now automatic -->
+        <div id="age-action">
+          <button class="btn btn-primary" onclick="detectAge()">
+            <i class="bi bi-cpu me-1"></i> เริ่มตรวจจับอายุต้นยาง
+          </button>
+          <button class="btn btn-outline" onclick="goStep(2)">
+            <i class="bi bi-arrow-left me-1"></i> กลับ
+          </button>
+        </div>
 
         <div id="age-result" style="display:none;">
-          <!-- Age Section -->
           <div class="chart-box">
-            <div class="chart-box-title">การกระจายอายุยาง (Age Distribution)</div>
-            <canvas id="ageChart" height="150"></canvas>
+            <div class="chart-box-title">การกระจายปีปลูก (%)</div>
+            <canvas id="yearChart" height="150"></canvas>
           </div>
           <div class="metrics-grid">
             <div class="metric">
@@ -1993,93 +1972,100 @@
             </div>
           </div>
           <div class="chips" id="yr-chips"></div>
-
-          <!-- Carbon Section (Merged from Step 4) -->
-          <div style="margin: 20px 0 10px; border-top: 1px solid var(--border); padding-top: 15px;">
-            <div class="step-tag"><i class="bi bi-calculator"></i> ผลคำนวณคาร์บอน</div>
-          </div>
-
-          <div class="analyzing" id="carbon-spin">
-            <div class="spin"></div>
-            <p>กำลังคำนวณ...</p>
-          </div>
-
-          <div id="carbon-result" style="display:none;">
-            <div class="metrics-grid">
-              <div class="metric">
-                <div class="metric-label">H ความสูง</div>
-                <div class="metric-value" id="r-h">—</div>
-                <div class="metric-unit">เมตร</div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">D รอบวง</div>
-                <div class="metric-value" id="r-d">—</div>
-                <div class="metric-unit">ซม.</div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">จำนวนต้น</div>
-                <div class="metric-value" id="r-trees">—</div>
-                <div class="metric-unit">ต้น</div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">Biomass/ต้น</div>
-                <div class="metric-value" id="r-bio">—</div>
-                <div class="metric-unit">กก.</div>
-              </div>
-            </div>
-            <div class="carbon-hero">
-              <div class="carbon-hero-label">คาร์บอนทั้งแปลง</div>
-              <div class="carbon-hero-value" id="r-co2">—</div>
-              <div class="carbon-hero-unit">tCO₂ eq.</div>
-            </div>
-
-            <div class="chart-box">
-              <div class="chart-box-title">คาร์บอนแยกตามช่วงอายุ (tCO₂)</div>
-              <canvas id="carbonAgeChart" height="150"></canvas>
-            </div>
-
-            <div class="chart-box">
-              <div class="chart-box-title">คาร์บอนแยกส่วนประกอบ (AGB/BGB)</div>
-              <canvas id="carbonChart" height="130"></canvas>
-            </div>
-
-            <div style="display:flex;gap:7px;margin-top:15px;">
-              <button class="btn btn-primary" style="flex:1;" onclick="goStep4()">
-                <i class="bi bi-graph-up-arrow me-1"></i> ดูพยากรณ์
-              </button>
-              <button class="btn btn-outline" style="flex:1;" onclick="savePlot()">
-                <i class="bi bi-floppy me-1"></i> บันทึกแปลง
-              </button>
-            </div>
-            <button class="btn btn-outline" style="margin-top:7px;" onclick="goStep(2)">
-              <i class="bi bi-arrow-left me-1"></i> กลับ
-            </button>
-          </div>
+          <button class="btn btn-primary" onclick="goStep4()">
+            <i class="bi bi-arrow-right-circle me-1"></i> ถัดไป: คำนวณคาร์บอน
+          </button>
+          <button class="btn btn-outline" onclick="goStep(2)">
+            <i class="bi bi-arrow-left me-1"></i> กลับ
+          </button>
         </div>
       </div><!-- /step-3 -->
-
-
 
       <!-- ===== STEP 4 ===== -->
       <div class="pstep" id="step-4">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-graph-up"></i> ขั้นตอนที่ 4 / 4</div>
+          <div class="step-tag"><i class="bi bi-calculator"></i> ขั้นตอนที่ 4 / 5</div>
+          <h2>คำนวณคาร์บอน</h2>
+          <p>สมการอัลโลเมตริก Hevea brasiliensis</p>
+        </div>
+
+        <div class="info-box" style="margin-bottom:12px;">
+          <div class="info-box-title">สูตรคำนวณ</div>
+          <ol class="info-steps">
+            <li><span class="sn">H</span>ความสูง = 2.0 + 1.8 × อายุ (สูงสุด 28 ม.)</li>
+            <li><span class="sn">D</span>DBH = 3 + 4.5 × อายุ (สูงสุด 60 ซม.)</li>
+            <li><span class="sn">B</span>AGB = 0.1284 × D² × H × 0.001 ตัน/ต้น</li>
+            <li><span class="sn">↑</span>CO₂ = (AGB + BGB) × 0.47 × 3.67</li>
+          </ol>
+        </div>
+
+        <div class="analyzing" id="carbon-spin">
+          <div class="spin"></div>
+          <p>กำลังคำนวณ...</p>
+        </div>
+
+        <div id="carbon-result" style="display:none;">
+          <div class="metrics-grid">
+            <div class="metric">
+              <div class="metric-label">H ความสูง</div>
+              <div class="metric-value" id="r-h">—</div>
+              <div class="metric-unit">เมตร</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">D รอบวง</div>
+              <div class="metric-value" id="r-d">—</div>
+              <div class="metric-unit">ซม.</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">จำนวนต้น</div>
+              <div class="metric-value" id="r-trees">—</div>
+              <div class="metric-unit">ต้น</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Biomass/ต้น</div>
+              <div class="metric-value" id="r-bio">—</div>
+              <div class="metric-unit">กก.</div>
+            </div>
+          </div>
+          <div class="carbon-hero">
+            <div class="carbon-hero-label">คาร์บอนทั้งแปลง</div>
+            <div class="carbon-hero-value" id="r-co2">—</div>
+            <div class="carbon-hero-unit">tCO₂ eq.</div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-box-title">คาร์บอนแยกส่วน (tCO₂)</div>
+            <canvas id="carbonChart" height="130"></canvas>
+          </div>
+          <button class="btn btn-primary" onclick="goStep5()">
+            <i class="bi bi-graph-up-arrow me-1"></i> ถัดไป: พยากรณ์คาร์บอน
+          </button>
+          <button class="btn btn-outline" onclick="goStep(3)">
+            <i class="bi bi-arrow-left me-1"></i> กลับ
+          </button>
+        </div>
+      </div><!-- /step-4 -->
+
+      <!-- ===== STEP 5 ===== -->
+      <div class="pstep" id="step-5">
+        <div class="step-title">
+          <div class="step-tag"><i class="bi bi-graph-up"></i> ขั้นตอนที่ 5 / 5</div>
           <h2>พยากรณ์คาร์บอน</h2>
           <p>ดูแนวโน้มการสะสมคาร์บอนในปีต่อ ๆ ไป</p>
         </div>
 
         <div style="display:flex;gap:7px;margin-bottom:12px;align-items:center;">
           <div class="field" style="flex:1;margin-bottom:0;">
-            <input type="number" id="fc-years" value="7" min="1" max="7" placeholder="จำนวนปี (ไม่เกิน 7)">
+            <input type="number" id="fc-years" value="10" min="1" max="50" placeholder="จำนวนปี">
           </div>
           <button class="btn btn-primary" style="width:auto;padding:10px 16px;margin-bottom:0;" onclick="runForecast()">
             <i class="bi bi-play-fill me-1"></i>พยากรณ์
           </button>
         </div>
         <div class="preset-wrap">
-          <button class="btn-sm" onclick="setFc(3)">3 ปี</button>
           <button class="btn-sm" onclick="setFc(5)">5 ปี</button>
-          <button class="btn-sm" onclick="setFc(7)">7 ปี</button>
+          <button class="btn-sm" onclick="setFc(10)">10 ปี</button>
+          <button class="btn-sm" onclick="setFc(20)">20 ปี</button>
+          <button class="btn-sm" onclick="setFc(30)">30 ปี</button>
         </div>
 
         <div class="chart-box">
@@ -2093,8 +2079,11 @@
         </div>
 
         <div style="display:flex;gap:7px;">
-          <button class="btn btn-outline" style="flex:1;" onclick="goStep(3)">
-            <i class="bi bi-arrow-left me-1"></i> กลับไปหน้าสรุปผล
+          <button class="btn btn-primary" style="flex:2;" onclick="savePlot()">
+            <i class="bi bi-floppy me-1"></i> บันทึกแปลงนี้
+          </button>
+          <button class="btn btn-outline" style="flex:1;" onclick="goStep(4)">
+            <i class="bi bi-arrow-left me-1"></i> กลับ
           </button>
         </div>
       </div><!-- /step-5 -->
@@ -2138,24 +2127,21 @@
         sources: {
           sat: {
             type: 'raster',
-            tiles: ['https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'],
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
             tileSize: 256,
-            attribution: '© Google',
-            maxzoom: 20
+            attribution: ''
           },
           street: {
             type: 'raster',
-            tiles: ['https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'],
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
             tileSize: 256,
-            attribution: '© Google',
-            maxzoom: 20
+            attribution: ''
           },
           topo: {
             type: 'raster',
-            tiles: ['https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}'],
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
             tileSize: 256,
-            attribution: '© Google',
-            maxzoom: 20
+            attribution: ''
           }
         },
         layers: [
@@ -2220,17 +2206,10 @@
       map.addSource('draw-fill', { type: 'geojson', data: empty() });
       map.addLayer({ id: 'draw-fill-l', type: 'fill', source: 'draw-fill', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.12 } });
 
-      // Final plot (current drawing)
+      // Final plot
       map.addSource('plot', { type: 'geojson', data: empty() });
       map.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.22 } });
       map.addLayer({ id: 'plot-line', type: 'line', source: 'plot', paint: { 'line-color': '#2d9e5f', 'line-width': 2.5 } });
-
-      // Saved plots (all previously saved)
-      map.addSource('saved-plots', { type: 'geojson', data: empty() });
-      map.addLayer({ id: 'saved-plots-fill', type: 'fill', source: 'saved-plots', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.15 } });
-      map.addLayer({ id: 'saved-plots-line', type: 'line', source: 'saved-plots', paint: { 'line-color': '#2d9e5f', 'line-width': 1.5, 'line-opacity': 0.6 } });
-
-      loadSavedPlots();
     });
 
     /* ================================================================
@@ -2243,58 +2222,28 @@
     let shpFile = null;
 
     function toggleDraw() {
-      // If currently drawing and we have at least 3 points, 
-      // clicking "Stop Drawing" should finish the plot.
-      if (drawMode && verts.length >= 3) {
-        finishDraw();
-        return;
-      }
-
       drawMode = !drawMode;
       const btn = document.getElementById('btnDraw');
       const btnP = document.getElementById('btnStartDraw');
-
       if (drawMode) {
-        if (btn) btn.classList.add('on');
+        btn.classList.add('on');
         document.getElementById('body').classList.add('drawing');
-        if (btnP) btnP.innerHTML = '<i class="bi bi-stop-circle me-1"></i> หยุดวาด';
-        setStatus('โหมดวาด — คลิกเพื่อเพิ่มจุด | คลิก "หยุดวาด" หรือ Double-click เพื่อปิดแปลง');
-        if (map.doubleClickZoom) map.doubleClickZoom.disable();
+        btnP.innerHTML = '<i class="bi bi-stop-circle me-1"></i> หยุดวาด';
+        setStatus('โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click เพื่อปิดแปลง | Esc ยกเลิก');
       } else {
-        if (btn) btn.classList.remove('on');
+        btn.classList.remove('on');
         document.getElementById('body').classList.remove('drawing');
-        if (btnP) btnP.innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
+        btnP.innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
         setStatus('ออกจากโหมดวาด');
-        if (map.doubleClickZoom) map.doubleClickZoom.enable();
       }
     }
 
     map.on('click', e => {
       if (!drawMode) return;
-
-      const pCurrent = map.project(e.lngLat);
-
-      // 1. Detect clicking near the LAST point to finish (easy double-tap)
-      if (verts.length >= 3) {
-        const pLast = map.project(verts[verts.length - 1]);
-        if (Math.hypot(pLast.x - pCurrent.x, pLast.y - pCurrent.y) < 30) {
-          finishDraw();
-          return;
-        }
-      }
-
-      // 2. Detect clicking near the FIRST point to close (classic way)
-      if (verts.length >= 3) {
-        const pFirst = map.project(verts[0]);
-        if (Math.hypot(pFirst.x - pCurrent.x, pFirst.y - pCurrent.y) < 35) {
-          finishDraw();
-          return;
-        }
-      }
-
       verts.push([e.lngLat.lng, e.lngLat.lat]);
-      rebuildMarkers();
-      setStatus(`จุดที่ ${verts.length} — คลิกที่จุดเดิมหรือจุดแรกเพื่อจบการวาด`);
+      addMarker([e.lngLat.lng, e.lngLat.lat]);
+      previewDraw();
+      setStatus(`จุดที่ ${verts.length} — Double-click เพื่อปิดแปลง`);
     });
 
     map.on('dblclick', e => {
@@ -2307,129 +2256,17 @@
       if (e.key === 'Escape' && drawMode) { drawMode = false; document.getElementById('body').classList.remove('drawing'); document.getElementById('btnDraw').classList.remove('on'); setStatus('ยกเลิกการวาด'); }
     });
 
-    function addMarker(ll, index) {
+    function addMarker(ll) {
       const el = document.createElement('div');
       el.className = 'vdot';
-      const m = new maplibregl.Marker({ element: el, anchor: 'center', draggable: true })
-        .setLngLat(ll)
-        .addTo(map);
-
-      m.on('drag', () => {
-        const newLL = m.getLngLat();
-        verts[index] = [newLL.lng, newLL.lat];
-        previewDraw();
-      });
-
-      m.on('dragend', () => {
-        const newLL = m.getLngLat();
-        verts[index] = [newLL.lng, newLL.lat];
-        rebuildMarkers();
-
-        // Validation update on dragend
-        if (verts.length >= 3) {
-          const sqm = areaM2([...verts, verts[0]]);
-          const rai = sqm / 1600;
-          const areaText = document.getElementById('draw-area-preview');
-          if (rai < 1.0) {
-            areaText.style.color = '#e05';
-            areaText.innerHTML = `<strong>${rai.toFixed(2)} ไร่ (เล็กเกินไป)</strong><br><small style="color:var(--text-dim);">ขั้นต่ำ 1 ไร่ (40x40 ม.)</small>`;
-            document.getElementById('btnConfirm').disabled = true;
-          } else {
-            areaText.style.color = 'var(--green)';
-            areaText.textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
-            document.getElementById('btnConfirm').disabled = false;
-          }
-        }
-      });
-
-      markers.push(m);
-    }
-
-    let ghostMarkers = [];
-    function updateMidpointMarkers() {
-      ghostMarkers.forEach(m => m.remove());
-      ghostMarkers = [];
-
-      if (verts.length < 2) return;
-
-      // Only show ghosts if we have a closed polygon or are in edit mode
-      // If verts >= 3 and not currently "drawing" new points, connect last to first
-      const isClosed = verts.length >= 3;
-      const loopCount = isClosed ? verts.length : verts.length - 1;
-
-      for (let i = 0; i < loopCount; i++) {
-        const p1 = verts[i];
-        const p2 = verts[(i + 1) % verts.length];
-
-        const mid = [
-          (p1[0] + p2[0]) / 2,
-          (p1[1] + p2[1]) / 2
-        ];
-
-        const el = document.createElement('div');
-        el.className = 'vdot ghost';
-        const gm = new maplibregl.Marker({ element: el, anchor: 'center', draggable: true })
-          .setLngLat(mid)
-          .addTo(map);
-
-        let promotedIndex = -1;
-        gm.on('drag', () => {
-          const pos = gm.getLngLat();
-          if (promotedIndex === -1) {
-            // First move: insert the new vertex
-            promotedIndex = i + 1;
-            verts.splice(promotedIndex, 0, [pos.lng, pos.lat]);
-          } else {
-            // Subsequent moves: update the vertex
-            verts[promotedIndex] = [pos.lng, pos.lat];
-          }
-          previewDraw();
-        });
-
-        gm.on('dragend', () => {
-          rebuildMarkers();
-        });
-
-        ghostMarkers.push(gm);
-      }
-    }
-
-    function rebuildMarkers() {
-      markers.forEach(m => m.remove());
-      markers = [];
-      ghostMarkers.forEach(m => m.remove());
-      ghostMarkers = [];
-
-      verts.forEach((v, i) => {
-        addMarker(v, i);
-      });
-
-      updateMidpointMarkers();
-      previewDraw();
+      markers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(ll).addTo(map));
     }
 
     function previewDraw() {
-      if (verts.length < 2) {
-        if (map.getSource('draw-line')) map.getSource('draw-line').setData(empty());
-        if (map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty());
-        return;
-      }
-      const ring = [...verts, verts[0]];
+      if (verts.length < 2) { map.getSource('draw-line').setData(empty()); map.getSource('draw-fill').setData(empty()); return; }
       const line = [...verts, verts.length >= 3 ? verts[0] : verts[verts.length - 1]];
-
-      const lineGeo = { type: 'Feature', geometry: { type: 'LineString', coordinates: line } };
-      const fillGeo = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] } };
-
-      if (map.getSource('draw-line')) map.getSource('draw-line').setData(lineGeo);
-      if (verts.length >= 3 && map.getSource('draw-fill')) {
-        map.getSource('draw-fill').setData(fillGeo);
-      }
-
-      // Also update the 'plot' source if we have finished drawing and are just editing
-      if (!drawMode && verts.length >= 3 && map.getSource('plot')) {
-        map.getSource('plot').setData(fillGeo);
-        finalGJ = fillGeo; // ensure finalGJ is kept in sync
-      }
+      map.getSource('draw-line').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: line } });
+      if (verts.length >= 3) map.getSource('draw-fill').setData({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[...verts, verts[0]]] } });
     }
 
     function finishDraw() {
@@ -2444,189 +2281,46 @@
       map.getSource('draw-line').setData(empty());
       map.getSource('draw-fill').setData(empty());
 
-      // After finishing, we keep the markers so user can edit!
-      rebuildMarkers();
-
       const sqm = areaM2(ring);
       const rai = sqm / 1600;
-      const areaText = document.getElementById('draw-area-preview');
-      areaText.textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
-
-      if (rai < 1.0) {
-        areaText.style.color = '#e05';
-        areaText.innerHTML = `<strong>${rai.toFixed(2)} ไร่ (เล็กเกินไป)</strong><br><small style="color:var(--text-dim);">ขั้นต่ำ 1 ไร่ (40x40 ม.)</small>`;
-        document.getElementById('btnConfirm').disabled = true;
-        setStatus('⚠️ พื้นที่เล็กเกินไป: ขั้นต่ำต้องมีขนาด 1 ไร่ (40x40 ม.) กรุณาขยายแปลง');
-      } else {
-        areaText.style.color = 'var(--green)';
-        document.getElementById('btnConfirm').disabled = false;
-        document.getElementById('draw-done').classList.add('show');
-      }
-
-      const isMob = window.innerWidth <= 768;
-
-      if (isMob) {
-        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — สามารถขยับจุดเพื่อแก้ไขได้`);
-        // We DON'T auto-confirm on mobile anymore if they might want to edit
-        // But the previous conversation history says "ensuring the existing automatic progression remains enabled for mobile users"
-        // Let's keep a slight delay if we want to auto-confirm, but maybe give them a chance to see the markers.
-        // Actually, if we want "drag to edit", auto-confirming immediately is bad.
-        // Let's just open the panel.
-        setTimeout(() => {
-          togglePanel(true);
-        }, 600);
-      } else {
-        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — ขยับจุดเพื่อแก้ไขได้ หรือกด "ยืนยันแปลงที่วาด"`);
-        togglePanel(true);
-      }
-
+      document.getElementById('draw-area-preview').textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
+      document.getElementById('draw-done').classList.add('show');
+      document.getElementById('btnConfirm').disabled = false;
+      setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กด "ยืนยันแปลง"`);
       fitPlot();
     }
 
     function undoVertex() {
       if (!verts.length) return;
-      verts.pop();
-      rebuildMarkers();
+      verts.pop(); markers.pop()?.remove();
+      previewDraw();
       setStatus(`ยกเลิกจุดล่าสุด (เหลือ ${verts.length} จุด)`);
     }
 
     function clearDraw() {
-      // 1. Reset Drawing
-      verts = [];
-      markers.forEach(m => m.remove()); markers = [];
-      ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
-      finalGJ = null;
+      verts = []; markers.forEach(m => m.remove()); markers = []; finalGJ = null;
       drawMode = false;
-      const bodyEl = document.getElementById('body');
-      if (bodyEl) bodyEl.classList.remove('drawing');
-      
-      const btnDraw = document.getElementById('btnDraw');
-      if (btnDraw) btnDraw.classList.remove('on');
-      
-      const btnStartDraw = document.getElementById('btnStartDraw');
-      if (btnStartDraw) btnStartDraw.innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
-
-      if (map && map.getSource('draw-line')) map.getSource('draw-line').setData(empty());
-      if (map && map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty());
-      if (map && map.getSource('plot')) map.getSource('plot').setData(empty());
-
-      const btnConfirm = document.getElementById('btnConfirm');
-      if (btnConfirm) btnConfirm.disabled = true;
-      
-      const drawDone = document.getElementById('draw-done');
-      if (drawDone) drawDone.classList.remove('show');
-
-      // 2. Reset Data Object
-      pd.name = '';
-      pd.areaSqm = 0;
-      pd.areaRai = 0;
-      pd.treeCount = 0;
-      pd.plantYear = 0;
-      pd.treeAge = 0;
-      pd.H = 0;
-      pd.D = 0;
-      pd.bio = 0;
-      pd.co2 = 0;
-      pd.gj = null;
-      pd.ageDist = null;
-
-      // 3. Reset Inputs
-      const inpName = document.getElementById('inp-name');
-      if (inpName) inpName.value = '';
-      
-      const inpVariety = document.getElementById('inp-variety');
-      if (inpVariety) inpVariety.value = '';
-      
-      const drawAreaPreview = document.getElementById('draw-area-preview');
-      if (drawAreaPreview) {
-        drawAreaPreview.textContent = '—';
-        drawAreaPreview.style.color = 'var(--text-mid)';
-      }
-      
-      const areaDisplay = document.getElementById('area-display');
-      if (areaDisplay) areaDisplay.textContent = '—';
-
-      // 4. Reset Analysis Results
-      const ageRes = document.getElementById('age-result');
-      if (ageRes) ageRes.style.display = 'none';
-      
-      const carbRes = document.getElementById('carbon-result');
-      if (carbRes) carbRes.style.display = 'none';
-      
-      const anaSpin = document.getElementById('analyze-spin');
-      if (anaSpin) anaSpin.classList.remove('show');
-      
-      const carbSpin = document.getElementById('carbon-spin');
-      if (carbSpin) carbSpin.classList.remove('show');
-      
-      const fcTableBox = document.getElementById('fc-table-box');
-      if (fcTableBox) fcTableBox.style.display = 'none';
-
-      const ageAction = document.getElementById('age-action');
-      if (ageAction) ageAction.style.display = 'block';
-
-      // 5. Clear Charts
-      if (ageChart) { ageChart.destroy(); ageChart = null; }
-      if (carbChart) { carbChart.destroy(); carbChart = null; }
-      if (carbAgeChart) { carbAgeChart.destroy(); carbAgeChart = null; }
-      if (fcChart) { fcChart.destroy(); fcChart = null; }
-
-      // 6. Navigation
-      goStep(1);
-      
-      // Auto open panel for step 1
-      if (isMobile()) {
-        const panel = document.getElementById('panel');
-        if (panel) panel.classList.add('open');
-        document.body.classList.add('panel-open');
-      }
-      
-      setStatus('ล้างข้อมูลและแปลงเรียบร้อย — เริ่มวาดแปลงใหม่ได้ทันที');
+      document.getElementById('body').classList.remove('drawing');
+      document.getElementById('btnDraw').classList.remove('on');
+      document.getElementById('btnStartDraw').innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
+      if (map.getSource('draw-line')) map.getSource('draw-line').setData(empty());
+      if (map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty());
+      if (map.getSource('plot')) map.getSource('plot').setData(empty());
+      document.getElementById('btnConfirm').disabled = true;
+      document.getElementById('draw-done').classList.remove('show');
+      setStatus('ล้างแปลงเรียบร้อย');
     }
 
     function startDrawFlow() {
       stopSpin();
       toggleDraw();
-
-      // Auto collapse panel on mobile when starting to draw
-      // Auto collapse panel when starting to draw
-      togglePanel(false);
-
       if (map.getZoom() < 8) {
         map.flyTo({ center: [101.258, 12.682], zoom: 10, pitch: 20, bearing: 0, duration: 2000 });
       }
     }
 
     function confirmDraw() {
-      // Check area again just in case
-      const ring = [...verts, verts[0]];
-      const sqm = areaM2(ring);
-      const rai = sqm / 1600;
-
-      if (rai < 1.0) {
-        alert('ไม่สามารถยืนยันได้: พื้นที่แปลงต้องมีขนาดอย่างน้อย 1 ไร่ (40x40 เมตร)');
-        return;
-      }
-
-      // Before confirming, we should clear the editing markers
-      markers.forEach(m => m.remove()); markers = [];
-      ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
-
-      if (!finalGJ) {
-        // If finalGJ is null (maybe user edited but we didn't update it)
-        // ensure we have it
-        if (verts.length >= 3) {
-          const ring = [...verts, verts[0]];
-          finalGJ = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] }, properties: {} };
-        } else {
-          return;
-        }
-      } else {
-        // Update finalGJ from current verts just in case
-        const ring = [...verts, verts[0]];
-        finalGJ.geometry.coordinates = [ring];
-      }
-
+      if (!finalGJ) return;
       updateArea(finalGJ);
 
       // Build geom object
@@ -2635,29 +2329,38 @@
         type: 'Polygon',
         coordinates: [coords.map(([lng, lat]) => [+lng.toFixed(6), +lat.toFixed(6)])]
       };
+      const geomStr = JSON.stringify(geomObj, null, 2);
 
-      // 1. Send to Backend (Simulated for Demo)
-      console.log('%c[BACKEND] Processing geometry at /api/process-plot...', 'color: #2d9e5f; font-weight: bold;');
+      // Log to console
+      console.log('=== GeoJSON Polygon ===');
+      console.log(geomStr);
+      console.log('Vertices:', coords.length);
+      console.table(coords.map(([lng, lat]) => ({ lng: +lng.toFixed(6), lat: +lat.toFixed(6) })));
 
-      // We simulate the API call to avoid 404 since this is a static site demo
-      new Promise(resolve => setTimeout(resolve, 1000)).then(() => {
-        console.log('%c[BACKEND] Success: Geometry processed.', 'color: #2d9e5f;');
-      });
-
-      // 2. Log to console as requested
-      console.log('=== Plot Geometry (Polygon) ===');
-      console.log(JSON.stringify(geomObj, null, 2));
-      console.table(coords.map(([lng, lat]) => ({ lng, lat })));
-
-      // 3. UI feedback
-      const indicator = document.getElementById('geom-status-indicator');
-      indicator.style.display = 'flex';
-      setTimeout(() => indicator.style.display = 'none', 4000);
+      // Show floating panel
+      document.getElementById('geom-output-pre').textContent = geomStr;
+      document.getElementById('geom-panel').classList.add('show');
 
       goStep(2);
     }
 
-
+    function copyGeom() {
+      const text = document.getElementById('geom-output-pre').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('geom-copy-btn');
+        btn.textContent = '✓ คัดลอกแล้ว!';
+        btn.style.background = 'rgba(45,158,95,0.3)';
+        setTimeout(() => { btn.textContent = '⧉ คัดลอก GeoJSON'; btn.style.background = ''; }, 2500);
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        const btn = document.getElementById('geom-copy-btn');
+        btn.textContent = '✓ คัดลอกแล้ว!';
+        setTimeout(() => btn.textContent = '⧉ คัดลอก GeoJSON', 2500);
+      });
+    }
 
     function fitPlot() {
       if (!finalGJ) return;
@@ -2715,9 +2418,9 @@
     /* ================================================================
        STEP NAVIGATION
     ================================================================ */
-    const STEPS = 4;
+    const STEPS = 5;
     let curStep = 1;
-    const stepTitles = ['เลือกวิธี', 'ข้อมูล', 'วิเคราะห์', 'พยากรณ์'];
+    const stepTitles = ['เลือกวิธี', 'ข้อมูล', 'ตรวจอายุ', 'คาร์บอน', 'พยากรณ์'];
 
     function goStep(n) {
       for (let i = 1; i <= STEPS; i++) {
@@ -2733,10 +2436,7 @@
       curStep = n;
       document.getElementById('mobile-step-label').textContent = `ขั้น ${n}/${STEPS}`;
       // Auto open panel on mobile when navigating
-      if (isMobile()) {
-        document.getElementById('panel').classList.add('open');
-        document.body.classList.add('panel-open');
-      }
+      if (isMobile()) document.getElementById('panel').classList.add('open');
     }
 
     function switchTab(t) {
@@ -2751,12 +2451,10 @@
       if (!nm) { alert('กรุณากรอกชื่อแปลงยาง'); return; }
       pd.name = nm; pd.ownerName = document.getElementById('inp-owner').value;
       goStep(3);
-      
-      // Auto-start analysis when entering step 3
-      setTimeout(detectAge, 400); 
     }
 
-    function goStep4() { goStep(4); runForecast(); }
+    function goStep4() { goStep(4); document.getElementById('carbon-spin').classList.add('show'); setTimeout(calcCarbon, 600); }
+    function goStep5() { goStep(5); runForecast(); }
 
     /* ================================================================
        PLOT DATA
@@ -2771,108 +2469,56 @@
     }
 
     /* ================================================================
-       TREE AGE DETECTION (GEE BACKEND)
+       TREE AGE DETECTION
     ================================================================ */
-    let ageChart = null;
+    let yrChart = null;
 
-    async function detectAge() {
-      const ageAction = document.getElementById('age-action');
-      if (ageAction) ageAction.style.display = 'none';
+    function detectAge() {
+      document.getElementById('age-action').style.display = 'none';
       document.getElementById('analyze-spin').classList.add('show');
-
-      const msgs = ['ติดต่อ Google Earth Engine...', 'วิเคราะห์ภาพถ่ายดาวเทียม Sentinel-2...', 'ประมวลผลดัชนีพืชพรรณ (NDVI)...', 'คำนวณโครงสร้างอายุยาง...'];
+      const msgs = ['วิเคราะห์ NDVI/EVI...', 'ประมวลผลดาวเทียม...', 'ประมาณอายุพืช...'];
       let mi = 0;
-      const iv = setInterval(() => { if (mi < msgs.length) document.getElementById('spin-msg').textContent = msgs[mi++]; }, 800);
-
-      try {
-        // Mock GEE API Call
-        console.log('%c[GEE] Analyzing plot age distribution...', 'color: #3498db; font-weight: bold;');
-
-        // Simulate network delay
-        await new Promise(r => setTimeout(r, 3500));
-
+      const iv = setInterval(() => { if (mi < msgs.length) document.getElementById('spin-msg').textContent = msgs[mi++]; }, 700);
+      setTimeout(() => {
         clearInterval(iv);
         document.getElementById('analyze-spin').classList.remove('show');
-
-        // Mock result from GEE
-        const curY = new Date().getFullYear() + 543;
-        const mainAge = Math.floor(Math.random() * 12 + 5); // 5-17 years
-        const mainYear = curY - mainAge;
-
-        // Distribution of ages
-        const ageDist = genAgeDist(mainAge);
-        pd.plantYear = mainYear;
-        pd.treeAge = mainAge;
-        pd.ageDist = ageDist; // Store for carbon calculation
-
-        renderAgeChart(ageDist);
-        buildAgeChips(ageDist);
-
-        document.getElementById('r-year').textContent = mainYear;
-        document.getElementById('r-age').textContent = mainAge;
+        const cur = new Date().getFullYear() + 543;
+        const main = cur - Math.floor(Math.random() * 14 + 6);
+        const dist = genDist(main, cur);
+        pd.plantYear = main; pd.treeAge = cur - main;
+        renderYearChart(dist, main);
+        buildChips(dist, main);
+        document.getElementById('r-year').textContent = main;
+        document.getElementById('r-age').textContent = pd.treeAge;
         document.getElementById('age-result').style.display = 'block';
-
-        // Auto-calculate carbon immediately after age is detected
-        calcCarbon();
-
-        setStatus('✓ วิเคราะห์สำเร็จ: พบอายุยางเฉลี่ย ' + mainAge + ' ปี และคำนวณคาร์บอนเรียบร้อย');
-      } catch (err) {
-        clearInterval(iv);
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ GEE Backend');
-        document.getElementById('analyze-spin').classList.remove('show');
-        document.getElementById('age-action').style.display = 'block';
-      }
+      }, 3000);
     }
 
-    function genAgeDist(mainAge) {
+    function genDist(main, cur) {
       const d = {};
-      const offsets = [-2, -1, 0, 0, 0, 1, 2];
-      offsets.forEach(o => {
-        const a = mainAge + o;
-        if (a > 0) d[a] = (d[a] || 0) + Math.random() * 20 + (o === 0 ? 40 : 5);
-      });
+      [-3, -2, -1, 0, 0, 0, 1, 2, 3].forEach(o => { const y = main + o; if (y > 2530 && y <= cur) d[y] = (d[y] || 0) + Math.random() * 14 + (o === 0 ? 36 : 5); });
       const tot = Object.values(d).reduce((a, b) => a + b, 0);
       Object.keys(d).forEach(k => d[k] = +(d[k] / tot * 100).toFixed(1));
       return d;
     }
 
-    function renderAgeChart(dist) {
-      const ctx = document.getElementById('ageChart').getContext('2d');
-      if (ageChart) ageChart.destroy();
-      const labs = Object.keys(dist).sort((a, b) => a - b);
-      const mainAge = pd.treeAge;
-
-      ageChart = new Chart(ctx, {
+    function renderYearChart(dist, main) {
+      const ctx = document.getElementById('yearChart').getContext('2d');
+      if (yrChart) yrChart.destroy();
+      const labs = Object.keys(dist).sort();
+      yrChart = new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels: labs.map(a => a + ' ปี'),
-          datasets: [{
-            data: labs.map(k => dist[k]),
-            backgroundColor: labs.map(a => +a === mainAge ? 'rgba(45, 158, 95, 0.85)' : 'rgba(45, 158, 95, 0.25)'),
-            borderRadius: 6,
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: (c) => `พื้นที่ ${c.raw}% (${(pd.areaRai * c.raw / 100).toFixed(2)} ไร่)` } }
-          },
-          scales: {
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 10 } }, grid: { display: false } },
-            y: { beginAtZero: true, ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
-          }
-        }
+        data: { labels: labs, datasets: [{ data: labs.map(k => dist[k]), backgroundColor: labs.map(y => +y === main ? 'rgba(132,169,140,0.85)' : 'rgba(132,169,140,0.28)'), borderRadius: 4, borderWidth: 0 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(200,220,210,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: 'rgba(200,220,210,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } }
       });
     }
 
-    function buildAgeChips(dist) {
+    function buildChips(dist, main) {
       const c = document.getElementById('yr-chips'); c.innerHTML = '';
-      Object.keys(dist).sort((a, b) => a - b).forEach(a => {
+      Object.keys(dist).sort().forEach(y => {
         const el = document.createElement('div');
-        el.className = 'chip' + (+a === pd.treeAge ? ' main' : '');
-        el.textContent = `อายุ ${a} ปี: ${dist[a]}%`;
+        el.className = 'chip' + (+y === main ? ' main' : '');
+        el.textContent = `${y}: ${dist[y]}%`;
         c.appendChild(el);
       });
     }
@@ -2881,90 +2527,28 @@
        CARBON CALCULATION
     ================================================================ */
     let carbChart = null;
-    let carbAgeChart = null;
 
     function calcCarbon() {
-      const baseAge = pd.treeAge, trees = pd.treeCount, dist = pd.ageDist || { [baseAge]: 100 };
+      const age = pd.treeAge, trees = pd.treeCount;
+      const H = Math.min(2.0 + 1.8 * age, 28);
+      const D = Math.min(3 + 4.5 * age, 60);
+      const AGB = 0.1284 * D * D * H * 0.001;
+      const BGB = AGB * 0.26;
+      const co2 = (AGB + BGB) * 0.47 * 3.67 * trees;
+      pd.H = H; pd.D = D; pd.bio = +(AGB * 1000).toFixed(0); pd.co2 = co2;
 
-      let totalCo2 = 0;
-      const ageLabels = Object.keys(dist).sort((a, b) => a - b);
-      const ageCo2Data = [];
-
-      ageLabels.forEach(age => {
-        const a = +age;
-        const perc = dist[age] / 100;
-        const treesInAge = Math.round(trees * perc);
-
-        const H = Math.min(2.0 + 1.8 * a, 28);
-        const D = Math.min(3 + 4.5 * a, 60);
-        const AGB = 0.1284 * D * D * H * 0.001;
-        const BGB = AGB * 0.26;
-        const co2Single = (AGB + BGB) * 0.47 * 3.67 * treesInAge;
-
-        totalCo2 += co2Single;
-        ageCo2Data.push(+co2Single.toFixed(2));
-
-        if (a === baseAge) {
-          pd.H = H; pd.D = D; pd.bio = +(AGB * 1000).toFixed(0);
-        }
-      });
-
-      pd.co2 = totalCo2;
-
-      document.getElementById('r-h').textContent = pd.H.toFixed(1);
-      document.getElementById('r-d').textContent = pd.D.toFixed(1);
+      document.getElementById('r-h').textContent = H.toFixed(1);
+      document.getElementById('r-d').textContent = D.toFixed(1);
       document.getElementById('r-trees').textContent = trees.toLocaleString();
-      document.getElementById('r-bio').textContent = pd.bio;
-      document.getElementById('r-co2').textContent = totalCo2.toFixed(2);
+      document.getElementById('r-bio').textContent = (AGB * 1000).toFixed(0);
+      document.getElementById('r-co2').textContent = co2.toFixed(2);
 
-      // 1. Carbon by Age Chart
-      const ctxAge = document.getElementById('carbonAgeChart').getContext('2d');
-      if (carbAgeChart) carbAgeChart.destroy();
-      carbAgeChart = new Chart(ctxAge, {
-        type: 'pie',
-        data: {
-          labels: ageLabels.map(a => 'อายุ ' + a + ' ปี'),
-          datasets: [{
-            data: ageCo2Data,
-            backgroundColor: ['#2d9e5f', '#38b26a', '#1e7a47', '#84a98c', '#52796f'],
-            borderWidth: 2,
-            borderColor: '#fff'
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-            tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} tCO₂` } }
-          }
-        }
-      });
-
-      // 2. AGB/BGB Component Chart
-      const ctxComp = document.getElementById('carbonChart').getContext('2d');
+      const ctx = document.getElementById('carbonChart').getContext('2d');
       if (carbChart) carbChart.destroy();
-      const agbPart = totalCo2 * (1 / 1.26);
-      const bgbPart = totalCo2 - agbPart;
-      carbChart = new Chart(ctxComp, {
+      carbChart = new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels: ['AGB (บนดิน)', 'BGB (ใต้ดิน)', 'CO₂ รวม'],
-          datasets: [{
-            data: [+agbPart.toFixed(2), +bgbPart.toFixed(2), +totalCo2.toFixed(2)],
-            backgroundColor: ['rgba(45, 158, 95, 0.75)', 'rgba(82, 121, 111, 0.7)', 'rgba(45, 158, 95, 0.3)'],
-            borderRadius: 5,
-            borderWidth: 0
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
-            y: { ticks: { color: 'var(--text-mid)', font: { size: 10 } }, grid: { display: false } }
-          }
-        }
+        data: { labels: ['AGB', 'BGB', 'CO₂ eq.'], datasets: [{ data: [(AGB * trees * 0.47 * 3.67).toFixed(2), (BGB * trees * 0.47 * 3.67).toFixed(2), co2.toFixed(2)], backgroundColor: ['rgba(132,169,140,0.75)', 'rgba(82,121,111,0.7)', 'rgba(168,201,177,0.7)'], borderRadius: 5, borderWidth: 0 }] },
+        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(200,220,210,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: 'rgba(200,220,210,0.65)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.03)' } } } }
       });
 
       document.getElementById('carbon-spin').classList.remove('show');
@@ -2978,84 +2562,27 @@
     function setFc(y) { document.getElementById('fc-years').value = y; runForecast(); }
 
     function runForecast() {
-      let yrs = parseInt(document.getElementById('fc-years').value) || 7;
-      if (yrs > 7) yrs = 7; // Clamp to 7 as requested
-
-      const baseAge = pd.treeAge;
-      const startYear = pd.plantYear + baseAge; // Current Year (พ.ศ.)
-      const trees = pd.treeCount;
-      const dist = pd.ageDist || { [baseAge]: 100 };
-      const labs = [], vals = [], fullLabs = [];
-
+      const yrs = parseInt(document.getElementById('fc-years').value) || 10;
+      const base = pd.treeAge, trees = pd.treeCount;
+      const labs = [], vals = [];
       for (let y = 0; y <= yrs; y++) {
-        let yearlyTotal = 0;
-        Object.keys(dist).forEach(age => {
-          const a = +age + y;
-          const perc = dist[age] / 100;
-          const treesInAge = Math.round(trees * perc);
-
-          const H2 = Math.min(2.0 + 1.8 * a, 28);
-          const D2 = Math.min(3 + 4.5 * a, 60);
-          const AGB2 = 0.1284 * D2 * D2 * H2 * 0.001;
-          yearlyTotal += (AGB2 + AGB2 * 0.26) * 0.47 * 3.67 * treesInAge;
-        });
-        
-        vals.push(+yearlyTotal.toFixed(2));
-        const currentYearLabel = startYear + y;
-        const currentAgeLabel = baseAge + y;
-        labs.push(`${currentYearLabel}`);
-        fullLabs.push(`ปี ${currentYearLabel} (อายุ ${currentAgeLabel} ปี)`);
+        const a = base + y, H2 = Math.min(2.0 + 1.8 * a, 28), D2 = Math.min(3 + 4.5 * a, 60);
+        const AGB2 = 0.1284 * D2 * D2 * H2 * 0.001;
+        vals.push(+((AGB2 + AGB2 * 0.26) * 0.47 * 3.67 * trees).toFixed(2));
+        labs.push(`+${y}ปี`);
       }
-
       const ctx = document.getElementById('fcChart').getContext('2d');
       if (fcChart) fcChart.destroy();
       fcChart = new Chart(ctx, {
         type: 'line',
-        data: {
-          labels: labs,
-          datasets: [{
-            label: 'คาดการณ์ tCO₂',
-            data: vals,
-            borderColor: '#2d9e5f',
-            backgroundColor: 'rgba(45, 158, 95, 0.1)',
-            borderWidth: 3,
-            pointRadius: 4,
-            pointBackgroundColor: '#fff',
-            pointBorderColor: '#2d9e5f',
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { 
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                title: (items) => fullLabs[items[0].dataIndex]
-              }
-            }
-          },
-          scales: {
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { display: false } },
-            y: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
-          }
-        }
+        data: { labels: labs, datasets: [{ data: vals, borderColor: 'rgba(132,169,140,0.85)', backgroundColor: 'rgba(132,169,140,0.08)', borderWidth: 2.2, pointRadius: 1.5, fill: true, tension: 0.4 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(200,220,210,0.4)', font: { size: 8.5 }, maxTicksLimit: 9 }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: 'rgba(200,220,210,0.4)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } }
       });
 
-      const milestones = [1, 2, 3, 5, 7].filter(m => m <= yrs);
+      const milestones = [1, 5, 10, 20, 30].filter(m => m <= yrs);
       let html = '<table style="width:100%;border-collapse:collapse;font-size:11.5px;">';
-      html += '<tr><th style="color:var(--text-dim);text-align:left;padding:3px 0;font-weight:500;">ปี/อายุ</th><th style="color:var(--text-dim);text-align:right;font-weight:500;">tCO₂ eq.</th></tr>';
-      
-      // Current Year Row
-      html += `<tr><td style="color:var(--text-mid);padding:4px 0;">ปี ${startYear} (อายุ ${baseAge} ปี)</td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[0].toLocaleString()}</td></tr>`;
-
-      milestones.forEach(m => {
-        const inc = ((vals[m] - vals[0]) / vals[0] * 100).toFixed(1);
-        const yLabel = startYear + m;
-        const aLabel = baseAge + m;
-        html += `<tr><td style="color:var(--text-mid);padding:4px 0;">ปี ${yLabel} (อายุ ${aLabel} ปี) <span style="font-size:9px;color:var(--green);">[+${inc}%]</span></td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m].toLocaleString()}</td></tr>`;
-      });
+      html += '<tr><th style="color:var(--text-dim);text-align:left;padding:3px 0;font-weight:500;">ปีที่</th><th style="color:var(--text-dim);text-align:right;font-weight:500;">tCO₂</th></tr>';
+      milestones.forEach(m => { html += `<tr><td style="color:var(--text-mid);padding:3px 0;">+${m} ปี (อายุ ${base + m} ปี)</td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m]}</td></tr>`; });
       html += '</table>';
       document.getElementById('fc-table').innerHTML = html;
       document.getElementById('fc-table-box').style.display = 'block';
@@ -3069,54 +2596,18 @@
       const plot = { id: Date.now().toString(), name: pd.name || 'แปลงไม่มีชื่อ', ownerName: pd.ownerName, userId: ME.id, areaRai: pd.areaRai, areaSqm: pd.areaSqm, treeCount: pd.treeCount, plantYear: pd.plantYear, treeAge: pd.treeAge, treeHeight: pd.H, dbh: pd.D, biomassPerTree: pd.bio, carbonTotal: pd.co2, geojson: finalGJ, createdAt: new Date().toISOString() };
       PlotDB.savePlot(ME.id, plot);
       toast(`บันทึก "${plot.name}" เรียบร้อย!`);
-
-      // Update saved plots display
-      loadSavedPlots();
-
-      setTimeout(() => {
-        console.log('Save complete, resetting UI...');
-        clearDraw(); 
-      }, 1500);
-    }
-
-    function loadSavedPlots() {
-      if (!ME) return;
-      const plots = PlotDB.getPlots(ME.id);
-      const collection = {
-        type: 'FeatureCollection',
-        features: plots.map(p => {
-          const feat = p.geojson;
-          if (feat) {
-            feat.properties = { ...feat.properties, name: p.name, id: p.id };
-            return feat;
-          }
-          return null;
-        }).filter(f => f)
-      };
-      if (map.getSource('saved-plots')) {
-        map.getSource('saved-plots').setData(collection);
-      }
+      setTimeout(() => window.location.href = 'my-plots.html', 2000);
     }
 
     /* ================================================================
        MOBILE PANEL TOGGLE
     ================================================================ */
-    function togglePanel(forceState) {
+    function togglePanel() {
       const p = document.getElementById('panel');
       const ic = document.getElementById('panel-toggle-icon');
-      if (!p) return;
-
-      const shouldOpen = (forceState !== undefined) ? forceState : !p.classList.contains('open');
-
-      if (shouldOpen) {
-        p.classList.add('open');
-        document.body.classList.add('panel-open');
-        if (ic) ic.innerHTML = '<i class="bi bi-chevron-down"></i>';
-      } else {
-        p.classList.remove('open');
-        document.body.classList.remove('panel-open');
-        if (ic) ic.innerHTML = '<i class="bi bi-chevron-up"></i>';
-      }
+      if (p) p.classList.toggle('open');
+      if (ic) ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
+      document.body.classList.toggle('panel-open');
     }
 
     /* ================================================================
@@ -3209,14 +2700,9 @@
     /* ================================================================
        UTILITIES
     ================================================================ */
-    function stopSpin() {
-      // Dummy function to prevent ReferenceError
-      // If there was a globe rotation interval, clear it here
-    }
-
     function setStatus(t) { document.getElementById('status-text').textContent = t; }
     function empty() { return { type: 'FeatureCollection', features: [] }; }
-    function isMobile() { return window.innerWidth <= 992; }
+    function isMobile() { return window.innerWidth <= 768; }
 
     function areaM2(coords) {
       let a = 0;
