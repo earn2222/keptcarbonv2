@@ -1534,13 +1534,16 @@
       }
 
       .maplibregl-ctrl-bottom-right {
-        bottom: 12px !important;
+        bottom: 20px !important;
+        top: auto !important;
         right: 12px !important;
         gap: 6px;
-        transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        z-index: 600 !important;
+        transition: none !important;
       }
       body.panel-open .maplibregl-ctrl-bottom-right {
-        bottom: calc(65vh + 12px) !important;
+        bottom: 20px !important;
+        top: auto !important;
       }
 
       .maplibregl-ctrl-group button {
@@ -1562,16 +1565,19 @@
 
       /* Basemap card adjustment */
       #basemap-card {
-        right: 12px;
-        bottom: 12px;
-        width: auto;
+        right: 60px;
+        bottom: 20px;
+        top: auto;
+        width: 220px;
         min-width: 200px;
-        max-width: calc(100% - 24px);
+        max-width: calc(100% - 80px);
         transform: translateX(20px);
-        transition: all 0.3s, bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        z-index: 610;
+        transition: all 0.3s;
       }
       body.panel-open #basemap-card {
-        bottom: calc(65vh + 12px);
+        bottom: 20px;
+        top: auto;
       }
       #basemap-card.open {
         transform: translateX(0);
