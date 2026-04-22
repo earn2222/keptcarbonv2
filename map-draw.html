@@ -1775,8 +1775,8 @@
             <ol class="info-steps">
               <li><span class="sn">1</span>กดปุ่ม ✏️ ในแถบซ้ายเพื่อเข้าโหมดวาด</li>
               <li><span class="sn">2</span>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต</li>
-              <li><span class="sn">3</span>ดับเบิลคลิกเพื่อปิดและบันทึกแปลง</li>
-              <li><span class="sn">4</span>กด "ยืนยันแปลง" ด้านล่าง</li>
+              <li><span class="sn">3</span>คลิกที่ "จุดเดิม" หรือ "จุดแรก" เพื่อจบงาน</li>
+              <li><span class="sn">4</span>ระบบจะพาไปหน้ากรอกข้อมูลอัตโนมัติ</li>
             </ol>
           </div>
 
@@ -2220,6 +2220,13 @@
     let shpFile = null;
 
     function toggleDraw() {
+      // If currently drawing and we have at least 3 points, 
+      // clicking "Stop Drawing" should finish the plot.
+      if (drawMode && verts.length >= 3) {
+        finishDraw();
+        return;
+      }
+
       drawMode = !drawMode;
       const btn = document.getElementById('btnDraw');
       const btnP = document.getElementById('btnStartDraw');
@@ -2228,7 +2235,7 @@
         if (btn) btn.classList.add('on');
         document.getElementById('body').classList.add('drawing');
         if (btnP) btnP.innerHTML = '<i class="bi bi-stop-circle me-1"></i> หยุดวาด';
-        setStatus('โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click เพื่อปิดแปลง | Esc ยกเลิก');
+        setStatus('โหมดวาด — คลิกเพื่อเพิ่มจุด | คลิก "หยุดวาด" หรือ Double-click เพื่อปิดแปลง');
         if (map.doubleClickZoom) map.doubleClickZoom.disable();
       } else {
         if (btn) btn.classList.remove('on');
@@ -2241,10 +2248,31 @@
 
     map.on('click', e => {
       if (!drawMode) return;
+
+      const pCurrent = map.project(e.lngLat);
+
+      // 1. Detect clicking near the LAST point to finish (easy double-tap)
+      if (verts.length >= 3) {
+        const pLast = map.project(verts[verts.length - 1]);
+        if (Math.hypot(pLast.x - pCurrent.x, pLast.y - pCurrent.y) < 30) {
+          finishDraw();
+          return;
+        }
+      }
+
+      // 2. Detect clicking near the FIRST point to close (classic way)
+      if (verts.length >= 3) {
+        const pFirst = map.project(verts[0]);
+        if (Math.hypot(pFirst.x - pCurrent.x, pFirst.y - pCurrent.y) < 35) {
+          finishDraw();
+          return;
+        }
+      }
+
       verts.push([e.lngLat.lng, e.lngLat.lat]);
       addMarker([e.lngLat.lng, e.lngLat.lat]);
       previewDraw();
-      setStatus(`จุดที่ ${verts.length} — Double-click เพื่อปิดแปลง`);
+      setStatus(`จุดที่ ${verts.length} — คลิกที่จุดเดิมหรือจุดแรกเพื่อจบการวาด`);
     });
 
     map.on('dblclick', e => {
@@ -2287,11 +2315,13 @@
       document.getElementById('draw-area-preview').textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
       document.getElementById('draw-done').classList.add('show');
       document.getElementById('btnConfirm').disabled = false;
-      setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กด "ยืนยันแปลง"`);
+      setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กำลังไปหน้ากรอกข้อมูล...`);
       
-      // Auto open panel on mobile after drawing finished
-      // Auto open panel after drawing finished
-      setTimeout(() => togglePanel(true), 150);
+      // Auto open panel and jump to Step 2 immediately as requested
+      setTimeout(() => {
+        togglePanel(true);
+        confirmDraw();
+      }, 500);
 
       fitPlot();
     }
