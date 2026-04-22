@@ -2945,8 +2945,11 @@
       let yrs = parseInt(document.getElementById('fc-years').value) || 7;
       if (yrs > 7) yrs = 7; // Clamp to 7 as requested
 
-      const baseAge = pd.treeAge, trees = pd.treeCount, dist = pd.ageDist || { [baseAge]: 100 };
-      const labs = [], vals = [];
+      const baseAge = pd.treeAge;
+      const startYear = pd.plantYear + baseAge; // Current Year (พ.ศ.)
+      const trees = pd.treeCount;
+      const dist = pd.ageDist || { [baseAge]: 100 };
+      const labs = [], vals = [], fullLabs = [];
 
       for (let y = 0; y <= yrs; y++) {
         let yearlyTotal = 0;
@@ -2960,8 +2963,12 @@
           const AGB2 = 0.1284 * D2 * D2 * H2 * 0.001;
           yearlyTotal += (AGB2 + AGB2 * 0.26) * 0.47 * 3.67 * treesInAge;
         });
+        
         vals.push(+yearlyTotal.toFixed(2));
-        labs.push(y === 0 ? 'ปัจจุบัน' : `ปีที่ ${y}`);
+        const currentYearLabel = startYear + y;
+        const currentAgeLabel = baseAge + y;
+        labs.push(`${currentYearLabel}`);
+        fullLabs.push(`ปี ${currentYearLabel} (อายุ ${currentAgeLabel} ปี)`);
       }
 
       const ctx = document.getElementById('fcChart').getContext('2d');
@@ -2985,7 +2992,14 @@
         },
         options: {
           responsive: true,
-          plugins: { legend: { display: false } },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => fullLabs[items[0].dataIndex]
+              }
+            }
+          },
           scales: {
             x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { display: false } },
             y: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
@@ -2995,10 +3009,16 @@
 
       const milestones = [1, 2, 3, 5, 7].filter(m => m <= yrs);
       let html = '<table style="width:100%;border-collapse:collapse;font-size:11.5px;">';
-      html += '<tr><th style="color:var(--text-dim);text-align:left;padding:3px 0;font-weight:500;">พยากรณ์</th><th style="color:var(--text-dim);text-align:right;font-weight:500;">tCO₂ eq.</th></tr>';
+      html += '<tr><th style="color:var(--text-dim);text-align:left;padding:3px 0;font-weight:500;">ปี/อายุ</th><th style="color:var(--text-dim);text-align:right;font-weight:500;">tCO₂ eq.</th></tr>';
+      
+      // Current Year Row
+      html += `<tr><td style="color:var(--text-mid);padding:4px 0;">ปี ${startYear} (อายุ ${baseAge} ปี)</td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[0].toLocaleString()}</td></tr>`;
+
       milestones.forEach(m => {
         const inc = ((vals[m] - vals[0]) / vals[0] * 100).toFixed(1);
-        html += `<tr><td style="color:var(--text-mid);padding:4px 0;">+${m} ปี <span style="font-size:9px;color:var(--green);">[+${inc}%]</span></td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m].toLocaleString()}</td></tr>`;
+        const yLabel = startYear + m;
+        const aLabel = baseAge + m;
+        html += `<tr><td style="color:var(--text-mid);padding:4px 0;">ปี ${yLabel} (อายุ ${aLabel} ปี) <span style="font-size:9px;color:var(--green);">[+${inc}%]</span></td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m].toLocaleString()}</td></tr>`;
       });
       html += '</table>';
       document.getElementById('fc-table').innerHTML = html;
