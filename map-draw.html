@@ -41,6 +41,14 @@
       --font: 'Noto Sans Thai', 'Noto Sans', sans-serif;
     }
 
+    .desktop-only { display: block; }
+    .mobile-only { display: none; }
+
+    @media (max-width: 768px) {
+      .desktop-only { display: none; }
+      .mobile-only { display: block; }
+    }
+
     html,
     body {
       height: 100%;
@@ -1787,16 +1795,31 @@
         <!-- DRAW TAB -->
         <div id="ct-draw">
           <div class="info-box">
-            <div class="info-box-title">วิธีวาด</div>
-            <ol class="info-steps">
-              <li><span class="sn">1</span>กดปุ่ม ✏️ ในแถบซ้ายเพื่อเข้าโหมดวาด</li>
-              <li><span class="sn">2</span>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต</li>
-              <li><span class="sn">3</span>คลิกที่ "จุดเดิม" หรือ "จุดแรก" เพื่อจบงาน</li>
-              <li><span class="sn">4</span>กดปุ่ม "ยืนยันแปลงที่วาด" เพื่อดำเนินการต่อ</li>
-            </ol>
+            <div class="info-box-title">วิธีวาดแปลง</div>
+            
+            <!-- Desktop Instructions -->
+            <div class="desktop-only">
+              <ol class="info-steps">
+                <li><span class="sn">1</span>คลิก ✏️ หรือปุ่ม "เริ่มวาด"</li>
+                <li><span class="sn">2</span>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต</li>
+                <li><span class="sn">3</span>คลิกที่ "จุดแรก" หรือ Double-click เพื่อจบงาน</li>
+                <li><span class="sn">4</span><strong>แก้ไข:</strong> ลากจุดเพื่อขยับ หรือลากจุดจางเพื่อเพิ่มจุด</li>
+              </ol>
+            </div>
+
+            <!-- Mobile Instructions -->
+            <div class="mobile-only">
+              <ol class="info-steps">
+                <li><span class="sn">1</span>แตะปุ่ม ✏️ เพื่อเริ่มวาด</li>
+                <li><span class="sn">2</span>แตะบนแผนที่เพื่อวางจุดตามขอบแปลง</li>
+                <li><span class="sn">3</span>แตะ "จุดแรก" หรือปุ่ม "หยุดวาด" เพื่อจบงาน</li>
+                <li><span class="sn">4</span><strong>แก้ไข:</strong> แตะค้างที่จุดแล้วลากเพื่อขยับตำแหน่ง</li>
+              </ol>
+            </div>
+
             <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border); font-size:11px;">
               <div style="color:var(--green);font-weight:700;margin-bottom:4px;"><i class="bi bi-info-circle me-1"></i> ข้อกำหนดพื้นที่</div>
-              <p style="color:var(--text-mid);line-height:1.4;">ขนาดแปลงต้องมีพื้นที่ไม่น้อยกว่า <strong>1 ไร่</strong> (หรือประมาณ <strong>40 × 40 เมตร</strong>) เพื่อให้ระบบสามารถประมวลผลข้อมูลดาวเทียมได้อย่างแม่นยำ</p>
+              <p style="color:var(--text-mid);line-height:1.4;">ขนาดแปลงต้องมีพื้นที่ไม่น้อยกว่า <strong>1 ไร่</strong> (หรือ <strong>40 × 40 เมตร</strong>) เพื่อความแม่นยำของข้อมูล</p>
             </div>
           </div>
 
