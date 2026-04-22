@@ -1536,3 +1536,205 @@
 .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
   filter: hue-rotate(100deg) saturate(1.5) brightness(0.6);
 }
+
+/* ============================================================
+   Sidebar Menu (Mobile Drawer)
+   Matching map-draw.html style
+   ============================================================ */
+#sidebar-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: #ffffff;
+  z-index: 9999;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Noto Sans Thai', sans-serif;
+}
+
+#sidebar-menu.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header .brand {
+  font-weight: 700;
+  color: #2d9e5f;
+  font-size: 17px;
+  margin-left: 8px;
+}
+
+.btn-close-sidebar {
+  width: 30px;
+  height: 30px;
+  background: #ff5252;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close-sidebar:hover {
+  background: #ff1a1a;
+  transform: rotate(90deg);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.sidebar-nav-title {
+  font-size: 11px;
+  color: #999;
+  padding: 0 24px;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: #444;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.sidebar-nav a i {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  color: #777;
+}
+
+.sidebar-nav a:hover {
+  background: rgba(45, 158, 95, 0.05);
+  color: #2d9e5f;
+}
+
+.sidebar-nav a:hover i {
+  color: #2d9e5f;
+}
+
+.sidebar-nav a.active {
+  background: rgba(45, 158, 95, 0.08);
+  color: #2d9e5f;
+  border-right: 4px solid #2d9e5f;
+  font-weight: 600;
+}
+
+.sidebar-nav a.active i {
+  color: #2d9e5f;
+}
+
+.sidebar-footer {
+  padding: 24px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  line-height: 1.6;
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Adjust Mobile Nav Toggle to look like map-draw.html */
+@media (max-width: 1199px) {
+  .header {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .header .container-fluid {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important; /* Toggle on left */
+    height: 70px;
+    position: relative;
+    background: transparent !important;
+  }
+
+  
+  .header .logo {
+    display: none !important; /* Remove logo on mobile as requested */
+  }
+
+  
+  #navmenu {
+    order: -1; /* Move to the beginning (left) */
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 100 !important; /* Higher z-index to stay above logo */
+    position: relative;
+  }
+
+  .mobile-nav-toggle {
+    background: rgba(45, 158, 95, 0.08) !important;
+    border: 1px solid rgba(45, 158, 95, 0.15) !important;
+    border-radius: 10px !important;
+    width: 42px !important;
+    height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #2d9e5f !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    position: relative;
+    z-index: 110 !important; /* Ensure it's clickable */
+  }
+  
+  .mobile-nav-toggle:hover {
+    background: rgba(45, 158, 95, 0.15) !important;
+    transform: scale(1.05);
+  }
+  
+  #nav-buttons {
+    display: none !important; /* Hide auth buttons in top bar on mobile */
+  }
+}
+
+
