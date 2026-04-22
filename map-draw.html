@@ -60,43 +60,56 @@
       background: #ffffff;
     }
 
-    /* MapLibre overrides */
+    /* MapLibre overrides for separated controls */
+    .maplibregl-ctrl-bottom-right {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      bottom: 24px !important;
+      right: 24px !important;
+      align-items: flex-end;
+      z-index: 100;
+    }
+
     .maplibregl-ctrl-group {
-      background: rgba(255, 255, 255, 0.95) !important;
-      border: 1px solid var(--border) !important;
-      border-radius: 12px !important;
-      box-shadow: 0 4px 20px rgba(45, 158, 95, 0.12) !important;
-      overflow: hidden;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0 !important;
     }
 
     .maplibregl-ctrl-group button {
       width: 38px !important;
       height: 38px !important;
-      background: transparent !important;
-      border-bottom: 1px solid var(--border) !important;
-      transition: background 0.2s;
-    }
-
-    .maplibregl-ctrl-group button:last-child {
-      border-bottom: none !important;
+      background: rgba(255, 255, 255, 0.98) !important;
+      border: 1px solid rgba(0,0,0,0.06) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+      transition: all 0.2s !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .maplibregl-ctrl-group button:hover {
-      background: rgba(45, 158, 95, 0.1) !important;
+      background: #ffffff !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
     }
 
+
+
     .maplibregl-ctrl-icon {
-      filter: hue-rotate(100deg) saturate(1.5) brightness(0.55) !important;
+      transform: scale(0.75) !important;
+      filter: opacity(0.65) !important;
     }
 
     .maplibregl-ctrl-bottom-left {
-      bottom: 72px !important;
+      bottom: 24px !important;
       left: 14px !important;
-    }
-
-    .maplibregl-ctrl-bottom-right {
-      bottom: 72px !important;
-      right: calc(var(--panel-w) + 12px) !important;
     }
 
     .maplibregl-ctrl-scale {
@@ -114,33 +127,234 @@
     }
 
     /* ============================================================
-   TOP BAR
+   TOP BAR (NEW)
 ============================================================ */
     #topbar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: var(--topbar-h);
+      height: 60px;
       z-index: 300;
-      background: rgba(255, 255, 255, 0.97);
-      border-bottom: 1px solid rgba(45, 158, 95, 0.1);
-      backdrop-filter: blur(12px);
+      background: #ffffff;
+      border-bottom: 1px solid #f0f0f0;
       display: flex;
       align-items: center;
-      padding: 0 18px;
-      gap: 16px;
-      box-shadow: 0 2px 16px rgba(45, 158, 95, 0.06);
+      justify-content: space-between;
+      padding: 0 20px;
     }
 
-    .logo {
+    .topbar-left {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 16px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #e9ecef;
+      color: #000;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* ============================================================
+   SIDEBAR (LEFT)
+============================================================ */
+    #sidebar-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      background: #ffffff;
+      z-index: 400;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.06);
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar-menu.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sidebar-header .brand {
+      font-weight: 700;
+      color: #e65100;
+      font-size: 16px;
+    }
+
+    .sidebar-header .version {
+      font-size: 10px;
+      background: #ffe0b2;
+      color: #e65100;
+      padding: 2px 6px;
+      border-radius: 12px;
+      margin-left: 8px;
+    }
+
+    .btn-close-sidebar {
+      width: 28px;
+      height: 28px;
+      background: #ff5252;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-nav-title {
+      font-size: 11px;
+      color: #999;
+      padding: 0 24px;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      color: #555;
       text-decoration: none;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .sidebar-nav a i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      color: #888;
+    }
+
+    .sidebar-nav a:hover {
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .sidebar-nav a.active {
+      background: rgba(45, 158, 95, 0.08);
+      color: var(--green);
+      border-right: 3px solid var(--green);
+    }
+
+    .sidebar-nav a.active i {
+      color: var(--green);
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+    }
+
+    /* BASEMAP CARD */
+    #basemap-card {
+      position: fixed;
+      bottom: 24px;
+      right: 70px;
+      width: 220px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      opacity: 0;
+      transform: translateX(20px);
+      pointer-events: none;
+      transition: all 0.3s;
+    }
+
+    #basemap-card.open {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .basemap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .basemap-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #555;
+      transition: all 0.2s;
+    }
+
+    .basemap-option:hover {
+      background: #f8f9fa;
+    }
+
+    .basemap-option.active {
+      background: #f59e0b;
+      color: white;
+      border-color: #f59e0b;
     }
 
     .logo:hover {
@@ -355,18 +569,73 @@
 ============================================================ */
     #panel {
       position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
+      top: 24px;
+      right: 24px;
+      bottom: auto;
+      max-height: calc(100vh - 48px);
       width: var(--panel-w);
       background: var(--surface);
       backdrop-filter: blur(28px) saturate(150%);
       -webkit-backdrop-filter: blur(28px) saturate(150%);
-      border-left: 1px solid var(--border);
-      z-index: 200;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      z-index: 500;
       display: flex;
       flex-direction: column;
-      padding: calc(var(--topbar-h) + 14px) 0 0;
+      padding: 0;
+      overflow: hidden;
+      transform: translateX(120%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #panel.open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #btn-open-panel {
+      position: fixed;
+      top: 84px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      background: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #555;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      z-index: 200;
+      transition: all 0.2s;
+    }
+
+    #btn-open-panel:hover {
+      background: #f8f9fa;
+      color: #000;
+    }
+
+    #btn-close-panel {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      color: var(--text-dim);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #btn-close-panel:hover {
+      color: var(--text);
     }
 
     .panel-inner {
@@ -1042,20 +1311,7 @@
    SEARCH BAR
 ============================================================ */
     #search-container {
-      position: fixed;
-      top: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 200;
-      width: 340px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-radius: 12px;
-      border: 1px solid var(--border-g);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      display: none !important;
     }
     #search-box {
       display: flex;
@@ -1123,22 +1379,7 @@
    STATUS BAR (BOTTOM)
 ============================================================ */
     #statusbar {
-      position: fixed;
-      bottom: 14px;
-      left: 14px;
-      right: calc(var(--panel-w) + 14px);
-      z-index: 200;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(45, 158, 95, 0.14);
-      border-radius: 10px;
-      padding: 8px 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-mid);
-      box-shadow: 0 4px 14px rgba(45, 158, 95, 0.08);
+      display: none !important;
     }
 
     .sdot {
@@ -1330,7 +1571,10 @@
       }
 
       #panel {
-        transform: none !important;
+        transform: translateY(100%) !important;
+      }
+      #panel.open {
+        transform: translateY(0) !important;
       }
 
       #menu-toggle {
@@ -1366,26 +1610,64 @@
     <button id="geom-copy-btn" onclick="copyGeom()">⧉ คัดลอก GeoJSON</button>
   </div>
 
-  <!-- ======================== TOPBAR ======================== -->
+  <!-- ======================== TOP BAR ======================== -->
   <div id="topbar">
-    <a class="logo" href="dashboard.html">
-      <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" class="logo-img">
-    </a>
-    <nav class="topnav">
-      <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
-      <a href="map-draw.html" class="active"><i class="bi bi-map"></i> วาดแปลง</a>
-      <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
-      <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
-    </nav>
+    <div class="topbar-left">
+      <button class="icon-btn" onclick="document.getElementById('sidebar-menu').classList.add('open')">
+        <i class="bi bi-list"></i>
+      </button>
+      <div class="topbar-title" style="display: flex; align-items: center; gap: 10px;">
+        <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" style="height: 32px;">
+        <span style="color: var(--green); font-weight: 700;">KeptCarbon</span>
+      </div>
+    </div>
     <div class="topbar-right">
-      <span id="nav-user" style="font-size:12px;color:var(--text-mid);"></span>
-      <button class="btn-logout" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกระบบ</button>
-      <button id="menu-toggle" onclick="togglePanel()"><i class="bi bi-layout-text-sidebar-reverse"></i></button>
+      <span id="nav-user" style="font-size:12px;color:var(--text-mid);margin-right:8px;"></span>
+      <button class="icon-btn" style="font-weight:600;font-size:12px;">TH</button>
+      <button class="icon-btn" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
     </div>
   </div>
 
+  <!-- ======================== SIDEBAR ======================== -->
+  <div id="sidebar-menu">
+    <div class="sidebar-header">
+      <div style="display:flex;align-items:center;">
+        <div class="brand" style="color: var(--green);">KeptCarbon</div>
+        <div class="version" style="background: rgba(45,158,95,0.1); color: var(--green);">V2.0</div>
+      </div>
+      <button class="btn-close-sidebar" onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
+    </div>
+    <div class="sidebar-nav">
+      <a href="index.html"><i class="bi bi-house"></i> หน้าหลัก</a>
+      <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
+      
+      <div class="sidebar-nav-title">จัดการพื้นที่</div>
+      <a href="map-draw.html" class="active"><i class="bi bi-map"></i> วาดแปลง (Map Draw)</a>
+      <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
+      
+      <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
+      <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
+      <a href="#" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
+    </div>
+    <div class="sidebar-footer">
+      <i class="bi bi-tree"></i><br>ระบบประเมินคาร์บอนเครดิต<br>สวนยางพารายั่งยืน
+    </div>
+  </div>
+
+  <!-- ======================== BASEMAP CARD ======================== -->
+  <div id="basemap-card">
+    <div class="basemap-header">
+      <span><i class="bi bi-map me-2"></i>Basemap</span>
+      <i class="bi bi-x" style="cursor:pointer;font-size:18px;" onclick="document.getElementById('basemap-card').classList.remove('open')"></i>
+    </div>
+    <div class="basemap-option" onclick="switchBasemap('light', this)"><i class="bi bi-sun"></i> Light</div>
+    <div class="basemap-option" onclick="switchBasemap('dark', this)"><i class="bi bi-moon"></i> Dark</div>
+    <div class="basemap-option active" onclick="switchBasemap('sat', this)"><i class="bi bi-globe"></i> Satellite</div>
+    <div class="basemap-option" onclick="switchBasemap('hybrid', this)"><i class="bi bi-google"></i> Google Hybrid</div>
+  </div>
+
   <!-- ======================== DRAW TOOLBAR ======================== -->
-  <div id="draw-toolbar">
+  <div id="draw-toolbar" style="display: none;"> <!-- Hidden as requested by full screen globe UI -->
     <button class="tool-btn" id="btnDraw" onclick="toggleDraw()" title="วาดแปลง">
       <i class="bi bi-pencil"></i>
     </button>
@@ -1401,8 +1683,14 @@
     </button>
   </div>
 
+  <!-- FLOATING ICON TO OPEN PANEL -->
+  <button id="btn-open-panel" onclick="togglePanel()" title="กรอกข้อมูลแปลง">
+    <i class="bi bi-pencil-square"></i>
+  </button>
+
   <!-- ======================== SIDE PANEL ======================== -->
   <div id="panel">
+    <button id="btn-close-panel" onclick="togglePanel()">✕</button>
     <!-- Mobile handle -->
     <div class="panel-handle" onclick="togglePanel()">
       <div class="panel-handle-bar"></div>
@@ -1780,9 +2068,25 @@
             tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
             tileSize: 256,
             attribution: ''
+          },
+          street: {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: ''
+          },
+          topo: {
+            type: 'raster',
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
+            tileSize: 256,
+            attribution: ''
           }
         },
-        layers: [{ id: 'sat', type: 'raster', source: 'sat' }]
+        layers: [
+          { id: 'sat', type: 'raster', source: 'sat', layout: { visibility: 'visible' } },
+          { id: 'street', type: 'raster', source: 'street', layout: { visibility: 'none' } },
+          { id: 'topo', type: 'raster', source: 'topo', layout: { visibility: 'none' } }
+        ]
       },
       center: [101.258, 15],
       zoom: 1.8,
@@ -1791,8 +2095,40 @@
       attributionControl: false
     });
 
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-left');
-    map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
+    // Add Custom Layer Switcher (Mock)
+    class MapLayerControl {
+      onAdd(map) {
+        this.map = map;
+        this.container = document.createElement('div');
+        this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+        
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.title = 'เปลี่ยนชั้นข้อมูลแผนที่';
+        btn.innerHTML = '<span class="maplibregl-ctrl-icon" style="display:flex;align-items:center;justify-content:center;font-size:18px;color:#555;"><i class="bi bi-map"></i></span>';
+        
+        // When clicked, toggle basemap card
+        btn.onclick = () => {
+          document.getElementById('basemap-card').classList.toggle('open');
+        };
+        
+        this.container.appendChild(btn);
+        return this.container;
+      }
+      onRemove() {
+        this.container.parentNode.removeChild(this.container);
+        this.map = undefined;
+      }
+    }
+    map.addControl(new MapLayerControl(), 'bottom-right');
+
+    // Add Geolocate Control
+    map.addControl(new maplibregl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true
+    }), 'bottom-right');
+
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
     // Auto-spin globe
     let spinning = true;
@@ -2229,8 +2565,9 @@
     function togglePanel() {
       const p = document.getElementById('panel');
       const ic = document.getElementById('panel-toggle-icon');
-      p.classList.toggle('open');
-      ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
+      if(p) p.classList.toggle('open');
+      if(ic) ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
+      document.body.classList.toggle('panel-open');
     }
 
     /* ================================================================
@@ -2240,10 +2577,37 @@
       if (e.key === 'Enter') searchLocation();
     });
 
-    // Hide search results when clicking outside
+    // Switch basemap globally
+    function switchBasemap(mode, el) {
+      document.querySelectorAll('.basemap-option').forEach(opt => opt.classList.remove('active'));
+      el.classList.add('active');
+      
+      const modes = ['sat', 'street', 'topo']; // Map to existing layers
+      // Hide all first
+      modes.forEach(m => map.setLayoutProperty(m, 'visibility', 'none'));
+      
+      // We will map 'light' -> street, 'dark' -> topo, 'sat' -> sat, 'hybrid' -> sat (as mock)
+      let targetLayer = 'sat';
+      if (mode === 'light') targetLayer = 'street';
+      if (mode === 'dark') targetLayer = 'topo';
+      
+      map.setLayoutProperty(targetLayer, 'visibility', 'visible');
+    }
+
+    // Close sidebar when clicking outside
     document.addEventListener('click', function(e) {
-      if (!document.getElementById('search-container').contains(e.target)) {
-        document.getElementById('search-results').style.display = 'none';
+      const sidebar = document.getElementById('sidebar-menu');
+      const toggleBtn = document.querySelector('.topbar-left .icon-btn');
+      
+      if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+        sidebar.classList.remove('open');
+      }
+      
+      // Close search results
+      const searchContainer = document.getElementById('search-container');
+      if (searchContainer && !searchContainer.contains(e.target)) {
+        const results = document.getElementById('search-results');
+        if (results) results.style.display = 'none';
       }
     });
 
