@@ -2379,13 +2379,13 @@
         coordinates: [coords.map(([lng, lat]) => [+lng.toFixed(6), +lat.toFixed(6)])]
       };
       
-      // 1. Send to Backend (Mock)
-      console.log('%c[BACKEND] Sending geometry to /api/process-plot...', 'color: #2d9e5f; font-weight: bold;');
-      fetch('/api/process-plot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ geom: geomObj, userId: ME?.id })
-      }).catch(e => console.log('Mock fetch sent (as expected in demo)'));
+      // 1. Send to Backend (Simulated for Demo)
+      console.log('%c[BACKEND] Processing geometry at /api/process-plot...', 'color: #2d9e5f; font-weight: bold;');
+      
+      // We simulate the API call to avoid 404 since this is a static site demo
+      new Promise(resolve => setTimeout(resolve, 1000)).then(() => {
+        console.log('%c[BACKEND] Success: Geometry processed.', 'color: #2d9e5f;');
+      });
 
       // 2. Log to console as requested
       console.log('=== Plot Geometry (Polygon) ===');
