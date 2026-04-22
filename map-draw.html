@@ -1237,98 +1237,27 @@
     }
 
     /* ============================================================
-   GEOM FLOATING PANEL
+   GEOM STATUS (CONSOLE ONLY)
 ============================================================ */
-    #geom-panel {
+    #geom-status-indicator {
       position: fixed;
-      bottom: 70px;
-      left: 14px;
+      bottom: 24px;
+      left: 24px;
       z-index: 300;
-      background: rgba(10, 30, 20, 0.93);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(45, 158, 95, 0.4);
-      border-radius: 12px;
-      padding: 12px 14px;
-      width: 300px;
-      max-width: calc(100vw - 28px);
-      display: none;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    #geom-panel.show {
-      display: block;
-    }
-
-    #geom-panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    #geom-panel-title {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--green);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
-    #geom-panel-close {
-      background: none;
-      border: none;
-      color: var(--text-dim);
-      cursor: pointer;
-      font-size: 14px;
-      padding: 0;
-      line-height: 1;
-    }
-
-    #geom-copy-btn {
-      margin-top: 8px;
-      width: 100%;
-      padding: 5px 0;
-      background: rgba(45, 158, 95, 0.15);
-      border: 1px solid rgba(45, 158, 95, 0.35);
-      border-radius: 7px;
-      color: var(--green);
+      background: rgba(45, 158, 95, 0.1);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-g);
+      border-radius: 8px;
+      padding: 8px 12px;
       font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: var(--font);
-      transition: all 0.2s;
+      color: var(--green);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.3s ease;
     }
 
-    #geom-copy-btn:hover {
-      background: rgba(45, 158, 95, 0.25);
-    }
-
-    #geom-output-pre {
-      font-size: 9px;
-      color: rgba(180, 220, 195, 0.85);
-      max-height: 120px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-      line-height: 1.5;
-      margin: 0;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
-      padding: 7px;
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     /* ============================================================
    SEARCH BAR
@@ -1635,15 +1564,10 @@
     <div id="search-results"></div>
   </div>
 
-  <!-- ======================== GEOM FLOAT PANEL ======================== -->
-  <div id="geom-panel">
-    <div id="geom-panel-header">
-      <span id="geom-panel-title">📍 GeoJSON Polygon</span>
-      <button id="geom-panel-close" onclick="document.getElementById('geom-panel').classList.remove('show')"
-        title="ปิด">✕</button>
-    </div>
-    <pre id="geom-output-pre"></pre>
-    <button id="geom-copy-btn" onclick="copyGeom()">⧉ คัดลอก GeoJSON</button>
+  <!-- ======================== GEOM STATUS INDICATOR ======================== -->
+  <div id="geom-status-indicator">
+    <i class="bi bi-terminal"></i>
+    <span>Geometry logged to console & sent to backend</span>
   </div>
 
   <!-- ======================== TOP BAR ======================== -->
@@ -1904,10 +1828,7 @@
               <option>อื่นๆ</option>
             </select>
           </div>
-          <div class="field" style="margin-bottom:0;">
-            <label><i class="bi bi-calendar3" style="margin-right:4px;color:var(--green);"></i>ปีที่ปลูก (พ.ศ.)</label>
-            <input type="number" id="inp-plantyear" placeholder="เช่น 2558" min="2500" max="2570">
-          </div>
+
           <div class="field" style="margin-bottom:0;">
             <label><i class="bi bi-tree" style="margin-right:4px;color:var(--green);"></i>พันธุ์ยาง</label>
             <select id="inp-variety"
@@ -1956,8 +1877,8 @@
 
         <div id="age-result" style="display:none;">
           <div class="chart-box">
-            <div class="chart-box-title">การกระจายปีปลูก (%)</div>
-            <canvas id="yearChart" height="150"></canvas>
+            <div class="chart-box-title">การกระจายอายุยาง (Age Distribution)</div>
+            <canvas id="ageChart" height="150"></canvas>
           </div>
           <div class="metrics-grid">
             <div class="metric">
@@ -2033,7 +1954,11 @@
             <div class="carbon-hero-unit">tCO₂ eq.</div>
           </div>
           <div class="chart-box">
-            <div class="chart-box-title">คาร์บอนแยกส่วน (tCO₂)</div>
+            <div class="chart-box-title">คาร์บอนแยกตามช่วงอายุ (tCO₂)</div>
+            <canvas id="carbonAgeChart" height="150"></canvas>
+          </div>
+          <div class="chart-box">
+            <div class="chart-box-title">คาร์บอนแยกส่วนประกอบ (AGB/BGB)</div>
             <canvas id="carbonChart" height="130"></canvas>
           </div>
           <button class="btn btn-primary" onclick="goStep5()">
@@ -2055,17 +1980,16 @@
 
         <div style="display:flex;gap:7px;margin-bottom:12px;align-items:center;">
           <div class="field" style="flex:1;margin-bottom:0;">
-            <input type="number" id="fc-years" value="10" min="1" max="50" placeholder="จำนวนปี">
+            <input type="number" id="fc-years" value="7" min="1" max="7" placeholder="จำนวนปี (ไม่เกิน 7)">
           </div>
           <button class="btn btn-primary" style="width:auto;padding:10px 16px;margin-bottom:0;" onclick="runForecast()">
             <i class="bi bi-play-fill me-1"></i>พยากรณ์
           </button>
         </div>
         <div class="preset-wrap">
+          <button class="btn-sm" onclick="setFc(3)">3 ปี</button>
           <button class="btn-sm" onclick="setFc(5)">5 ปี</button>
-          <button class="btn-sm" onclick="setFc(10)">10 ปี</button>
-          <button class="btn-sm" onclick="setFc(20)">20 ปี</button>
-          <button class="btn-sm" onclick="setFc(30)">30 ปี</button>
+          <button class="btn-sm" onclick="setFc(7)">7 ปี</button>
         </div>
 
         <div class="chart-box">
@@ -2127,21 +2051,24 @@
         sources: {
           sat: {
             type: 'raster',
-            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+            tiles: ['https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'],
             tileSize: 256,
-            attribution: ''
+            attribution: '© Google',
+            maxzoom: 20
           },
           street: {
             type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tiles: ['https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'],
             tileSize: 256,
-            attribution: ''
+            attribution: '© Google',
+            maxzoom: 20
           },
           topo: {
             type: 'raster',
-            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
+            tiles: ['https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}'],
             tileSize: 256,
-            attribution: ''
+            attribution: '© Google',
+            maxzoom: 20
           }
         },
         layers: [
@@ -2329,38 +2256,29 @@
         type: 'Polygon',
         coordinates: [coords.map(([lng, lat]) => [+lng.toFixed(6), +lat.toFixed(6)])]
       };
-      const geomStr = JSON.stringify(geomObj, null, 2);
+      
+      // 1. Send to Backend (Mock)
+      console.log('%c[BACKEND] Sending geometry to /api/process-plot...', 'color: #2d9e5f; font-weight: bold;');
+      fetch('/api/process-plot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ geom: geomObj, userId: ME?.id })
+      }).catch(e => console.log('Mock fetch sent (as expected in demo)'));
 
-      // Log to console
-      console.log('=== GeoJSON Polygon ===');
-      console.log(geomStr);
-      console.log('Vertices:', coords.length);
-      console.table(coords.map(([lng, lat]) => ({ lng: +lng.toFixed(6), lat: +lat.toFixed(6) })));
+      // 2. Log to console as requested
+      console.log('=== Plot Geometry (Polygon) ===');
+      console.log(JSON.stringify(geomObj, null, 2));
+      console.table(coords.map(([lng, lat]) => ({ lng, lat })));
 
-      // Show floating panel
-      document.getElementById('geom-output-pre').textContent = geomStr;
-      document.getElementById('geom-panel').classList.add('show');
+      // 3. UI feedback
+      const indicator = document.getElementById('geom-status-indicator');
+      indicator.style.display = 'flex';
+      setTimeout(() => indicator.style.display = 'none', 4000);
 
       goStep(2);
     }
 
-    function copyGeom() {
-      const text = document.getElementById('geom-output-pre').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('geom-copy-btn');
-        btn.textContent = '✓ คัดลอกแล้ว!';
-        btn.style.background = 'rgba(45,158,95,0.3)';
-        setTimeout(() => { btn.textContent = '⧉ คัดลอก GeoJSON'; btn.style.background = ''; }, 2500);
-      }).catch(() => {
-        // fallback
-        const ta = document.createElement('textarea');
-        ta.value = text; document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
-        const btn = document.getElementById('geom-copy-btn');
-        btn.textContent = '✓ คัดลอกแล้ว!';
-        setTimeout(() => btn.textContent = '⧉ คัดลอก GeoJSON', 2500);
-      });
-    }
+
 
     function fitPlot() {
       if (!finalGJ) return;
@@ -2469,56 +2387,104 @@
     }
 
     /* ================================================================
-       TREE AGE DETECTION
+       TREE AGE DETECTION (GEE BACKEND)
     ================================================================ */
-    let yrChart = null;
+    let ageChart = null;
 
-    function detectAge() {
+    async function detectAge() {
       document.getElementById('age-action').style.display = 'none';
       document.getElementById('analyze-spin').classList.add('show');
-      const msgs = ['วิเคราะห์ NDVI/EVI...', 'ประมวลผลดาวเทียม...', 'ประมาณอายุพืช...'];
+      
+      const msgs = ['ติดต่อ Google Earth Engine...', 'วิเคราะห์ภาพถ่ายดาวเทียม Sentinel-2...', 'ประมวลผลดัชนีพืชพรรณ (NDVI)...', 'คำนวณโครงสร้างอายุยาง...'];
       let mi = 0;
-      const iv = setInterval(() => { if (mi < msgs.length) document.getElementById('spin-msg').textContent = msgs[mi++]; }, 700);
-      setTimeout(() => {
+      const iv = setInterval(() => { if (mi < msgs.length) document.getElementById('spin-msg').textContent = msgs[mi++]; }, 800);
+
+      try {
+        // Mock GEE API Call
+        console.log('%c[GEE] Analyzing plot age distribution...', 'color: #3498db; font-weight: bold;');
+        
+        // Simulate network delay
+        await new Promise(r => setTimeout(r, 3500));
+        
         clearInterval(iv);
         document.getElementById('analyze-spin').classList.remove('show');
-        const cur = new Date().getFullYear() + 543;
-        const main = cur - Math.floor(Math.random() * 14 + 6);
-        const dist = genDist(main, cur);
-        pd.plantYear = main; pd.treeAge = cur - main;
-        renderYearChart(dist, main);
-        buildChips(dist, main);
-        document.getElementById('r-year').textContent = main;
-        document.getElementById('r-age').textContent = pd.treeAge;
+
+        // Mock result from GEE
+        const curY = new Date().getFullYear() + 543;
+        const mainAge = Math.floor(Math.random() * 12 + 5); // 5-17 years
+        const mainYear = curY - mainAge;
+        
+        // Distribution of ages
+        const ageDist = genAgeDist(mainAge);
+        pd.plantYear = mainYear; 
+        pd.treeAge = mainAge;
+        pd.ageDist = ageDist; // Store for carbon calculation
+
+        renderAgeChart(ageDist);
+        buildAgeChips(ageDist);
+        
+        document.getElementById('r-year').textContent = mainYear;
+        document.getElementById('r-age').textContent = mainAge;
         document.getElementById('age-result').style.display = 'block';
-      }, 3000);
+        
+        setStatus('✓ วิเคราะห์สำเร็จ: พบอายุยางเฉลี่ย ' + mainAge + ' ปี');
+      } catch (err) {
+        clearInterval(iv);
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ GEE Backend');
+        document.getElementById('analyze-spin').classList.remove('show');
+        document.getElementById('age-action').style.display = 'block';
+      }
     }
 
-    function genDist(main, cur) {
+    function genAgeDist(mainAge) {
       const d = {};
-      [-3, -2, -1, 0, 0, 0, 1, 2, 3].forEach(o => { const y = main + o; if (y > 2530 && y <= cur) d[y] = (d[y] || 0) + Math.random() * 14 + (o === 0 ? 36 : 5); });
+      const offsets = [-2, -1, 0, 0, 0, 1, 2];
+      offsets.forEach(o => { 
+        const a = mainAge + o; 
+        if (a > 0) d[a] = (d[a] || 0) + Math.random() * 20 + (o === 0 ? 40 : 5); 
+      });
       const tot = Object.values(d).reduce((a, b) => a + b, 0);
       Object.keys(d).forEach(k => d[k] = +(d[k] / tot * 100).toFixed(1));
       return d;
     }
 
-    function renderYearChart(dist, main) {
-      const ctx = document.getElementById('yearChart').getContext('2d');
-      if (yrChart) yrChart.destroy();
-      const labs = Object.keys(dist).sort();
-      yrChart = new Chart(ctx, {
+    function renderAgeChart(dist) {
+      const ctx = document.getElementById('ageChart').getContext('2d');
+      if (ageChart) ageChart.destroy();
+      const labs = Object.keys(dist).sort((a,b) => a-b);
+      const mainAge = pd.treeAge;
+      
+      ageChart = new Chart(ctx, {
         type: 'bar',
-        data: { labels: labs, datasets: [{ data: labs.map(k => dist[k]), backgroundColor: labs.map(y => +y === main ? 'rgba(132,169,140,0.85)' : 'rgba(132,169,140,0.28)'), borderRadius: 4, borderWidth: 0 }] },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(200,220,210,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: 'rgba(200,220,210,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } }
+        data: { 
+          labels: labs.map(a => a + ' ปี'), 
+          datasets: [{ 
+            data: labs.map(k => dist[k]), 
+            backgroundColor: labs.map(a => +a === mainAge ? 'rgba(45, 158, 95, 0.85)' : 'rgba(45, 158, 95, 0.25)'), 
+            borderRadius: 6,
+            borderWidth: 0 
+          }] 
+        },
+        options: { 
+          responsive: true, 
+          plugins: { 
+            legend: { display: false },
+            tooltip: { callbacks: { label: (c) => `พื้นที่ ${c.raw}% (${(pd.areaRai * c.raw / 100).toFixed(2)} ไร่)` } }
+          }, 
+          scales: { 
+            x: { ticks: { color: 'var(--text-dim)', font: { size: 10 } }, grid: { display: false } }, 
+            y: { beginAtZero: true, ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } } 
+          } 
+        }
       });
     }
 
-    function buildChips(dist, main) {
+    function buildAgeChips(dist) {
       const c = document.getElementById('yr-chips'); c.innerHTML = '';
-      Object.keys(dist).sort().forEach(y => {
+      Object.keys(dist).sort((a,b) => a-b).forEach(a => {
         const el = document.createElement('div');
-        el.className = 'chip' + (+y === main ? ' main' : '');
-        el.textContent = `${y}: ${dist[y]}%`;
+        el.className = 'chip' + (+a === pd.treeAge ? ' main' : '');
+        el.textContent = `อายุ ${a} ปี: ${dist[a]}%`;
         c.appendChild(el);
       });
     }
@@ -2527,28 +2493,91 @@
        CARBON CALCULATION
     ================================================================ */
     let carbChart = null;
+    let carbAgeChart = null;
 
     function calcCarbon() {
-      const age = pd.treeAge, trees = pd.treeCount;
-      const H = Math.min(2.0 + 1.8 * age, 28);
-      const D = Math.min(3 + 4.5 * age, 60);
-      const AGB = 0.1284 * D * D * H * 0.001;
-      const BGB = AGB * 0.26;
-      const co2 = (AGB + BGB) * 0.47 * 3.67 * trees;
-      pd.H = H; pd.D = D; pd.bio = +(AGB * 1000).toFixed(0); pd.co2 = co2;
+      const baseAge = pd.treeAge, trees = pd.treeCount, dist = pd.ageDist || { [baseAge]: 100 };
+      
+      let totalCo2 = 0;
+      const ageLabels = Object.keys(dist).sort((a,b) => a-b);
+      const ageCo2Data = [];
 
-      document.getElementById('r-h').textContent = H.toFixed(1);
-      document.getElementById('r-d').textContent = D.toFixed(1);
+      ageLabels.forEach(age => {
+        const a = +age;
+        const perc = dist[age] / 100;
+        const treesInAge = Math.round(trees * perc);
+        
+        const H = Math.min(2.0 + 1.8 * a, 28);
+        const D = Math.min(3 + 4.5 * a, 60);
+        const AGB = 0.1284 * D * D * H * 0.001;
+        const BGB = AGB * 0.26;
+        const co2Single = (AGB + BGB) * 0.47 * 3.67 * treesInAge;
+        
+        totalCo2 += co2Single;
+        ageCo2Data.push(+co2Single.toFixed(2));
+        
+        if (a === baseAge) {
+          pd.H = H; pd.D = D; pd.bio = +(AGB * 1000).toFixed(0);
+        }
+      });
+
+      pd.co2 = totalCo2;
+
+      document.getElementById('r-h').textContent = pd.H.toFixed(1);
+      document.getElementById('r-d').textContent = pd.D.toFixed(1);
       document.getElementById('r-trees').textContent = trees.toLocaleString();
-      document.getElementById('r-bio').textContent = (AGB * 1000).toFixed(0);
-      document.getElementById('r-co2').textContent = co2.toFixed(2);
+      document.getElementById('r-bio').textContent = pd.bio;
+      document.getElementById('r-co2').textContent = totalCo2.toFixed(2);
 
-      const ctx = document.getElementById('carbonChart').getContext('2d');
+      // 1. Carbon by Age Chart
+      const ctxAge = document.getElementById('carbonAgeChart').getContext('2d');
+      if (carbAgeChart) carbAgeChart.destroy();
+      carbAgeChart = new Chart(ctxAge, {
+        type: 'pie',
+        data: { 
+          labels: ageLabels.map(a => 'อายุ ' + a + ' ปี'), 
+          datasets: [{ 
+            data: ageCo2Data, 
+            backgroundColor: ['#2d9e5f', '#38b26a', '#1e7a47', '#84a98c', '#52796f'],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }] 
+        },
+        options: { 
+          responsive: true, 
+          plugins: { 
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} tCO₂` } }
+          }
+        }
+      });
+
+      // 2. AGB/BGB Component Chart
+      const ctxComp = document.getElementById('carbonChart').getContext('2d');
       if (carbChart) carbChart.destroy();
-      carbChart = new Chart(ctx, {
+      const agbPart = totalCo2 * (1 / 1.26);
+      const bgbPart = totalCo2 - agbPart;
+      
+      carbChart = new Chart(ctxComp, {
         type: 'bar',
-        data: { labels: ['AGB', 'BGB', 'CO₂ eq.'], datasets: [{ data: [(AGB * trees * 0.47 * 3.67).toFixed(2), (BGB * trees * 0.47 * 3.67).toFixed(2), co2.toFixed(2)], backgroundColor: ['rgba(132,169,140,0.75)', 'rgba(82,121,111,0.7)', 'rgba(168,201,177,0.7)'], borderRadius: 5, borderWidth: 0 }] },
-        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(200,220,210,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: 'rgba(200,220,210,0.65)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.03)' } } } }
+        data: { 
+          labels: ['AGB (บนดิน)', 'BGB (ใต้ดิน)', 'CO₂ รวม'], 
+          datasets: [{ 
+            data: [+agbPart.toFixed(2), +bgbPart.toFixed(2), +totalCo2.toFixed(2)], 
+            backgroundColor: ['rgba(45, 158, 95, 0.75)', 'rgba(82, 121, 111, 0.7)', 'rgba(45, 158, 95, 0.3)'], 
+            borderRadius: 5, 
+            borderWidth: 0 
+          }] 
+        },
+        options: { 
+          indexAxis: 'y', 
+          responsive: true, 
+          plugins: { legend: { display: false } }, 
+          scales: { 
+            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }, 
+            y: { ticks: { color: 'var(--text-mid)', font: { size: 10 } }, grid: { display: false } } 
+          } 
+        }
       });
 
       document.getElementById('carbon-spin').classList.remove('show');
@@ -2562,27 +2591,64 @@
     function setFc(y) { document.getElementById('fc-years').value = y; runForecast(); }
 
     function runForecast() {
-      const yrs = parseInt(document.getElementById('fc-years').value) || 10;
-      const base = pd.treeAge, trees = pd.treeCount;
+      let yrs = parseInt(document.getElementById('fc-years').value) || 7;
+      if (yrs > 7) yrs = 7; // Clamp to 7 as requested
+      
+      const baseAge = pd.treeAge, trees = pd.treeCount, dist = pd.ageDist || { [baseAge]: 100 };
       const labs = [], vals = [];
+      
       for (let y = 0; y <= yrs; y++) {
-        const a = base + y, H2 = Math.min(2.0 + 1.8 * a, 28), D2 = Math.min(3 + 4.5 * a, 60);
-        const AGB2 = 0.1284 * D2 * D2 * H2 * 0.001;
-        vals.push(+((AGB2 + AGB2 * 0.26) * 0.47 * 3.67 * trees).toFixed(2));
-        labs.push(`+${y}ปี`);
+        let yearlyTotal = 0;
+        Object.keys(dist).forEach(age => {
+          const a = +age + y;
+          const perc = dist[age] / 100;
+          const treesInAge = Math.round(trees * perc);
+          
+          const H2 = Math.min(2.0 + 1.8 * a, 28);
+          const D2 = Math.min(3 + 4.5 * a, 60);
+          const AGB2 = 0.1284 * D2 * D2 * H2 * 0.001;
+          yearlyTotal += (AGB2 + AGB2 * 0.26) * 0.47 * 3.67 * treesInAge;
+        });
+        vals.push(+yearlyTotal.toFixed(2));
+        labs.push(y === 0 ? 'ปัจจุบัน' : `ปีที่ ${y}`);
       }
+      
       const ctx = document.getElementById('fcChart').getContext('2d');
       if (fcChart) fcChart.destroy();
       fcChart = new Chart(ctx, {
         type: 'line',
-        data: { labels: labs, datasets: [{ data: vals, borderColor: 'rgba(132,169,140,0.85)', backgroundColor: 'rgba(132,169,140,0.08)', borderWidth: 2.2, pointRadius: 1.5, fill: true, tension: 0.4 }] },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(200,220,210,0.4)', font: { size: 8.5 }, maxTicksLimit: 9 }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: 'rgba(200,220,210,0.4)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } }
+        data: { 
+          labels: labs, 
+          datasets: [{ 
+            label: 'คาดการณ์ tCO₂',
+            data: vals, 
+            borderColor: '#2d9e5f', 
+            backgroundColor: 'rgba(45, 158, 95, 0.1)', 
+            borderWidth: 3, 
+            pointRadius: 4, 
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#2d9e5f',
+            fill: true, 
+            tension: 0.4 
+          }] 
+        },
+        options: { 
+          responsive: true, 
+          plugins: { legend: { display: false } }, 
+          scales: { 
+            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { display: false } }, 
+            y: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } } 
+          } 
+        }
       });
 
-      const milestones = [1, 5, 10, 20, 30].filter(m => m <= yrs);
+      const milestones = [1, 2, 3, 5, 7].filter(m => m <= yrs);
       let html = '<table style="width:100%;border-collapse:collapse;font-size:11.5px;">';
-      html += '<tr><th style="color:var(--text-dim);text-align:left;padding:3px 0;font-weight:500;">ปีที่</th><th style="color:var(--text-dim);text-align:right;font-weight:500;">tCO₂</th></tr>';
-      milestones.forEach(m => { html += `<tr><td style="color:var(--text-mid);padding:3px 0;">+${m} ปี (อายุ ${base + m} ปี)</td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m]}</td></tr>`; });
+      html += '<tr><th style="color:var(--text-dim);text-align:left;padding:3px 0;font-weight:500;">พยากรณ์</th><th style="color:var(--text-dim);text-align:right;font-weight:500;">tCO₂ eq.</th></tr>';
+      milestones.forEach(m => { 
+        const inc = ((vals[m] - vals[0]) / vals[0] * 100).toFixed(1);
+        html += `<tr><td style="color:var(--text-mid);padding:4px 0;">+${m} ปี <span style="font-size:9px;color:var(--green);">[+${inc}%]</span></td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m].toLocaleString()}</td></tr>`; 
+      });
       html += '</table>';
       document.getElementById('fc-table').innerHTML = html;
       document.getElementById('fc-table-box').style.display = 'block';
@@ -2700,6 +2766,11 @@
     /* ================================================================
        UTILITIES
     ================================================================ */
+    function stopSpin() {
+      // Dummy function to prevent ReferenceError
+      // If there was a globe rotation interval, clear it here
+    }
+
     function setStatus(t) { document.getElementById('status-text').textContent = t; }
     function empty() { return { type: 'FeatureCollection', features: [] }; }
     function isMobile() { return window.innerWidth <= 768; }
