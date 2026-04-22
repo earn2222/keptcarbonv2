@@ -6,7 +6,6 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>แดชบอร์ด - KeptCarbon</title>
   <meta name="description" content="แดชบอร์ดภาพรวมสวนยางพาราและคาร์บอนเครดิต">
-  <link href="assets/img/favicon.png" rel="icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -379,10 +378,9 @@
         sources: {
           'satellite': {
             type: 'raster',
-            tiles: ['https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'],
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
             tileSize: 256,
-            attribution: '© Google',
-            maxzoom: 20
+            attribution: '© Esri'
           }
         },
         layers: [{ id: 'satellite', type: 'raster', source: 'satellite' }]
