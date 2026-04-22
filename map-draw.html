@@ -41,12 +41,22 @@
       --font: 'Noto Sans Thai', 'Noto Sans', sans-serif;
     }
 
-    .desktop-only { display: block; }
-    .mobile-only { display: none; }
+    .desktop-only {
+      display: block;
+    }
+
+    .mobile-only {
+      display: none;
+    }
 
     @media (max-width: 768px) {
-      .desktop-only { display: none; }
-      .mobile-only { display: block; }
+      .desktop-only {
+        display: none;
+      }
+
+      .mobile-only {
+        display: block;
+      }
     }
 
     html,
@@ -1282,7 +1292,15 @@
       animation: fadeIn 0.3s ease;
     }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
 
     /* ============================================================
    SEARCH BAR
@@ -1544,6 +1562,7 @@
         font-size: 11px;
         transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
       }
+
       body.panel-open #statusbar {
         bottom: calc(65vh + 10px);
       }
@@ -1554,6 +1573,7 @@
         left: 12px !important;
         transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
       }
+
       body.panel-open .maplibregl-ctrl-bottom-left {
         bottom: calc(65vh + 12px) !important;
       }
@@ -1566,6 +1586,7 @@
         z-index: 600 !important;
         transition: none !important;
       }
+
       body.panel-open .maplibregl-ctrl-bottom-right {
         bottom: 20px !important;
         top: auto !important;
@@ -1600,10 +1621,12 @@
         z-index: 610;
         transition: all 0.3s;
       }
+
       body.panel-open #basemap-card {
         bottom: 20px;
         top: auto;
       }
+
       #basemap-card.open {
         transform: translateX(0);
       }
@@ -1760,14 +1783,10 @@
       </div>
       <div class="step-item" id="si-3">
         <div class="step-dot" id="sd-3">3</div>
-        <div class="step-lbl">ตรวจอายุ</div>
+        <div class="step-lbl">วิเคราะห์</div>
       </div>
       <div class="step-item" id="si-4">
         <div class="step-dot" id="sd-4">4</div>
-        <div class="step-lbl">คาร์บอน</div>
-      </div>
-      <div class="step-item" id="si-5">
-        <div class="step-dot" id="sd-5">5</div>
         <div class="step-lbl">พยากรณ์</div>
       </div>
     </div>
@@ -1778,7 +1797,7 @@
       <!-- ===== STEP 1 ===== -->
       <div class="pstep active" id="step-1">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-map"></i> ขั้นตอนที่ 1 / 5</div>
+          <div class="step-tag"><i class="bi bi-map"></i> ขั้นตอนที่ 1 / 4</div>
           <h2>กำหนดขอบเขตแปลง</h2>
           <p>วาดแปลงบนแผนที่ หรือนำเข้าไฟล์ Shapefile</p>
         </div>
@@ -1796,7 +1815,7 @@
         <div id="ct-draw">
           <div class="info-box">
             <div class="info-box-title">วิธีวาดแปลง</div>
-            
+
             <!-- Desktop Instructions -->
             <div class="desktop-only">
               <ol class="info-steps">
@@ -1818,8 +1837,10 @@
             </div>
 
             <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border); font-size:11px;">
-              <div style="color:var(--green);font-weight:700;margin-bottom:4px;"><i class="bi bi-info-circle me-1"></i> ข้อกำหนดพื้นที่</div>
-              <p style="color:var(--text-mid);line-height:1.4;">ขนาดแปลงต้องมีพื้นที่ไม่น้อยกว่า <strong>1 ไร่</strong> (หรือ <strong>40 × 40 เมตร</strong>) เพื่อความแม่นยำของข้อมูล</p>
+              <div style="color:var(--green);font-weight:700;margin-bottom:4px;"><i class="bi bi-info-circle me-1"></i>
+                ข้อกำหนดพื้นที่</div>
+              <p style="color:var(--text-mid);line-height:1.4;">ขนาดแปลงต้องมีพื้นที่ไม่น้อยกว่า <strong>1 ไร่</strong>
+                (หรือ <strong>40 × 40 เมตร</strong>) เพื่อความแม่นยำของข้อมูล</p>
             </div>
           </div>
 
@@ -1879,7 +1900,7 @@
       <!-- ===== STEP 2 ===== -->
       <div class="pstep" id="step-2">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-pencil-square"></i> ขั้นตอนที่ 2 / 5</div>
+          <div class="step-tag"><i class="bi bi-pencil-square"></i> ขั้นตอนที่ 2 / 4</div>
           <h2>ข้อมูลแปลงยาง</h2>
           <p>กรอกข้อมูลแปลงเพื่อระบุตัวตนและคำนวณคาร์บอน</p>
         </div>
@@ -1913,28 +1934,6 @@
             <label><i class="bi bi-person" style="margin-right:4px;color:var(--green);"></i>เจ้าของแปลง</label>
             <input type="text" id="inp-owner" placeholder="ชื่อเจ้าของ" readonly>
           </div>
-          <div class="field" style="margin-bottom:0;">
-            <label><i class="bi bi-geo-alt" style="margin-right:4px;color:var(--green);"></i>จังหวัด</label>
-            <select id="inp-province"
-              style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
-              <option value="">-- เลือกจังหวัด --</option>
-              <option>ระยอง</option>
-              <option>ชุมพร</option>
-              <option>สุราษฎร์ธานี</option>
-              <option>นครศรีธรรมราช</option>
-              <option>ตรัง</option>
-              <option>สงขลา</option>
-              <option>ยะลา</option>
-              <option>นราธิวาส</option>
-              <option>พัทลุง</option>
-              <option>กระบี่</option>
-              <option>พังงา</option>
-              <option>ภูเก็ต</option>
-              <option>ปัตตานี</option>
-              <option>สตูล</option>
-              <option>อื่นๆ</option>
-            </select>
-          </div>
 
           <div class="field" style="margin-bottom:0;">
             <label><i class="bi bi-tree" style="margin-right:4px;color:var(--green);"></i>พันธุ์ยาง</label>
@@ -1963,9 +1962,9 @@
       <!-- ===== STEP 3 ===== -->
       <div class="pstep" id="step-3">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-cpu"></i> ขั้นตอนที่ 3 / 5</div>
-          <h2>ตรวจจับอายุต้นยาง</h2>
-          <p>วิเคราะห์ดาวเทียมเพื่อประมาณปีปลูกและอายุต้นยาง</p>
+          <div class="step-tag"><i class="bi bi-cpu"></i> ขั้นตอนที่ 3 / 4</div>
+          <h2>วิเคราะห์ผลลัพธ์</h2>
+          <p>วิเคราะห์ข้อมูลดาวเทียมและคำนวณคาร์บอนเครดิต</p>
         </div>
 
         <div class="analyzing" id="analyze-spin">
@@ -1975,7 +1974,7 @@
 
         <div id="age-action">
           <button class="btn btn-primary" onclick="detectAge()">
-            <i class="bi bi-cpu me-1"></i> เริ่มตรวจจับอายุต้นยาง
+            <i class="bi bi-cpu me-1"></i> เริ่มการวิเคราะห์
           </button>
           <button class="btn btn-outline" onclick="goStep(2)">
             <i class="bi bi-arrow-left me-1"></i> กลับ
@@ -1983,6 +1982,7 @@
         </div>
 
         <div id="age-result" style="display:none;">
+          <!-- Age Section -->
           <div class="chart-box">
             <div class="chart-box-title">การกระจายอายุยาง (Age Distribution)</div>
             <canvas id="ageChart" height="150"></canvas>
@@ -2000,87 +2000,77 @@
             </div>
           </div>
           <div class="chips" id="yr-chips"></div>
-          <button class="btn btn-primary" onclick="goStep4()">
-            <i class="bi bi-arrow-right-circle me-1"></i> ถัดไป: คำนวณคาร์บอน
-          </button>
-          <button class="btn btn-outline" onclick="goStep(2)">
-            <i class="bi bi-arrow-left me-1"></i> กลับ
-          </button>
+
+          <!-- Carbon Section (Merged from Step 4) -->
+          <div style="margin: 20px 0 10px; border-top: 1px solid var(--border); padding-top: 15px;">
+            <div class="step-tag"><i class="bi bi-calculator"></i> ผลคำนวณคาร์บอน</div>
+          </div>
+
+          <div class="analyzing" id="carbon-spin">
+            <div class="spin"></div>
+            <p>กำลังคำนวณ...</p>
+          </div>
+
+          <div id="carbon-result" style="display:none;">
+            <div class="metrics-grid">
+              <div class="metric">
+                <div class="metric-label">H ความสูง</div>
+                <div class="metric-value" id="r-h">—</div>
+                <div class="metric-unit">เมตร</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">D รอบวง</div>
+                <div class="metric-value" id="r-d">—</div>
+                <div class="metric-unit">ซม.</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">จำนวนต้น</div>
+                <div class="metric-value" id="r-trees">—</div>
+                <div class="metric-unit">ต้น</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Biomass/ต้น</div>
+                <div class="metric-value" id="r-bio">—</div>
+                <div class="metric-unit">กก.</div>
+              </div>
+            </div>
+            <div class="carbon-hero">
+              <div class="carbon-hero-label">คาร์บอนทั้งแปลง</div>
+              <div class="carbon-hero-value" id="r-co2">—</div>
+              <div class="carbon-hero-unit">tCO₂ eq.</div>
+            </div>
+
+            <div class="chart-box">
+              <div class="chart-box-title">คาร์บอนแยกตามช่วงอายุ (tCO₂)</div>
+              <canvas id="carbonAgeChart" height="150"></canvas>
+            </div>
+
+            <div class="chart-box">
+              <div class="chart-box-title">คาร์บอนแยกส่วนประกอบ (AGB/BGB)</div>
+              <canvas id="carbonChart" height="130"></canvas>
+            </div>
+
+            <div style="display:flex;gap:7px;margin-top:15px;">
+              <button class="btn btn-primary" style="flex:1;" onclick="goStep4()">
+                <i class="bi bi-graph-up-arrow me-1"></i> ดูพยากรณ์
+              </button>
+              <button class="btn btn-outline" style="flex:1;" onclick="savePlot()">
+                <i class="bi bi-floppy me-1"></i> บันทึกแปลง
+              </button>
+            </div>
+            <button class="btn btn-outline" style="margin-top:7px;" onclick="goStep(2)">
+              <i class="bi bi-arrow-left me-1"></i> กลับ
+            </button>
+          </div>
         </div>
       </div><!-- /step-3 -->
+
+
 
       <!-- ===== STEP 4 ===== -->
       <div class="pstep" id="step-4">
         <div class="step-title">
-          <div class="step-tag"><i class="bi bi-calculator"></i> ขั้นตอนที่ 4 / 5</div>
-          <h2>คำนวณคาร์บอน</h2>
-          <p>สมการอัลโลเมตริก Hevea brasiliensis</p>
-        </div>
-
-        <div class="info-box" style="margin-bottom:12px;">
-          <div class="info-box-title">สูตรคำนวณ</div>
-          <ol class="info-steps">
-            <li><span class="sn">H</span>ความสูง = 2.0 + 1.8 × อายุ (สูงสุด 28 ม.)</li>
-            <li><span class="sn">D</span>DBH = 3 + 4.5 × อายุ (สูงสุด 60 ซม.)</li>
-            <li><span class="sn">B</span>AGB = 0.1284 × D² × H × 0.001 ตัน/ต้น</li>
-            <li><span class="sn">↑</span>CO₂ = (AGB + BGB) × 0.47 × 3.67</li>
-          </ol>
-        </div>
-
-        <div class="analyzing" id="carbon-spin">
-          <div class="spin"></div>
-          <p>กำลังคำนวณ...</p>
-        </div>
-
-        <div id="carbon-result" style="display:none;">
-          <div class="metrics-grid">
-            <div class="metric">
-              <div class="metric-label">H ความสูง</div>
-              <div class="metric-value" id="r-h">—</div>
-              <div class="metric-unit">เมตร</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">D รอบวง</div>
-              <div class="metric-value" id="r-d">—</div>
-              <div class="metric-unit">ซม.</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">จำนวนต้น</div>
-              <div class="metric-value" id="r-trees">—</div>
-              <div class="metric-unit">ต้น</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Biomass/ต้น</div>
-              <div class="metric-value" id="r-bio">—</div>
-              <div class="metric-unit">กก.</div>
-            </div>
-          </div>
-          <div class="carbon-hero">
-            <div class="carbon-hero-label">คาร์บอนทั้งแปลง</div>
-            <div class="carbon-hero-value" id="r-co2">—</div>
-            <div class="carbon-hero-unit">tCO₂ eq.</div>
-          </div>
-          <div class="chart-box">
-            <div class="chart-box-title">คาร์บอนแยกตามช่วงอายุ (tCO₂)</div>
-            <canvas id="carbonAgeChart" height="150"></canvas>
-          </div>
-          <div class="chart-box">
-            <div class="chart-box-title">คาร์บอนแยกส่วนประกอบ (AGB/BGB)</div>
-            <canvas id="carbonChart" height="130"></canvas>
-          </div>
-          <button class="btn btn-primary" onclick="goStep5()">
-            <i class="bi bi-graph-up-arrow me-1"></i> ถัดไป: พยากรณ์คาร์บอน
-          </button>
-          <button class="btn btn-outline" onclick="goStep(3)">
-            <i class="bi bi-arrow-left me-1"></i> กลับ
-          </button>
-        </div>
-      </div><!-- /step-4 -->
-
-      <!-- ===== STEP 5 ===== -->
-      <div class="pstep" id="step-5">
-        <div class="step-title">
-          <div class="step-tag"><i class="bi bi-graph-up"></i> ขั้นตอนที่ 5 / 5</div>
+          <div class="step-tag"><i class="bi bi-graph-up"></i> ขั้นตอนที่ 4 / 4</div>
           <h2>พยากรณ์คาร์บอน</h2>
           <p>ดูแนวโน้มการสะสมคาร์บอนในปีต่อ ๆ ไป</p>
         </div>
@@ -2113,7 +2103,7 @@
           <button class="btn btn-primary" style="flex:2;" onclick="savePlot()">
             <i class="bi bi-floppy me-1"></i> บันทึกแปลงนี้
           </button>
-          <button class="btn btn-outline" style="flex:1;" onclick="goStep(4)">
+          <button class="btn btn-outline" style="flex:1;" onclick="goStep(3)">
             <i class="bi bi-arrow-left me-1"></i> กลับ
           </button>
         </div>
@@ -2273,7 +2263,7 @@
       drawMode = !drawMode;
       const btn = document.getElementById('btnDraw');
       const btnP = document.getElementById('btnStartDraw');
-      
+
       if (drawMode) {
         if (btn) btn.classList.add('on');
         document.getElementById('body').classList.add('drawing');
@@ -2344,7 +2334,7 @@
         const newLL = m.getLngLat();
         verts[index] = [newLL.lng, newLL.lat];
         rebuildMarkers();
-        
+
         // Validation update on dragend
         if (verts.length >= 3) {
           const sqm = areaM2([...verts, verts[0]]);
@@ -2429,14 +2419,14 @@
     }
 
     function previewDraw() {
-      if (verts.length < 2) { 
-        if (map.getSource('draw-line')) map.getSource('draw-line').setData(empty()); 
-        if (map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty()); 
-        return; 
+      if (verts.length < 2) {
+        if (map.getSource('draw-line')) map.getSource('draw-line').setData(empty());
+        if (map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty());
+        return;
       }
       const ring = [...verts, verts[0]];
       const line = [...verts, verts.length >= 3 ? verts[0] : verts[verts.length - 1]];
-      
+
       const lineGeo = { type: 'Feature', geometry: { type: 'LineString', coordinates: line } };
       const fillGeo = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] } };
 
@@ -2471,7 +2461,7 @@
       const rai = sqm / 1600;
       const areaText = document.getElementById('draw-area-preview');
       areaText.textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
-      
+
       if (rai < 1.0) {
         areaText.style.color = '#e05';
         areaText.innerHTML = `<strong>${rai.toFixed(2)} ไร่ (เล็กเกินไป)</strong><br><small style="color:var(--text-dim);">ขั้นต่ำ 1 ไร่ (40x40 ม.)</small>`;
@@ -2484,7 +2474,7 @@
       }
 
       const isMob = window.innerWidth <= 768;
-      
+
       if (isMob) {
         setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — สามารถขยับจุดเพื่อแก้ไขได้`);
         // We DON'T auto-confirm on mobile anymore if they might want to edit
@@ -2505,13 +2495,13 @@
 
     function undoVertex() {
       if (!verts.length) return;
-      verts.pop(); 
+      verts.pop();
       rebuildMarkers();
       setStatus(`ยกเลิกจุดล่าสุด (เหลือ ${verts.length} จุด)`);
     }
 
     function clearDraw() {
-      verts = []; 
+      verts = [];
       markers.forEach(m => m.remove()); markers = [];
       ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
       finalGJ = null;
@@ -2545,7 +2535,7 @@
       const ring = [...verts, verts[0]];
       const sqm = areaM2(ring);
       const rai = sqm / 1600;
-      
+
       if (rai < 1.0) {
         alert('ไม่สามารถยืนยันได้: พื้นที่แปลงต้องมีขนาดอย่างน้อย 1 ไร่ (40x40 เมตร)');
         return;
@@ -2569,7 +2559,7 @@
         const ring = [...verts, verts[0]];
         finalGJ.geometry.coordinates = [ring];
       }
-      
+
       updateArea(finalGJ);
 
       // Build geom object
@@ -2578,10 +2568,10 @@
         type: 'Polygon',
         coordinates: [coords.map(([lng, lat]) => [+lng.toFixed(6), +lat.toFixed(6)])]
       };
-      
+
       // 1. Send to Backend (Simulated for Demo)
       console.log('%c[BACKEND] Processing geometry at /api/process-plot...', 'color: #2d9e5f; font-weight: bold;');
-      
+
       // We simulate the API call to avoid 404 since this is a static site demo
       new Promise(resolve => setTimeout(resolve, 1000)).then(() => {
         console.log('%c[BACKEND] Success: Geometry processed.', 'color: #2d9e5f;');
@@ -2658,9 +2648,9 @@
     /* ================================================================
        STEP NAVIGATION
     ================================================================ */
-    const STEPS = 5;
+    const STEPS = 4;
     let curStep = 1;
-    const stepTitles = ['เลือกวิธี', 'ข้อมูล', 'ตรวจอายุ', 'คาร์บอน', 'พยากรณ์'];
+    const stepTitles = ['เลือกวิธี', 'ข้อมูล', 'วิเคราะห์', 'พยากรณ์'];
 
     function goStep(n) {
       for (let i = 1; i <= STEPS; i++) {
@@ -2696,8 +2686,7 @@
       goStep(3);
     }
 
-    function goStep4() { goStep(4); document.getElementById('carbon-spin').classList.add('show'); setTimeout(calcCarbon, 600); }
-    function goStep5() { goStep(5); runForecast(); }
+    function goStep4() { goStep(4); runForecast(); }
 
     /* ================================================================
        PLOT DATA
@@ -2719,7 +2708,7 @@
     async function detectAge() {
       document.getElementById('age-action').style.display = 'none';
       document.getElementById('analyze-spin').classList.add('show');
-      
+
       const msgs = ['ติดต่อ Google Earth Engine...', 'วิเคราะห์ภาพถ่ายดาวเทียม Sentinel-2...', 'ประมวลผลดัชนีพืชพรรณ (NDVI)...', 'คำนวณโครงสร้างอายุยาง...'];
       let mi = 0;
       const iv = setInterval(() => { if (mi < msgs.length) document.getElementById('spin-msg').textContent = msgs[mi++]; }, 800);
@@ -2727,10 +2716,10 @@
       try {
         // Mock GEE API Call
         console.log('%c[GEE] Analyzing plot age distribution...', 'color: #3498db; font-weight: bold;');
-        
+
         // Simulate network delay
         await new Promise(r => setTimeout(r, 3500));
-        
+
         clearInterval(iv);
         document.getElementById('analyze-spin').classList.remove('show');
 
@@ -2738,21 +2727,24 @@
         const curY = new Date().getFullYear() + 543;
         const mainAge = Math.floor(Math.random() * 12 + 5); // 5-17 years
         const mainYear = curY - mainAge;
-        
+
         // Distribution of ages
         const ageDist = genAgeDist(mainAge);
-        pd.plantYear = mainYear; 
+        pd.plantYear = mainYear;
         pd.treeAge = mainAge;
         pd.ageDist = ageDist; // Store for carbon calculation
 
         renderAgeChart(ageDist);
         buildAgeChips(ageDist);
-        
+
         document.getElementById('r-year').textContent = mainYear;
         document.getElementById('r-age').textContent = mainAge;
         document.getElementById('age-result').style.display = 'block';
-        
-        setStatus('✓ วิเคราะห์สำเร็จ: พบอายุยางเฉลี่ย ' + mainAge + ' ปี');
+
+        // Auto-calculate carbon immediately after age is detected
+        calcCarbon();
+
+        setStatus('✓ วิเคราะห์สำเร็จ: พบอายุยางเฉลี่ย ' + mainAge + ' ปี และคำนวณคาร์บอนเรียบร้อย');
       } catch (err) {
         clearInterval(iv);
         alert('เกิดข้อผิดพลาดในการเชื่อมต่อ GEE Backend');
@@ -2764,9 +2756,9 @@
     function genAgeDist(mainAge) {
       const d = {};
       const offsets = [-2, -1, 0, 0, 0, 1, 2];
-      offsets.forEach(o => { 
-        const a = mainAge + o; 
-        if (a > 0) d[a] = (d[a] || 0) + Math.random() * 20 + (o === 0 ? 40 : 5); 
+      offsets.forEach(o => {
+        const a = mainAge + o;
+        if (a > 0) d[a] = (d[a] || 0) + Math.random() * 20 + (o === 0 ? 40 : 5);
       });
       const tot = Object.values(d).reduce((a, b) => a + b, 0);
       Object.keys(d).forEach(k => d[k] = +(d[k] / tot * 100).toFixed(1));
@@ -2776,37 +2768,37 @@
     function renderAgeChart(dist) {
       const ctx = document.getElementById('ageChart').getContext('2d');
       if (ageChart) ageChart.destroy();
-      const labs = Object.keys(dist).sort((a,b) => a-b);
+      const labs = Object.keys(dist).sort((a, b) => a - b);
       const mainAge = pd.treeAge;
-      
+
       ageChart = new Chart(ctx, {
         type: 'bar',
-        data: { 
-          labels: labs.map(a => a + ' ปี'), 
-          datasets: [{ 
-            data: labs.map(k => dist[k]), 
-            backgroundColor: labs.map(a => +a === mainAge ? 'rgba(45, 158, 95, 0.85)' : 'rgba(45, 158, 95, 0.25)'), 
+        data: {
+          labels: labs.map(a => a + ' ปี'),
+          datasets: [{
+            data: labs.map(k => dist[k]),
+            backgroundColor: labs.map(a => +a === mainAge ? 'rgba(45, 158, 95, 0.85)' : 'rgba(45, 158, 95, 0.25)'),
             borderRadius: 6,
-            borderWidth: 0 
-          }] 
+            borderWidth: 0
+          }]
         },
-        options: { 
-          responsive: true, 
-          plugins: { 
+        options: {
+          responsive: true,
+          plugins: {
             legend: { display: false },
             tooltip: { callbacks: { label: (c) => `พื้นที่ ${c.raw}% (${(pd.areaRai * c.raw / 100).toFixed(2)} ไร่)` } }
-          }, 
-          scales: { 
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 10 } }, grid: { display: false } }, 
-            y: { beginAtZero: true, ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } } 
-          } 
+          },
+          scales: {
+            x: { ticks: { color: 'var(--text-dim)', font: { size: 10 } }, grid: { display: false } },
+            y: { beginAtZero: true, ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
+          }
         }
       });
     }
 
     function buildAgeChips(dist) {
       const c = document.getElementById('yr-chips'); c.innerHTML = '';
-      Object.keys(dist).sort((a,b) => a-b).forEach(a => {
+      Object.keys(dist).sort((a, b) => a - b).forEach(a => {
         const el = document.createElement('div');
         el.className = 'chip' + (+a === pd.treeAge ? ' main' : '');
         el.textContent = `อายุ ${a} ปี: ${dist[a]}%`;
@@ -2822,25 +2814,25 @@
 
     function calcCarbon() {
       const baseAge = pd.treeAge, trees = pd.treeCount, dist = pd.ageDist || { [baseAge]: 100 };
-      
+
       let totalCo2 = 0;
-      const ageLabels = Object.keys(dist).sort((a,b) => a-b);
+      const ageLabels = Object.keys(dist).sort((a, b) => a - b);
       const ageCo2Data = [];
 
       ageLabels.forEach(age => {
         const a = +age;
         const perc = dist[age] / 100;
         const treesInAge = Math.round(trees * perc);
-        
+
         const H = Math.min(2.0 + 1.8 * a, 28);
         const D = Math.min(3 + 4.5 * a, 60);
         const AGB = 0.1284 * D * D * H * 0.001;
         const BGB = AGB * 0.26;
         const co2Single = (AGB + BGB) * 0.47 * 3.67 * treesInAge;
-        
+
         totalCo2 += co2Single;
         ageCo2Data.push(+co2Single.toFixed(2));
-        
+
         if (a === baseAge) {
           pd.H = H; pd.D = D; pd.bio = +(AGB * 1000).toFixed(0);
         }
@@ -2859,18 +2851,18 @@
       if (carbAgeChart) carbAgeChart.destroy();
       carbAgeChart = new Chart(ctxAge, {
         type: 'pie',
-        data: { 
-          labels: ageLabels.map(a => 'อายุ ' + a + ' ปี'), 
-          datasets: [{ 
-            data: ageCo2Data, 
+        data: {
+          labels: ageLabels.map(a => 'อายุ ' + a + ' ปี'),
+          datasets: [{
+            data: ageCo2Data,
             backgroundColor: ['#2d9e5f', '#38b26a', '#1e7a47', '#84a98c', '#52796f'],
             borderWidth: 2,
             borderColor: '#fff'
-          }] 
+          }]
         },
-        options: { 
-          responsive: true, 
-          plugins: { 
+        options: {
+          responsive: true,
+          plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
             tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} tCO₂` } }
           }
@@ -2882,26 +2874,26 @@
       if (carbChart) carbChart.destroy();
       const agbPart = totalCo2 * (1 / 1.26);
       const bgbPart = totalCo2 - agbPart;
-      
+
       carbChart = new Chart(ctxComp, {
         type: 'bar',
-        data: { 
-          labels: ['AGB (บนดิน)', 'BGB (ใต้ดิน)', 'CO₂ รวม'], 
-          datasets: [{ 
-            data: [+agbPart.toFixed(2), +bgbPart.toFixed(2), +totalCo2.toFixed(2)], 
-            backgroundColor: ['rgba(45, 158, 95, 0.75)', 'rgba(82, 121, 111, 0.7)', 'rgba(45, 158, 95, 0.3)'], 
-            borderRadius: 5, 
-            borderWidth: 0 
-          }] 
+        data: {
+          labels: ['AGB (บนดิน)', 'BGB (ใต้ดิน)', 'CO₂ รวม'],
+          datasets: [{
+            data: [+agbPart.toFixed(2), +bgbPart.toFixed(2), +totalCo2.toFixed(2)],
+            backgroundColor: ['rgba(45, 158, 95, 0.75)', 'rgba(82, 121, 111, 0.7)', 'rgba(45, 158, 95, 0.3)'],
+            borderRadius: 5,
+            borderWidth: 0
+          }]
         },
-        options: { 
-          indexAxis: 'y', 
-          responsive: true, 
-          plugins: { legend: { display: false } }, 
-          scales: { 
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }, 
-            y: { ticks: { color: 'var(--text-mid)', font: { size: 10 } }, grid: { display: false } } 
-          } 
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+            y: { ticks: { color: 'var(--text-mid)', font: { size: 10 } }, grid: { display: false } }
+          }
         }
       });
 
@@ -2918,17 +2910,17 @@
     function runForecast() {
       let yrs = parseInt(document.getElementById('fc-years').value) || 7;
       if (yrs > 7) yrs = 7; // Clamp to 7 as requested
-      
+
       const baseAge = pd.treeAge, trees = pd.treeCount, dist = pd.ageDist || { [baseAge]: 100 };
       const labs = [], vals = [];
-      
+
       for (let y = 0; y <= yrs; y++) {
         let yearlyTotal = 0;
         Object.keys(dist).forEach(age => {
           const a = +age + y;
           const perc = dist[age] / 100;
           const treesInAge = Math.round(trees * perc);
-          
+
           const H2 = Math.min(2.0 + 1.8 * a, 28);
           const D2 = Math.min(3 + 4.5 * a, 60);
           const AGB2 = 0.1284 * D2 * D2 * H2 * 0.001;
@@ -2937,42 +2929,42 @@
         vals.push(+yearlyTotal.toFixed(2));
         labs.push(y === 0 ? 'ปัจจุบัน' : `ปีที่ ${y}`);
       }
-      
+
       const ctx = document.getElementById('fcChart').getContext('2d');
       if (fcChart) fcChart.destroy();
       fcChart = new Chart(ctx, {
         type: 'line',
-        data: { 
-          labels: labs, 
-          datasets: [{ 
+        data: {
+          labels: labs,
+          datasets: [{
             label: 'คาดการณ์ tCO₂',
-            data: vals, 
-            borderColor: '#2d9e5f', 
-            backgroundColor: 'rgba(45, 158, 95, 0.1)', 
-            borderWidth: 3, 
-            pointRadius: 4, 
+            data: vals,
+            borderColor: '#2d9e5f',
+            backgroundColor: 'rgba(45, 158, 95, 0.1)',
+            borderWidth: 3,
+            pointRadius: 4,
             pointBackgroundColor: '#fff',
             pointBorderColor: '#2d9e5f',
-            fill: true, 
-            tension: 0.4 
-          }] 
+            fill: true,
+            tension: 0.4
+          }]
         },
-        options: { 
-          responsive: true, 
-          plugins: { legend: { display: false } }, 
-          scales: { 
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { display: false } }, 
-            y: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } } 
-          } 
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { display: false } },
+            y: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
+          }
         }
       });
 
       const milestones = [1, 2, 3, 5, 7].filter(m => m <= yrs);
       let html = '<table style="width:100%;border-collapse:collapse;font-size:11.5px;">';
       html += '<tr><th style="color:var(--text-dim);text-align:left;padding:3px 0;font-weight:500;">พยากรณ์</th><th style="color:var(--text-dim);text-align:right;font-weight:500;">tCO₂ eq.</th></tr>';
-      milestones.forEach(m => { 
+      milestones.forEach(m => {
         const inc = ((vals[m] - vals[0]) / vals[0] * 100).toFixed(1);
-        html += `<tr><td style="color:var(--text-mid);padding:4px 0;">+${m} ปี <span style="font-size:9px;color:var(--green);">[+${inc}%]</span></td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m].toLocaleString()}</td></tr>`; 
+        html += `<tr><td style="color:var(--text-mid);padding:4px 0;">+${m} ปี <span style="font-size:9px;color:var(--green);">[+${inc}%]</span></td><td style="color:var(--green);text-align:right;font-weight:600;">${vals[m].toLocaleString()}</td></tr>`;
       });
       html += '</table>';
       document.getElementById('fc-table').innerHTML = html;
@@ -2987,10 +2979,10 @@
       const plot = { id: Date.now().toString(), name: pd.name || 'แปลงไม่มีชื่อ', ownerName: pd.ownerName, userId: ME.id, areaRai: pd.areaRai, areaSqm: pd.areaSqm, treeCount: pd.treeCount, plantYear: pd.plantYear, treeAge: pd.treeAge, treeHeight: pd.H, dbh: pd.D, biomassPerTree: pd.bio, carbonTotal: pd.co2, geojson: finalGJ, createdAt: new Date().toISOString() };
       PlotDB.savePlot(ME.id, plot);
       toast(`บันทึก "${plot.name}" เรียบร้อย!`);
-      
+
       // Update saved plots display
       loadSavedPlots();
-      
+
       setTimeout(() => {
         clearDraw(); // Clears the temporary drawing but now the saved one stays via saved-plots source
         goStep(1);
