@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>วาดแปลงยาง – KeptCarbon</title>
   <meta name="description" content="วาดแปลงยางพาราบนแผนที่และคำนวณคาร์บอนเครดิต">
+  <link href="assets/img/favicon.png" rel="icon">
 
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
@@ -2222,16 +2223,19 @@
       drawMode = !drawMode;
       const btn = document.getElementById('btnDraw');
       const btnP = document.getElementById('btnStartDraw');
+      
       if (drawMode) {
-        btn.classList.add('on');
+        if (btn) btn.classList.add('on');
         document.getElementById('body').classList.add('drawing');
-        btnP.innerHTML = '<i class="bi bi-stop-circle me-1"></i> หยุดวาด';
+        if (btnP) btnP.innerHTML = '<i class="bi bi-stop-circle me-1"></i> หยุดวาด';
         setStatus('โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click เพื่อปิดแปลง | Esc ยกเลิก');
+        if (map.doubleClickZoom) map.doubleClickZoom.disable();
       } else {
-        btn.classList.remove('on');
+        if (btn) btn.classList.remove('on');
         document.getElementById('body').classList.remove('drawing');
-        btnP.innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
+        if (btnP) btnP.innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
         setStatus('ออกจากโหมดวาด');
+        if (map.doubleClickZoom) map.doubleClickZoom.enable();
       }
     }
 
@@ -2284,6 +2288,11 @@
       document.getElementById('draw-done').classList.add('show');
       document.getElementById('btnConfirm').disabled = false;
       setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กด "ยืนยันแปลง"`);
+      
+      // Auto open panel on mobile after drawing finished
+      // Auto open panel after drawing finished
+      setTimeout(() => togglePanel(true), 150);
+
       fitPlot();
     }
 
@@ -2311,6 +2320,11 @@
     function startDrawFlow() {
       stopSpin();
       toggleDraw();
+
+      // Auto collapse panel on mobile when starting to draw
+      // Auto collapse panel when starting to draw
+      togglePanel(false);
+
       if (map.getZoom() < 8) {
         map.flyTo({ center: [101.258, 12.682], zoom: 10, pitch: 20, bearing: 0, duration: 2000 });
       }
@@ -2767,12 +2781,22 @@
     /* ================================================================
        MOBILE PANEL TOGGLE
     ================================================================ */
-    function togglePanel() {
+    function togglePanel(forceState) {
       const p = document.getElementById('panel');
       const ic = document.getElementById('panel-toggle-icon');
-      if (p) p.classList.toggle('open');
-      if (ic) ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
-      document.body.classList.toggle('panel-open');
+      if (!p) return;
+
+      const shouldOpen = (forceState !== undefined) ? forceState : !p.classList.contains('open');
+
+      if (shouldOpen) {
+        p.classList.add('open');
+        document.body.classList.add('panel-open');
+        if (ic) ic.innerHTML = '<i class="bi bi-chevron-down"></i>';
+      } else {
+        p.classList.remove('open');
+        document.body.classList.remove('panel-open');
+        if (ic) ic.innerHTML = '<i class="bi bi-chevron-up"></i>';
+      }
     }
 
     /* ================================================================
@@ -2872,7 +2896,7 @@
 
     function setStatus(t) { document.getElementById('status-text').textContent = t; }
     function empty() { return { type: 'FeatureCollection', features: [] }; }
-    function isMobile() { return window.innerWidth <= 768; }
+    function isMobile() { return window.innerWidth <= 992; }
 
     function areaM2(coords) {
       let a = 0;
