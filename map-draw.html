@@ -1374,6 +1374,17 @@
         --panel-w: 0px;
       }
 
+      #topbar {
+        padding: 0 12px;
+        height: 56px;
+      }
+
+      .icon-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+      }
+
       .topnav {
         display: none !important;
       }
@@ -1394,7 +1405,7 @@
       #draw-toolbar {
         left: 10px;
         top: auto;
-        bottom: 180px;
+        bottom: 100px;
         transform: none;
         flex-direction: column;
         padding: 6px 5px;
@@ -1504,20 +1515,66 @@
       #statusbar {
         left: 10px;
         right: 10px;
-        bottom: calc(64px + 10px);
-        /* above collapsed panel */
+        bottom: 10px;
         font-size: 11px;
+        transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+      body.panel-open #statusbar {
+        bottom: calc(65vh + 10px);
       }
 
       /* MapLibre controls */
       .maplibregl-ctrl-bottom-left {
-        bottom: calc(64px + 90px) !important;
-        left: 58px !important;
+        bottom: 12px !important;
+        left: 12px !important;
+        transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+      body.panel-open .maplibregl-ctrl-bottom-left {
+        bottom: calc(65vh + 12px) !important;
       }
 
       .maplibregl-ctrl-bottom-right {
-        bottom: calc(64px + 10px) !important;
-        right: 10px !important;
+        bottom: 12px !important;
+        right: 12px !important;
+        gap: 6px;
+        transition: bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+      body.panel-open .maplibregl-ctrl-bottom-right {
+        bottom: calc(65vh + 12px) !important;
+      }
+
+      .maplibregl-ctrl-group button {
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 8px !important;
+      }
+
+      /* Adjust pencil button on mobile */
+      #btn-open-panel {
+        top: 72px;
+        right: 12px;
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Basemap card adjustment */
+      #basemap-card {
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+        min-width: 200px;
+        max-width: calc(100% - 24px);
+        transform: translateX(20px);
+        transition: all 0.3s, bottom 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+      body.panel-open #basemap-card {
+        bottom: calc(65vh + 12px);
+      }
+      #basemap-card.open {
+        transform: translateX(0);
       }
     }
 
@@ -2361,7 +2418,10 @@
       curStep = n;
       document.getElementById('mobile-step-label').textContent = `ขั้น ${n}/${STEPS}`;
       // Auto open panel on mobile when navigating
-      if (isMobile()) document.getElementById('panel').classList.add('open');
+      if (isMobile()) {
+        document.getElementById('panel').classList.add('open');
+        document.body.classList.add('panel-open');
+      }
     }
 
     function switchTab(t) {
