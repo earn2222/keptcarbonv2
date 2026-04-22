@@ -85,7 +85,7 @@
       width: 38px !important;
       height: 38px !important;
       background: rgba(255, 255, 255, 0.98) !important;
-      border: 1px solid rgba(0,0,0,0.06) !important;
+      border: 1px solid rgba(0, 0, 0, 0.06) !important;
       border-radius: 8px !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
       transition: all 0.2s !important;
@@ -193,7 +193,7 @@
       width: 280px;
       background: #ffffff;
       z-index: 400;
-      box-shadow: 4px 0 24px rgba(0,0,0,0.06);
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06);
       transform: translateX(-100%);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
@@ -306,7 +306,7 @@
       width: 220px;
       background: #ffffff;
       border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
       z-index: 500;
       display: flex;
       flex-direction: column;
@@ -1240,28 +1240,41 @@
       bottom: 70px;
       left: 14px;
       z-index: 300;
-      background: rgba(10,30,20,0.93);
+      background: rgba(10, 30, 20, 0.93);
       backdrop-filter: blur(16px);
-      border: 1px solid rgba(45,158,95,0.4);
+      border: 1px solid rgba(45, 158, 95, 0.4);
       border-radius: 12px;
       padding: 12px 14px;
       width: 300px;
       max-width: calc(100vw - 28px);
       display: none;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
       animation: slideUp 0.3s ease;
     }
+
     @keyframes slideUp {
-      from { opacity:0; transform: translateY(10px); }
-      to   { opacity:1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    #geom-panel.show { display: block; }
+
+    #geom-panel.show {
+      display: block;
+    }
+
     #geom-panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 8px;
     }
+
     #geom-panel-title {
       font-size: 10px;
       font-weight: 700;
@@ -1269,6 +1282,7 @@
       text-transform: uppercase;
       letter-spacing: 0.8px;
     }
+
     #geom-panel-close {
       background: none;
       border: none;
@@ -1278,12 +1292,13 @@
       padding: 0;
       line-height: 1;
     }
+
     #geom-copy-btn {
       margin-top: 8px;
       width: 100%;
       padding: 5px 0;
-      background: rgba(45,158,95,0.15);
-      border: 1px solid rgba(45,158,95,0.35);
+      background: rgba(45, 158, 95, 0.15);
+      border: 1px solid rgba(45, 158, 95, 0.35);
       border-radius: 7px;
       color: var(--green);
       font-size: 11px;
@@ -1292,17 +1307,21 @@
       font-family: var(--font);
       transition: all 0.2s;
     }
-    #geom-copy-btn:hover { background: rgba(45,158,95,0.25); }
+
+    #geom-copy-btn:hover {
+      background: rgba(45, 158, 95, 0.25);
+    }
+
     #geom-output-pre {
       font-size: 9px;
-      color: rgba(180,220,195,0.85);
+      color: rgba(180, 220, 195, 0.85);
       max-height: 120px;
       overflow-y: auto;
       white-space: pre-wrap;
       word-break: break-all;
       line-height: 1.5;
       margin: 0;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0, 0, 0, 0.2);
       border-radius: 6px;
       padding: 7px;
     }
@@ -1313,10 +1332,12 @@
     #search-container {
       display: none !important;
     }
+
     #search-box {
       display: flex;
       padding: 4px;
     }
+
     #loc-search {
       flex: 1;
       border: none;
@@ -1327,9 +1348,11 @@
       font-family: var(--font);
       color: var(--text);
     }
+
     #loc-search::placeholder {
       color: var(--text-dim);
     }
+
     #search-btn {
       background: rgba(45, 158, 95, 0.1);
       border: none;
@@ -1342,9 +1365,11 @@
       justify-content: center;
       transition: all 0.2s;
     }
+
     #search-btn:hover {
       background: rgba(45, 158, 95, 0.2);
     }
+
     #search-results {
       display: none;
       border-top: 1px solid var(--border);
@@ -1352,13 +1377,16 @@
       overflow-y: auto;
       background: rgba(255, 255, 255, 0.98);
     }
+
     #search-results::-webkit-scrollbar {
       width: 4px;
     }
+
     #search-results::-webkit-scrollbar-thumb {
       background: rgba(132, 169, 140, 0.3);
       border-radius: 4px;
     }
+
     .search-item {
       padding: 12px 14px;
       font-size: 12px;
@@ -1367,9 +1395,11 @@
       border-bottom: 1px solid rgba(0, 0, 0, 0.04);
       line-height: 1.4;
     }
+
     .search-item:last-child {
       border-bottom: none;
     }
+
     .search-item:hover {
       background: rgba(45, 158, 95, 0.06);
       color: var(--green);
@@ -1573,6 +1603,7 @@
       #panel {
         transform: translateY(100%) !important;
       }
+
       #panel.open {
         transform: translateY(0) !important;
       }
@@ -1604,7 +1635,8 @@
   <div id="geom-panel">
     <div id="geom-panel-header">
       <span id="geom-panel-title">📍 GeoJSON Polygon</span>
-      <button id="geom-panel-close" onclick="document.getElementById('geom-panel').classList.remove('show')" title="ปิด">✕</button>
+      <button id="geom-panel-close" onclick="document.getElementById('geom-panel').classList.remove('show')"
+        title="ปิด">✕</button>
     </div>
     <pre id="geom-output-pre"></pre>
     <button id="geom-copy-btn" onclick="copyGeom()">⧉ คัดลอก GeoJSON</button>
@@ -1632,18 +1664,18 @@
     <div class="sidebar-header">
       <div style="display:flex;align-items:center;">
         <div class="brand" style="color: var(--green);">KeptCarbon</div>
-        <div class="version" style="background: rgba(45,158,95,0.1); color: var(--green);">V2.0</div>
       </div>
-      <button class="btn-close-sidebar" onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
+      <button class="btn-close-sidebar"
+        onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
     </div>
     <div class="sidebar-nav">
       <a href="index.html"><i class="bi bi-house"></i> หน้าหลัก</a>
       <a href="dashboard.html"><i class="bi bi-grid-1x2"></i> แดชบอร์ด</a>
-      
+
       <div class="sidebar-nav-title">จัดการพื้นที่</div>
       <a href="map-draw.html" class="active"><i class="bi bi-map"></i> วาดแปลง (Map Draw)</a>
       <a href="my-plots.html"><i class="bi bi-collection"></i> แปลงของฉัน</a>
-      
+
       <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
       <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
       <a href="#" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
@@ -1657,7 +1689,8 @@
   <div id="basemap-card">
     <div class="basemap-header">
       <span><i class="bi bi-map me-2"></i>Basemap</span>
-      <i class="bi bi-x" style="cursor:pointer;font-size:18px;" onclick="document.getElementById('basemap-card').classList.remove('open')"></i>
+      <i class="bi bi-x" style="cursor:pointer;font-size:18px;"
+        onclick="document.getElementById('basemap-card').classList.remove('open')"></i>
     </div>
     <div class="basemap-option" onclick="switchBasemap('light', this)"><i class="bi bi-sun"></i> Light</div>
     <div class="basemap-option" onclick="switchBasemap('dark', this)"><i class="bi bi-moon"></i> Dark</div>
@@ -1765,12 +1798,18 @@
           </div>
 
           <!-- Geom output box -->
-          <div id="geom-box" style="display:none;margin-bottom:12px;background:rgba(45,158,95,0.05);border:1px solid rgba(45,158,95,0.22);border-radius:10px;padding:12px;">
+          <div id="geom-box"
+            style="display:none;margin-bottom:12px;background:rgba(45,158,95,0.05);border:1px solid rgba(45,158,95,0.22);border-radius:10px;padding:12px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
-              <span style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.7px;">📍 GeoJSON Coordinates</span>
-              <button onclick="copyGeom()" style="font-size:10px;padding:3px 9px;background:rgba(45,158,95,0.12);border:1px solid rgba(45,158,95,0.3);border-radius:6px;color:var(--green);cursor:pointer;font-family:var(--font);" id="copy-geom-btn">คัดลอก</button>
+              <span
+                style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.7px;">📍
+                GeoJSON Coordinates</span>
+              <button onclick="copyGeom()"
+                style="font-size:10px;padding:3px 9px;background:rgba(45,158,95,0.12);border:1px solid rgba(45,158,95,0.3);border-radius:6px;color:var(--green);cursor:pointer;font-family:var(--font);"
+                id="copy-geom-btn">คัดลอก</button>
             </div>
-            <pre id="geom-output" style="font-size:9.5px;color:var(--text-mid);overflow:auto;max-height:110px;margin:0;white-space:pre-wrap;word-break:break-all;line-height:1.5;"></pre>
+            <pre id="geom-output"
+              style="font-size:9.5px;color:var(--text-mid);overflow:auto;max-height:110px;margin:0;white-space:pre-wrap;word-break:break-all;line-height:1.5;"></pre>
           </div>
 
           <button class="btn btn-outline" id="btnStartDraw" onclick="startDrawFlow()">
@@ -1812,12 +1851,16 @@
         </div>
 
         <!-- Area summary card -->
-        <div style="background:linear-gradient(135deg,rgba(45,158,95,0.1),rgba(30,122,71,0.06));border:1px solid rgba(45,158,95,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
-          <div style="width:40px;height:40px;background:linear-gradient(135deg,#2d9e5f,#1e7a47);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <div
+          style="background:linear-gradient(135deg,rgba(45,158,95,0.1),rgba(30,122,71,0.06));border:1px solid rgba(45,158,95,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+          <div
+            style="width:40px;height:40px;background:linear-gradient(135deg,#2d9e5f,#1e7a47);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <i class="bi bi-map-fill" style="color:#fff;font-size:16px;"></i>
           </div>
           <div>
-            <div style="font-size:9.5px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;">พื้นที่แปลง</div>
+            <div
+              style="font-size:9.5px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;">
+              พื้นที่แปลง</div>
             <div style="display:flex;align-items:baseline;gap:5px;">
               <span style="font-size:22px;font-weight:800;color:var(--green);" id="area-display">—</span>
               <span style="font-size:12px;color:var(--text-dim);">ไร่</span>
@@ -1828,7 +1871,8 @@
         <!-- Form fields -->
         <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
           <div class="field" style="margin-bottom:0;">
-            <label><i class="bi bi-tag" style="margin-right:4px;color:var(--green);"></i>ชื่อแปลงยาง <span style="color:#e05;">*</span></label>
+            <label><i class="bi bi-tag" style="margin-right:4px;color:var(--green);"></i>ชื่อแปลงยาง <span
+                style="color:#e05;">*</span></label>
             <input type="text" id="inp-name" placeholder="เช่น แปลงยางหลัก 1">
           </div>
           <div class="field" style="margin-bottom:0;">
@@ -1837,13 +1881,24 @@
           </div>
           <div class="field" style="margin-bottom:0;">
             <label><i class="bi bi-geo-alt" style="margin-right:4px;color:var(--green);"></i>จังหวัด</label>
-            <select id="inp-province" style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
+            <select id="inp-province"
+              style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
               <option value="">-- เลือกจังหวัด --</option>
-              <option>ระยอง</option><option>ชุมพร</option><option>สุราษฎร์ธานี</option>
-              <option>นครศรีธรรมราช</option><option>ตรัง</option><option>สงขลา</option>
-              <option>ยะลา</option><option>นราธิวาส</option><option>พัทลุง</option>
-              <option>กระบี่</option><option>พังงา</option><option>ภูเก็ต</option>
-              <option>ปัตตานี</option><option>สตูล</option><option>อื่นๆ</option>
+              <option>ระยอง</option>
+              <option>ชุมพร</option>
+              <option>สุราษฎร์ธานี</option>
+              <option>นครศรีธรรมราช</option>
+              <option>ตรัง</option>
+              <option>สงขลา</option>
+              <option>ยะลา</option>
+              <option>นราธิวาส</option>
+              <option>พัทลุง</option>
+              <option>กระบี่</option>
+              <option>พังงา</option>
+              <option>ภูเก็ต</option>
+              <option>ปัตตานี</option>
+              <option>สตูล</option>
+              <option>อื่นๆ</option>
             </select>
           </div>
           <div class="field" style="margin-bottom:0;">
@@ -1852,10 +1907,15 @@
           </div>
           <div class="field" style="margin-bottom:0;">
             <label><i class="bi bi-tree" style="margin-right:4px;color:var(--green);"></i>พันธุ์ยาง</label>
-            <select id="inp-variety" style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
+            <select id="inp-variety"
+              style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
               <option value="">-- เลือกพันธุ์ --</option>
-              <option>RRIM 600</option><option>BPM 24</option><option>GT 1</option>
-              <option>PR 255</option><option>PB 260</option><option>RRIT 226</option>
+              <option>RRIM 600</option>
+              <option>BPM 24</option>
+              <option>GT 1</option>
+              <option>PR 255</option>
+              <option>PB 260</option>
+              <option>RRIT 226</option>
               <option>อื่นๆ</option>
             </select>
           </div>
@@ -2100,17 +2160,17 @@
         this.map = map;
         this.container = document.createElement('div');
         this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
-        
+
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.title = 'เปลี่ยนชั้นข้อมูลแผนที่';
         btn.innerHTML = '<span class="maplibregl-ctrl-icon" style="display:flex;align-items:center;justify-content:center;font-size:18px;color:#555;"><i class="bi bi-map"></i></span>';
-        
+
         // When clicked, toggle basemap card
         btn.onclick = () => {
           document.getElementById('basemap-card').classList.toggle('open');
         };
-        
+
         this.container.appendChild(btn);
         return this.container;
       }
@@ -2123,8 +2183,8 @@
 
     // Add Geolocate Control
     map.addControl(new maplibregl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true
     }), 'bottom-right');
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
@@ -2152,7 +2212,7 @@
 
     map.on('load', () => {
       // Ensure globe projection (fallback)
-      try { map.setProjection({ type: 'globe' }); } catch(e) {}
+      try { map.setProjection({ type: 'globe' }); } catch (e) { }
 
       spinGlobe();
       setStatus('🌍 หมุนลูกโลก — กด "เริ่มวาดแปลง" เพื่อบินไปยังประเทศไทย');
@@ -2294,7 +2354,7 @@
       console.log('=== GeoJSON Polygon ===');
       console.log(geomStr);
       console.log('Vertices:', coords.length);
-      console.table(coords.map(([lng,lat]) => ({ lng: +lng.toFixed(6), lat: +lat.toFixed(6) })));
+      console.table(coords.map(([lng, lat]) => ({ lng: +lng.toFixed(6), lat: +lat.toFixed(6) })));
 
       // Show floating panel
       document.getElementById('geom-output-pre').textContent = geomStr;
@@ -2564,15 +2624,15 @@
     function togglePanel() {
       const p = document.getElementById('panel');
       const ic = document.getElementById('panel-toggle-icon');
-      if(p) p.classList.toggle('open');
-      if(ic) ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
+      if (p) p.classList.toggle('open');
+      if (ic) ic.innerHTML = p.classList.contains('open') ? '<i class="bi bi-chevron-down"></i>' : '<i class="bi bi-chevron-up"></i>';
       document.body.classList.toggle('panel-open');
     }
 
     /* ================================================================
        SEARCH LOCATIONS (NOMINATIM API)
     ================================================================ */
-    document.getElementById('loc-search').addEventListener('keypress', function(e) {
+    document.getElementById('loc-search').addEventListener('keypress', function (e) {
       if (e.key === 'Enter') searchLocation();
     });
 
@@ -2580,28 +2640,28 @@
     function switchBasemap(mode, el) {
       document.querySelectorAll('.basemap-option').forEach(opt => opt.classList.remove('active'));
       el.classList.add('active');
-      
+
       const modes = ['sat', 'street', 'topo']; // Map to existing layers
       // Hide all first
       modes.forEach(m => map.setLayoutProperty(m, 'visibility', 'none'));
-      
+
       // We will map 'light' -> street, 'dark' -> topo, 'sat' -> sat, 'hybrid' -> sat (as mock)
       let targetLayer = 'sat';
       if (mode === 'light') targetLayer = 'street';
       if (mode === 'dark') targetLayer = 'topo';
-      
+
       map.setLayoutProperty(targetLayer, 'visibility', 'visible');
     }
 
     // Close sidebar when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const sidebar = document.getElementById('sidebar-menu');
       const toggleBtn = document.querySelector('.topbar-left .icon-btn');
-      
+
       if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
         sidebar.classList.remove('open');
       }
-      
+
       // Close search results
       const searchContainer = document.getElementById('search-container');
       if (searchContainer && !searchContainer.contains(e.target)) {
@@ -2617,7 +2677,7 @@
         resultsDiv.style.display = 'none';
         return;
       }
-      
+
       const btn = document.getElementById('search-btn');
       btn.innerHTML = '<div class="spinner-border spinner-border-sm text-success" role="status"></div>';
       btn.disabled = true;
@@ -2626,7 +2686,7 @@
         // Query nominatim restricted to Thailand
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=th&limit=5&q=${encodeURIComponent(q)}`);
         const data = await res.json();
-        
+
         resultsDiv.innerHTML = '';
         if (data.length === 0) {
           resultsDiv.innerHTML = '<div class="search-item" style="text-align:center;color:rgba(220,53,69,0.8);">ไม่พบสถานที่ที่ค้นหา</div>';
@@ -2637,9 +2697,9 @@
             el.innerHTML = `<i class="bi bi-geo-alt me-2" style="color:var(--green);"></i>${item.display_name}`;
             el.onclick = () => {
               stopSpin();
-              map.flyTo({ 
-                center: [parseFloat(item.lon), parseFloat(item.lat)], 
-                zoom: 12, 
+              map.flyTo({
+                center: [parseFloat(item.lon), parseFloat(item.lat)],
+                zoom: 12,
                 pitch: 0,
                 duration: 2500
               });
@@ -2655,7 +2715,7 @@
         resultsDiv.innerHTML = '<div class="search-item" style="text-align:center;color:rgba(220,53,69,0.8);">เกิดข้อผิดพลาดในการค้นหา</div>';
         resultsDiv.style.display = 'block';
       }
-      
+
       btn.innerHTML = '<i class="bi bi-search"></i>';
       btn.disabled = false;
     }
