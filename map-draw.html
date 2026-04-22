@@ -2189,33 +2189,11 @@
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
-    // Auto-spin globe
-    let spinning = true;
-    let rafId = null;
-    let spinBearing = 0;
-
-    function spinGlobe() {
-      if (!spinning) return;
-      spinBearing = (spinBearing + 0.12) % 360;
-      map.setBearing(spinBearing);
-      rafId = requestAnimationFrame(spinGlobe);
-    }
-
-    function stopSpin() {
-      spinning = false;
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    }
-
-    map.on('mousedown', stopSpin);
-    map.on('touchstart', stopSpin);
-    map.on('wheel', stopSpin);
-
     map.on('load', () => {
       // Ensure globe projection (fallback)
       try { map.setProjection({ type: 'globe' }); } catch (e) { }
 
-      spinGlobe();
-      setStatus('🌍 หมุนลูกโลก — กด "เริ่มวาดแปลง" เพื่อบินไปยังประเทศไทย');
+      setStatus('🌍 แผนที่ลูกโลก — กด "เริ่มวาดแปลง" เพื่อบินไปยังประเทศไทย');
 
       // Drawing line preview
       map.addSource('draw-line', { type: 'geojson', data: empty() });
