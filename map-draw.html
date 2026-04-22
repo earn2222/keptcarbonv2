@@ -1572,15 +1572,6 @@
     map.on('load', () => {
       setStatus('แผนที่ดาวเทียมโหลดเรียบร้อย — เริ่มวาดแปลงที่แผงด้านขวา');
 
-      // Rayong boundary
-      map.addSource('rayong', { type: 'geojson', data: rayongGeoJSON() });
-      map.addLayer({ id: 'rayong-fill', type: 'fill', source: 'rayong', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.05 } });
-      map.addLayer({ id: 'rayong-line', type: 'line', source: 'rayong', paint: { 'line-color': '#2d9e5f', 'line-width': 1.5, 'line-dasharray': [5, 3] } });
-      map.addLayer({
-        id: 'rayong-lbl', type: 'symbol', source: 'rayong',
-        layout: { 'text-field': 'จังหวัดระยอง', 'text-font': ['Open Sans Regular'], 'text-size': 13 },
-        paint: { 'text-color': '#2d9e5f', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 2 }
-      });
 
       // Drawing line preview
       map.addSource('draw-line', { type: 'geojson', data: empty() });
@@ -1973,9 +1964,6 @@
       setTimeout(() => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 2200);
     }
 
-    function rayongGeoJSON() {
-      return { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[101.038, 12.421], [101.40, 12.35], [101.70, 12.40], [101.95, 12.50], [102.05, 12.65], [101.95, 12.90], [101.75, 13.05], [101.45, 13.12], [101.15, 13.08], [100.90, 12.92], [100.82, 12.72], [100.88, 12.55], [101.038, 12.421]]] }, properties: { name: 'จังหวัดระยอง' } }] };
-    }
   </script>
 </body>
 
