@@ -2133,10 +2133,17 @@
       map.addSource('draw-fill', { type: 'geojson', data: empty() });
       map.addLayer({ id: 'draw-fill-l', type: 'fill', source: 'draw-fill', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.12 } });
 
-      // Final plot
+      // Final plot (current drawing)
       map.addSource('plot', { type: 'geojson', data: empty() });
       map.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.22 } });
       map.addLayer({ id: 'plot-line', type: 'line', source: 'plot', paint: { 'line-color': '#2d9e5f', 'line-width': 2.5 } });
+
+      // Saved plots (all previously saved)
+      map.addSource('saved-plots', { type: 'geojson', data: empty() });
+      map.addLayer({ id: 'saved-plots-fill', type: 'fill', source: 'saved-plots', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.15 } });
+      map.addLayer({ id: 'saved-plots-line', type: 'line', source: 'saved-plots', paint: { 'line-color': '#2d9e5f', 'line-width': 1.5, 'line-opacity': 0.6 } });
+
+      loadSavedPlots();
     });
 
     /* ================================================================
@@ -2662,7 +2669,33 @@
       const plot = { id: Date.now().toString(), name: pd.name || 'แปลงไม่มีชื่อ', ownerName: pd.ownerName, userId: ME.id, areaRai: pd.areaRai, areaSqm: pd.areaSqm, treeCount: pd.treeCount, plantYear: pd.plantYear, treeAge: pd.treeAge, treeHeight: pd.H, dbh: pd.D, biomassPerTree: pd.bio, carbonTotal: pd.co2, geojson: finalGJ, createdAt: new Date().toISOString() };
       PlotDB.savePlot(ME.id, plot);
       toast(`บันทึก "${plot.name}" เรียบร้อย!`);
-      setTimeout(() => window.location.href = 'my-plots.html', 2000);
+      
+      // Update saved plots display
+      loadSavedPlots();
+      
+      setTimeout(() => {
+        clearDraw(); // Clears the temporary drawing but now the saved one stays via saved-plots source
+        goStep(1);
+      }, 2000);
+    }
+
+    function loadSavedPlots() {
+      if (!ME) return;
+      const plots = PlotDB.getPlots(ME.id);
+      const collection = {
+        type: 'FeatureCollection',
+        features: plots.map(p => {
+          const feat = p.geojson;
+          if (feat) {
+            feat.properties = { ...feat.properties, name: p.name, id: p.id };
+            return feat;
+          }
+          return null;
+        }).filter(f => f)
+      };
+      if (map.getSource('saved-plots')) {
+        map.getSource('saved-plots').setData(collection);
+      }
     }
 
     /* ================================================================
