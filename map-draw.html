@@ -1794,6 +1794,10 @@
               <li><span class="sn">3</span>คลิกที่ "จุดเดิม" หรือ "จุดแรก" เพื่อจบงาน</li>
               <li><span class="sn">4</span>กดปุ่ม "ยืนยันแปลงที่วาด" เพื่อดำเนินการต่อ</li>
             </ol>
+            <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border); font-size:11px;">
+              <div style="color:var(--green);font-weight:700;margin-bottom:4px;"><i class="bi bi-info-circle me-1"></i> ข้อกำหนดพื้นที่</div>
+              <p style="color:var(--text-mid);line-height:1.4;">ขนาดแปลงต้องมีพื้นที่ไม่น้อยกว่า <strong>1 ไร่</strong> (หรือประมาณ <strong>40 × 40 เมตร</strong>) เพื่อให้ระบบสามารถประมวลผลข้อมูลดาวเทียมได้อย่างแม่นยำ</p>
+            </div>
           </div>
 
           <div class="draw-done" id="draw-done">
@@ -2317,10 +2321,21 @@
         const newLL = m.getLngLat();
         verts[index] = [newLL.lng, newLL.lat];
         rebuildMarkers();
+        
+        // Validation update on dragend
         if (verts.length >= 3) {
           const sqm = areaM2([...verts, verts[0]]);
           const rai = sqm / 1600;
-          document.getElementById('draw-area-preview').textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
+          const areaText = document.getElementById('draw-area-preview');
+          if (rai < 1.0) {
+            areaText.style.color = '#e05';
+            areaText.innerHTML = `<strong>${rai.toFixed(2)} ไร่ (เล็กเกินไป)</strong><br><small style="color:var(--text-dim);">ขั้นต่ำ 1 ไร่ (40x40 ม.)</small>`;
+            document.getElementById('btnConfirm').disabled = true;
+          } else {
+            areaText.style.color = 'var(--green)';
+            areaText.textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
+            document.getElementById('btnConfirm').disabled = false;
+          }
         }
       });
 
@@ -2431,9 +2446,19 @@
 
       const sqm = areaM2(ring);
       const rai = sqm / 1600;
-      document.getElementById('draw-area-preview').textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
-      document.getElementById('draw-done').classList.add('show');
-      document.getElementById('btnConfirm').disabled = false;
+      const areaText = document.getElementById('draw-area-preview');
+      areaText.textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
+      
+      if (rai < 1.0) {
+        areaText.style.color = '#e05';
+        areaText.innerHTML = `<strong>${rai.toFixed(2)} ไร่ (เล็กเกินไป)</strong><br><small style="color:var(--text-dim);">ขั้นต่ำ 1 ไร่ (40x40 ม.)</small>`;
+        document.getElementById('btnConfirm').disabled = true;
+        setStatus('⚠️ พื้นที่เล็กเกินไป: ขั้นต่ำต้องมีขนาด 1 ไร่ (40x40 ม.) กรุณาขยายแปลง');
+      } else {
+        areaText.style.color = 'var(--green)';
+        document.getElementById('btnConfirm').disabled = false;
+        document.getElementById('draw-done').classList.add('show');
+      }
 
       const isMob = window.innerWidth <= 768;
       
@@ -2493,6 +2518,16 @@
     }
 
     function confirmDraw() {
+      // Check area again just in case
+      const ring = [...verts, verts[0]];
+      const sqm = areaM2(ring);
+      const rai = sqm / 1600;
+      
+      if (rai < 1.0) {
+        alert('ไม่สามารถยืนยันได้: พื้นที่แปลงต้องมีขนาดอย่างน้อย 1 ไร่ (40x40 เมตร)');
+        return;
+      }
+
       // Before confirming, we should clear the editing markers
       markers.forEach(m => m.remove()); markers = [];
       ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
