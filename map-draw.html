@@ -2497,16 +2497,24 @@
       ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
       finalGJ = null;
       drawMode = false;
-      document.getElementById('body').classList.remove('drawing');
-      if (document.getElementById('btnDraw')) document.getElementById('btnDraw').classList.remove('on');
-      document.getElementById('btnStartDraw').innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
+      const bodyEl = document.getElementById('body');
+      if (bodyEl) bodyEl.classList.remove('drawing');
+      
+      const btnDraw = document.getElementById('btnDraw');
+      if (btnDraw) btnDraw.classList.remove('on');
+      
+      const btnStartDraw = document.getElementById('btnStartDraw');
+      if (btnStartDraw) btnStartDraw.innerHTML = '<i class="bi bi-pencil me-1"></i> เริ่มวาดแปลง';
 
-      if (map.getSource('draw-line')) map.getSource('draw-line').setData(empty());
-      if (map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty());
-      if (map.getSource('plot')) map.getSource('plot').setData(empty());
+      if (map && map.getSource('draw-line')) map.getSource('draw-line').setData(empty());
+      if (map && map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty());
+      if (map && map.getSource('plot')) map.getSource('plot').setData(empty());
 
-      document.getElementById('btnConfirm').disabled = true;
-      document.getElementById('draw-done').classList.remove('show');
+      const btnConfirm = document.getElementById('btnConfirm');
+      if (btnConfirm) btnConfirm.disabled = true;
+      
+      const drawDone = document.getElementById('draw-done');
+      if (drawDone) drawDone.classList.remove('show');
 
       // 2. Reset Data Object
       pd.name = '';
@@ -2523,18 +2531,39 @@
       pd.ageDist = null;
 
       // 3. Reset Inputs
-      document.getElementById('inp-name').value = '';
-      document.getElementById('inp-variety').value = '';
-      document.getElementById('draw-area-preview').textContent = '—';
-      document.getElementById('area-display').textContent = '—';
+      const inpName = document.getElementById('inp-name');
+      if (inpName) inpName.value = '';
+      
+      const inpVariety = document.getElementById('inp-variety');
+      if (inpVariety) inpVariety.value = '';
+      
+      const drawAreaPreview = document.getElementById('draw-area-preview');
+      if (drawAreaPreview) {
+        drawAreaPreview.textContent = '—';
+        drawAreaPreview.style.color = 'var(--text-mid)';
+      }
+      
+      const areaDisplay = document.getElementById('area-display');
+      if (areaDisplay) areaDisplay.textContent = '—';
 
       // 4. Reset Analysis Results
-      document.getElementById('age-result').style.display = 'none';
-      document.getElementById('carbon-result').style.display = 'none';
-      document.getElementById('age-action').style.display = 'block';
-      document.getElementById('analyze-spin').classList.remove('show');
-      document.getElementById('carbon-spin').classList.remove('show');
-      if (document.getElementById('fc-table-box')) document.getElementById('fc-table-box').style.display = 'none';
+      const ageRes = document.getElementById('age-result');
+      if (ageRes) ageRes.style.display = 'none';
+      
+      const carbRes = document.getElementById('carbon-result');
+      if (carbRes) carbRes.style.display = 'none';
+      
+      const anaSpin = document.getElementById('analyze-spin');
+      if (anaSpin) anaSpin.classList.remove('show');
+      
+      const carbSpin = document.getElementById('carbon-spin');
+      if (carbSpin) carbSpin.classList.remove('show');
+      
+      const fcTableBox = document.getElementById('fc-table-box');
+      if (fcTableBox) fcTableBox.style.display = 'none';
+
+      const ageAction = document.getElementById('age-action');
+      if (ageAction) ageAction.style.display = 'block';
 
       // 5. Clear Charts
       if (ageChart) { ageChart.destroy(); ageChart = null; }
@@ -2544,6 +2573,14 @@
 
       // 6. Navigation
       goStep(1);
+      
+      // Auto open panel for step 1
+      if (isMobile()) {
+        const panel = document.getElementById('panel');
+        if (panel) panel.classList.add('open');
+        document.body.classList.add('panel-open');
+      }
+      
       setStatus('ล้างข้อมูลและแปลงเรียบร้อย — เริ่มวาดแปลงใหม่ได้ทันที');
     }
 
@@ -2908,7 +2945,6 @@
       if (carbChart) carbChart.destroy();
       const agbPart = totalCo2 * (1 / 1.26);
       const bgbPart = totalCo2 - agbPart;
-
       carbChart = new Chart(ctxComp, {
         type: 'bar',
         data: {
@@ -3038,9 +3074,9 @@
       loadSavedPlots();
 
       setTimeout(() => {
-        clearDraw(); // Clears the temporary drawing but now the saved one stays via saved-plots source
-        goStep(1);
-      }, 2000);
+        console.log('Save complete, resetting UI...');
+        clearDraw(); 
+      }, 1500);
     }
 
     function loadSavedPlots() {
