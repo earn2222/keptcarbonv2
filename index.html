@@ -545,15 +545,33 @@
       }
 
       @media (max-width: 991px) and (min-width: 768px) {
-        .stats-number { font-size: 22px; }
-        .stats-label { font-size: 11px; }
+        .stats-number {
+          font-size: 22px;
+        }
+
+        .stats-label {
+          font-size: 11px;
+        }
       }
 
       @media (max-width: 576px) {
-        .stats-box { padding: 20px 8px; }
-        .stats-icon { width: 40px; height: 40px; font-size: 20px; }
-        .stats-number { font-size: 20px; }
-        .stats-label { font-size: 11px; }
+        .stats-box {
+          padding: 20px 8px;
+        }
+
+        .stats-icon {
+          width: 40px;
+          height: 40px;
+          font-size: 20px;
+        }
+
+        .stats-number {
+          font-size: 20px;
+        }
+
+        .stats-label {
+          font-size: 11px;
+        }
       }
 
       /* Objectives Redesign */
@@ -1071,13 +1089,13 @@
             <div class="team-card">
               <div class="team-avatar-wrap">
                 <div class="team-avatar-img">
-                  <img src="assets/img/team/team-2.jpg" alt="รศ.ดร.แสงดาว วงคสาย" class="img-fluid"
+                  <img src="assets/img/team/team-2.jpg" alt="รศ.ดร.แสงดาว วงค์สาย" class="img-fluid"
                     style="object-fit: cover; object-position: top;">
                 </div>
               </div>
               <div class="team-card-body">
                 <div class="team-role">หัวหน้าโครงการ</div>
-                <div class="team-name">รศ.ดร.แสงดาว วงคสาย</div>
+                <div class="team-name">รศ.ดร.แสงดาว วงค์สาย</div>
                 <p class="team-desc">คณะวิทยาศาสตร์และเทคโนโลยี <br>มหาวิทยาลัยธรรมศาสตร์</p>
               </div>
             </div>
@@ -1515,43 +1533,193 @@
       box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
       position: relative;
     }
-    .modal-auth-logo { text-align: center; margin-bottom: 12px; }
-    .modal-auth-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-    .modal-auth-sub { font-size: 14px; color: #64748b; margin-bottom: 28px; }
-    .modal-auth-form-group { margin-bottom: 18px; }
-    .modal-auth-form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; text-align: left; }
-    .modal-inp-wrap { position: relative; }
-    .modal-inp-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #94a3b8; pointer-events: none; }
-    .modal-inp-wrap input { width: 100%; padding: 12px 14px 12px 42px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #0f172a; outline: none; transition: all 0.2s; }
-    .modal-inp-wrap input:focus { border-color: #2d9e5f; background: #edfaf3; box-shadow: 0 0 0 3px rgba(45, 158, 95, 0.12); }
-    .modal-btn-submit { width: 100%; padding: 13px; background: linear-gradient(135deg, #2d9e5f, #0d9488); border: none; border-radius: 12px; color: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.25s; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 20px rgba(45, 158, 95, 0.35); }
-    .modal-btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(45, 158, 95, 0.45); color: white; }
-    .modal-divider { position: relative; text-align: center; color: #94a3b8; font-size: 12px; margin: 22px 0; }
-    .modal-divider::before, .modal-divider::after { content: ''; position: absolute; top: 50%; width: calc(50% - 24px); height: 1px; background: #e2e8f0; }
-    .modal-divider::before { left: 0; } .modal-divider::after { right: 0; }
-    .modal-auth-links { text-align: center; font-size: 14px; color: #64748b; }
-    .modal-auth-links a { color: #2d9e5f; font-weight: 600; text-decoration: none; cursor: pointer; }
-    .modal-pwd-strength { margin-top: 6px; height: 3px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
-    .modal-pwd-bar { height: 100%; width: 0; border-radius: 3px; transition: all 0.3s; }
-    .modal-auth-alert { display: none; padding: 11px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 18px; align-items: center; gap: 8px; }
-    .modal-auth-alert.show { display: flex; }
-    .modal-auth-alert.error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
-    .modal-auth-alert.success { background: #edfaf3; border: 1px solid rgba(45, 158, 95, 0.3); color: #1e7a47; }
+
+    .modal-auth-logo {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .modal-auth-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .modal-auth-sub {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    .modal-auth-form-group {
+      margin-bottom: 18px;
+    }
+
+    .modal-auth-form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
+      text-align: left;
+    }
+
+    .modal-inp-wrap {
+      position: relative;
+    }
+
+    .modal-inp-wrap i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .modal-inp-wrap input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #0f172a;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .modal-inp-wrap input:focus {
+      border-color: #2d9e5f;
+      background: #edfaf3;
+      box-shadow: 0 0 0 3px rgba(45, 158, 95, 0.12);
+    }
+
+    .modal-btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #2d9e5f, #0d9488);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(45, 158, 95, 0.35);
+    }
+
+    .modal-btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(45, 158, 95, 0.45);
+      color: white;
+    }
+
+    .modal-divider {
+      position: relative;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+      margin: 22px 0;
+    }
+
+    .modal-divider::before,
+    .modal-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: calc(50% - 24px);
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .modal-divider::before {
+      left: 0;
+    }
+
+    .modal-divider::after {
+      right: 0;
+    }
+
+    .modal-auth-links {
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .modal-auth-links a {
+      color: #2d9e5f;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .modal-pwd-strength {
+      margin-top: 6px;
+      height: 3px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .modal-pwd-bar {
+      height: 100%;
+      width: 0;
+      border-radius: 3px;
+      transition: all 0.3s;
+    }
+
+    .modal-auth-alert {
+      display: none;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 18px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-auth-alert.show {
+      display: flex;
+    }
+
+    .modal-auth-alert.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+    }
+
+    .modal-auth-alert.success {
+      background: #edfaf3;
+      border: 1px solid rgba(45, 158, 95, 0.3);
+      color: #1e7a47;
+    }
   </style>
 
   <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
       <div class="modal-content border-0 bg-transparent">
         <div class="modal-auth-card">
-          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"
+            aria-label="Close"></button>
           <div class="modal-auth-logo">
             <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo" style="max-width: 180px; height: auto;">
           </div>
           <div class="modal-auth-heading text-center">เข้าสู่ระบบ</div>
           <div class="modal-auth-sub text-center">ยินดีต้อนรับกลับ! กรุณากรอกข้อมูลเพื่อดำเนินการต่อ</div>
-          
+
           <div class="modal-auth-alert" id="login-alert-m"></div>
-          
+
           <form id="login-form-m" onsubmit="handleLoginModal(event)" autocomplete="on">
             <div class="modal-auth-form-group">
               <label>อีเมล</label>
@@ -1564,17 +1732,19 @@
               <label>รหัสผ่าน</label>
               <div class="modal-inp-wrap">
                 <i class="bi bi-lock"></i>
-                <input type="password" id="login-password-m" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password">
+                <input type="password" id="login-password-m" placeholder="กรอกรหัสผ่าน" required
+                  autocomplete="current-password">
               </div>
             </div>
             <button type="submit" class="modal-btn-submit" id="login-btn-m">
               เข้าสู่ระบบ
             </button>
           </form>
-          
+
           <div class="modal-divider">หรือ</div>
           <div class="modal-auth-links">
-            ยังไม่มีบัญชี? <a data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">สมัครสมาชิกใหม่</a>
+            ยังไม่มีบัญชี? <a data-bs-toggle="modal" data-bs-target="#registerModal"
+              data-bs-dismiss="modal">สมัครสมาชิกใหม่</a>
           </div>
         </div>
       </div>
@@ -1585,15 +1755,17 @@
     <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
       <div class="modal-content border-0 bg-transparent">
         <div class="modal-auth-card">
-          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"
+            aria-label="Close"></button>
           <div class="modal-auth-logo">
-            <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo" style="max-width: 180px; height: auto; margin-bottom: 12px;">
+            <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo"
+              style="max-width: 180px; height: auto; margin-bottom: 12px;">
           </div>
           <div class="modal-auth-heading text-center">สมัครสมาชิก</div>
           <div class="modal-auth-sub text-center">สร้างบัญชีเพื่อเริ่มจัดการสวนยางพาราของคุณ</div>
-          
+
           <div class="modal-auth-alert" id="reg-alert-m"></div>
-          
+
           <form id="register-form-m" onsubmit="handleRegisterModal(event)" autocomplete="on">
             <div class="modal-auth-form-group">
               <label>ชื่อ-นามสกุล</label>
@@ -1623,9 +1795,12 @@
                 <label>รหัสผ่าน</label>
                 <div class="modal-inp-wrap">
                   <i class="bi bi-lock"></i>
-                  <input type="password" id="reg-password-m" placeholder="≥ 6 ตัวอักษร" required minlength="6" oninput="checkStrengthModal(this.value)">
+                  <input type="password" id="reg-password-m" placeholder="≥ 6 ตัวอักษร" required minlength="6"
+                    oninput="checkStrengthModal(this.value)">
                 </div>
-                <div class="modal-pwd-strength"><div class="modal-pwd-bar" id="pwd-bar-m"></div></div>
+                <div class="modal-pwd-strength">
+                  <div class="modal-pwd-bar" id="pwd-bar-m"></div>
+                </div>
               </div>
               <div class="col-6 modal-auth-form-group">
                 <label>ยืนยันรหัสผ่าน</label>
@@ -1642,10 +1817,11 @@
               เมื่อสมัครสมาชิก คุณยอมรับ <a href="#" style="color: #2d9e5f;">เงื่อนไขการใช้งาน</a> ของเรา
             </div>
           </form>
-          
+
           <div class="modal-divider">หรือ</div>
           <div class="modal-auth-links">
-            มีบัญชีอยู่แล้ว? <a data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">เข้าสู่ระบบ</a>
+            มีบัญชีอยู่แล้ว? <a data-bs-toggle="modal" data-bs-target="#loginModal"
+              data-bs-dismiss="modal">เข้าสู่ระบบ</a>
           </div>
         </div>
       </div>
@@ -1659,10 +1835,10 @@
       const password = document.getElementById('login-password-m').value;
       const al = document.getElementById('login-alert-m');
       const btn = document.getElementById('login-btn-m');
-      
+
       btn.disabled = true;
       btn.innerHTML = 'กำลังเข้าสู่ระบบ...';
-      
+
       setTimeout(() => {
         const result = Auth.login(email, password);
         if (result.success) {
@@ -1677,7 +1853,7 @@
         }
       }, 600);
     }
-    
+
     function checkStrengthModal(pwd) {
       const bar = document.getElementById('pwd-bar-m');
       const len = pwd.length;
@@ -1697,16 +1873,16 @@
       const confirm = document.getElementById('reg-confirm-m').value;
       const al = document.getElementById('reg-alert-m');
       const btn = document.getElementById('reg-btn-m');
-      
+
       if (password !== confirm) {
         al.className = 'modal-auth-alert error show';
         al.innerHTML = '<i class="bi bi-exclamation-circle"></i> ✗ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
         return;
       }
-      
+
       btn.disabled = true;
       btn.innerHTML = 'กำลังสมัครสมาชิก...';
-      
+
       setTimeout(() => {
         const result = Auth.register({ fullname, email, phone, password });
         if (result.success) {
