@@ -337,24 +337,28 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px;
-      border: 1px solid #f0f0f0;
-      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       margin-bottom: 8px;
       cursor: pointer;
       font-size: 13px;
-      color: #555;
+      font-weight: 500;
+      color: #64748b;
       transition: all 0.2s;
     }
 
     .basemap-option:hover {
-      background: #f8f9fa;
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #334155;
     }
 
     .basemap-option.active {
-      background: #f59e0b;
-      color: white;
-      border-color: #f59e0b;
+      background: rgba(45, 158, 95, 0.08);
+      color: var(--green);
+      border-color: var(--green);
+      font-weight: 600;
     }
 
     .logo:hover {
@@ -1648,10 +1652,6 @@
       <button class="icon-btn" onclick="document.getElementById('sidebar-menu').classList.add('open')">
         <i class="bi bi-list"></i>
       </button>
-      <div class="topbar-title" style="display: flex; align-items: center; gap: 10px;">
-        <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" style="height: 32px;">
-        <span style="color: var(--green); font-weight: 700;">KeptCarbon</span>
-      </div>
     </div>
     <div class="topbar-right">
       <span id="nav-user" style="font-size:12px;color:var(--text-mid);margin-right:8px;"></span>
@@ -1663,6 +1663,7 @@
   <div id="sidebar-menu">
     <div class="sidebar-header">
       <div style="display:flex;align-items:center;">
+        <img src="assets/img/keptcarbon-logo.png" alt="Kept Carbon" style="height: 32px;">
         <div class="brand" style="color: var(--green);">KeptCarbon</div>
       </div>
       <button class="btn-close-sidebar"
@@ -1688,14 +1689,16 @@
   <!-- ======================== BASEMAP CARD ======================== -->
   <div id="basemap-card">
     <div class="basemap-header">
-      <span><i class="bi bi-map me-2"></i>Basemap</span>
+      <span><i class="bi bi-map" style="margin-right: 8px;"></i>แผนที่ (Basemap)</span>
       <i class="bi bi-x" style="cursor:pointer;font-size:18px;"
         onclick="document.getElementById('basemap-card').classList.remove('open')"></i>
     </div>
-    <div class="basemap-option" onclick="switchBasemap('light', this)"><i class="bi bi-sun"></i> Light</div>
-    <div class="basemap-option" onclick="switchBasemap('dark', this)"><i class="bi bi-moon"></i> Dark</div>
-    <div class="basemap-option active" onclick="switchBasemap('sat', this)"><i class="bi bi-globe"></i> Satellite</div>
-    <div class="basemap-option" onclick="switchBasemap('hybrid', this)"><i class="bi bi-google"></i> Google Hybrid</div>
+    <div class="basemap-option active" onclick="switchBasemap('sat', this)"><i class="bi bi-globe-asia-australia"></i>
+      แผนที่ดาวเทียม</div>
+    <div class="basemap-option" onclick="switchBasemap('street', this)"><i class="bi bi-map"></i> แผนที่ถนน (Street)
+    </div>
+    <div class="basemap-option" onclick="switchBasemap('topo', this)"><i class="bi bi-tree"></i> ภูมิประเทศ
+      (Terrain)</div>
   </div>
 
   <!-- ======================== DRAW TOOLBAR ======================== -->
@@ -2154,6 +2157,14 @@
       attributionControl: false
     });
 
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+
+    // Add Geolocate Control
+    map.addControl(new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true
+    }), 'bottom-right');
+
     // Add Custom Layer Switcher (Mock)
     class MapLayerControl {
       onAdd(map) {
@@ -2180,14 +2191,6 @@
       }
     }
     map.addControl(new MapLayerControl(), 'bottom-right');
-
-    // Add Geolocate Control
-    map.addControl(new maplibregl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
-      trackUserLocation: true
-    }), 'bottom-right');
-
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
     map.on('load', () => {
       // Ensure globe projection (fallback)
@@ -2619,16 +2622,12 @@
       document.querySelectorAll('.basemap-option').forEach(opt => opt.classList.remove('active'));
       el.classList.add('active');
 
-      const modes = ['sat', 'street', 'topo']; // Map to existing layers
-      // Hide all first
-      modes.forEach(m => map.setLayoutProperty(m, 'visibility', 'none'));
-
-      // We will map 'light' -> street, 'dark' -> topo, 'sat' -> sat, 'hybrid' -> sat (as mock)
-      let targetLayer = 'sat';
-      if (mode === 'light') targetLayer = 'street';
-      if (mode === 'dark') targetLayer = 'topo';
-
-      map.setLayoutProperty(targetLayer, 'visibility', 'visible');
+      const modes = ['sat', 'street', 'topo'];
+      modes.forEach(m => {
+        if (map.getLayer(m)) {
+          map.setLayoutProperty(m, 'visibility', m === mode ? 'visible' : 'none');
+        }
+      });
     }
 
     // Close sidebar when clicking outside
