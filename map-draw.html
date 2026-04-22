@@ -1776,7 +1776,7 @@
               <li><span class="sn">1</span>กดปุ่ม ✏️ ในแถบซ้ายเพื่อเข้าโหมดวาด</li>
               <li><span class="sn">2</span>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต</li>
               <li><span class="sn">3</span>คลิกที่ "จุดเดิม" หรือ "จุดแรก" เพื่อจบงาน</li>
-              <li><span class="sn">4</span>ระบบจะพาไปหน้ากรอกข้อมูลอัตโนมัติ</li>
+              <li><span class="sn">4</span>กดปุ่ม "ยืนยันแปลงที่วาด" เพื่อดำเนินการต่อ</li>
             </ol>
           </div>
 
@@ -2315,13 +2315,21 @@
       document.getElementById('draw-area-preview').textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
       document.getElementById('draw-done').classList.add('show');
       document.getElementById('btnConfirm').disabled = false;
-      setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กำลังไปหน้ากรอกข้อมูล...`);
+
+      const isMob = window.innerWidth <= 768;
       
-      // Auto open panel and jump to Step 2 immediately as requested
-      setTimeout(() => {
+      if (isMob) {
+        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กำลังไปหน้ากรอกข้อมูล...`);
+        // Auto open panel and jump to Step 2 immediately for mobile
+        setTimeout(() => {
+          togglePanel(true);
+          confirmDraw();
+        }, 600);
+      } else {
+        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กรุณากดปุ่ม "ยืนยันแปลงที่วาด" เพื่อไปขั้นตอนถัดไป`);
+        // On desktop, just ensure panel is open so they see the confirm button
         togglePanel(true);
-        confirmDraw();
-      }, 500);
+      }
 
       fitPlot();
     }
