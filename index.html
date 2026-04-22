@@ -53,6 +53,20 @@
           <li><a href="#project-about">เกี่ยวกับโครงการ</a></li>
           <li><a href="#team">ทีมงานของเรา</a></li>
           <li><a href="#contact">ติดต่อเรา</a></li>
+          <!-- Mobile-only auth buttons inside drawer -->
+          <li class="d-xl-none">
+            <div class="mobile-auth-divider"></div>
+          </li>
+          <li class="d-xl-none">
+            <div class="mobile-auth-buttons">
+              <a class="mobile-btn-login" href="login.html">
+                <i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบ
+              </a>
+              <a class="mobile-btn-register" href="register.html">
+                <i class="bi bi-person-plus"></i> สมัครสมาชิก
+              </a>
+            </div>
+          </li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -1275,7 +1289,9 @@
       }
 
       @media (max-width: 576px) {
-        .contact-form-grid { grid-template-columns: 1fr; }
+        .contact-form-grid {
+          grid-template-columns: 1fr;
+        }
       }
 
       .contact-divider {
@@ -1317,14 +1333,6 @@
                   <strong>ที่อยู่มหาวิทยาลัย</strong>
                   สาขาวิชาคณิตศาสตร์และสถิติ คณะวิทยาศาสตร์และเทคโนโลยี<br>
                   มหาวิทยาลัยธรรมศาสตร์ (ศูนย์รังสิต) อ.คลองหลวง จ.ปทุมธานี
-                </div>
-              </div>
-
-              <div class="contact-info-row">
-                <i class="bi bi-door-open"></i>
-                <div>
-                  <strong>ห้องพักอาจารย์</strong>
-                  บร.3-217/10
                 </div>
               </div>
 
