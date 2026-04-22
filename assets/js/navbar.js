@@ -27,11 +27,11 @@
           <li class="d-xl-none"><div class="mobile-auth-divider"></div></li>
           <li class="d-xl-none">
             <div class="mobile-auth-buttons">
-              <a class="mobile-btn-login" href="login.html">
-                <i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบ
+              <a class="mobile-btn-login" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                เข้าสู่ระบบ
               </a>
-              <a class="mobile-btn-register" href="register.html">
-                <i class="bi bi-person-plus"></i> สมัครสมาชิก
+              <a class="mobile-btn-register" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">
+                สมัครสมาชิก
               </a>
             </div>
           </li>
@@ -40,8 +40,8 @@
       `;
       if (navButtons) {
         navButtons.innerHTML = `
-          <a class="btn-login" href="login.html">เข้าสู่ระบบ</a>
-          <a class="btn-getstarted" href="register.html">สมัครสมาชิก</a>
+          <a class="btn-login" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">เข้าสู่ระบบ</a>
+          <a class="btn-getstarted" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">สมัครสมาชิก</a>
         `;
       }
     } else {
