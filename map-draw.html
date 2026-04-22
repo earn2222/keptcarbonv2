@@ -559,7 +559,6 @@
       background: var(--green);
       border: 2px solid rgba(255, 255, 255, 0.9);
       border-radius: 50%;
-      margin: -5px 0 0 -5px;
       cursor: pointer;
       box-shadow: 0 0 0 3px rgba(132, 169, 140, 0.22);
       transition: transform .15s;
@@ -567,6 +566,23 @@
 
     .vdot:hover {
       transform: scale(1.5);
+    }
+
+    /* ghost dot (midpoint) */
+    .vdot.ghost {
+      width: 8px;
+      height: 8px;
+      background: rgba(45, 158, 95, 0.4);
+      border: 1.5px solid rgba(255, 255, 255, 0.6);
+      box-shadow: none;
+      opacity: 0.6;
+      cursor: copy;
+    }
+
+    .vdot.ghost:hover {
+      background: var(--green);
+      opacity: 1;
+      transform: scale(1.6);
     }
 
     /* ============================================================
@@ -2270,8 +2286,7 @@
       }
 
       verts.push([e.lngLat.lng, e.lngLat.lat]);
-      addMarker([e.lngLat.lng, e.lngLat.lat]);
-      previewDraw();
+      rebuildMarkers();
       setStatus(`จุดที่ ${verts.length} — คลิกที่จุดเดิมหรือจุดแรกเพื่อจบการวาด`);
     });
 
@@ -2285,17 +2300,118 @@
       if (e.key === 'Escape' && drawMode) { drawMode = false; document.getElementById('body').classList.remove('drawing'); document.getElementById('btnDraw').classList.remove('on'); setStatus('ยกเลิกการวาด'); }
     });
 
-    function addMarker(ll) {
+    function addMarker(ll, index) {
       const el = document.createElement('div');
       el.className = 'vdot';
-      markers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(ll).addTo(map));
+      const m = new maplibregl.Marker({ element: el, anchor: 'center', draggable: true })
+        .setLngLat(ll)
+        .addTo(map);
+
+      m.on('drag', () => {
+        const newLL = m.getLngLat();
+        verts[index] = [newLL.lng, newLL.lat];
+        previewDraw();
+      });
+
+      m.on('dragend', () => {
+        const newLL = m.getLngLat();
+        verts[index] = [newLL.lng, newLL.lat];
+        rebuildMarkers();
+        if (verts.length >= 3) {
+          const sqm = areaM2([...verts, verts[0]]);
+          const rai = sqm / 1600;
+          document.getElementById('draw-area-preview').textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
+        }
+      });
+
+      markers.push(m);
+    }
+
+    let ghostMarkers = [];
+    function updateMidpointMarkers() {
+      ghostMarkers.forEach(m => m.remove());
+      ghostMarkers = [];
+
+      if (verts.length < 2) return;
+
+      // Only show ghosts if we have a closed polygon or are in edit mode
+      // If verts >= 3 and not currently "drawing" new points, connect last to first
+      const isClosed = verts.length >= 3;
+      const loopCount = isClosed ? verts.length : verts.length - 1;
+
+      for (let i = 0; i < loopCount; i++) {
+        const p1 = verts[i];
+        const p2 = verts[(i + 1) % verts.length];
+
+        const mid = [
+          (p1[0] + p2[0]) / 2,
+          (p1[1] + p2[1]) / 2
+        ];
+
+        const el = document.createElement('div');
+        el.className = 'vdot ghost';
+        const gm = new maplibregl.Marker({ element: el, anchor: 'center', draggable: true })
+          .setLngLat(mid)
+          .addTo(map);
+
+        let promotedIndex = -1;
+        gm.on('drag', () => {
+          const pos = gm.getLngLat();
+          if (promotedIndex === -1) {
+            // First move: insert the new vertex
+            promotedIndex = i + 1;
+            verts.splice(promotedIndex, 0, [pos.lng, pos.lat]);
+          } else {
+            // Subsequent moves: update the vertex
+            verts[promotedIndex] = [pos.lng, pos.lat];
+          }
+          previewDraw();
+        });
+
+        gm.on('dragend', () => {
+          rebuildMarkers();
+        });
+
+        ghostMarkers.push(gm);
+      }
+    }
+
+    function rebuildMarkers() {
+      markers.forEach(m => m.remove());
+      markers = [];
+      ghostMarkers.forEach(m => m.remove());
+      ghostMarkers = [];
+
+      verts.forEach((v, i) => {
+        addMarker(v, i);
+      });
+
+      updateMidpointMarkers();
+      previewDraw();
     }
 
     function previewDraw() {
-      if (verts.length < 2) { map.getSource('draw-line').setData(empty()); map.getSource('draw-fill').setData(empty()); return; }
+      if (verts.length < 2) { 
+        if (map.getSource('draw-line')) map.getSource('draw-line').setData(empty()); 
+        if (map.getSource('draw-fill')) map.getSource('draw-fill').setData(empty()); 
+        return; 
+      }
+      const ring = [...verts, verts[0]];
       const line = [...verts, verts.length >= 3 ? verts[0] : verts[verts.length - 1]];
-      map.getSource('draw-line').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: line } });
-      if (verts.length >= 3) map.getSource('draw-fill').setData({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[...verts, verts[0]]] } });
+      
+      const lineGeo = { type: 'Feature', geometry: { type: 'LineString', coordinates: line } };
+      const fillGeo = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] } };
+
+      if (map.getSource('draw-line')) map.getSource('draw-line').setData(lineGeo);
+      if (verts.length >= 3 && map.getSource('draw-fill')) {
+        map.getSource('draw-fill').setData(fillGeo);
+      }
+
+      // Also update the 'plot' source if we have finished drawing and are just editing
+      if (!drawMode && verts.length >= 3 && map.getSource('plot')) {
+        map.getSource('plot').setData(fillGeo);
+        finalGJ = fillGeo; // ensure finalGJ is kept in sync
+      }
     }
 
     function finishDraw() {
@@ -2310,6 +2426,9 @@
       map.getSource('draw-line').setData(empty());
       map.getSource('draw-fill').setData(empty());
 
+      // After finishing, we keep the markers so user can edit!
+      rebuildMarkers();
+
       const sqm = areaM2(ring);
       const rai = sqm / 1600;
       document.getElementById('draw-area-preview').textContent = `${rai.toFixed(2)} ไร่ · ${verts.length} จุด`;
@@ -2319,15 +2438,17 @@
       const isMob = window.innerWidth <= 768;
       
       if (isMob) {
-        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กำลังไปหน้ากรอกข้อมูล...`);
-        // Auto open panel and jump to Step 2 immediately for mobile
+        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — สามารถขยับจุดเพื่อแก้ไขได้`);
+        // We DON'T auto-confirm on mobile anymore if they might want to edit
+        // But the previous conversation history says "ensuring the existing automatic progression remains enabled for mobile users"
+        // Let's keep a slight delay if we want to auto-confirm, but maybe give them a chance to see the markers.
+        // Actually, if we want "drag to edit", auto-confirming immediately is bad.
+        // Let's just open the panel.
         setTimeout(() => {
           togglePanel(true);
-          confirmDraw();
         }, 600);
       } else {
-        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กรุณากดปุ่ม "ยืนยันแปลงที่วาด" เพื่อไปขั้นตอนถัดไป`);
-        // On desktop, just ensure panel is open so they see the confirm button
+        setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — ขยับจุดเพื่อแก้ไขได้ หรือกด "ยืนยันแปลงที่วาด"`);
         togglePanel(true);
       }
 
@@ -2336,13 +2457,16 @@
 
     function undoVertex() {
       if (!verts.length) return;
-      verts.pop(); markers.pop()?.remove();
-      previewDraw();
+      verts.pop(); 
+      rebuildMarkers();
       setStatus(`ยกเลิกจุดล่าสุด (เหลือ ${verts.length} จุด)`);
     }
 
     function clearDraw() {
-      verts = []; markers.forEach(m => m.remove()); markers = []; finalGJ = null;
+      verts = []; 
+      markers.forEach(m => m.remove()); markers = [];
+      ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
+      finalGJ = null;
       drawMode = false;
       document.getElementById('body').classList.remove('drawing');
       document.getElementById('btnDraw').classList.remove('on');
@@ -2369,7 +2493,25 @@
     }
 
     function confirmDraw() {
-      if (!finalGJ) return;
+      // Before confirming, we should clear the editing markers
+      markers.forEach(m => m.remove()); markers = [];
+      ghostMarkers.forEach(m => m.remove()); ghostMarkers = [];
+
+      if (!finalGJ) {
+        // If finalGJ is null (maybe user edited but we didn't update it)
+        // ensure we have it
+        if (verts.length >= 3) {
+          const ring = [...verts, verts[0]];
+          finalGJ = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] }, properties: {} };
+        } else {
+          return;
+        }
+      } else {
+        // Update finalGJ from current verts just in case
+        const ring = [...verts, verts[0]];
+        finalGJ.geometry.coordinates = [ring];
+      }
+      
       updateArea(finalGJ);
 
       // Build geom object
