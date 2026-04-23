@@ -2842,26 +2842,60 @@
       const labs = Object.keys(dist).sort((a, b) => a - b);
       const mainAge = pd.treeAge;
 
+      Chart.defaults.font.family = "'Noto Sans Thai', 'Noto Sans', sans-serif";
+      Chart.defaults.color = '#555';
+
+      const gradMain = ctx.createLinearGradient(0, 0, 0, 200);
+      gradMain.addColorStop(0, 'rgba(45, 158, 95, 0.95)');
+      gradMain.addColorStop(1, 'rgba(45, 158, 95, 0.6)');
+
+      const gradDim = ctx.createLinearGradient(0, 0, 0, 200);
+      gradDim.addColorStop(0, 'rgba(45, 158, 95, 0.3)');
+      gradDim.addColorStop(1, 'rgba(45, 158, 95, 0.1)');
+
       ageChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labs.map(a => a + ' ปี'),
           datasets: [{
             data: labs.map(k => dist[k]),
-            backgroundColor: labs.map(a => +a === mainAge ? 'rgba(45, 158, 95, 0.85)' : 'rgba(45, 158, 95, 0.25)'),
-            borderRadius: 6,
-            borderWidth: 0
+            backgroundColor: labs.map(a => +a === mainAge ? gradMain : gradDim),
+            borderRadius: 8,
+            borderWidth: 0,
+            hoverBackgroundColor: 'rgba(45, 158, 95, 1)'
           }]
         },
         options: {
           responsive: true,
+          animation: { duration: 1200, easing: 'easeOutQuart' },
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: (c) => `พื้นที่ ${c.raw}% (${(pd.areaRai * c.raw / 100).toFixed(2)} ไร่)` } }
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              titleColor: '#1a3d2b',
+              bodyColor: '#1a3d2b',
+              borderColor: 'rgba(45, 158, 95, 0.2)',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true,
+              bodyFont: { family: "'Noto Sans Thai', sans-serif" },
+              titleFont: { family: "'Noto Sans Thai', sans-serif" },
+              callbacks: { label: (c) => `พื้นที่ ${c.raw}% (${(pd.areaRai * c.raw / 100).toFixed(2)} ไร่)` }
+            }
           },
           scales: {
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 10 } }, grid: { display: false } },
-            y: { beginAtZero: true, ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
+            x: { 
+              ticks: { color: 'var(--text-dim)', font: { size: 11, family: "'Noto Sans Thai', sans-serif" } }, 
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: { 
+              beginAtZero: true, 
+              ticks: { color: 'var(--text-dim)', font: { size: 10, family: "'Noto Sans Thai', sans-serif" } }, 
+              grid: { color: 'rgba(0,0,0,0.03)' },
+              border: { display: false }
+            }
           }
         }
       });
@@ -2921,21 +2955,49 @@
       const ctxAge = document.getElementById('carbonAgeChart').getContext('2d');
       if (carbAgeChart) carbAgeChart.destroy();
       carbAgeChart = new Chart(ctxAge, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
           labels: ageLabels.map(a => 'อายุ ' + a + ' ปี'),
           datasets: [{
             data: ageCo2Data,
-            backgroundColor: ['#2d9e5f', '#38b26a', '#1e7a47', '#84a98c', '#52796f'],
+            backgroundColor: ['#2d9e5f', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800'],
+            hoverOffset: 6,
             borderWidth: 2,
-            borderColor: '#fff'
+            borderColor: '#ffffff',
+            borderRadius: 4
           }]
         },
         options: {
           responsive: true,
+          cutout: '65%',
+          animation: {
+            animateScale: true,
+            animateRotate: true,
+            duration: 1500,
+            easing: 'easeOutExpo'
+          },
           plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-            tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} tCO₂` } }
+            legend: { 
+              position: 'bottom', 
+              labels: { 
+                boxWidth: 12, 
+                padding: 15,
+                font: { size: 11, family: "'Noto Sans Thai', sans-serif", weight: '500' },
+                usePointStyle: true,
+                pointStyle: 'circle'
+              } 
+            },
+            tooltip: { 
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              titleColor: '#1a3d2b',
+              bodyColor: '#1a3d2b',
+              bodyFont: { family: "'Noto Sans Thai', sans-serif", size: 12 },
+              titleFont: { family: "'Noto Sans Thai', sans-serif", size: 13, weight: 'bold' },
+              borderColor: 'rgba(0,0,0,0.05)',
+              borderWidth: 1,
+              padding: 12,
+              callbacks: { label: (c) => ` ${c.label}: ${c.raw} tCO₂` } 
+            }
           }
         }
       });
@@ -2945,24 +3007,58 @@
       if (carbChart) carbChart.destroy();
       const agbPart = totalCo2 * (1 / 1.26);
       const bgbPart = totalCo2 - agbPart;
+      const gradAGB = ctxComp.createLinearGradient(0, 0, 300, 0);
+      gradAGB.addColorStop(0, '#2d9e5f');
+      gradAGB.addColorStop(1, '#4CAF50');
+      
+      const gradBGB = ctxComp.createLinearGradient(0, 0, 300, 0);
+      gradBGB.addColorStop(0, '#52796f');
+      gradBGB.addColorStop(1, '#84a98c');
+      
+      const gradTotal = ctxComp.createLinearGradient(0, 0, 300, 0);
+      gradTotal.addColorStop(0, 'rgba(45, 158, 95, 0.4)');
+      gradTotal.addColorStop(1, 'rgba(45, 158, 95, 0.2)');
+
       carbChart = new Chart(ctxComp, {
         type: 'bar',
         data: {
           labels: ['AGB (บนดิน)', 'BGB (ใต้ดิน)', 'CO₂ รวม'],
           datasets: [{
             data: [+agbPart.toFixed(2), +bgbPart.toFixed(2), +totalCo2.toFixed(2)],
-            backgroundColor: ['rgba(45, 158, 95, 0.75)', 'rgba(82, 121, 111, 0.7)', 'rgba(45, 158, 95, 0.3)'],
-            borderRadius: 5,
-            borderWidth: 0
+            backgroundColor: [gradAGB, gradBGB, gradTotal],
+            borderRadius: 6,
+            borderWidth: 0,
+            barPercentage: 0.6
           }]
         },
         options: {
           indexAxis: 'y',
           responsive: true,
-          plugins: { legend: { display: false } },
+          animation: { duration: 1200, easing: 'easeOutQuart' },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              titleColor: '#1a3d2b',
+              bodyColor: '#1a3d2b',
+              borderColor: 'rgba(0,0,0,0.05)',
+              borderWidth: 1,
+              padding: 10,
+              bodyFont: { family: "'Noto Sans Thai', sans-serif" },
+              titleFont: { family: "'Noto Sans Thai', sans-serif" }
+            }
+          },
           scales: {
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
-            y: { ticks: { color: 'var(--text-mid)', font: { size: 10 } }, grid: { display: false } }
+            x: { 
+              ticks: { color: 'var(--text-dim)', font: { size: 10, family: "'Noto Sans Thai', sans-serif" } }, 
+              grid: { color: 'rgba(0,0,0,0.03)' },
+              border: { display: false }
+            },
+            y: { 
+              ticks: { color: 'var(--text-mid)', font: { size: 11, family: "'Noto Sans Thai', sans-serif", weight: '500' } }, 
+              grid: { display: false },
+              border: { display: false }
+            }
           }
         }
       });
@@ -3009,6 +3105,10 @@
 
       const ctx = document.getElementById('fcChart').getContext('2d');
       if (fcChart) fcChart.destroy();
+      const gradLine = ctx.createLinearGradient(0, 0, 0, 300);
+      gradLine.addColorStop(0, 'rgba(45, 158, 95, 0.4)');
+      gradLine.addColorStop(1, 'rgba(45, 158, 95, 0.0)');
+
       fcChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -3017,28 +3117,54 @@
             label: 'คาดการณ์ tCO₂',
             data: vals,
             borderColor: '#2d9e5f',
-            backgroundColor: 'rgba(45, 158, 95, 0.1)',
+            backgroundColor: gradLine,
             borderWidth: 3,
-            pointRadius: 4,
-            pointBackgroundColor: '#fff',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#ffffff',
             pointBorderColor: '#2d9e5f',
+            pointBorderWidth: 2,
             fill: true,
             tension: 0.4
           }]
         },
         options: {
           responsive: true,
+          animation: {
+            duration: 1500,
+            easing: 'easeInOutQuart'
+          },
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
           plugins: { 
             legend: { display: false },
             tooltip: {
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              titleColor: '#1a3d2b',
+              bodyColor: '#2d9e5f',
+              titleFont: { size: 13, family: "'Noto Sans Thai', sans-serif" },
+              bodyFont: { size: 13, family: "'Noto Sans Thai', sans-serif", weight: 'bold' },
+              borderColor: 'rgba(45, 158, 95, 0.2)',
+              borderWidth: 1,
+              padding: 12,
               callbacks: {
                 title: (items) => fullLabs[items[0].dataIndex]
               }
             }
           },
           scales: {
-            x: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { display: false } },
-            y: { ticks: { color: 'var(--text-dim)', font: { size: 9 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
+            x: { 
+              ticks: { color: 'var(--text-dim)', font: { size: 11, family: "'Noto Sans Thai', sans-serif" } }, 
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: { 
+              ticks: { color: 'var(--text-dim)', font: { size: 10, family: "'Noto Sans Thai', sans-serif" } }, 
+              grid: { color: 'rgba(0,0,0,0.03)' },
+              border: { display: false }
+            }
           }
         }
       });
