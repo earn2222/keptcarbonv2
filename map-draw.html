@@ -3227,6 +3227,15 @@
 
       // Logic for Step 2 multi-plot rendering
       if (n === 2) {
+        // Reset variety selectors
+        const bulkVar = document.getElementById('bulk-variety');
+        if (bulkVar) bulkVar.value = '';
+        const singleVar = document.getElementById('inp-variety');
+        if (singleVar) singleVar.value = '';
+
+        // Reset data in array
+        multiPlots.forEach(p => p.variety = '');
+
         renderMultiPlotList();
       }
 
@@ -3422,7 +3431,7 @@
             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
               <div style="display:flex; align-items:center; gap:8px;">
                 <div style="width:28px; height:28px; background:rgba(45,158,95,0.1); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--green); font-size:12px;">${idx + 1}</div>
-                <div style="font-size:11px; font-weight:700; color:var(--text);">${p.areaRai.toFixed(2)} ไร่</div>
+                <div style="font-size:11px; font-weight:700; color:var(--text);">พื้นที่ ${p.areaRai.toFixed(2)} ไร่</div>
               </div>
               <div style="font-size:10px; color:var(--text-dim);">#${p.id.split('_').pop()}</div>
             </div>
