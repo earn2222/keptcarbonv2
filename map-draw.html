@@ -2827,7 +2827,7 @@
         listDiv.innerHTML = `<div style="font-size:11.5px; font-weight:600; color:var(--text-dim); margin-bottom:10px;">เลือกแปลงที่จะคำนวณ (${shpFeatures.length} แปลง)</div>`;
 
         shpFeatures.forEach((f, idx) => {
-          const nm = f.properties?.PLOT_NAME || f.properties?.NAME || `แปลงที่ ${idx + 1}`;
+          const nm = getPlotNameFromProps(f.properties, idx + 1);
           let areaStr = '';
           try {
             const coords = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates[0][0] : f.geometry.coordinates[0];
@@ -3044,7 +3044,7 @@
       checkboxes.forEach((chk, orderIdx) => {
         const idx = parseInt(chk.value);
         const f = shpFeatures[idx];
-        const nm = f.properties?.PLOT_NAME || f.properties?.NAME || `แปลงที่ ${orderIdx + 1}`;
+        const nm = getPlotNameFromProps(f.properties, orderIdx + 1);
 
         let gj = f.geometry.type === 'MultiPolygon'
           ? { type: 'Feature', geometry: { type: 'Polygon', coordinates: f.geometry.coordinates[0] }, properties: f.properties || {} }
@@ -3895,6 +3895,20 @@
     function setStatus(t) { document.getElementById('status-text').textContent = t; }
     function empty() { return { type: 'FeatureCollection', features: [] }; }
     function isMobile() { return window.innerWidth <= 992; }
+
+    function getPlotNameFromProps(p, fallbackIdx) {
+      if (!p) return `แปลงที่ ${fallbackIdx}`;
+      const fname = p.F_name || p.FNAME || p.fname || p.F_NAME || p.titl_nam || '';
+      const lname = p.L_Name || p.LNAME || p.lname || p.L_NAME || '';
+      if (fname || lname) {
+        let n = `${fname} ${lname}`.trim();
+        // Remove repeated spaces
+        return n.replace(/\s+/g, ' ');
+      }
+      if (p.OWNER || p.owner || p.OWNER_NAME) return p.OWNER || p.owner || p.OWNER_NAME;
+      if (p.PLOT_NAME || p.NAME || p.name || p.Name) return p.PLOT_NAME || p.NAME || p.name || p.Name;
+      return `แปลงที่ ${fallbackIdx}`;
+    }
 
     function getSafeBounds(lngs, lats) {
       if (!lngs || !lngs.length) return null;
