@@ -2806,8 +2806,8 @@
           item.style.fontSize = '12px';
           
           item.innerHTML = `
-            <input type="checkbox" id="shp-chk-${idx}" value="${idx}" checked style="accent-color:var(--green); width:16px; height:16px; cursor:pointer;">
-            <label for="shp-chk-${idx}" style="cursor:pointer; color:var(--text); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            <input type="checkbox" id="shp-chk-${idx}" value="${idx}" checked style="accent-color:var(--green); width:16px; height:16px; cursor:pointer;" onchange="updateShpPreview(${idx})">
+            <label for="shp-chk-${idx}" style="cursor:pointer; color:var(--text); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" onclick="updateShpPreview(${idx})">
               <i class="bi bi-tree" style="color:var(--green); margin-right:4px;"></i> ${nm} 
               <span style="color:var(--text-dim); margin-left:4px;">(${areaStr})</span>
             </label>
@@ -2820,11 +2820,72 @@
         s.style.color = 'var(--green)';
         document.getElementById('btnLoadShp').disabled = false;
         
+        // Initial Preview of all plots
+        setTimeout(() => updateShpPreview(), 100);
+        
       } catch (err) {
         s.textContent = '✗ ' + err.message; s.style.color = 'rgba(255,100,110,0.7)';
         document.getElementById('btnLoadShp').disabled = false;
       }
     }
+
+    // Global function to update preview map in Step 1
+    window.updateShpPreview = function(zoomIdx) {
+      if (!shpFeatures.length) return;
+      const checkboxes = document.querySelectorAll('input[id^="shp-chk-"]');
+      let checkedIndices = [];
+      checkboxes.forEach(chk => { if (chk.checked) checkedIndices.push(parseInt(chk.value)); });
+      
+      const fcPreview = {
+        type: 'FeatureCollection',
+        features: checkedIndices.map(i => {
+          const f = shpFeatures[i];
+          let feat = f.geometry.type === 'MultiPolygon' 
+            ? { type: 'Feature', geometry: { type: 'Polygon', coordinates: f.geometry.coordinates[0] }, properties: f.properties || {} } 
+            : { ...f };
+          feat.properties = { ...feat.properties, active: true };
+          return feat;
+        })
+      };
+      
+      if (map.getSource('plot')) {
+         map.getSource('plot').setData(fcPreview);
+      }
+      
+      // Calculate bounds for zoom
+      let lngs = [], lats = [];
+      if (zoomIdx !== undefined && shpFeatures[zoomIdx]) {
+         // Zoom to specific plot
+         let f = shpFeatures[zoomIdx];
+         let coords = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates[0][0] : f.geometry.coordinates[0];
+         if (Array.isArray(coords)) {
+           coords.forEach(c => {
+             if (c && typeof c[0] === 'number' && typeof c[1] === 'number') {
+               lngs.push(c[0]); lats.push(c[1]);
+             }
+           });
+         }
+      } else if (fcPreview.features.length > 0) {
+         // Zoom to all preview plots
+         fcPreview.features.forEach(feat => {
+           let coords = feat.geometry.coordinates[0];
+           if (Array.isArray(coords)) {
+             coords.forEach(c => {
+               if (c && typeof c[0] === 'number' && typeof c[1] === 'number') {
+                 lngs.push(c[0]); lats.push(c[1]);
+               }
+             });
+           }
+         });
+      }
+      
+      const bounds = getSafeBounds(lngs, lats);
+      if (bounds) {
+         try {
+           map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: 80, right: isMobile() ? 80 : 400 }, duration: 600, pitch: 18 });
+         } catch(e) { console.error("Preview zoom error:", e); }
+      }
+    };
 
     async function loadShp() {
       const checkboxes = document.querySelectorAll('input[id^="shp-chk-"]:checked');
