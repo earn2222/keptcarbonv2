@@ -2577,6 +2577,17 @@
       const areaDisplay = document.getElementById('area-display');
       if (areaDisplay) areaDisplay.textContent = '—';
 
+      // Reset SHP Upload UI
+      const shpFile = document.getElementById('shp-file');
+      if (shpFile) shpFile.value = '';
+      const shpStatus = document.getElementById('shp-status');
+      if (shpStatus) { shpStatus.textContent = ''; shpStatus.style.color = ''; }
+      const shpList = document.getElementById('shp-plot-list');
+      if (shpList) { shpList.innerHTML = ''; shpList.style.display = 'none'; }
+      const btnLoadShp = document.getElementById('btnLoadShp');
+      if (btnLoadShp) btnLoadShp.disabled = true;
+      if (typeof shpFeatures !== 'undefined') shpFeatures = [];
+
       // 4. Reset Analysis Results
       const ageRes = document.getElementById('age-result');
       if (ageRes) ageRes.style.display = 'none';
