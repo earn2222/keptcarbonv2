@@ -1884,13 +1884,17 @@
             <div class="req-title">ข้อกำหนดไฟล์</div>
             <div class="req-item"><i class="bi bi-file-zip"></i> ไฟล์ .zip ที่มี .shp .shx .dbf</div>
             <div class="req-item"><i class="bi bi-globe2"></i> ระบบพิกัด WGS84 (EPSG:4326)</div>
-            <div class="req-item"><i class="bi bi-table"></i> คอลัมน์ PLOT_NAME ในไฟล์ .dbf</div>
           </div>
           <div class="field">
             <label>เลือกไฟล์ ZIP</label>
-            <input type="file" id="shp-file" accept=".zip" onchange="onShpSelected(this)">
+            <input type="file" id="shp-file" accept=".zip" onchange="onShpSelected(this)" style="font-family: 'Noto Sans Thai', sans-serif;">
           </div>
-          <div id="shp-status"></div>
+          <div id="shp-status" style="font-family: 'Noto Sans Thai', sans-serif;"></div>
+          
+          <div id="shp-plot-list" style="display:none; max-height:200px; overflow-y:auto; margin-bottom:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:10px; font-family: 'Noto Sans Thai', sans-serif;">
+            <!-- JS will populate checkboxes here -->
+          </div>
+
           <button class="btn btn-primary" id="btnLoadShp" onclick="loadShp()" disabled>
             <i class="bi bi-upload me-1"></i> โหลดและแสดงบนแผนที่
           </button>
@@ -1965,6 +1969,12 @@
           <div class="step-tag"><i class="bi bi-cpu"></i> ขั้นตอนที่ 3 / 4</div>
           <h2>วิเคราะห์ผลลัพธ์</h2>
           <p>วิเคราะห์ข้อมูลดาวเทียมและคำนวณคาร์บอนเครดิต</p>
+        </div>
+
+        <div id="multi-plot-selector-container" style="display:none; margin-bottom: 15px; padding: 12px; background: rgba(45,158,95,0.05); border: 1px solid rgba(45,158,95,0.2); border-radius: 10px;">
+          <label style="font-size:10px; color:var(--text-dim); font-weight:600; text-transform:uppercase; display:block; margin-bottom:6px;">สลับดูผลการวิเคราะห์แต่ละแปลง</label>
+          <select id="multi-plot-select" class="field select" style="width:100%; margin-bottom:0;" onchange="switchActivePlot(this.value)">
+          </select>
         </div>
 
         <div class="analyzing" id="analyze-spin">
@@ -2112,6 +2122,7 @@
   <script src="https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://unpkg.com/shapefile@0.6.6/dist/shapefile.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/auth.js"></script>
 
@@ -2222,8 +2233,24 @@
 
       // Final plot (current drawing)
       map.addSource('plot', { type: 'geojson', data: empty() });
-      map.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.22 } });
-      map.addLayer({ id: 'plot-line', type: 'line', source: 'plot', paint: { 'line-color': '#2d9e5f', 'line-width': 2.5 } });
+      map.addLayer({ 
+        id: 'plot-fill', 
+        type: 'fill', 
+        source: 'plot', 
+        paint: { 
+          'fill-color': ['case', ['boolean', ['get', 'active'], true], '#2d9e5f', '#84a98c'], 
+          'fill-opacity': ['case', ['boolean', ['get', 'active'], true], 0.22, 0.1] 
+        } 
+      });
+      map.addLayer({ 
+        id: 'plot-line', 
+        type: 'line', 
+        source: 'plot', 
+        paint: { 
+          'line-color': ['case', ['boolean', ['get', 'active'], true], '#2d9e5f', '#6c967a'], 
+          'line-width': ['case', ['boolean', ['get', 'active'], true], 2.5, 1.5] 
+        } 
+      });
 
       // Saved plots (all previously saved)
       map.addSource('saved-plots', { type: 'geojson', data: empty() });
@@ -2517,6 +2544,10 @@
       if (drawDone) drawDone.classList.remove('show');
 
       // 2. Reset Data Object
+      multiPlots = [];
+      activePlotIndex = -1;
+      document.getElementById('multi-plot-selector-container').style.display = 'none';
+
       pd.name = '';
       pd.areaSqm = 0;
       pd.areaRai = 0;
@@ -2654,6 +2685,22 @@
       indicator.style.display = 'flex';
       setTimeout(() => indicator.style.display = 'none', 4000);
 
+      multiPlots = [{
+        id: 'draw_' + Date.now(),
+        name: '',
+        gj: finalGJ,
+        areaSqm: pd.areaSqm,
+        areaRai: pd.areaRai,
+        treeCount: pd.treeCount,
+        ownerName: ME ? ME.fullname : '',
+        variety: '',
+        plantYear: 0, treeAge: 0, H: 0, D: 0, bio: 0, co2: 0, ageDist: null
+      }];
+      activePlotIndex = 0;
+      
+      const fc = { type: 'FeatureCollection', features: multiPlots.map(p => ({ ...p.gj, properties: { ...p.gj.properties, active: true } })) };
+      map.getSource('plot').setData(fc);
+
       goStep(2);
     }
 
@@ -2663,53 +2710,212 @@
       if (!finalGJ) return;
       const c = finalGJ.geometry.coordinates[0];
       const lngs = c.map(p => p[0]), lats = c.map(p => p[1]);
-      map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: { top: 80, bottom: 80, left: 80, right: isMobile() ? 80 : 400 }, duration: 900, pitch: 18 });
+      const bounds = getSafeBounds(lngs, lats);
+      if (bounds) {
+        map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: 80, right: isMobile() ? 80 : 400 }, duration: 900, pitch: 18 });
+      }
     }
 
     /* ================================================================
        SHP IMPORT
     ================================================================ */
-    function onShpSelected(inp) {
+    let shpFeatures = [];
+
+    async function onShpSelected(inp) {
       if (!inp.files.length) return;
       shpFile = inp.files[0];
-      document.getElementById('shp-status').textContent = `✓ เลือกไฟล์: ${shpFile.name}`;
-      document.getElementById('shp-status').style.color = 'var(--green)';
-      document.getElementById('btnLoadShp').disabled = false;
-    }
-
-    async function loadShp() {
-      if (!shpFile) return;
       const s = document.getElementById('shp-status');
       s.textContent = 'กำลังอ่านไฟล์...'; s.style.color = 'var(--text-dim)';
       document.getElementById('btnLoadShp').disabled = true;
+      document.getElementById('shp-plot-list').style.display = 'none';
+
       try {
         const zip = await JSZip.loadAsync(shpFile);
         const fns = Object.keys(zip.files);
         const sk = fns.find(f => f.toLowerCase().endsWith('.shp'));
         const dk = fns.find(f => f.toLowerCase().endsWith('.dbf'));
+        const pk = fns.find(f => f.toLowerCase().endsWith('.prj'));
         if (!sk) throw new Error('ไม่พบไฟล์ .shp ใน zip');
+        
         const shpBuf = await zip.files[sk].async('arraybuffer');
         const dbfBuf = dk ? await zip.files[dk].async('arraybuffer') : undefined;
+        let prjText = pk ? await zip.files[pk].async('text') : null;
+        
         const src = await shapefile.open(shpBuf, dbfBuf);
+        
         const feats = []; let r;
         while (!(r = await src.read()).done) feats.push(r.value);
         if (!feats.length) throw new Error('ไม่พบ Feature ในไฟล์');
-        const poly = feats.find(f => f.geometry?.type === 'Polygon' || f.geometry?.type === 'MultiPolygon');
-        if (!poly) throw new Error('ไม่พบ Polygon');
-        finalGJ = poly.geometry.type === 'MultiPolygon'
-          ? { type: 'Feature', geometry: { type: 'Polygon', coordinates: poly.geometry.coordinates[0] }, properties: poly.properties || {} }
-          : { ...poly };
-        const nm = (poly.properties?.PLOT_NAME || poly.properties?.NAME || '');
-        if (nm) document.getElementById('inp-name').value = nm;
-        map.getSource('plot').setData(finalGJ);
-        updateArea(finalGJ);
-        fitPlot();
-        s.textContent = `✓ โหลดสำเร็จ — ${feats.length} feature`; s.style.color = 'var(--green)';
-        setTimeout(() => goStep(2), 800);
+        
+        shpFeatures = feats.filter(f => f.geometry?.type === 'Polygon' || f.geometry?.type === 'MultiPolygon');
+        if (!shpFeatures.length) throw new Error('ไม่พบ Polygon ในไฟล์');
+
+        // Check if coords are WGS84 (EPSG:4326)
+        let isWGS84 = true;
+        try {
+          let firstCoord = shpFeatures[0].geometry.type === 'MultiPolygon' 
+             ? shpFeatures[0].geometry.coordinates[0][0][0] 
+             : shpFeatures[0].geometry.coordinates[0][0];
+          if (firstCoord && (firstCoord[1] < -90 || firstCoord[1] > 90 || firstCoord[0] < -180 || firstCoord[0] > 180)) {
+             isWGS84 = false;
+          }
+        } catch (e) {}
+
+        if (!isWGS84) {
+          if (typeof proj4 === 'undefined') {
+            throw new Error('พิกัดไม่ใช่ WGS84 และไม่พบไลบรารีแปลงพิกัด');
+          }
+          if (!prjText) {
+            // Fallback to UTM 47N (Common in Thailand) if no PRJ found
+            prjText = '+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs';
+          }
+          
+          // Auto convert coordinates
+          const convertCoords = (coords) => {
+            if (typeof coords[0] === 'number') {
+              try {
+                return proj4(prjText, 'EPSG:4326', coords);
+              } catch(e) { return coords; }
+            }
+            return coords.map(c => convertCoords(c));
+          };
+          
+          shpFeatures.forEach(f => {
+            f.geometry.coordinates = convertCoords(f.geometry.coordinates);
+          });
+        }
+
+        // Render multi-select list
+        const listDiv = document.getElementById('shp-plot-list');
+        listDiv.innerHTML = `<div style="font-size:11.5px; font-weight:600; color:var(--text-dim); margin-bottom:10px;">เลือกแปลงที่จะคำนวณ (${shpFeatures.length} แปลง)</div>`;
+        
+        shpFeatures.forEach((f, idx) => {
+          const nm = f.properties?.PLOT_NAME || f.properties?.NAME || `แปลงที่ ${idx+1}`;
+          let areaStr = '';
+          try {
+            const coords = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates[0][0] : f.geometry.coordinates[0];
+            const rai = areaM2(coords) / 1600;
+            areaStr = `${rai.toFixed(2)} ไร่`;
+          } catch(e) {}
+          
+          const item = document.createElement('div');
+          item.style.display = 'flex';
+          item.style.alignItems = 'center';
+          item.style.gap = '10px';
+          item.style.marginBottom = '8px';
+          item.style.fontSize = '12px';
+          
+          item.innerHTML = `
+            <input type="checkbox" id="shp-chk-${idx}" value="${idx}" checked style="accent-color:var(--green); width:16px; height:16px; cursor:pointer;">
+            <label for="shp-chk-${idx}" style="cursor:pointer; color:var(--text); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              <i class="bi bi-tree" style="color:var(--green); margin-right:4px;"></i> ${nm} 
+              <span style="color:var(--text-dim); margin-left:4px;">(${areaStr})</span>
+            </label>
+          `;
+          listDiv.appendChild(item);
+        });
+        
+        listDiv.style.display = 'block';
+        s.textContent = `✓ อ่านไฟล์สำเร็จ กรุณาเลือกแปลงที่ต้องการ`; 
+        s.style.color = 'var(--green)';
+        document.getElementById('btnLoadShp').disabled = false;
+        
       } catch (err) {
         s.textContent = '✗ ' + err.message; s.style.color = 'rgba(255,100,110,0.7)';
         document.getElementById('btnLoadShp').disabled = false;
       }
+    }
+
+    async function loadShp() {
+      const checkboxes = document.querySelectorAll('input[id^="shp-chk-"]:checked');
+      if (checkboxes.length === 0) {
+        alert('กรุณาเลือกอย่างน้อย 1 แปลง');
+        return;
+      }
+      
+      const s = document.getElementById('shp-status');
+      s.textContent = 'กำลังโหลดลงแผนที่...'; s.style.color = 'var(--text-dim)';
+      document.getElementById('btnLoadShp').disabled = true;
+
+      multiPlots = [];
+      
+      checkboxes.forEach((chk, orderIdx) => {
+        const idx = parseInt(chk.value);
+        const f = shpFeatures[idx];
+        const nm = f.properties?.PLOT_NAME || f.properties?.NAME || `แปลงที่ ${orderIdx+1}`;
+        
+        let gj = f.geometry.type === 'MultiPolygon'
+          ? { type: 'Feature', geometry: { type: 'Polygon', coordinates: f.geometry.coordinates[0] }, properties: f.properties || {} }
+          : { ...f };
+          
+        const coords = gj.geometry.coordinates[0];
+        const sqm = areaM2(coords);
+        
+        multiPlots.push({
+          id: 'shp_' + Date.now() + '_' + idx,
+          name: nm,
+          gj: gj,
+          areaSqm: sqm,
+          areaRai: sqm / 1600,
+          treeCount: Math.round((sqm / 1600) * 80),
+          ownerName: ME ? ME.fullname : '',
+          variety: '',
+          plantYear: 0, treeAge: 0, H: 0, D: 0, bio: 0, co2: 0, ageDist: null
+        });
+      });
+
+      // Display on map
+      activePlotIndex = 0;
+      const fc = { 
+        type: 'FeatureCollection', 
+        features: multiPlots.map((p, i) => ({ 
+          ...p.gj, 
+          properties: { ...p.gj.properties, active: i === activePlotIndex } 
+        })) 
+      };
+      map.getSource('plot').setData(fc);
+      
+      // Fit bounds to all plots with validation
+      let allLngs = [], allLats = [];
+      let hasInvalid = false;
+      multiPlots.forEach(p => {
+        if (!p.gj || !p.gj.geometry || !p.gj.geometry.coordinates) return;
+        const coords = p.gj.geometry.coordinates[0];
+        if (Array.isArray(coords)) {
+          coords.forEach(coord => {
+            if (coord && typeof coord[0] === 'number' && typeof coord[1] === 'number') {
+              if (coord[1] < -90 || coord[1] > 90 || coord[0] < -180 || coord[0] > 180) {
+                hasInvalid = true;
+              } else {
+                allLngs.push(coord[0]);
+                allLats.push(coord[1]);
+              }
+            }
+          });
+        }
+      });
+      
+      if (hasInvalid) {
+        alert('พบพิกัดบางส่วนที่ไม่ใช่ WGS84 (EPSG:4326) การแสดงผลแผนที่อาจคลาดเคลื่อน');
+      }
+
+      if (allLngs.length > 0) {
+        try {
+          const bounds = getSafeBounds(allLngs, allLats);
+          if (bounds) {
+            map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: 80, right: isMobile() ? 80 : 400 }, duration: 900, pitch: 18 });
+          }
+        } catch (e) {
+          console.error("Map fitBounds error:", e);
+        }
+      }
+
+      s.textContent = `✓ โหลดสำเร็จ — ${multiPlots.length} แปลง`; s.style.color = 'var(--green)';
+      
+      setTimeout(() => {
+        switchActivePlot(0); // This populates Step 2 UI as well
+        goStep(2);
+      }, 800);
     }
 
     /* ================================================================
@@ -2749,19 +2955,32 @@
     function goStep3() {
       const nm = document.getElementById('inp-name').value.trim();
       if (!nm) { alert('กรุณากรอกชื่อแปลงยาง'); return; }
-      pd.name = nm; pd.ownerName = document.getElementById('inp-owner').value;
+      
+      // Save info to active plot
+      if (activePlotIndex >= 0 && multiPlots[activePlotIndex]) {
+        multiPlots[activePlotIndex].name = nm;
+        multiPlots[activePlotIndex].ownerName = document.getElementById('inp-owner').value;
+        multiPlots[activePlotIndex].variety = document.getElementById('inp-variety').value;
+      }
+
       goStep(3);
 
       // Auto-start analysis when entering step 3
-      setTimeout(detectAge, 400);
+      if (multiPlots.some(p => p.treeAge === 0)) {
+        setTimeout(detectAgeAll, 400);
+      } else {
+        switchActivePlot(activePlotIndex);
+      }
     }
 
     function goStep4() { goStep(4); runForecast(); }
 
     /* ================================================================
-       PLOT DATA
+       PLOT DATA & MULTI-PLOT MANAGEMENT
     ================================================================ */
     const pd = { name: '', ownerName: '', areaSqm: 0, areaRai: 0, treeCount: 0, plantYear: 0, treeAge: 0, H: 0, D: 0, bio: 0, co2: 0, gj: null };
+    let multiPlots = [];
+    let activePlotIndex = -1;
 
     function updateArea(feat) {
       const coords = feat.geometry.type === 'MultiPolygon' ? feat.geometry.coordinates[0][0] : feat.geometry.coordinates[0];
@@ -2770,57 +2989,155 @@
       document.getElementById('area-display').textContent = pd.areaRai.toFixed(2);
     }
 
+    function switchActivePlot(idx) {
+      idx = parseInt(idx);
+      activePlotIndex = idx;
+      const p = multiPlots[idx];
+      if (!p) return;
+
+      // Update pd reference for legacy functions
+      Object.assign(pd, p);
+      
+      // Update map highlight & Zoom to active plot
+      if (map.getSource('plot')) {
+         const fc = {
+           type: 'FeatureCollection',
+           features: multiPlots.map((mp, i) => {
+             let feat = { ...mp.gj };
+             feat.properties = { ...feat.properties, active: i === idx };
+             return feat;
+           })
+         };
+         map.getSource('plot').setData(fc);
+      }
+      
+      // Zoom to active plot
+      if (p.gj && p.gj.geometry && p.gj.geometry.coordinates) {
+        let lngs = [], lats = [];
+        const coords = p.gj.geometry.coordinates[0];
+        if (Array.isArray(coords)) {
+          coords.forEach(c => {
+            if (c && typeof c[0] === 'number' && typeof c[1] === 'number' && c[1] >= -90 && c[1] <= 90) {
+              lngs.push(c[0]); lats.push(c[1]);
+            }
+          });
+        }
+        if (lngs.length > 0) {
+          try {
+            const bounds = getSafeBounds(lngs, lats);
+            if (bounds) {
+              map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: 80, right: isMobile() ? 80 : 400 }, duration: 900, pitch: 18 });
+            }
+          } catch(e) { console.error(e); }
+        }
+      }
+      
+      // Update Step 2 UI
+      document.getElementById('inp-name').value = p.name;
+      document.getElementById('inp-owner').value = p.ownerName;
+      document.getElementById('inp-variety').value = p.variety || '';
+      document.getElementById('area-display').textContent = p.areaRai.toFixed(2);
+      
+      // Update Step 3 UI (if already analyzed)
+      if (p.treeAge > 0) {
+        document.getElementById('r-year').textContent = p.plantYear;
+        document.getElementById('r-age').textContent = p.treeAge;
+        renderAgeChart(p.ageDist);
+        buildAgeChips(p.ageDist);
+        
+        document.getElementById('r-h').textContent = p.H.toFixed(1);
+        document.getElementById('r-d').textContent = p.D.toFixed(1);
+        document.getElementById('r-trees').textContent = p.treeCount.toLocaleString();
+        document.getElementById('r-bio').textContent = p.bio;
+        document.getElementById('r-co2').textContent = p.co2.toFixed(2);
+        
+        renderCarbonCharts(p);
+        
+        document.getElementById('age-result').style.display = 'block';
+        document.getElementById('carbon-result').style.display = 'block';
+      }
+
+      // Sync selector dropdown
+      const sel = document.getElementById('multi-plot-select');
+      if (sel) sel.value = idx;
+      
+      // Run forecast if in Step 4
+      if (curStep === 4) {
+        runForecast();
+      }
+    }
+
+    function setupMultiPlotSelector() {
+      const container = document.getElementById('multi-plot-selector-container');
+      const select = document.getElementById('multi-plot-select');
+      
+      if (multiPlots.length > 1) {
+        select.innerHTML = '';
+        multiPlots.forEach((p, idx) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = `${p.name} (${p.areaRai.toFixed(2)} ไร่) - ${p.co2.toFixed(1)} tCO₂`;
+          select.appendChild(opt);
+        });
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
     /* ================================================================
        TREE AGE DETECTION (GEE BACKEND)
     ================================================================ */
     let ageChart = null;
 
-    async function detectAge() {
-      const ageAction = document.getElementById('age-action');
-      if (ageAction) ageAction.style.display = 'none';
+    async function detectAgeAll() {
+      document.getElementById('age-result').style.display = 'none';
+      document.getElementById('carbon-result').style.display = 'none';
       document.getElementById('analyze-spin').classList.add('show');
-
-      const msgs = ['ติดต่อ Google Earth Engine...', 'วิเคราะห์ภาพถ่ายดาวเทียม Sentinel-2...', 'ประมวลผลดัชนีพืชพรรณ (NDVI)...', 'คำนวณโครงสร้างอายุยาง...'];
-      let mi = 0;
-      const iv = setInterval(() => { if (mi < msgs.length) document.getElementById('spin-msg').textContent = msgs[mi++]; }, 800);
+      const spinMsg = document.getElementById('spin-msg');
 
       try {
-        // Mock GEE API Call
-        console.log('%c[GEE] Analyzing plot age distribution...', 'color: #3498db; font-weight: bold;');
-
-        // Simulate network delay
-        await new Promise(r => setTimeout(r, 3500));
-
-        clearInterval(iv);
+        for (let i = 0; i < multiPlots.length; i++) {
+          let p = multiPlots[i];
+          if (p.treeAge !== 0) continue; // Already analyzed
+          
+          if (multiPlots.length > 1) {
+            spinMsg.innerHTML = `กำลังวิเคราะห์แปลง <strong style="color:var(--green);">${p.name}</strong> (${i+1}/${multiPlots.length})...`;
+          } else {
+            spinMsg.textContent = 'วิเคราะห์ภาพถ่ายดาวเทียม Sentinel-2...';
+          }
+          
+          // Simulate network delay per plot
+          await new Promise(r => setTimeout(r, 1200));
+          
+          const curY = new Date().getFullYear() + 543;
+          const mainAge = Math.floor(Math.random() * 12 + 5); 
+          const mainYear = curY - mainAge;
+          
+          p.plantYear = mainYear;
+          p.treeAge = mainAge;
+          p.ageDist = genAgeDist(mainAge);
+          
+          // Pre-calculate carbon for each plot silently
+          calcCarbonForPlot(p);
+        }
+        
         document.getElementById('analyze-spin').classList.remove('show');
-
-        // Mock result from GEE
-        const curY = new Date().getFullYear() + 543;
-        const mainAge = Math.floor(Math.random() * 12 + 5); // 5-17 years
-        const mainYear = curY - mainAge;
-
-        // Distribution of ages
-        const ageDist = genAgeDist(mainAge);
-        pd.plantYear = mainYear;
-        pd.treeAge = mainAge;
-        pd.ageDist = ageDist; // Store for carbon calculation
-
-        renderAgeChart(ageDist);
-        buildAgeChips(ageDist);
-
-        document.getElementById('r-year').textContent = mainYear;
-        document.getElementById('r-age').textContent = mainAge;
-        document.getElementById('age-result').style.display = 'block';
-
-        // Auto-calculate carbon immediately after age is detected
-        calcCarbon();
-
-        setStatus('✓ วิเคราะห์สำเร็จ: พบอายุยางเฉลี่ย ' + mainAge + ' ปี และคำนวณคาร์บอนเรียบร้อย');
+        
+        // Setup multi-plot UI
+        setupMultiPlotSelector();
+        
+        // Show first plot results
+        switchActivePlot(0);
+        
+        setStatus(multiPlots.length > 1 
+          ? `✓ วิเคราะห์สำเร็จ ${multiPlots.length} แปลง — สามารถสลับดูแต่ละแปลงได้` 
+          : `✓ วิเคราะห์สำเร็จ: พบอายุยางเฉลี่ย ${multiPlots[0].treeAge} ปี และคำนวณคาร์บอนเรียบร้อย`);
+          
       } catch (err) {
-        clearInterval(iv);
+        console.error(err);
         alert('เกิดข้อผิดพลาดในการเชื่อมต่อ GEE Backend');
         document.getElementById('analyze-spin').classList.remove('show');
-        document.getElementById('age-action').style.display = 'block';
       }
     }
 
@@ -2917,14 +3234,10 @@
     let carbChart = null;
     let carbAgeChart = null;
 
-    function calcCarbon() {
-      const baseAge = pd.treeAge, trees = pd.treeCount, dist = pd.ageDist || { [baseAge]: 100 };
-
+    function calcCarbonForPlot(p) {
+      const baseAge = p.treeAge, trees = p.treeCount, dist = p.ageDist || { [baseAge]: 100 };
       let totalCo2 = 0;
-      const ageLabels = Object.keys(dist).sort((a, b) => a - b);
-      const ageCo2Data = [];
-
-      ageLabels.forEach(age => {
+      Object.keys(dist).forEach(age => {
         const a = +age;
         const perc = dist[age] / 100;
         const treesInAge = Math.round(trees * perc);
@@ -2936,20 +3249,31 @@
         const co2Single = (AGB + BGB) * 0.47 * 3.67 * treesInAge;
 
         totalCo2 += co2Single;
-        ageCo2Data.push(+co2Single.toFixed(2));
-
         if (a === baseAge) {
-          pd.H = H; pd.D = D; pd.bio = +(AGB * 1000).toFixed(0);
+          p.H = H; p.D = D; p.bio = +(AGB * 1000).toFixed(0);
         }
       });
+      p.co2 = totalCo2;
+    }
 
-      pd.co2 = totalCo2;
+    function renderCarbonCharts(p) {
+      const baseAge = p.treeAge, trees = p.treeCount, dist = p.ageDist || { [baseAge]: 100 };
+      const totalCo2 = p.co2;
 
-      document.getElementById('r-h').textContent = pd.H.toFixed(1);
-      document.getElementById('r-d').textContent = pd.D.toFixed(1);
-      document.getElementById('r-trees').textContent = trees.toLocaleString();
-      document.getElementById('r-bio').textContent = pd.bio;
-      document.getElementById('r-co2').textContent = totalCo2.toFixed(2);
+      const ageLabels = Object.keys(dist).sort((a, b) => a - b);
+      const ageCo2Data = [];
+
+      ageLabels.forEach(age => {
+        const a = +age;
+        const perc = dist[age] / 100;
+        const treesInAge = Math.round(trees * perc);
+        const H = Math.min(2.0 + 1.8 * a, 28);
+        const D = Math.min(3 + 4.5 * a, 60);
+        const AGB = 0.1284 * D * D * H * 0.001;
+        const BGB = AGB * 0.26;
+        const co2Single = (AGB + BGB) * 0.47 * 3.67 * treesInAge;
+        ageCo2Data.push(+co2Single.toFixed(2));
+      });
 
       // 1. Carbon by Age Chart
       const ctxAge = document.getElementById('carbonAgeChart').getContext('2d');
@@ -3064,7 +3388,6 @@
       });
 
       document.getElementById('carbon-spin').classList.remove('show');
-      document.getElementById('carbon-result').style.display = 'block';
     }
 
     /* ================================================================
@@ -3191,10 +3514,37 @@
        SAVE
     ================================================================ */
     function savePlot() {
-      if (!ME || !finalGJ) return;
-      const plot = { id: Date.now().toString(), name: pd.name || 'แปลงไม่มีชื่อ', ownerName: pd.ownerName, userId: ME.id, areaRai: pd.areaRai, areaSqm: pd.areaSqm, treeCount: pd.treeCount, plantYear: pd.plantYear, treeAge: pd.treeAge, treeHeight: pd.H, dbh: pd.D, biomassPerTree: pd.bio, carbonTotal: pd.co2, geojson: finalGJ, createdAt: new Date().toISOString() };
-      PlotDB.savePlot(ME.id, plot);
-      toast(`บันทึก "${plot.name}" เรียบร้อย!`);
+      if (!ME) return;
+      
+      let savedCount = 0;
+      multiPlots.forEach(p => {
+        if (!p.gj) return;
+        const plotData = { 
+          id: p.id || Date.now().toString() + '_' + Math.random().toString(36).substr(2, 5), 
+          name: p.name || 'แปลงไม่มีชื่อ', 
+          ownerName: p.ownerName, 
+          userId: ME.id, 
+          areaRai: p.areaRai, 
+          areaSqm: p.areaSqm, 
+          treeCount: p.treeCount, 
+          plantYear: p.plantYear, 
+          treeAge: p.treeAge, 
+          treeHeight: p.H, 
+          dbh: p.D, 
+          biomassPerTree: p.bio, 
+          carbonTotal: p.co2, 
+          geojson: p.gj, 
+          createdAt: new Date().toISOString() 
+        };
+        PlotDB.savePlot(ME.id, plotData);
+        savedCount++;
+      });
+      
+      if (savedCount === 1) {
+        toast(`บันทึก "${multiPlots[0].name}" เรียบร้อย!`);
+      } else if (savedCount > 1) {
+        toast(`บันทึกสำเร็จทั้งหมด ${savedCount} แปลง!`);
+      }
 
       // Update saved plots display
       loadSavedPlots();
@@ -3343,6 +3693,18 @@
     function setStatus(t) { document.getElementById('status-text').textContent = t; }
     function empty() { return { type: 'FeatureCollection', features: [] }; }
     function isMobile() { return window.innerWidth <= 992; }
+
+    function getSafeBounds(lngs, lats) {
+      if (!lngs || !lngs.length) return null;
+      let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+      for (let i = 0; i < lngs.length; i++) {
+        if (lngs[i] < minLng) minLng = lngs[i];
+        if (lngs[i] > maxLng) maxLng = lngs[i];
+        if (lats[i] < minLat) minLat = lats[i];
+        if (lats[i] > maxLat) maxLat = lats[i];
+      }
+      return [[minLng, minLat], [maxLng, maxLat]];
+    }
 
     function areaM2(coords) {
       let a = 0;
