@@ -4,19 +4,17 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>แดชบอร์ด - KeptCarbon</title>
-  <meta name="description" content="แดชบอร์ดภาพรวมสวนยางพาราและคาร์บอนเครดิต">
+  <title>แดชบอร์ดการจัดการ - KeptCarbon</title>
+  <meta name="description" content="ระบบจัดการข้อมูลแปลงสวนยางพาราและคาร์บอนเครดิตสำหรับองค์กร">
   <link href="assets/img/favicon.png" rel="icon">
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- MapLibre -->
   <link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet">
@@ -24,14 +22,42 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <!-- Custom CSS -->
-  <link href="assets/css/main.css?v=2" rel="stylesheet">
-  <link href="assets/css/keptcarbon.css" rel="stylesheet">
-</head>
-
-<body class="dashboard-page dark-header">
-
   <style>
+    /* ==========================================================================
+       ENTERPRISE DASHBOARD DESIGN SYSTEM
+       ========================================================================== */
+    :root {
+      /* Colors */
+      --bg-body: #f3f4f6;
+      --bg-card: #ffffff;
+      
+      --brand-primary: #059669; /* Emerald 600 */
+      --brand-primary-hover: #047857; /* Emerald 700 */
+      
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      
+      --border-light: #e2e8f0;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
     /* ── TOPBAR ── */
     #topbar {
       position: fixed;
@@ -48,163 +74,372 @@
       padding: 0 20px;
     }
 
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      width: 36px; height: 36px; background: #f8f9fa; border: 1px solid #e9ecef;
+      border-radius: 8px; color: #555; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; transition: all 0.2s;
+    }
+    .icon-btn:hover { background: #e9ecef; color: #000; }
+
+    /* ── SIDEBAR ── */
+    #sidebar-menu {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #ffffff;
+      z-index: 600; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06); transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column;
+    }
+    #sidebar-menu.open { transform: translateX(0); }
+    .sidebar-header {
+      height: 60px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; border-bottom: 1px solid #f0f0f0;
+    }
+    .sidebar-header .brand { font-weight: 700; color: #2d9e5f; font-size: 16px; }
+    .btn-close-sidebar {
+      width: 28px; height: 28px; background: #ff5252; color: white; border: none;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; cursor: pointer;
+    }
+    .sidebar-nav { flex: 1; padding: 20px 0; overflow-y: auto; }
+    .sidebar-nav-title { font-size: 11px; color: #999; padding: 0 24px; margin-bottom: 8px; margin-top: 16px; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 12px; padding: 10px 24px; color: #555;
+      text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s;
+    }
+    .sidebar-nav a i { font-size: 16px; width: 20px; text-align: center; color: #888; }
+    .sidebar-nav a:hover { background: #f8f9fa; color: #333; }
+    .sidebar-nav a.active { background: rgba(45, 158, 95, 0.08); color: #2d9e5f; border-right: 3px solid #2d9e5f; }
+    .sidebar-nav a.active i { color: #2d9e5f; }
+    .sidebar-footer { padding: 20px; border-top: 1px solid #f0f0f0; text-align: center; font-size: 11px; color: #888; }
+
+    /* --- PAGE CONTENT --- */
+    main {
+      padding-top: 60px;
+      min-height: 100vh;
     }
 
-    .topbar-right {
+    .page-content {
+      padding: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary:hover {
+      background-color: var(--brand-primary-hover);
+      color: white;
+    }
+
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--bg-card) 0%, #f8fafc 100%);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--brand-primary);
+    }
+
+    .welcome-text h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .welcome-text p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .welcome-date {
+      text-align: right;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* --- STAT CARDS --- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-card);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .stat-title {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .icon-green { background: #dcfce7; color: #16a34a; }
+    .icon-blue { background: #dbeafe; color: #2563eb; }
+    .icon-amber { background: #fef3c7; color: #d97706; }
+    .icon-purple { background: #f3e8ff; color: #9333ea; }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .stat-trend {
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .trend-up { color: #16a34a; }
+    .trend-neutral { color: var(--text-muted); }
+
+    /* --- MAIN PANELS (Map & Charts) --- */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .panel-card {
+      background-color: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .icon-btn {
-      width: 36px;
-      height: 36px;
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      color: #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-
-    .icon-btn:hover {
-      background: #e9ecef;
-      color: #000;
-    }
-
-    .topbar-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    /* ── SIDEBAR ── */
-    #sidebar-menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 280px;
-      background: #ffffff;
-      z-index: 600;
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06);
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-    }
-
-    #sidebar-menu.open {
-      transform: translateX(0);
-    }
-
-    .sidebar-header {
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .sidebar-header .brand {
-      font-weight: 700;
-      color: #2d9e5f;
-      font-size: 16px;
-    }
-
-    .sidebar-header .version {
-      font-size: 10px;
-      background: rgba(45, 158, 95, 0.1);
-      color: #2d9e5f;
-      padding: 2px 6px;
-      border-radius: 12px;
-      margin-left: 8px;
-    }
-
-    .btn-close-sidebar {
-      width: 28px;
-      height: 28px;
-      background: #ff5252;
-      color: white;
+    .panel-action {
+      background: none;
       border: none;
-      border-radius: 50%;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .panel-action:hover {
+      color: var(--brand-primary);
+    }
+
+    .panel-body {
+      padding: 24px;
+      flex: 1;
+    }
+
+    /* Map container inside panel */
+    .map-container {
+      width: 100%;
+      height: 400px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+    }
+
+    #dashboard-map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Chart container */
+    .chart-container {
+      width: 100%;
+      height: 300px;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+    }
+
+    /* --- DATA TABLE --- */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .enterprise-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .enterprise-table th {
+      background-color: #f8fafc;
+      padding: 16px 24px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-light);
+      white-space: nowrap;
+    }
+
+    .enterprise-table td {
+      padding: 16px 24px;
       font-size: 14px;
-      cursor: pointer;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
     }
 
-    .sidebar-nav {
-      flex: 1;
-      padding: 20px 0;
-      overflow-y: auto;
+    .enterprise-table tr:last-child td {
+      border-bottom: none;
     }
 
-    .sidebar-nav-title {
-      font-size: 11px;
-      color: #999;
-      padding: 0 24px;
-      margin-bottom: 8px;
-      margin-top: 16px;
+    .enterprise-table tr:hover td {
+      background-color: #f8fafc;
     }
 
-    .sidebar-nav a {
+    .plot-cell {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 24px;
-      color: #555;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
     }
 
-    .sidebar-nav a i {
-      font-size: 16px;
-      width: 20px;
+    .plot-icon {
+      width: 32px;
+      height: 32px;
+      background-color: #e2e8f0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+    }
+
+    .plot-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .plot-owner {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
       text-align: center;
-      color: #888;
     }
 
-    .sidebar-nav a:hover {
-      background: #f8f9fa;
-      color: #333;
+    .status-active { background-color: #dcfce7; color: #16a34a; }
+    .status-pending { background-color: #fef3c7; color: #d97706; }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN
+       ========================================================================== */
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .sidebar-nav a.active {
-      background: rgba(45, 158, 95, 0.08);
-      color: #2d9e5f;
-      border-right: 3px solid #2d9e5f;
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .page-content {
+        padding: 16px;
+      }
     }
 
-    .sidebar-nav a.active i {
-      color: #2d9e5f;
-    }
-
-    .sidebar-footer {
-      padding: 20px;
-      border-top: 1px solid #f0f0f0;
-      text-align: center;
-      font-size: 11px;
-      color: #888;
-    }
-
-    main.dashboard-page {
-      padding-top: 60px;
-      /* Adjust for new topbar height */
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .welcome-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .welcome-date {
+        text-align: left;
+      }
     }
   </style>
+</head>
+
+<body>
 
   <!-- TOPBAR -->
   <div id="topbar">
@@ -212,8 +447,12 @@
       <button class="icon-btn" onclick="document.getElementById('sidebar-menu').classList.add('open')">
         <i class="bi bi-list"></i>
       </button>
+      <span style="font-weight: 600; font-size: 15px; color: #333; margin-left: 8px;">Executive Dashboard</span>
     </div>
     <div class="topbar-right">
+      <a href="map-draw.html" class="btn-primary" style="padding: 6px 12px; font-size: 13px; margin-right: 10px;">
+        <i class="bi bi-plus-circle"></i> เพิ่มแปลงใหม่
+      </a>
       <span id="nav-user" style="font-size:12px;color:#888;margin-right:8px;"></span>
       <button class="icon-btn" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i></button>
     </div>
@@ -246,111 +485,169 @@
     </div>
   </div>
 
-  <main class="dashboard-page">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-      <div class="container">
-        <div class="row align-items-center">
-          <div class="col-md-8">
-            <h1 id="welcome-title">ยินดีต้อนรับ 🌿</h1>
-            <p id="welcome-sub">ภาพรวมสวนยางพาราและคาร์บอนเครดิตของคุณ</p>
+  <main>
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+      
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2 id="welcome-title">ยินดีต้อนรับเข้าสู่ระบบ KeptCarbon</h2>
+          <p>ภาพรวมสรุปข้อมูลคาร์บอนเครดิตและสินทรัพย์สวนยางพาราของท่าน</p>
+        </div>
+        <div class="welcome-date">
+          <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);" id="current-time">00:00</div>
+          <div id="current-date">วัน จันทร์ 1 มกราคม 2024</div>
+        </div>
+      </div>
+
+      <!-- Key Metrics (Stats Grid) -->
+      <div class="stats-grid">
+        <!-- Stat 1 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">พื้นที่ขึ้นทะเบียนรวม</span>
+            <div class="stat-icon icon-blue"><i class="bi bi-rulers"></i></div>
           </div>
-          <div class="col-md-4 text-md-end mt-3 mt-md-0">
-            <a href="map-draw.html" class="btn-map-primary d-inline-block" style="width:auto;padding:12px 24px;">
-              <i class="bi bi-plus-circle me-2"></i>วาดแปลงใหม่
-            </a>
+          <div class="stat-value"><span id="stat-area">0</span> <span style="font-size: 16px; color: var(--text-muted); font-weight: 500;">ไร่</span></div>
+          <div class="stat-trend trend-neutral">
+            <i class="bi bi-dash"></i> อัปเดตล่าสุดวันนี้
+          </div>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">ปริมาณคาร์บอนสะสม (tCO₂e)</span>
+            <div class="stat-icon icon-green"><i class="bi bi-cloud-arrow-down"></i></div>
+          </div>
+          <div class="stat-value"><span id="stat-carbon">0.0</span></div>
+          <div class="stat-trend trend-up">
+            <i class="bi bi-arrow-up-right"></i> ประเมินตามสมการ Allometric
+          </div>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">จำนวนต้นยางโดยประมาณ</span>
+            <div class="stat-icon icon-amber"><i class="bi bi-tree"></i></div>
+          </div>
+          <div class="stat-value"><span id="stat-trees">0</span></div>
+          <div class="stat-trend trend-neutral">
+            <i class="bi bi-check2-circle"></i> ตรวจสอบจากฐานข้อมูล
+          </div>
+        </div>
+
+        <!-- Stat 4 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">แปลงทั้งหมด</span>
+            <div class="stat-icon icon-purple"><i class="bi bi-layers"></i></div>
+          </div>
+          <div class="stat-value"><span id="stat-plots">0</span> <span style="font-size: 16px; color: var(--text-muted); font-weight: 500;">แปลง</span></div>
+          <div class="stat-trend trend-neutral">
+            <i class="bi bi-clipboard-data"></i> รอการอนุมัติ: 0
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Stats Row -->
-    <div class="dashboard-section">
-      <div class="container">
-        <div class="row g-3 mb-4">
-          <div class="col-6 col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="bi bi-map"></i></div>
-              <div class="stat-value" id="stat-plots">0</div>
-              <div class="stat-label">จำนวนแปลงทั้งหมด</div>
-            </div>
+      <!-- Main Panels (Map & Chart) -->
+      <div class="content-grid">
+        <!-- Left Panel: Map -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3 class="panel-title"><i class="bi bi-geo-alt" style="color: var(--brand-primary);"></i> พิกัดแปลงสวนยางระดับมหภาค</h3>
+            <button class="panel-action" onclick="window.location.href='my-plots.html'">ดูแผนที่เต็ม <i class="bi bi-arrow-right-short"></i></button>
           </div>
-          <div class="col-6 col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="bi bi-wind"></i></div>
-              <div class="stat-value" id="stat-carbon">0</div>
-              <div class="stat-label">คาร์บอนรวม (tCO₂)</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="bi bi-rulers"></i></div>
-              <div class="stat-value" id="stat-area">0</div>
-              <div class="stat-label">พื้นที่รวม (ไร่)</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="bi bi-tree"></i></div>
-              <div class="stat-value" id="stat-trees">0</div>
-              <div class="stat-label">ต้นยางโดยประมาณ</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Map Preview -->
-        <div class="row g-4">
-          <div class="col-lg-8">
-            <h2>แผนที่ภาพรวมแปลง</h2>
-            <div class="dashboard-map-preview">
+          <div class="panel-body">
+            <div class="map-container">
               <div id="dashboard-map"></div>
             </div>
           </div>
-          <div class="col-lg-4">
-            <h2>การกระจายคาร์บอน</h2>
-            <div class="chart-container" style="padding:20px;">
-              <canvas id="carbon-chart" height="250"></canvas>
-            </div>
-          </div>
         </div>
 
-        <!-- Recent Plots -->
-        <div class="row mt-4">
-          <div class="col-12">
-            <h2>แปลงล่าสุด</h2>
-            <div class="row g-3" id="recent-plots-container">
-              <!-- Filled by JS -->
+        <!-- Right Panel: Chart -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3 class="panel-title"><i class="bi bi-pie-chart" style="color: var(--brand-primary);"></i> สัดส่วนคาร์บอนรายแปลง</h3>
+            <button class="panel-action"><i class="bi bi-three-dots"></i></button>
+          </div>
+          <div class="panel-body" style="display: flex; flex-direction: column;">
+            <div class="chart-container">
+              <canvas id="carbon-chart"></canvas>
+            </div>
+            <div style="margin-top: auto; text-align: center; color: var(--text-secondary); font-size: 13px; padding-top: 16px;">
+              แสดงข้อมูลสัดส่วนศักยภาพการกักเก็บคาร์บอนสูงสุด 5 ลำดับแรก
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- Bottom Panel: Data Table -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h3 class="panel-title"><i class="bi bi-table" style="color: var(--brand-primary);"></i> รายการแปลงอัปเดตล่าสุด</h3>
+          <button class="panel-action" onclick="window.location.href='my-plots.html'">ดูรายการทั้งหมด <i class="bi bi-arrow-right-short"></i></button>
+        </div>
+        <div class="panel-body" style="padding: 0;">
+          <div class="table-container">
+            <table class="enterprise-table">
+              <thead>
+                <tr>
+                  <th>ชื่อแปลง (Plot Name)</th>
+                  <th>พื้นที่ (Area)</th>
+                  <th>จำนวนต้น (Trees)</th>
+                  <th>คาร์บอน (tCO₂e)</th>
+                  <th>วันที่บันทึก (Date)</th>
+                  <th>สถานะ (Status)</th>
+                </tr>
+              </thead>
+              <tbody id="recent-plots-tbody">
+                <!-- JS Will Populate This -->
+              </tbody>
+            </table>
+            <div id="empty-state" style="display: none; padding: 48px; text-align: center; color: var(--text-muted);">
+              <div style="font-size: 40px; margin-bottom: 16px; opacity: 0.5;"><i class="bi bi-folder2-open"></i></div>
+              <h4 style="font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">ยังไม่มีข้อมูลแปลงในระบบ</h4>
+              <p style="font-size: 14px; margin-bottom: 24px;">กรุณาสร้างแปลงใหม่เพื่อเริ่มต้นการประเมินคาร์บอนเครดิต</p>
+              <a href="map-draw.html" class="btn-primary" style="display: inline-flex; width: auto;">
+                <i class="bi bi-plus"></i> สร้างแปลงใหม่
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- End Page Content -->
   </main>
 
   <!-- MapLibre -->
   <script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
-  <!-- Bootstrap -->
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- Auth & Navbar -->
+  
+  <!-- App Scripts -->
   <script src="assets/js/auth.js"></script>
-  <script src="assets/js/navbar.js"></script>
-  <script src="assets/js/main.js"></script>
 
   <script>
-    // Require login
-    if (!Auth.requireAuth()) { /* redirects */ }
+    // ---------------------------------------------------------
+    // 1. Authentication & User Info
+    // ---------------------------------------------------------
+    if (!Auth.requireAuth()) {
+      // Redirects automatically if not logged in
+    }
 
     const user = Auth.getUser();
-
-    // Set welcome message
     if (user) {
-      document.getElementById('welcome-title').textContent = `ยินดีต้อนรับ, ${user.fullname} 🌿`;
+      document.getElementById('welcome-title').textContent = `ยินดีต้อนรับคุณ ${user.fullname}`;
       const navUser = document.getElementById('nav-user');
       if (navUser) navUser.textContent = user.fullname;
     }
 
+    // ---------------------------------------------------------
+    // 2. UI Interactions
+    // ---------------------------------------------------------
     // Close sidebar when clicking outside
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
       const sidebar = document.getElementById('sidebar-menu');
       const toggleBtn = document.querySelector('.topbar-left .icon-btn');
       if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
@@ -358,20 +655,41 @@
       }
     });
 
-    // Load plots
-    const plots = user ? PlotDB.getPlots(user.id) : [];
+    // Update Date and Time
+    function updateDateTime() {
+      const now = new Date();
+      const timeOpts = { hour: '2-digit', minute: '2-digit' };
+      const dateOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      
+      document.getElementById('current-time').textContent = now.toLocaleTimeString('th-TH', timeOpts);
+      document.getElementById('current-date').textContent = now.toLocaleDateString('th-TH', dateOpts);
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
 
-    // Update stats
+    // ---------------------------------------------------------
+    // 3. Data Processing & Stats
+    // ---------------------------------------------------------
+    const plots = user ? PlotDB.getPlots(user.id) : [];
+    
+    // Calculate Totals
     const totalCarbon = plots.reduce((sum, p) => sum + (p.carbonTotal || 0), 0);
     const totalArea = plots.reduce((sum, p) => sum + (p.areaRai || 0), 0);
     const totalTrees = plots.reduce((sum, p) => sum + (p.treeCount || 0), 0);
 
-    document.getElementById('stat-plots').textContent = plots.length;
-    document.getElementById('stat-carbon').textContent = totalCarbon.toFixed(1);
-    document.getElementById('stat-area').textContent = totalArea.toFixed(2);
-    document.getElementById('stat-trees').textContent = totalTrees;
+    // Format numbers with commas
+    const formatNum = (num, decimals = 0) => num.toLocaleString('th-TH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
-    // Dashboard Map (centered on Rayong)
+    // Update DOM Stats
+    document.getElementById('stat-plots').textContent = formatNum(plots.length);
+    document.getElementById('stat-carbon').textContent = formatNum(totalCarbon, 2);
+    document.getElementById('stat-area').textContent = formatNum(totalArea, 2);
+    document.getElementById('stat-trees').textContent = formatNum(totalTrees);
+
+    // ---------------------------------------------------------
+    // 4. Map Initialization
+    // ---------------------------------------------------------
+    // Init MapLibre (Centered on Rayong roughly)
     const dashMap = new maplibregl.Map({
       container: 'dashboard-map',
       style: {
@@ -387,145 +705,211 @@
         },
         layers: [{ id: 'satellite', type: 'raster', source: 'satellite' }]
       },
-      center: [101.2587, 12.6819], // Rayong
-      zoom: 9,
+      center: [101.2587, 12.6819],
+      zoom: 8.5,
       attributionControl: false
     });
 
-    dashMap.on('load', () => {
-      // Add Rayong boundary
-      dashMap.addSource('rayong', {
-        type: 'geojson',
-        data: getRayongBoundary()
-      });
-      dashMap.addLayer({
-        id: 'rayong-outline',
-        type: 'line',
-        source: 'rayong',
-        paint: {
-          'line-color': '#84a98c',
-          'line-width': 2,
-          'line-dasharray': [4, 2]
-        }
-      });
-      dashMap.addLayer({
-        id: 'rayong-fill',
-        type: 'fill',
-        source: 'rayong',
-        paint: {
-          'fill-color': '#84a98c',
-          'fill-opacity': 0.05
-        }
-      });
+    // Add navigation control
+    dashMap.addControl(new maplibregl.NavigationControl({showCompass: false}), 'top-right');
 
-      // Draw saved plots
+    dashMap.on('load', () => {
+      // Draw saved plots on the map
+      const bounds = new maplibregl.LngLatBounds();
+      let hasValidCoords = false;
+
       plots.forEach((plot, idx) => {
         if (plot.geojson) {
           dashMap.addSource(`plot-${idx}`, { type: 'geojson', data: plot.geojson });
+          
+          // Outer glow / thick line
           dashMap.addLayer({
-            id: `plot-fill-${idx}`,
-            type: 'fill',
+            id: `plot-glow-${idx}`,
+            type: 'line',
             source: `plot-${idx}`,
-            paint: { 'fill-color': '#84a98c', 'fill-opacity': 0.3 }
+            paint: { 'line-color': '#10b981', 'line-width': 4, 'line-opacity': 0.4 }
           });
+
+          // Inner solid line
           dashMap.addLayer({
             id: `plot-line-${idx}`,
             type: 'line',
             source: `plot-${idx}`,
-            paint: { 'line-color': '#84a98c', 'line-width': 2 }
+            paint: { 'line-color': '#059669', 'line-width': 2 }
           });
+
+          // Fill
+          dashMap.addLayer({
+            id: `plot-fill-${idx}`,
+            type: 'fill',
+            source: `plot-${idx}`,
+            paint: { 'fill-color': '#34d399', 'fill-opacity': 0.3 }
+          });
+
+          // Extend bounds to fit all plots
+          if (plot.geojson.geometry && plot.geojson.geometry.coordinates) {
+             const coords = plot.geojson.geometry.type === 'Polygon' ? plot.geojson.geometry.coordinates[0] : 
+                            (plot.geojson.geometry.type === 'MultiPolygon' ? plot.geojson.geometry.coordinates[0][0] : []);
+             
+             coords.forEach(coord => {
+               bounds.extend(coord);
+               hasValidCoords = true;
+             });
+          }
         }
       });
+
+      // Fit map to show all plots if they exist
+      if (hasValidCoords) {
+        dashMap.fitBounds(bounds, { padding: 40, maxZoom: 16 });
+      } else {
+        // Fallback boundary (Rayong)
+        dashMap.addSource('rayong', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [{
+              type: 'Feature',
+              geometry: { type: 'Polygon', coordinates: [[[101.0, 12.4], [101.8, 12.4], [102.0, 12.6], [101.9, 13.0], [101.5, 13.1], [101.0, 13.0], [100.8, 12.8], [100.9, 12.5], [101.0, 12.4]]] }
+            }]
+          }
+        });
+        dashMap.addLayer({
+          id: 'rayong-outline', type: 'line', source: 'rayong',
+          paint: { 'line-color': '#10b981', 'line-width': 2, 'line-dasharray': [4, 2], 'line-opacity': 0.5 }
+        });
+      }
     });
 
-    // Carbon Chart
+    // ---------------------------------------------------------
+    // 5. Chart & Data Table Generation
+    // ---------------------------------------------------------
+    const tbody = document.getElementById('recent-plots-tbody');
+    const emptyState = document.getElementById('empty-state');
     const carbonCtx = document.getElementById('carbon-chart').getContext('2d');
-    if (plots.length > 0) {
+
+    if (plots.length === 0) {
+      // Empty State handling
+      tbody.parentElement.style.display = 'none';
+      emptyState.style.display = 'block';
+      
+      // Empty Chart
       new Chart(carbonCtx, {
         type: 'doughnut',
         data: {
-          labels: plots.map(p => p.name),
+          labels: ['ไม่มีข้อมูล'],
+          datasets: [{ data: [1], backgroundColor: ['#e2e8f0'], borderWidth: 0 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { tooltip: { enabled: false }, legend: { display: false } },
+          cutout: '75%'
+        }
+      });
+      
+      // Add text inside empty chart
+      Chart.register({
+        id: 'emptyChartText',
+        beforeDraw: function(chart) {
+          if (chart.data.labels[0] === 'ไม่มีข้อมูล') {
+            var width = chart.width, height = chart.height, ctx = chart.ctx;
+            ctx.restore();
+            var fontSize = (height / 114).toFixed(2);
+            ctx.font = "600 " + fontSize + "em 'Inter', sans-serif";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "#94a3b8";
+            var text = "N/A", textX = Math.round((width - ctx.measureText(text).width) / 2), textY = height / 2;
+            ctx.fillText(text, textX, textY);
+            ctx.save();
+          }
+        }
+      });
+
+    } else {
+      // Setup Enterprise Chart (Top 5 plots by carbon)
+      const sortedPlots = [...plots].sort((a, b) => (b.carbonTotal || 0) - (a.carbonTotal || 0));
+      const top5 = sortedPlots.slice(0, 5);
+      const otherCarbon = sortedPlots.slice(5).reduce((sum, p) => sum + (p.carbonTotal || 0), 0);
+      
+      const chartLabels = top5.map(p => p.name);
+      const chartData = top5.map(p => p.carbonTotal || 0);
+      
+      if (otherCarbon > 0) {
+        chartLabels.push('แปลงอื่นๆ');
+        chartData.push(otherCarbon);
+      }
+
+      // Enterprise Color Palette (Emeralds & Teals)
+      const colors = ['#047857', '#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'];
+
+      new Chart(carbonCtx, {
+        type: 'doughnut',
+        data: {
+          labels: chartLabels,
           datasets: [{
-            data: plots.map(p => p.carbonTotal || 0),
-            backgroundColor: [
-              '#1b4332', '#2d9e5f', '#40916c', '#52b788',
-              '#74c69d', '#95d5b2', '#b7e4c7'
-            ],
-            borderColor: 'rgba(132,169,140,0.3)',
-            borderWidth: 1
+            data: chartData,
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: '#ffffff',
+            hoverOffset: 4
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
           plugins: {
             legend: {
-              labels: { color: 'rgba(224,236,228,0.7)', font: { size: 11 } }
+              position: 'right',
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: { family: "'Inter', 'Noto Sans Thai', sans-serif", size: 12, weight: '500' },
+                color: '#475569'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleFont: { family: "'Inter', 'Noto Sans Thai', sans-serif", size: 13 },
+              bodyFont: { family: "'Inter', 'Noto Sans Thai', sans-serif", size: 14, weight: '600' },
+              padding: 12,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.parsed.toFixed(2)} tCO₂e`;
+                }
+              }
             }
           }
         }
       });
-    } else {
-      carbonCtx.canvas.parentElement.innerHTML = `
-        <div style="text-align:center;padding:40px;color:rgba(224,236,228,0.35);">
-          <i class="bi bi-pie-chart" style="font-size:32px;display:block;margin-bottom:8px;"></i>
-          ยังไม่มีข้อมูลแปลง
-        </div>`;
-    }
 
-    // Recent Plots
-    const container = document.getElementById('recent-plots-container');
-    if (plots.length === 0) {
-      container.innerHTML = `
-        <div class="col-12">
-          <div class="empty-plots">
-            <i class="bi bi-map"></i>
-            <h3>ยังไม่มีแปลงยาง</h3>
-            <p>เริ่มต้นด้วยการวาดแปลงแรกของคุณ</p>
-            <a href="map-draw.html" class="btn-map-primary d-inline-block" style="width:auto;padding:10px 24px;margin-top:12px;">
-              <i class="bi bi-plus me-2"></i>วาดแปลงใหม่
-            </a>
-          </div>
-        </div>`;
-    } else {
-      plots.slice(0, 3).forEach(plot => {
-        container.innerHTML += `
-          <div class="col-md-4">
-            <div class="plot-card">
-              <div class="plot-name">${plot.name}</div>
-              <div class="plot-meta">👤 ${plot.ownerName || 'ไม่ระบุ'} · 📅 ${formatDate(plot.createdAt)}</div>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <span class="plot-meta">พื้นที่: ${(plot.areaRai || 0).toFixed(2)} ไร่</span>
-                <span class="carbon-badge">${(plot.carbonTotal || 0).toFixed(1)} tCO₂</span>
+      // Populate Data Table (Top 5 recent)
+      const recentPlots = [...plots].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+      
+      recentPlots.forEach(plot => {
+        const dateStr = plot.createdAt ? new Date(plot.createdAt).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="plot-cell">
+              <div class="plot-icon"><i class="bi bi-geo-fill"></i></div>
+              <div>
+                <span class="plot-name">${plot.name}</span>
+                <span class="plot-owner">${plot.ownerName || 'ไม่ระบุเจ้าของ'}</span>
               </div>
             </div>
-          </div>`;
+          </td>
+          <td><span style="font-weight: 500;">${formatNum(plot.areaRai, 2)}</span> ไร่</td>
+          <td>${formatNum(plot.treeCount)} ต้น</td>
+          <td><span style="font-weight: 600; color: var(--brand-primary);">${formatNum(plot.carbonTotal, 2)}</span></td>
+          <td style="color: var(--text-muted);">${dateStr}</td>
+          <td><span class="status-badge status-active">ประเมินแล้ว</span></td>
+        `;
+        tbody.appendChild(tr);
       });
-    }
-
-    function formatDate(iso) {
-      if (!iso) return '-';
-      return new Date(iso).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
-    }
-
-    // Rayong approximate boundary (simplified polygon)
-    function getRayongBoundary() {
-      return {
-        type: 'FeatureCollection',
-        features: [{
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [[
-              [101.0, 12.4], [101.8, 12.4], [102.0, 12.6],
-              [101.9, 13.0], [101.5, 13.1], [101.0, 13.0],
-              [100.8, 12.8], [100.9, 12.5], [101.0, 12.4]
-            ]]
-          },
-          properties: { name: 'ระยอง' }
-        }]
-      };
     }
   </script>
 </body>
-
 </html>
