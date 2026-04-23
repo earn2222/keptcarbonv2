@@ -1167,6 +1167,36 @@
       font-weight: 600;
     }
 
+    /* Plot cards for multi-plot mode */
+    .plot-card {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      border: 1px solid var(--border) !important;
+    }
+
+    .plot-card:hover {
+      border-color: var(--border-g) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .plot-card.active {
+      background: rgba(45, 158, 95, 0.03) !important;
+      border-color: var(--green) !important;
+      box-shadow: 0 8px 25px rgba(45, 158, 95, 0.12) !important;
+    }
+
+    .plot-card.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      bottom: 12px;
+      width: 4px;
+      background: var(--green);
+      border-radius: 0 4px 4px 0;
+    }
+
     /* Analyzing */
     .analyzing {
       display: none;
@@ -1928,53 +1958,100 @@
         <div class="step-title">
           <div class="step-tag"><i class="bi bi-pencil-square"></i> ขั้นตอนที่ 2 / 4</div>
           <h2>ข้อมูลแปลงยาง</h2>
-          <p>กรอกข้อมูลแปลงเพื่อระบุตัวตนและคำนวณคาร์บอน</p>
+          <p>ระบุข้อมูลสำหรับแต่ละแปลงปลูกเพื่อความแม่นยำในการวิเคราะห์</p>
         </div>
 
-        <!-- Area summary card -->
-        <div
-          style="background:linear-gradient(135deg,rgba(45,158,95,0.1),rgba(30,122,71,0.06));border:1px solid rgba(45,158,95,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+        <!-- Multi-plot Overview & Bulk Actions (Shown only for SHP with >1 plot) -->
+        <div id="multi-plot-summary" style="display:none; margin-bottom:16px;">
           <div
-            style="width:40px;height:40px;background:linear-gradient(135deg,#2d9e5f,#1e7a47);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="bi bi-map-fill" style="color:#fff;font-size:16px;"></i>
+            style="background:rgba(45,158,95,0.06); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span
+                style="font-size:11px; font-weight:600; color:var(--text-dim); text-transform:uppercase;">ภาพรวมพื้นที่</span>
+              <span id="multi-plot-count-badge"
+                style="font-size:10px; background:var(--green); color:#fff; padding:2px 8px; border-radius:10px;">0
+                แปลง</span>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:5px;">
+              <span style="font-size:24px; font-weight:800; color:var(--green);" id="total-area-display">0.00</span>
+              <span style="font-size:13px; color:var(--text-dim);">ไร่รวม</span>
+            </div>
           </div>
-          <div>
-            <div
-              style="font-size:9.5px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;">
-              พื้นที่แปลง</div>
-            <div style="display:flex;align-items:baseline;gap:5px;">
-              <span style="font-size:22px;font-weight:800;color:var(--green);" id="area-display">—</span>
-              <span style="font-size:12px;color:var(--text-dim);">ไร่</span>
+
+          <!-- Bulk Edit -->
+          <div
+            style="background:#fff; border:1px solid var(--border-g); border-radius:10px; padding:10px; margin-bottom:12px;">
+            <label
+              style="font-size:10px; font-weight:700; color:var(--green); text-transform:uppercase; display:block; margin-bottom:6px;">
+              พันธุ์ยาง (ทุกแปลง)
+            </label>
+            <div style="display:flex; gap:8px;">
+              <select id="bulk-variety" class="field select"
+                style="flex:1; margin-bottom:0; padding:8px 10px; font-size:12px;">
+                <option value="">-- เลือกพันธุ์ยาง --</option>
+                <option>RRIM 600</option>
+                <option>BPM 24</option>
+                <option>GT 1</option>
+                <option>PR 255</option>
+                <option>PB 260</option>
+                <option>RRIT 226</option>
+                <option>อื่นๆ</option>
+              </select>
+              <button onclick="applyBulkVariety(this)" class="btn btn-outline"
+                style="width:auto; margin-bottom:0; padding:0 12px; font-size:11px;">ใช้ทั้งหมด</button>
             </div>
           </div>
         </div>
 
-        <!-- Form fields -->
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
-          <div class="field" style="margin-bottom:0;">
-            <label><i class="bi bi-tag" style="margin-right:4px;color:var(--green);"></i>ชื่อแปลงยาง <span
-                style="color:#e05;">*</span></label>
-            <input type="text" id="inp-name" placeholder="เช่น กัญญาพัชร">
-          </div>
-          <div class="field" style="margin-bottom:0;">
-            <label><i class="bi bi-person" style="margin-right:4px;color:var(--green);"></i>เจ้าของแปลง</label>
-            <input type="text" id="inp-owner" placeholder="ชื่อเจ้าของ" readonly>
+        <!-- Single Plot Form (Original, but containerized) -->
+        <div id="single-plot-container">
+          <div
+            style="background:linear-gradient(135deg,rgba(45,158,95,0.1),rgba(30,122,71,0.06));border:1px solid rgba(45,158,95,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+            <div
+              style="width:40px;height:40px;background:linear-gradient(135deg,#2d9e5f,#1e7a47);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="bi bi-map-fill" style="color:#fff;font-size:16px;"></i>
+            </div>
+            <div>
+              <div
+                style="font-size:9.5px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;">
+                พื้นที่แปลง</div>
+              <div style="display:flex;align-items:baseline;gap:5px;">
+                <span style="font-size:22px;font-weight:800;color:var(--green);" id="area-display">—</span>
+                <span style="font-size:12px;color:var(--text-dim);">ไร่</span>
+              </div>
+            </div>
           </div>
 
-          <div class="field" style="margin-bottom:0;">
-            <label><i class="bi bi-tree" style="margin-right:4px;color:var(--green);"></i>พันธุ์ยาง</label>
-            <select id="inp-variety"
-              style="width:100%;padding:10px 13px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:9px;color:var(--text);font-size:13.5px;font-family:var(--font);outline:none;">
-              <option value="">-- เลือกพันธุ์ --</option>
-              <option>RRIM 600</option>
-              <option>BPM 24</option>
-              <option>GT 1</option>
-              <option>PR 255</option>
-              <option>PB 260</option>
-              <option>RRIT 226</option>
-              <option>อื่นๆ</option>
-            </select>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+            <div class="field" style="margin-bottom:0;">
+              <label>ชื่อแปลงยาง <span
+                  style="color:#e05;">*</span></label>
+              <input type="text" id="inp-name" placeholder="เช่น กัญญาพัชร">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>เจ้าของแปลง</label>
+              <input type="text" id="inp-owner" placeholder="ชื่อเจ้าของ" readonly>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>พันธุ์ยาง</label>
+              <select id="inp-variety" class="field select" style="margin-bottom:0;">
+                <option value="">-- เลือกพันธุ์ --</option>
+                <option>RRIM 600</option>
+                <option>BPM 24</option>
+                <option>GT 1</option>
+                <option>PR 255</option>
+                <option>PB 260</option>
+                <option>RRIT 226</option>
+                <option>อื่นๆ</option>
+              </select>
+            </div>
           </div>
+        </div>
+
+        <!-- Multi-plot List View (New) -->
+        <div id="multi-plot-list-view"
+          style="display:none; max-height:400px; overflow-y:auto; margin-bottom:16px; padding-right:4px;">
+          <!-- JS will populate cards here -->
         </div>
 
         <button class="btn btn-primary" onclick="goStep3()">
@@ -3143,6 +3220,12 @@
       }
       curStep = n;
       document.getElementById('mobile-step-label').textContent = `ขั้น ${n}/${STEPS}`;
+
+      // Logic for Step 2 multi-plot rendering
+      if (n === 2) {
+        renderMultiPlotList();
+      }
+
       // Auto open panel on mobile when navigating
       if (isMobile()) {
         document.getElementById('panel').classList.add('open');
@@ -3158,14 +3241,24 @@
     }
 
     function goStep3() {
-      const nm = document.getElementById('inp-name').value.trim();
-      if (!nm) { alert('กรุณากรอกชื่อแปลงยาง'); return; }
-
-      // Save info to active plot
-      if (activePlotIndex >= 0 && multiPlots[activePlotIndex]) {
-        multiPlots[activePlotIndex].name = nm;
-        multiPlots[activePlotIndex].ownerName = document.getElementById('inp-owner').value;
-        multiPlots[activePlotIndex].variety = document.getElementById('inp-variety').value;
+      // Save info
+      if (multiPlots.length > 1) {
+        // Collect from multi-plot list
+        multiPlots.forEach((p, idx) => {
+          const nmInp = document.getElementById(`plot-name-${idx}`);
+          const varInp = document.getElementById(`plot-variety-${idx}`);
+          if (nmInp) p.name = nmInp.value || p.name;
+          if (varInp) p.variety = varInp.value;
+        });
+      } else {
+        // Collect from single form
+        const nm = document.getElementById('inp-name').value.trim();
+        if (!nm) { alert('กรุณากรอกชื่อแปลงยาง'); return; }
+        if (activePlotIndex >= 0 && multiPlots[activePlotIndex]) {
+          multiPlots[activePlotIndex].name = nm;
+          multiPlots[activePlotIndex].ownerName = document.getElementById('inp-owner').value;
+          multiPlots[activePlotIndex].variety = document.getElementById('inp-variety').value;
+        }
       }
 
       goStep(3);
@@ -3238,10 +3331,20 @@
       }
 
       // Update Step 2 UI
-      document.getElementById('inp-name').value = p.name;
-      document.getElementById('inp-owner').value = p.ownerName;
-      document.getElementById('inp-variety').value = p.variety || '';
-      document.getElementById('area-display').textContent = p.areaRai.toFixed(2);
+      const singleInpName = document.getElementById('inp-name');
+      if (singleInpName) {
+        singleInpName.value = p.name;
+        document.getElementById('inp-owner').value = p.ownerName;
+        document.getElementById('inp-variety').value = p.variety || '';
+        document.getElementById('area-display').textContent = p.areaRai.toFixed(2);
+      }
+
+      // Highlight active card in list view if in Step 2
+      if (curStep === 2 && multiPlots.length > 1) {
+        document.querySelectorAll('.plot-card').forEach((card, i) => {
+          card.classList.toggle('active', i === idx);
+        });
+      }
 
       // Update Step 3 UI (if already analyzed)
       if (p.treeAge > 0) {
@@ -3269,6 +3372,87 @@
       // Run forecast if in Step 4
       if (curStep === 4) {
         runForecast();
+      }
+    }
+
+    function renderMultiPlotList() {
+      const summary = document.getElementById('multi-plot-summary');
+      const singleForm = document.getElementById('single-plot-container');
+      const listView = document.getElementById('multi-plot-list-view');
+
+      if (multiPlots.length > 1) {
+        summary.style.display = 'block';
+        singleForm.style.display = 'none';
+        listView.style.display = 'block';
+
+        let totalArea = multiPlots.reduce((sum, p) => sum + p.areaRai, 0);
+        document.getElementById('total-area-display').textContent = totalArea.toFixed(2);
+        document.getElementById('multi-plot-count-badge').textContent = `${multiPlots.length} แปลง`;
+
+        listView.innerHTML = '';
+        multiPlots.forEach((p, idx) => {
+          const card = document.createElement('div');
+          card.className = `plot-card ${idx === activePlotIndex ? 'active' : ''}`;
+          card.onclick = (e) => {
+            // If clicking an input or select, don't switch plot yet to allow focus
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            switchActivePlot(idx);
+          };
+          card.style.cssText = `background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; cursor:pointer; transition:all 0.2s; position:relative;`;
+          if (idx === activePlotIndex) card.style.borderColor = 'var(--green)';
+          if (idx === activePlotIndex) card.style.boxShadow = '0 4px 12px rgba(45,158,95,0.08)';
+
+          const varietyOptions = ['RRIM 600', 'BPM 24', 'GT 1', 'PR 255', 'PB 260', 'RRIT 226', 'อื่นๆ'];
+          let optionsHtml = `<option value="">-- พันธุ์ยาง --</option>` + varietyOptions.map(v => `<option ${p.variety === v ? 'selected' : ''}>${v}</option>`).join('');
+
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="width:28px; height:28px; background:rgba(45,158,95,0.1); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--green); font-size:12px;">${idx + 1}</div>
+                <div style="font-size:11px; font-weight:700; color:var(--text);">${p.areaRai.toFixed(2)} ไร่</div>
+              </div>
+              <div style="font-size:10px; color:var(--text-dim);">#${p.id.split('_').pop()}</div>
+            </div>
+            <div class="field" style="margin-bottom:8px;">
+              <input type="text" id="plot-name-${idx}" value="${p.name}" placeholder="ชื่อแปลง" style="padding:6px 10px; font-size:12px;">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <select id="plot-variety-${idx}" class="field select" style="margin-bottom:0; padding:6px 10px; font-size:12px; background-position: right 10px center; background-size: 12px;">
+                ${optionsHtml}
+              </select>
+            </div>
+          `;
+          listView.appendChild(card);
+        });
+      } else {
+        summary.style.display = 'none';
+        singleForm.style.display = 'block';
+        listView.style.display = 'none';
+      }
+    }
+
+    function applyBulkVariety(btn) {
+      const v = document.getElementById('bulk-variety').value;
+      if (!v) { alert('กรุณาเลือกพันธุ์ยางที่ต้องการใช้'); return; }
+
+      multiPlots.forEach((p, idx) => {
+        p.variety = v;
+        const sel = document.getElementById(`plot-variety-${idx}`);
+        if (sel) sel.value = v;
+      });
+
+      // Also update single form just in case
+      document.getElementById('inp-variety').value = v;
+
+      // Temporary feedback
+      if (btn) {
+        const originalText = btn.textContent;
+        btn.textContent = '✓ เรียบร้อย';
+        btn.style.color = 'var(--green)';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.color = '';
+        }, 1500);
       }
     }
 
