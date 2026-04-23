@@ -1041,8 +1041,8 @@
 
     // Init avatar
     if (user) {
-      document.getElementById('tb-username').textContent = user.fullname;
-      document.getElementById('tb-avatar').textContent = user.fullname.charAt(0).toUpperCase();
+      const navUser = document.getElementById('nav-user');
+      if (navUser) navUser.textContent = user.fullname;
     }
 
     function loadPlots() {
@@ -1247,7 +1247,8 @@
       }
     });
 
-    initUser();
+    // Load initial plots
+    loadPlots();
   </script>
 </body>
 
