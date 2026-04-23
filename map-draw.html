@@ -2958,6 +2958,10 @@
       let checkedIndices = [];
       checkboxes.forEach(chk => { if (chk.checked) checkedIndices.push(parseInt(chk.value)); });
 
+      // Update button state based on selection
+      const btnLoad = document.getElementById('btnLoadShp');
+      if (btnLoad) btnLoad.disabled = (checkedIndices.length === 0);
+
       const fcPreview = {
         type: 'FeatureCollection',
         features: checkedIndices.map(i => {
@@ -3226,6 +3230,11 @@
         renderMultiPlotList();
       }
 
+      // Re-enable SHP load button if returning to step 1 with features
+      if (n === 1 && shpFeatures.length > 0) {
+        updateShpPreview();
+      }
+
       // Auto open panel on mobile when navigating
       if (isMobile()) {
         document.getElementById('panel').classList.add('open');
@@ -3238,6 +3247,10 @@
       document.getElementById('tab-shp').classList.toggle('active', t === 'shp');
       document.getElementById('ct-draw').style.display = t === 'draw' ? 'block' : 'none';
       document.getElementById('ct-shp').style.display = t === 'shp' ? 'block' : 'none';
+
+      if (t === 'shp' && shpFeatures.length > 0) {
+        updateShpPreview();
+      }
     }
 
     function goStep3() {
