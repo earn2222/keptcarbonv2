@@ -10,7 +10,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -26,12 +28,16 @@
       --text-2: #475569;
       --text-3: #94a3b8;
       --border: #e2e8f0;
-      --sh-sm: 0 1px 4px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.03);
-      --sh-md: 0 4px 16px rgba(0,0,0,.10);
-      --sh-lg: 0 10px 30px rgba(0,0,0,.12);
+      --sh-sm: 0 1px 4px rgba(0, 0, 0, .06), 0 0 0 1px rgba(0, 0, 0, .03);
+      --sh-md: 0 4px 16px rgba(0, 0, 0, .10);
+      --sh-lg: 0 10px 30px rgba(0, 0, 0, .12);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       font-family: 'Inter', 'Noto Sans Thai', sans-serif;
@@ -43,319 +49,764 @@
 
     /* ── TOPBAR ── */
     #topbar {
-      position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 500;
-      background: #fff; border-bottom: 1px solid #edf0f3;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 20px; box-shadow: 0 1px 6px rgba(0,0,0,.05);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 500;
+      background: #fff;
+      border-bottom: 1px solid #edf0f3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, .05);
     }
-    .topbar-left { display: flex; align-items: center; gap: 12px; }
-    .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
     .icon-btn {
-      width: 36px; height: 36px; background: #f8f9fa; border: 1px solid #e9ecef;
-      border-radius: 8px; color: #555; display: flex; align-items: center;
-      justify-content: center; cursor: pointer; font-size: 14px; transition: all .2s;
+      width: 36px;
+      height: 36px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all .2s;
     }
-    .icon-btn:hover { background: #e9ecef; color: #000; }
+
+    .icon-btn:hover {
+      background: #e9ecef;
+      color: #000;
+    }
 
     .btn-primary {
-      background: var(--brand); color: #fff; border: none; padding: 8px 16px;
-      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 6px;
-      transition: background .2s; text-decoration: none;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .2s;
+      text-decoration: none;
     }
-    .btn-primary:hover { background: var(--brand-dk); color: #fff; }
+
+    .btn-primary:hover {
+      background: var(--brand-dk);
+      color: #fff;
+    }
 
     /* ── SIDEBAR ── */
     #sidebar-menu {
-      position: fixed; top: 0; left: 0; bottom: 0; width: 272px; background: #fff;
-      z-index: 600; box-shadow: 4px 0 24px rgba(0,0,0,.07);
-      transform: translateX(-100%); transition: transform .3s cubic-bezier(.16,1,.3,1);
-      display: flex; flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 272px;
+      background: #fff;
+      z-index: 600;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, .07);
+      transform: translateX(-100%);
+      transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+      display: flex;
+      flex-direction: column;
     }
-    #sidebar-menu.open { transform: translateX(0); }
+
+    #sidebar-menu.open {
+      transform: translateX(0);
+    }
 
     .sidebar-header {
-      height: 60px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 20px; border-bottom: 1px solid #f0f0f0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0;
     }
-    .sidebar-header .brand { font-weight: 700; color: #2d9e5f; font-size: 15px; }
+
+    .sidebar-header .brand {
+      font-weight: 700;
+      color: #2d9e5f;
+      font-size: 15px;
+    }
+
     .btn-close-sidebar {
-      width: 26px; height: 26px; background: #ff5252; color: #fff; border: none;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 13px; cursor: pointer;
+      width: 26px;
+      height: 26px;
+      background: #ff5252;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
     }
-    .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+      overflow-y: auto;
+    }
+
     .sidebar-nav-title {
-      font-size: 10px; font-weight: 600; color: #bbb; text-transform: uppercase;
-      letter-spacing: .8px; padding: 0 20px; margin: 16px 0 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #bbb;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      padding: 0 20px;
+      margin: 16px 0 6px;
     }
+
     .sidebar-nav a {
-      display: flex; align-items: center; gap: 10px; padding: 10px 20px;
-      color: #555; text-decoration: none; font-size: 13.5px; font-weight: 500; transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: #555;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all .15s;
     }
-    .sidebar-nav a i { font-size: 16px; width: 20px; text-align: center; color: #aaa; }
-    .sidebar-nav a:hover { background: #f8f9fa; color: #222; }
+
+    .sidebar-nav a i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      color: #aaa;
+    }
+
+    .sidebar-nav a:hover {
+      background: #f8f9fa;
+      color: #222;
+    }
+
     .sidebar-nav a.active {
-      background: rgba(5,150,105,.08); color: var(--brand); border-right: 3px solid var(--brand);
+      background: rgba(5, 150, 105, .08);
+      color: var(--brand);
+      border-right: 3px solid var(--brand);
     }
-    .sidebar-nav a.active i { color: var(--brand); }
+
+    .sidebar-nav a.active i {
+      color: var(--brand);
+    }
+
     .sidebar-footer {
-      padding: 18px 20px; border-top: 1px solid #f0f0f0;
-      text-align: center; font-size: 11px; color: #bbb;
+      padding: 18px 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+      font-size: 11px;
+      color: #bbb;
     }
 
     /* ── MAIN ── */
-    main { padding-top: 60px; min-height: 100vh; }
-    .page-content { padding: 28px 32px; max-width: 1440px; margin: 0 auto; }
+    main {
+      padding-top: 60px;
+      min-height: 100vh;
+    }
+
+    .page-content {
+      padding: 28px 32px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
 
     /* ── HERO BANNER ── */
     .hero-banner {
       background: linear-gradient(135deg, #064e3b 0%, #059669 55%, #10b981 100%);
-      border-radius: 20px; padding: 30px 36px; margin-bottom: 26px;
-      display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 8px 32px rgba(5,150,105,.28); position: relative; overflow: hidden;
+      border-radius: 20px;
+      padding: 30px 36px;
+      margin-bottom: 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(5, 150, 105, .28);
+      position: relative;
+      overflow: hidden;
     }
+
     .hero-banner::before {
-      content: ''; position: absolute; top: -60px; right: -60px;
-      width: 260px; height: 260px; border-radius: 50%;
-      background: rgba(255,255,255,.06); pointer-events: none;
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .06);
+      pointer-events: none;
     }
+
     .hero-banner::after {
-      content: ''; position: absolute; bottom: -80px; right: 120px;
-      width: 200px; height: 200px; border-radius: 50%;
-      background: rgba(255,255,255,.04); pointer-events: none;
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      right: 120px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .04);
+      pointer-events: none;
     }
-    .hero-left { position: relative; z-index: 1; }
+
+    .hero-left {
+      position: relative;
+      z-index: 1;
+    }
+
     .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25);
-      border-radius: 20px; padding: 4px 12px;
-      font-size: 11px; font-weight: 600; color: rgba(255,255,255,.9);
-      letter-spacing: .5px; text-transform: uppercase; margin-bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, .18);
+      border: 1px solid rgba(255, 255, 255, .25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, .9);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
     }
+
     .hero-title {
-      font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.2;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+      line-height: 1.2;
     }
-    .hero-sub { font-size: 13.5px; color: rgba(255,255,255,.75); }
-    .hero-right { position: relative; z-index: 1; text-align: right; }
+
+    .hero-sub {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, .75);
+    }
+
+    .hero-right {
+      position: relative;
+      z-index: 1;
+      text-align: right;
+    }
+
     .hero-clock-time {
-      font-size: 32px; font-weight: 800; color: #fff; line-height: 1;
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
       font-variant-numeric: tabular-nums;
     }
-    .hero-clock-date { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 5px; }
+
+    .hero-clock-date {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .65);
+      margin-top: 5px;
+    }
 
     /* ── STAT CARDS ── */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 18px; margin-bottom: 26px;
+      gap: 18px;
+      margin-bottom: 26px;
     }
+
     .stat-card {
-      background: #fff; border-radius: 16px; padding: 22px 24px;
-      border: 1px solid var(--border); box-shadow: var(--sh-sm);
-      position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s;
+      background: #fff;
+      border-radius: 16px;
+      padding: 22px 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--sh-sm);
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
     }
-    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--sh-md);
+    }
+
     .stat-card::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
       background: var(--accent-bar, linear-gradient(90deg, #059669, #34d399));
     }
+
     .stat-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .6px; color: var(--text-3); margin-bottom: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--text-3);
+      margin-bottom: 14px;
     }
-    .stat-body { display: flex; align-items: flex-end; justify-content: space-between; }
-    .stat-num { font-size: 30px; font-weight: 800; color: var(--text-1); line-height: 1; }
-    .stat-unit { font-size: 13px; font-weight: 500; color: var(--text-3); margin-left: 4px; }
+
+    .stat-body {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .stat-num {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text-1);
+      line-height: 1;
+    }
+
+    .stat-unit {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-3);
+      margin-left: 4px;
+    }
+
     .stat-icon-wrap {
-      width: 48px; height: 48px; border-radius: 14px;
-      display: flex; align-items: center; justify-content: center; font-size: 22px;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
     }
-    .ic-blue { background: #dbeafe; color: #2563eb; }
-    .ic-purple { background: #f3e8ff; color: #9333ea; }
-    .ic-amber { background: #fef3c7; color: #d97706; }
-    .ic-green { background: #dcfce7; color: #16a34a; }
-    .ic-teal  { background: #ccfbf1; color: #0d9488; }
+
+    .ic-blue {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+
+    .ic-purple {
+      background: #f3e8ff;
+      color: #9333ea;
+    }
+
+    .ic-amber {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .ic-green {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .ic-teal {
+      background: #ccfbf1;
+      color: #0d9488;
+    }
+
     .stat-foot {
-      margin-top: 12px; font-size: 11.5px; color: var(--text-3);
-      display: flex; align-items: center; gap: 4px;
+      margin-top: 12px;
+      font-size: 11.5px;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
-    .stat-foot .up { color: #16a34a; font-weight: 600; }
+
+    .stat-foot .up {
+      color: #16a34a;
+      font-weight: 600;
+    }
 
     /* ── PANELS ── */
     .panel {
-      background: #fff; border-radius: 16px; border: 1px solid var(--border);
-      box-shadow: var(--sh-sm); overflow: hidden;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--sh-sm);
+      overflow: hidden;
     }
+
     .panel-head {
-      padding: 18px 24px; border-bottom: 1px solid #f1f5f9;
-      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+
     .panel-title {
-      font-size: 14.5px; font-weight: 700; color: var(--text-1);
-      display: flex; align-items: center; gap: 9px;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-1);
+      display: flex;
+      align-items: center;
+      gap: 9px;
     }
-    .panel-title i { color: var(--brand); font-size: 16px; }
+
+    .panel-title i {
+      color: var(--brand);
+      font-size: 16px;
+    }
+
     .panel-badge {
-      background: #f0fdf4; color: var(--brand); border: 1px solid #bbf7d0;
-      padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      background: #f0fdf4;
+      color: var(--brand);
+      border: 1px solid #bbf7d0;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
     }
-    .panel-body { padding: 24px; }
-    .panel-body-0 { padding: 0; }
-    .mb-26 { margin-bottom: 26px; }
-    .mb-28 { margin-bottom: 28px; }
+
+    .panel-body {
+      padding: 24px;
+    }
+
+    .panel-body-0 {
+      padding: 0;
+    }
+
+    .mb-26 {
+      margin-bottom: 26px;
+    }
+
+    .mb-28 {
+      margin-bottom: 28px;
+    }
 
     /* ── MAP ── */
     .map-wrap {
-      width: 100%; height: 440px; border-radius: 12px; overflow: hidden;
+      width: 100%;
+      height: 440px;
+      border-radius: 12px;
+      overflow: hidden;
       border: 1px solid var(--border);
     }
-    #dashboard-map { width: 100%; height: 100%; }
+
+    #dashboard-map {
+      width: 100%;
+      height: 100%;
+    }
 
     .plot-marker {
-      cursor: pointer; transition: transform .2s, filter .2s;
-      filter: drop-shadow(0 3px 8px rgba(0,0,0,.22));
+      cursor: pointer;
+      transition: transform .2s, filter .2s;
+      filter: drop-shadow(0 3px 8px rgba(0, 0, 0, .22));
     }
+
     .plot-marker:hover {
       transform: translateY(-6px) scale(1.12);
-      filter: drop-shadow(0 8px 18px rgba(5,150,105,.38));
+      filter: drop-shadow(0 8px 18px rgba(5, 150, 105, .38));
     }
+
     .maplibregl-popup-content {
-      padding: 0 !important; border-radius: 12px !important;
-      box-shadow: 0 6px 24px rgba(0,0,0,.13) !important;
+      padding: 0 !important;
+      border-radius: 12px !important;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .13) !important;
       border: 1px solid #e2e8f0 !important;
-      font-family: 'Inter','Noto Sans Thai',sans-serif; min-width: 200px; overflow: hidden;
+      font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+      min-width: 200px;
+      overflow: hidden;
     }
+
     .mp-title {
-      font-size: 13px; font-weight: 700; color: #0f172a; padding: 13px 15px 10px;
-      border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      padding: 13px 15px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 7px;
     }
-    .mp-title-dot { width: 8px; height: 8px; border-radius: 50%; background: #059669; flex-shrink: 0; }
-    .mp-body { padding: 10px 15px 13px; }
+
+    .mp-title-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #059669;
+      flex-shrink: 0;
+    }
+
+    .mp-body {
+      padding: 10px 15px 13px;
+    }
+
     .mp-row {
-      font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 7px;
-      padding: 5px 0; border-bottom: 1px solid #f8fafc;
+      font-size: 12px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 0;
+      border-bottom: 1px solid #f8fafc;
     }
-    .mp-row:last-of-type { border-bottom: none; }
-    .mp-row i { color: #059669; font-size: 12px; width: 13px; flex-shrink: 0; }
-    .mp-row strong { margin-left: auto; color: #0f172a; font-weight: 600; font-size: 12px; }
+
+    .mp-row:last-of-type {
+      border-bottom: none;
+    }
+
+    .mp-row i {
+      color: #059669;
+      font-size: 12px;
+      width: 13px;
+      flex-shrink: 0;
+    }
+
+    .mp-row strong {
+      margin-left: auto;
+      color: #0f172a;
+      font-weight: 600;
+      font-size: 12px;
+    }
 
     /* ── CARBON AGE CHART ── */
     .carbon-chart-layout {
-      display: grid; grid-template-columns: 1fr 280px; gap: 0;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 0;
     }
-    .chart-main { padding: 24px; border-right: 1px solid #f1f5f9; }
-    .chart-side { padding: 24px; background: #fafbfc; }
-    .chart-wrap-lg { width: 100%; height: 300px; }
+
+    .chart-main {
+      padding: 24px;
+      border-right: 1px solid #f1f5f9;
+    }
+
+    .chart-side {
+      padding: 24px;
+      background: #fafbfc;
+    }
+
+    .chart-wrap-lg {
+      width: 100%;
+      height: 300px;
+    }
 
     .age-legend {
-      display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
+
     .age-legend-item {
-      display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-2);
     }
+
     .legend-dot {
-      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
     }
 
     .info-block {
-      background: #fff; border: 1px solid var(--border); border-radius: 12px;
-      padding: 14px 16px; margin-bottom: 12px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
     }
+
     .info-block-title {
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-      color: var(--text-3); margin-bottom: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-3);
+      margin-bottom: 8px;
     }
+
     .info-block-val {
-      font-size: 22px; font-weight: 800; color: var(--text-1); line-height: 1;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-1);
+      line-height: 1;
     }
-    .info-block-unit { font-size: 11px; color: var(--text-3); margin-left: 3px; }
-    .info-block-sub { font-size: 11.5px; color: var(--text-2); margin-top: 4px; }
+
+    .info-block-unit {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-left: 3px;
+    }
+
+    .info-block-sub {
+      font-size: 11.5px;
+      color: var(--text-2);
+      margin-top: 4px;
+    }
 
     .age-pill {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 20px;
-      padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--brand); margin: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--brand);
+      margin: 2px;
     }
 
-    /* ── TABLE ── */
-    .tbl-wrap { overflow-x: auto; }
-    .dash-tbl { width: 100%; border-collapse: collapse; }
-    .dash-tbl thead th {
-      background: #f8fafc; padding: 12px 18px; font-size: 11px; font-weight: 700;
-      color: var(--text-3); text-transform: uppercase; letter-spacing: .5px;
-      border-bottom: 2px solid var(--border); white-space: nowrap; position: sticky; top: 0;
-    }
-    .dash-tbl tbody td {
-      padding: 14px 18px; font-size: 13.5px; color: var(--text-1);
-      border-bottom: 1px solid #f1f5f9; vertical-align: middle;
-    }
-    .dash-tbl tbody tr:last-child td { border-bottom: none; }
-    .dash-tbl tbody tr:hover td { background: #fafbfc; }
-    .row-num {
-      width: 28px; height: 28px; background: #f1f5f9; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 800; color: var(--text-3);
-    }
-    .pn-cell { display: flex; align-items: center; gap: 10px; }
-    .pn-icon {
-      width: 36px; height: 36px; background: #dcfce7; color: #16a34a;
-      border-radius: 10px; display: flex; align-items: center;
-      justify-content: center; font-size: 16px; flex-shrink: 0;
-    }
-    .pn-name { font-weight: 700; font-size: 13.5px; }
-    .pn-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
-    .meta-val { font-weight: 600; font-size: 13.5px; }
-    .meta-unit { font-size: 11px; color: var(--text-3); }
+    /* ── BADGE (used in map popup) ── */
     .badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
     }
+
     .badge::before {
-      content: ''; width: 6px; height: 6px; border-radius: 50%; display: inline-block;
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
     }
-    .badge-green { background: #dcfce7; color: #16a34a; }
-    .badge-green::before { background: #16a34a; }
-    .badge-amber { background: #fef3c7; color: #d97706; }
-    .badge-amber::before { background: #d97706; }
-    .empty-row td { text-align: center; padding: 56px 24px; color: var(--text-3); }
-    .empty-row .empty-icon { font-size: 40px; display: block; margin-bottom: 12px; opacity: .4; }
-    .empty-row h4 { font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
-    .empty-row p { font-size: 13px; }
+
+    .badge-green {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .badge-green::before {
+      background: #16a34a;
+    }
+
+    .badge-amber {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .badge-amber::before {
+      background: #d97706;
+    }
 
     /* ── MAP-STAT BAR (below map) ── */
     .map-stat-bar {
-      display: flex; gap: 0; border-top: 1px solid #f1f5f9; background: #fafbfc;
+      display: flex;
+      gap: 0;
+      border-top: 1px solid #f1f5f9;
+      background: #fafbfc;
     }
+
     .map-stat-item {
-      flex: 1; padding: 14px 20px; border-right: 1px solid #f1f5f9; text-align: center;
+      flex: 1;
+      padding: 14px 20px;
+      border-right: 1px solid #f1f5f9;
+      text-align: center;
     }
-    .map-stat-item:last-child { border-right: none; }
-    .map-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .5px; color: var(--text-3); margin-bottom: 4px; }
-    .map-stat-val { font-size: 18px; font-weight: 800; color: var(--text-1); }
-    .map-stat-unit { font-size: 11px; color: var(--text-3); margin-left: 3px; }
+
+    .map-stat-item:last-child {
+      border-right: none;
+    }
+
+    .map-stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-3);
+      margin-bottom: 4px;
+    }
+
+    .map-stat-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-1);
+    }
+
+    .map-stat-unit {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-left: 3px;
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 1200px) {
-      .carbon-chart-layout { grid-template-columns: 1fr; }
-      .chart-side { border-top: 1px solid #f1f5f9; background: #fafbfc; }
-      .chart-main { border-right: none; }
+      .carbon-chart-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-side {
+        border-top: 1px solid #f1f5f9;
+        background: #fafbfc;
+      }
+
+      .chart-main {
+        border-right: none;
+      }
     }
+
     @media (max-width: 1100px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
+
     @media (max-width: 640px) {
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .page-content { padding: 16px; }
-      .hero-banner { flex-direction: column; gap: 16px; }
-      .hero-right { text-align: left; }
-      .map-stat-bar { flex-wrap: wrap; }
-      .map-stat-item { min-width: 50%; }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .page-content {
+        padding: 16px;
+      }
+
+      .hero-banner {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hero-right {
+        text-align: left;
+      }
+
+      .map-stat-bar {
+        flex-wrap: wrap;
+      }
+
+      .map-stat-item {
+        min-width: 50%;
+      }
     }
+
     @media (max-width: 400px) {
-      .stats-grid { grid-template-columns: 1fr; }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -368,7 +819,8 @@
       <button class="icon-btn" onclick="document.getElementById('sidebar-menu').classList.add('open')">
         <i class="bi bi-list"></i>
       </button>
-      <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:28px;" onerror="this.style.display='none'">
+      <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:28px;"
+        onerror="this.style.display='none'">
       <span style="font-weight:700;font-size:14px;color:#1e293b;">ภาพรวมระบบ</span>
     </div>
     <div class="topbar-right">
@@ -385,10 +837,12 @@
   <div id="sidebar-menu">
     <div class="sidebar-header">
       <div style="display:flex;align-items:center;gap:8px;">
-        <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:30px;" onerror="this.style.display='none'">
+        <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:30px;"
+          onerror="this.style.display='none'">
         <div class="brand">KeptCarbon</div>
       </div>
-      <button class="btn-close-sidebar" onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
+      <button class="btn-close-sidebar"
+        onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
     </div>
     <div class="sidebar-nav">
       <a href="index.html"><i class="bi bi-house"></i> หน้าหลัก</a>
@@ -475,27 +929,28 @@
             <div id="dashboard-map"></div>
           </div>
           <div id="map-no-plot"
-            style="display:none;margin-top:12px;padding:10px 14px;background:#fef9ec;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:8px;">
+            style="display:none;margin-top:12px;padding:10px 14px;background:#fef9ec;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;align-items:center;gap:8px;">
             <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i>
-            ยังไม่มีแปลงในระบบ — <a href="map-draw.html" style="color:var(--brand);font-weight:600;text-decoration:none;">เพิ่มแปลงแรกของคุณ</a>
+            ยังไม่มีแปลงในระบบ — <a href="map-draw.html"
+              style="color:var(--brand);font-weight:600;text-decoration:none;">เพิ่มแปลงแรกของคุณ</a>
           </div>
         </div>
-        <div class="map-stat-bar" id="map-stat-bar">
+        <div class="map-stat-bar">
           <div class="map-stat-item">
-            <div class="map-stat-label">จำนวนแปลง</div>
-            <div><span class="map-stat-val" id="ms-plots">0</span><span class="map-stat-unit">แปลง</span></div>
+            <div class="map-stat-label">แปลงในระบบ</div>
+            <div class="map-stat-val"><span id="ms-plots">0</span><span class="map-stat-unit">แปลง</span></div>
           </div>
           <div class="map-stat-item">
             <div class="map-stat-label">พื้นที่รวม</div>
-            <div><span class="map-stat-val" id="ms-area">0</span><span class="map-stat-unit">ไร่</span></div>
+            <div class="map-stat-val"><span id="ms-area">0</span><span class="map-stat-unit">ไร่</span></div>
           </div>
           <div class="map-stat-item">
-            <div class="map-stat-label">อายุต้นยางเฉลี่ย</div>
-            <div><span class="map-stat-val" id="ms-age">—</span><span class="map-stat-unit" id="ms-age-unit"></span></div>
+            <div class="map-stat-label">อายุเฉลี่ย</div>
+            <div class="map-stat-val"><span id="ms-age">—</span><span id="ms-age-unit" class="map-stat-unit"></span></div>
           </div>
           <div class="map-stat-item">
             <div class="map-stat-label">คาร์บอนเฉลี่ย/ไร่</div>
-            <div><span class="map-stat-val" id="ms-carbon-rai">—</span><span class="map-stat-unit" id="ms-carbon-rai-unit"></span></div>
+            <div class="map-stat-val"><span id="ms-carbon-rai">—</span><span id="ms-carbon-rai-unit" class="map-stat-unit"></span></div>
           </div>
         </div>
       </div>
@@ -543,7 +998,8 @@
 
             <div class="info-block">
               <div class="info-block-title">คาร์บอน ณ อายุ 10 ปี</div>
-              <div><span class="info-block-val" id="carbon-10yr">—</span><span class="info-block-unit">tCO₂e/ไร่</span></div>
+              <div><span class="info-block-val" id="carbon-10yr">—</span><span class="info-block-unit">tCO₂e/ไร่</span>
+              </div>
               <div class="info-block-sub">ต่อไร่ที่ความหนาแน่นมาตรฐาน</div>
             </div>
 
@@ -554,41 +1010,12 @@
             </div>
 
             <div style="margin-top:16px;">
-              <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">
+              <div
+                style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">
                 แปลงในระบบ (แยกตามช่วงอายุ)
               </div>
               <div id="age-group-pills" style="line-height:2;"></div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── PLOTS TABLE ── -->
-      <div class="panel mb-28">
-        <div class="panel-head">
-          <h3 class="panel-title">
-            <i class="bi bi-table"></i>
-            รายการแปลงที่ลงทะเบียนล่าสุด
-          </h3>
-          <span class="panel-badge" id="plots-count-badge">0 แปลง</span>
-        </div>
-        <div class="panel-body-0">
-          <div class="tbl-wrap">
-            <table class="dash-tbl">
-              <thead>
-                <tr>
-                  <th style="width:48px;text-align:center;">#</th>
-                  <th>ชื่อแปลง</th>
-                  <th>พื้นที่</th>
-                  <th>จำนวนต้น</th>
-                  <th>อายุต้นยาง</th>
-                  <th>คาร์บอนประเมิน</th>
-                  <th>สถานะ</th>
-                  <th>แผนที่</th>
-                </tr>
-              </thead>
-              <tbody id="plots-tbody"></tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -631,28 +1058,27 @@
     allPlots.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     const fmt = (n, d = 0) => (+n).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
-    const totalArea   = allPlots.reduce((s, p) => s + (p.areaRai || 0), 0);
+    const totalArea = allPlots.reduce((s, p) => s + (p.areaRai || 0), 0);
     const totalCarbon = allPlots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
     const assessedCount = allPlots.filter(p => p.carbonTotal > 0).length;
     const avgAge = allPlots.length
       ? Math.round(allPlots.reduce((s, p) => s + (p.treeAge || 0), 0) / allPlots.length)
       : null;
 
-    document.getElementById('stat-plots').textContent     = fmt(allPlots.length);
-    document.getElementById('stat-area').textContent      = fmt(totalArea, 2);
-    document.getElementById('stat-carbon').textContent    = fmt(totalCarbon, 2);
-    document.getElementById('stat-assessed').textContent  = fmt(assessedCount);
-    document.getElementById('plots-count-badge').textContent = `${allPlots.length} แปลง`;
+    document.getElementById('stat-plots').textContent = fmt(allPlots.length);
+    document.getElementById('stat-area').textContent = fmt(totalArea, 2);
+    document.getElementById('stat-carbon').textContent = fmt(totalCarbon, 2);
+    document.getElementById('stat-assessed').textContent = fmt(assessedCount);
 
     /* map stat bar */
     document.getElementById('ms-plots').textContent = fmt(allPlots.length);
-    document.getElementById('ms-area').textContent  = fmt(totalArea, 2);
+    document.getElementById('ms-area').textContent = fmt(totalArea, 2);
     if (avgAge !== null) {
-      document.getElementById('ms-age').textContent      = avgAge;
+      document.getElementById('ms-age').textContent = avgAge;
       document.getElementById('ms-age-unit').textContent = 'ปี';
     }
     if (allPlots.length > 0 && totalArea > 0) {
-      document.getElementById('ms-carbon-rai').textContent      = fmt(totalCarbon / totalArea, 2);
+      document.getElementById('ms-carbon-rai').textContent = fmt(totalCarbon / totalArea, 2);
       document.getElementById('ms-carbon-rai-unit').textContent = 'tCO₂e/ไร่';
     }
 
@@ -682,8 +1108,8 @@
         if (!plot.geojson || !plot.geojson.geometry) return;
         const geo = plot.geojson.geometry;
         const assessed = plot.carbonTotal > 0;
-        const fillColor  = assessed ? '#34d399' : '#fbbf24';
-        const lineColor  = assessed ? '#059669' : '#d97706';
+        const fillColor = assessed ? '#34d399' : '#fbbf24';
+        const lineColor = assessed ? '#059669' : '#d97706';
 
         map.addSource(`p${idx}`, { type: 'geojson', data: plot.geojson });
         map.addLayer({ id: `pf${idx}`, type: 'fill', source: `p${idx}`, paint: { 'fill-color': fillColor, 'fill-opacity': 0.28 } });
@@ -704,15 +1130,15 @@
             <circle cx="14" cy="14" r="5.5" fill="white"/>
           </svg>`;
 
-        const popup = new maplibregl.Popup({ offset: [0,-44], closeButton: false, maxWidth:'220px' }).setHTML(`
-          <div class="mp-title"><span class="mp-title-dot" style="background:${assessed?'#059669':'#d97706'};"></span>${plot.name || 'ไม่ระบุชื่อ'}</div>
+        const popup = new maplibregl.Popup({ offset: [0, -44], closeButton: false, maxWidth: '220px' }).setHTML(`
+          <div class="mp-title"><span class="mp-title-dot" style="background:${assessed ? '#059669' : '#d97706'};"></span>${plot.name || 'ไม่ระบุชื่อ'}</div>
           <div class="mp-body">
-            <div class="mp-row"><i class="bi bi-rulers"></i> พื้นที่<strong>${fmt(plot.areaRai||0,2)} ไร่</strong></div>
+            <div class="mp-row"><i class="bi bi-rulers"></i> พื้นที่<strong>${fmt(plot.areaRai || 0, 2)} ไร่</strong></div>
             ${plot.treeCount ? `<div class="mp-row"><i class="bi bi-tree"></i> ต้นยาง<strong>${fmt(plot.treeCount)} ต้น</strong></div>` : ''}
-            ${plot.treeAge   ? `<div class="mp-row"><i class="bi bi-calendar3"></i> อายุต้น<strong>${plot.treeAge} ปี</strong></div>` : ''}
-            ${plot.carbonTotal ? `<div class="mp-row"><i class="bi bi-wind"></i> คาร์บอน<strong>${fmt(plot.carbonTotal,2)} tCO₂e</strong></div>` : ''}
+            ${plot.treeAge ? `<div class="mp-row"><i class="bi bi-calendar3"></i> อายุต้น<strong>${plot.treeAge} ปี</strong></div>` : ''}
+            ${plot.carbonTotal ? `<div class="mp-row"><i class="bi bi-wind"></i> คาร์บอน<strong>${fmt(plot.carbonTotal, 2)} tCO₂e</strong></div>` : ''}
             <div class="mp-row" style="border-bottom:none;padding-top:4px;">
-              <span class="badge ${assessed?'badge-green':'badge-amber'}" style="font-size:10px;">${assessed?'ประเมินแล้ว':'รอดำเนินการ'}</span>
+              <span class="badge ${assessed ? 'badge-green' : 'badge-amber'}" style="font-size:10px;">${assessed ? 'ประเมินแล้ว' : 'รอดำเนินการ'}</span>
             </div>
           </div>`);
 
@@ -729,19 +1155,19 @@
     /* ── 6. CARBON BY AGE CHART ── */
     (function buildAgeChart() {
       const STD_TREES = 80; /* standard planting density per rai */
-      const MAX_AGE   = 25;
+      const MAX_AGE = 25;
 
       function carbonPerRai(age) {
         if (age <= 0) return 0;
-        const H   = Math.min(2 + 1.8 * age, 28);
-        const D   = Math.min(3 + 4.5 * age, 60);
+        const H = Math.min(2 + 1.8 * age, 28);
+        const D = Math.min(3 + 4.5 * age, 60);
         const AGB = 0.1284 * D * D * H * 0.001;
         return (AGB + AGB * 0.26) * 0.47 * 3.67 * STD_TREES;
       }
 
       /* bar colors by age group */
       function barColor(age) {
-        if (age <= 5)  return '#86efac';
+        if (age <= 5) return '#86efac';
         if (age <= 12) return '#34d399';
         if (age <= 18) return '#059669';
         return '#065f46';
@@ -764,7 +1190,7 @@
       document.getElementById('carbon-10yr').textContent = fmt(data[9], 2);
 
       /* overlay — actual plots as scatter points */
-      const plotAges  = allPlots.filter(p => p.treeAge > 0 && p.treeAge <= MAX_AGE);
+      const plotAges = allPlots.filter(p => p.treeAge > 0 && p.treeAge <= MAX_AGE);
       const scatterPts = plotAges.map(p => ({
         x: p.treeAge - 1,   /* bar index (0-based) */
         y: p.carbonTotal > 0 ? (p.areaRai > 0 ? p.carbonTotal / p.areaRai : 0) : carbonPerRai(p.treeAge)
@@ -783,13 +1209,13 @@
       const groups = { '1–5': 0, '6–12': 0, '13–18': 0, '19–25': 0 };
       allPlots.forEach(p => {
         const a = p.treeAge || 0;
-        if (a >= 1  && a <= 5)  groups['1–5']++;
-        else if (a >= 6  && a <= 12) groups['6–12']++;
+        if (a >= 1 && a <= 5) groups['1–5']++;
+        else if (a >= 6 && a <= 12) groups['6–12']++;
         else if (a >= 13 && a <= 18) groups['13–18']++;
         else if (a >= 19 && a <= 25) groups['19–25']++;
       });
       const pillBox = document.getElementById('age-group-pills');
-      const pillColors = { '1–5':'#86efac', '6–12':'#34d399', '13–18':'#059669', '19–25':'#065f46' };
+      const pillColors = { '1–5': '#86efac', '6–12': '#34d399', '13–18': '#059669', '19–25': '#065f46' };
       Object.entries(groups).forEach(([range, cnt]) => {
         if (cnt === 0) return;
         const el = document.createElement('span');
@@ -857,14 +1283,14 @@
               padding: 12,
               cornerRadius: 10,
               titleFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 11 },
-              bodyFont:  { family: "'Inter','Noto Sans Thai',sans-serif", size: 13, weight: '700' },
+              bodyFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 13, weight: '700' },
               callbacks: {
                 title: items => `ต้นยางอายุ ${items[0].label}`,
                 label: c => {
                   if (c.dataset.label === 'เส้นแนวโน้ม') return null;
                   if (c.dataset.label === 'แปลงในระบบ')
-                    return ` แปลง: ${c.parsed.y.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})} tCO₂e/ไร่`;
-                  return ` คาร์บอน: ${c.parsed.y.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})} tCO₂e/ไร่`;
+                    return ` แปลง: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
+                  return ` คาร์บอน: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
                 }
               }
             }
@@ -889,58 +1315,7 @@
       });
     })();
 
-    /* ── 7. PLOTS TABLE ── */
-    (function buildTable() {
-      const tbody  = document.getElementById('plots-tbody');
-      const recent = allPlots.slice(0, 10);
-
-      if (recent.length === 0) {
-        tbody.innerHTML = `
-          <tr class="empty-row"><td colspan="8">
-            <i class="bi bi-tree empty-icon"></i>
-            <h4>ยังไม่มีแปลงในระบบ</h4>
-            <p>กรุณาเพิ่มแปลงใหม่เพื่อเริ่มต้นการประเมินคาร์บอนเครดิต</p>
-          </td></tr>`;
-        return;
-      }
-
-      recent.forEach((p, i) => {
-        const date     = p.createdAt ? new Date(p.createdAt).toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric' }) : '—';
-        const assessed = p.carbonTotal > 0;
-        const hasMap   = !!p.geojson;
-        const tr       = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="text-align:center;"><div class="row-num">${i + 1}</div></td>
-          <td>
-            <div class="pn-cell">
-              <div class="pn-icon"><i class="bi bi-tree-fill"></i></div>
-              <div>
-                <div class="pn-name">${p.name || 'ไม่ระบุชื่อ'}</div>
-                <div class="pn-sub">ยางพารา · ลงทะเบียน ${date}</div>
-              </div>
-            </div>
-          </td>
-          <td><span class="meta-val">${fmt(p.areaRai || 0, 2)}</span> <span class="meta-unit">ไร่</span></td>
-          <td><span class="meta-val">${p.treeCount ? fmt(p.treeCount) : '—'}</span> <span class="meta-unit">${p.treeCount ? 'ต้น' : ''}</span></td>
-          <td><span class="meta-val">${p.treeAge || '—'}</span> <span class="meta-unit">${p.treeAge ? 'ปี' : ''}</span></td>
-          <td>
-            ${assessed
-              ? `<span class="meta-val">${fmt(p.carbonTotal, 2)}</span> <span class="meta-unit">tCO₂e</span>`
-              : `<span style="color:var(--text-3);font-size:12px;">—</span>`}
-          </td>
-          <td>
-            <span class="badge ${assessed ? 'badge-green' : 'badge-amber'}">
-              ${assessed ? 'ประเมินแล้ว' : 'รอดำเนินการ'}
-            </span>
-          </td>
-          <td style="text-align:center;">
-            ${hasMap
-              ? `<span style="color:var(--brand);font-size:14px;" title="มีข้อมูลแผนที่"><i class="bi bi-geo-alt-fill"></i></span>`
-              : `<span style="color:var(--text-3);font-size:14px;" title="ไม่มีข้อมูลแผนที่"><i class="bi bi-geo-alt"></i></span>`}
-          </td>`;
-        tbody.appendChild(tr);
-      });
-    })();
   </script>
 </body>
+
 </html>
