@@ -11,7 +11,9 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
 
   <!-- Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -30,16 +32,18 @@
       /* Colors */
       --bg-body: #f3f4f6;
       --bg-card: #ffffff;
-      
-      --brand-primary: #059669; /* Emerald 600 */
-      --brand-primary-hover: #047857; /* Emerald 700 */
-      
+
+      --brand-primary: #059669;
+      /* Emerald 600 */
+      --brand-primary-hover: #047857;
+      /* Emerald 700 */
+
       --text-primary: #0f172a;
       --text-secondary: #475569;
       --text-muted: #64748b;
-      
+
       --border-light: #e2e8f0;
-      
+
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
@@ -74,43 +78,142 @@
       padding: 0 20px;
     }
 
-    .topbar-left { display: flex; align-items: center; gap: 16px; }
-    .topbar-right { display: flex; align-items: center; gap: 8px; }
-    .icon-btn {
-      width: 36px; height: 36px; background: #f8f9fa; border: 1px solid #e9ecef;
-      border-radius: 8px; color: #555; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 14px; transition: all 0.2s;
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
-    .icon-btn:hover { background: #e9ecef; color: #000; }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #e9ecef;
+      color: #000;
+    }
 
     /* ── SIDEBAR ── */
     #sidebar-menu {
-      position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #ffffff;
-      z-index: 600; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06); transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      background: #ffffff;
+      z-index: 600;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06);
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
     }
-    #sidebar-menu.open { transform: translateX(0); }
+
+    #sidebar-menu.open {
+      transform: translateX(0);
+    }
+
     .sidebar-header {
-      height: 60px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 20px; border-bottom: 1px solid #f0f0f0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0;
     }
-    .sidebar-header .brand { font-weight: 700; color: #2d9e5f; font-size: 16px; }
+
+    .sidebar-header .brand {
+      font-weight: 700;
+      color: #2d9e5f;
+      font-size: 16px;
+    }
+
     .btn-close-sidebar {
-      width: 28px; height: 28px; background: #ff5252; color: white; border: none;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 14px; cursor: pointer;
+      width: 28px;
+      height: 28px;
+      background: #ff5252;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
     }
-    .sidebar-nav { flex: 1; padding: 20px 0; overflow-y: auto; }
-    .sidebar-nav-title { font-size: 11px; color: #999; padding: 0 24px; margin-bottom: 8px; margin-top: 16px; }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-nav-title {
+      font-size: 11px;
+      color: #999;
+      padding: 0 24px;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+
     .sidebar-nav a {
-      display: flex; align-items: center; gap: 12px; padding: 10px 24px; color: #555;
-      text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      color: #555;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
     }
-    .sidebar-nav a i { font-size: 16px; width: 20px; text-align: center; color: #888; }
-    .sidebar-nav a:hover { background: #f8f9fa; color: #333; }
-    .sidebar-nav a.active { background: rgba(45, 158, 95, 0.08); color: #2d9e5f; border-right: 3px solid #2d9e5f; }
-    .sidebar-nav a.active i { color: #2d9e5f; }
-    .sidebar-footer { padding: 20px; border-top: 1px solid #f0f0f0; text-align: center; font-size: 11px; color: #888; }
+
+    .sidebar-nav a i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      color: #888;
+    }
+
+    .sidebar-nav a:hover {
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .sidebar-nav a.active {
+      background: rgba(45, 158, 95, 0.08);
+      color: #2d9e5f;
+      border-right: 3px solid #2d9e5f;
+    }
+
+    .sidebar-nav a.active i {
+      color: #2d9e5f;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+    }
 
     /* --- PAGE CONTENT --- */
     main {
@@ -139,6 +242,7 @@
       transition: background-color 0.2s;
       text-decoration: none;
     }
+
     .btn-primary:hover {
       background-color: var(--brand-primary-hover);
       color: white;
@@ -227,10 +331,25 @@
       font-size: 20px;
     }
 
-    .icon-green { background: #dcfce7; color: #16a34a; }
-    .icon-blue { background: #dbeafe; color: #2563eb; }
-    .icon-amber { background: #fef3c7; color: #d97706; }
-    .icon-purple { background: #f3e8ff; color: #9333ea; }
+    .icon-green {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .icon-blue {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+
+    .icon-amber {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .icon-purple {
+      background: #f3e8ff;
+      color: #9333ea;
+    }
 
     .stat-value {
       font-size: 32px;
@@ -247,8 +366,13 @@
       gap: 4px;
     }
 
-    .trend-up { color: #16a34a; }
-    .trend-neutral { color: var(--text-muted); }
+    .trend-up {
+      color: #16a34a;
+    }
+
+    .trend-neutral {
+      color: var(--text-muted);
+    }
 
     /* --- MAIN PANELS (Map & Charts) --- */
     .content-grid {
@@ -402,8 +526,15 @@
       text-align: center;
     }
 
-    .status-active { background-color: #dcfce7; color: #16a34a; }
-    .status-pending { background-color: #fef3c7; color: #d97706; }
+    .status-active {
+      background-color: #dcfce7;
+      color: #16a34a;
+    }
+
+    .status-pending {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
 
     /* ==========================================================================
        RESPONSIVE DESIGN
@@ -418,6 +549,7 @@
       .stats-grid {
         grid-template-columns: 1fr 1fr;
       }
+
       .page-content {
         padding: 16px;
       }
@@ -427,11 +559,13 @@
       .stats-grid {
         grid-template-columns: 1fr;
       }
+
       .welcome-banner {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
       }
+
       .welcome-date {
         text-align: left;
       }
@@ -488,7 +622,7 @@
   <main>
     <!-- PAGE CONTENT -->
     <div class="page-content">
-      
+
       <!-- Welcome Banner -->
       <div class="welcome-banner">
         <div class="welcome-text">
@@ -506,16 +640,43 @@
         <!-- Stat 1 -->
         <div class="stat-card">
           <div class="stat-header">
-            <span class="stat-title">พื้นที่ขึ้นทะเบียนรวม</span>
-            <div class="stat-icon icon-blue"><i class="bi bi-rulers"></i></div>
+            <span class="stat-title">จำนวนผู้ใช้งานในระบบ</span>
+            <div class="stat-icon icon-blue"><i class="bi bi-people"></i></div>
           </div>
-          <div class="stat-value"><span id="stat-area">0</span> <span style="font-size: 16px; color: var(--text-muted); font-weight: 500;">ไร่</span></div>
-          <div class="stat-trend trend-neutral">
-            <i class="bi bi-dash"></i> อัปเดตล่าสุดวันนี้
+          <div class="stat-value"><span id="stat-users">0</span> <span
+              style="font-size: 16px; color: var(--text-muted); font-weight: 500;">บัญชี</span></div>
+          <div class="stat-trend trend-up">
+            <i class="bi bi-arrow-up-right"></i> สมาชิกล่าสุดวันนี้
           </div>
         </div>
 
         <!-- Stat 2 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">แปลงทั้งหมดในระบบ</span>
+            <div class="stat-icon icon-purple"><i class="bi bi-layers"></i></div>
+          </div>
+          <div class="stat-value"><span id="stat-plots">0</span> <span
+              style="font-size: 16px; color: var(--text-muted); font-weight: 500;">แปลง</span></div>
+          <div class="stat-trend trend-neutral">
+            <i class="bi bi-clipboard-data"></i> จากทุกผู้ใช้งาน
+          </div>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">พื้นที่ขึ้นทะเบียนรวม</span>
+            <div class="stat-icon icon-amber"><i class="bi bi-rulers"></i></div>
+          </div>
+          <div class="stat-value"><span id="stat-area">0</span> <span
+              style="font-size: 16px; color: var(--text-muted); font-weight: 500;">ไร่</span></div>
+          <div class="stat-trend trend-neutral">
+            <i class="bi bi-map"></i> พื้นที่ทั้งหมดในระบบ
+          </div>
+        </div>
+
+        <!-- Stat 4 -->
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-title">ปริมาณคาร์บอนสะสม (tCO₂e)</span>
@@ -523,31 +684,7 @@
           </div>
           <div class="stat-value"><span id="stat-carbon">0.0</span></div>
           <div class="stat-trend trend-up">
-            <i class="bi bi-arrow-up-right"></i> ประเมินตามสมการ Allometric
-          </div>
-        </div>
-
-        <!-- Stat 3 -->
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-title">จำนวนต้นยางโดยประมาณ</span>
-            <div class="stat-icon icon-amber"><i class="bi bi-tree"></i></div>
-          </div>
-          <div class="stat-value"><span id="stat-trees">0</span></div>
-          <div class="stat-trend trend-neutral">
-            <i class="bi bi-check2-circle"></i> ตรวจสอบจากฐานข้อมูล
-          </div>
-        </div>
-
-        <!-- Stat 4 -->
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-title">แปลงทั้งหมด</span>
-            <div class="stat-icon icon-purple"><i class="bi bi-layers"></i></div>
-          </div>
-          <div class="stat-value"><span id="stat-plots">0</span> <span style="font-size: 16px; color: var(--text-muted); font-weight: 500;">แปลง</span></div>
-          <div class="stat-trend trend-neutral">
-            <i class="bi bi-clipboard-data"></i> รอการอนุมัติ: 0
+            <i class="bi bi-arrow-up-right"></i> จากแปลงทั้งหมดในระบบ
           </div>
         </div>
       </div>
@@ -557,8 +694,10 @@
         <!-- Left Panel: Map -->
         <div class="panel-card">
           <div class="panel-header">
-            <h3 class="panel-title"><i class="bi bi-geo-alt" style="color: var(--brand-primary);"></i> พิกัดแปลงสวนยางระดับมหภาค</h3>
-            <button class="panel-action" onclick="window.location.href='my-plots.html'">ดูแผนที่เต็ม <i class="bi bi-arrow-right-short"></i></button>
+            <h3 class="panel-title"><i class="bi bi-geo-alt" style="color: var(--brand-primary);"></i>
+              พิกัดแปลงสวนยางระดับมหภาค</h3>
+            <button class="panel-action" onclick="window.location.href='my-plots.html'">ดูแผนที่เต็ม <i
+                class="bi bi-arrow-right-short"></i></button>
           </div>
           <div class="panel-body">
             <div class="map-container">
@@ -570,14 +709,16 @@
         <!-- Right Panel: Chart -->
         <div class="panel-card">
           <div class="panel-header">
-            <h3 class="panel-title"><i class="bi bi-pie-chart" style="color: var(--brand-primary);"></i> สัดส่วนคาร์บอนรายแปลง</h3>
+            <h3 class="panel-title"><i class="bi bi-pie-chart" style="color: var(--brand-primary);"></i>
+              สัดส่วนคาร์บอนรายแปลง</h3>
             <button class="panel-action"><i class="bi bi-three-dots"></i></button>
           </div>
           <div class="panel-body" style="display: flex; flex-direction: column;">
             <div class="chart-container">
               <canvas id="carbon-chart"></canvas>
             </div>
-            <div style="margin-top: auto; text-align: center; color: var(--text-secondary); font-size: 13px; padding-top: 16px;">
+            <div
+              style="margin-top: auto; text-align: center; color: var(--text-secondary); font-size: 13px; padding-top: 16px;">
               แสดงข้อมูลสัดส่วนศักยภาพการกักเก็บคาร์บอนสูงสุด 5 ลำดับแรก
             </div>
           </div>
@@ -587,8 +728,10 @@
       <!-- Bottom Panel: Data Table -->
       <div class="panel-card">
         <div class="panel-header">
-          <h3 class="panel-title"><i class="bi bi-table" style="color: var(--brand-primary);"></i> รายการแปลงอัปเดตล่าสุด</h3>
-          <button class="panel-action" onclick="window.location.href='my-plots.html'">ดูรายการทั้งหมด <i class="bi bi-arrow-right-short"></i></button>
+          <h3 class="panel-title"><i class="bi bi-table" style="color: var(--brand-primary);"></i>
+            รายการแปลงอัปเดตล่าสุด</h3>
+          <button class="panel-action" onclick="window.location.href='my-plots.html'">ดูรายการทั้งหมด <i
+              class="bi bi-arrow-right-short"></i></button>
         </div>
         <div class="panel-body" style="padding: 0;">
           <div class="table-container">
@@ -596,8 +739,8 @@
               <thead>
                 <tr>
                   <th>ชื่อแปลง (Plot Name)</th>
+                  <th>เจ้าของ (Owner)</th>
                   <th>พื้นที่ (Area)</th>
-                  <th>จำนวนต้น (Trees)</th>
                   <th>คาร์บอน (tCO₂e)</th>
                   <th>วันที่บันทึก (Date)</th>
                   <th>สถานะ (Status)</th>
@@ -609,8 +752,10 @@
             </table>
             <div id="empty-state" style="display: none; padding: 48px; text-align: center; color: var(--text-muted);">
               <div style="font-size: 40px; margin-bottom: 16px; opacity: 0.5;"><i class="bi bi-folder2-open"></i></div>
-              <h4 style="font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">ยังไม่มีข้อมูลแปลงในระบบ</h4>
-              <p style="font-size: 14px; margin-bottom: 24px;">กรุณาสร้างแปลงใหม่เพื่อเริ่มต้นการประเมินคาร์บอนเครดิต</p>
+              <h4 style="font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">
+                ยังไม่มีข้อมูลแปลงในระบบ</h4>
+              <p style="font-size: 14px; margin-bottom: 24px;">กรุณาสร้างแปลงใหม่เพื่อเริ่มต้นการประเมินคาร์บอนเครดิต
+              </p>
               <a href="map-draw.html" class="btn-primary" style="display: inline-flex; width: auto;">
                 <i class="bi bi-plus"></i> สร้างแปลงใหม่
               </a>
@@ -624,7 +769,7 @@
 
   <!-- MapLibre -->
   <script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
-  
+
   <!-- App Scripts -->
   <script src="assets/js/auth.js"></script>
 
@@ -647,7 +792,7 @@
     // 2. UI Interactions
     // ---------------------------------------------------------
     // Close sidebar when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const sidebar = document.getElementById('sidebar-menu');
       const toggleBtn = document.querySelector('.topbar-left .icon-btn');
       if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
@@ -660,7 +805,7 @@
       const now = new Date();
       const timeOpts = { hour: '2-digit', minute: '2-digit' };
       const dateOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      
+
       document.getElementById('current-time').textContent = now.toLocaleTimeString('th-TH', timeOpts);
       document.getElementById('current-date').textContent = now.toLocaleDateString('th-TH', dateOpts);
     }
@@ -668,23 +813,34 @@
     setInterval(updateDateTime, 60000);
 
     // ---------------------------------------------------------
-    // 3. Data Processing & Stats
+    // 3. Data Processing & Stats (Global Overview)
     // ---------------------------------------------------------
-    const plots = user ? PlotDB.getPlots(user.id) : [];
-    
-    // Calculate Totals
-    const totalCarbon = plots.reduce((sum, p) => sum + (p.carbonTotal || 0), 0);
-    const totalArea = plots.reduce((sum, p) => sum + (p.areaRai || 0), 0);
-    const totalTrees = plots.reduce((sum, p) => sum + (p.treeCount || 0), 0);
+    // Fetch ALL users and ALL plots for the executive dashboard
+    const allUsers = Auth.getAllUsers();
+    let allPlots = [];
+
+    allUsers.forEach(u => {
+      const userPlots = PlotDB.getPlots(u.id);
+      // Ensure ownerName is attached to each plot for display
+      const plotsWithOwner = userPlots.map(p => ({ ...p, ownerName: p.ownerName || u.fullname }));
+      allPlots = allPlots.concat(plotsWithOwner);
+    });
+
+    // Sort all plots by creation date descending
+    allPlots.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Calculate Totals across entire system
+    const totalCarbon = allPlots.reduce((sum, p) => sum + (p.carbonTotal || 0), 0);
+    const totalArea = allPlots.reduce((sum, p) => sum + (p.areaRai || 0), 0);
 
     // Format numbers with commas
     const formatNum = (num, decimals = 0) => num.toLocaleString('th-TH', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
     // Update DOM Stats
-    document.getElementById('stat-plots').textContent = formatNum(plots.length);
+    document.getElementById('stat-users').textContent = formatNum(allUsers.length);
+    document.getElementById('stat-plots').textContent = formatNum(allPlots.length);
     document.getElementById('stat-carbon').textContent = formatNum(totalCarbon, 2);
     document.getElementById('stat-area').textContent = formatNum(totalArea, 2);
-    document.getElementById('stat-trees').textContent = formatNum(totalTrees);
 
     // ---------------------------------------------------------
     // 4. Map Initialization
@@ -711,17 +867,17 @@
     });
 
     // Add navigation control
-    dashMap.addControl(new maplibregl.NavigationControl({showCompass: false}), 'top-right');
+    dashMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
     dashMap.on('load', () => {
       // Draw saved plots on the map
       const bounds = new maplibregl.LngLatBounds();
       let hasValidCoords = false;
 
-      plots.forEach((plot, idx) => {
+      allPlots.forEach((plot, idx) => {
         if (plot.geojson) {
           dashMap.addSource(`plot-${idx}`, { type: 'geojson', data: plot.geojson });
-          
+
           // Outer glow / thick line
           dashMap.addLayer({
             id: `plot-glow-${idx}`,
@@ -748,13 +904,13 @@
 
           // Extend bounds to fit all plots
           if (plot.geojson.geometry && plot.geojson.geometry.coordinates) {
-             const coords = plot.geojson.geometry.type === 'Polygon' ? plot.geojson.geometry.coordinates[0] : 
-                            (plot.geojson.geometry.type === 'MultiPolygon' ? plot.geojson.geometry.coordinates[0][0] : []);
-             
-             coords.forEach(coord => {
-               bounds.extend(coord);
-               hasValidCoords = true;
-             });
+            const coords = plot.geojson.geometry.type === 'Polygon' ? plot.geojson.geometry.coordinates[0] :
+              (plot.geojson.geometry.type === 'MultiPolygon' ? plot.geojson.geometry.coordinates[0][0] : []);
+
+            coords.forEach(coord => {
+              bounds.extend(coord);
+              hasValidCoords = true;
+            });
           }
         }
       });
@@ -788,11 +944,11 @@
     const emptyState = document.getElementById('empty-state');
     const carbonCtx = document.getElementById('carbon-chart').getContext('2d');
 
-    if (plots.length === 0) {
+    if (allPlots.length === 0) {
       // Empty State handling
       tbody.parentElement.style.display = 'none';
       emptyState.style.display = 'block';
-      
+
       // Empty Chart
       new Chart(carbonCtx, {
         type: 'doughnut',
@@ -806,11 +962,11 @@
           cutout: '75%'
         }
       });
-      
+
       // Add text inside empty chart
       Chart.register({
         id: 'emptyChartText',
-        beforeDraw: function(chart) {
+        beforeDraw: function (chart) {
           if (chart.data.labels[0] === 'ไม่มีข้อมูล') {
             var width = chart.width, height = chart.height, ctx = chart.ctx;
             ctx.restore();
@@ -827,13 +983,13 @@
 
     } else {
       // Setup Enterprise Chart (Top 5 plots by carbon)
-      const sortedPlots = [...plots].sort((a, b) => (b.carbonTotal || 0) - (a.carbonTotal || 0));
+      const sortedPlots = [...allPlots].sort((a, b) => (b.carbonTotal || 0) - (a.carbonTotal || 0));
       const top5 = sortedPlots.slice(0, 5);
       const otherCarbon = sortedPlots.slice(5).reduce((sum, p) => sum + (p.carbonTotal || 0), 0);
-      
+
       const chartLabels = top5.map(p => p.name);
       const chartData = top5.map(p => p.carbonTotal || 0);
-      
+
       if (otherCarbon > 0) {
         chartLabels.push('แปลงอื่นๆ');
         chartData.push(otherCarbon);
@@ -875,7 +1031,7 @@
               padding: 12,
               cornerRadius: 8,
               callbacks: {
-                label: function(context) {
+                label: function (context) {
                   return ` ${context.parsed.toFixed(2)} tCO₂e`;
                 }
               }
@@ -885,11 +1041,11 @@
       });
 
       // Populate Data Table (Top 5 recent)
-      const recentPlots = [...plots].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
-      
+      const recentPlots = allPlots.slice(0, 5);
+
       recentPlots.forEach(plot => {
         const dateStr = plot.createdAt ? new Date(plot.createdAt).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-        
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>
@@ -897,12 +1053,12 @@
               <div class="plot-icon"><i class="bi bi-geo-fill"></i></div>
               <div>
                 <span class="plot-name">${plot.name}</span>
-                <span class="plot-owner">${plot.ownerName || 'ไม่ระบุเจ้าของ'}</span>
+                <span class="plot-owner" style="font-size: 11px; color: var(--brand-primary);">${plot.id.substring(0, 8)}</span>
               </div>
             </div>
           </td>
+          <td><span style="font-weight: 500; color: var(--text-secondary);"><i class="bi bi-person-fill"></i> ${plot.ownerName}</span></td>
           <td><span style="font-weight: 500;">${formatNum(plot.areaRai, 2)}</span> ไร่</td>
-          <td>${formatNum(plot.treeCount)} ต้น</td>
           <td><span style="font-weight: 600; color: var(--brand-primary);">${formatNum(plot.carbonTotal, 2)}</span></td>
           <td style="color: var(--text-muted);">${dateStr}</td>
           <td><span class="status-badge status-active">ประเมินแล้ว</span></td>
@@ -912,4 +1068,5 @@
     }
   </script>
 </body>
+
 </html>

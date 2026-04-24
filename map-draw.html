@@ -944,33 +944,69 @@
 
     /* SHP requirements */
     .req-box {
-      background: rgba(255, 193, 7, 0.04);
-      border: 1px solid rgba(255, 193, 7, 0.16);
-      border-radius: 10px;
-      padding: 12px 13px;
-      margin-bottom: 12px;
+      background: rgba(45, 158, 95, 0.07);
+      border: 1px solid rgba(45, 158, 95, 0.28);
+      border-radius: 12px;
+      padding: 13px 14px;
+      margin-bottom: 14px;
     }
 
     .req-title {
-      font-size: 10px;
-      font-weight: 600;
-      color: rgba(255, 193, 7, 0.7);
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      margin-bottom: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.3px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .req-item {
       display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 11.5px;
-      color: rgba(255, 193, 7, 0.6);
-      padding: 3px 0;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text);
+      padding: 4px 0;
+      line-height: 1.6;
     }
 
     .req-item i {
-      font-size: 12px;
+      font-size: 13px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      color: var(--green);
+    }
+
+    .req-tag {
+      display: inline-block;
+      background: rgba(45, 158, 95, 0.12);
+      border: 1px solid rgba(45, 158, 95, 0.35);
+      color: var(--green-d);
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+    }
+
+    .req-label {
+      font-size: 11px;
+      color: rgba(30, 80, 50, 0.65);
+    }
+
+    .req-divider {
+      border: none;
+      border-top: 1px solid rgba(45, 158, 95, 0.15);
+      margin: 6px 0;
+    }
+
+    .req-col-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 4px;
     }
 
     /* Fields */
@@ -1810,6 +1846,7 @@
 
   <!-- ======================== SIDE PANEL ======================== -->
   <div id="panel">
+    <button id="btn-close-panel" onclick="togglePanel()">✕</button>
     <!-- Mobile handle -->
     <div class="panel-handle" onclick="togglePanel()">
       <div class="panel-handle-bar"></div>
@@ -1930,9 +1967,63 @@
         <!-- SHP TAB -->
         <div id="ct-shp" style="display:none;">
           <div class="req-box">
-            <div class="req-title">ข้อกำหนดไฟล์</div>
-            <div class="req-item"><i class="bi bi-file-zip"></i> ไฟล์ .zip ที่มี .shp .shx .dbf</div>
-            <div class="req-item"><i class="bi bi-globe2"></i> ระบบพิกัด WGS84 (EPSG:4326)</div>
+            <div class="req-title"><i class="bi bi-info-circle-fill"></i> ข้อกำหนดไฟล์</div>
+
+            <div class="req-item">
+              <i class="bi bi-file-zip-fill"></i>
+              <span>ไฟล์ <strong>.zip</strong> ที่บรรจุ <strong>.shp</strong>, <strong>.shx</strong> และ
+                <strong>.dbf</strong> · ขนาดสูงสุด <strong>50 MB</strong></span>
+            </div>
+            <hr class="req-divider">
+
+            <!-- หัวตาราง -->
+            <div
+              style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; font-size:10.5px; font-weight:700; color:var(--green); padding:2px 2px 5px; border-bottom:1px solid rgba(45,158,95,0.18); margin-bottom:3px;">
+              <span>คอลัมน์</span>
+              <span>ไฟล์</span>
+              <span>ข้อมูลที่แสดง</span>
+            </div>
+
+            <!-- F_name -->
+            <div
+              style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; align-items:center; font-size:11.5px; color:var(--text); padding:4px 2px; border-bottom:1px solid rgba(45,158,95,0.07);">
+              <span class="req-tag" style="width:fit-content;">F_name</span>
+              <span class="req-label">.dbf</span>
+              <span>ชื่อ</span>
+            </div>
+
+            <!-- L_Name -->
+            <div
+              style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; align-items:center; font-size:11.5px; color:var(--text); padding:4px 2px; border-bottom:1px solid rgba(45,158,95,0.07);">
+              <span class="req-tag" style="width:fit-content;">L_Name</span>
+              <span class="req-label">.dbf</span>
+              <span>นามสกุล</span>
+            </div>
+
+            <!-- เนื้อที่ (geometry) -->
+            <div
+              style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; align-items:center; font-size:11.5px; color:var(--text); padding:4px 2px; border-bottom:1px solid rgba(45,158,95,0.07);">
+              <span class="req-label" style="font-style:italic;">— ไม่มี —</span>
+              <span class="req-label">.shp</span>
+              <span>เนื้อที่ ไร่ <span class="req-label">(คำนวณจาก geometry อัตโนมัติ)</span></span>
+            </div>
+
+            <!-- พิกัด (geometry) -->
+            <div
+              style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; align-items:center; font-size:11.5px; color:var(--text); padding:4px 2px;">
+              <span class="req-label" style="font-style:italic;">— ไม่มี —</span>
+              <span class="req-label">.shp</span>
+              <span>พิกัด WGS84 <span class="req-label">(ดึงจาก geometry)</span></span>
+            </div>
+
+            <!-- UTM note -->
+            <div style="margin-top:10px; padding:8px 10px; background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.2); border-radius:8px; display:flex; align-items:flex-start; gap:7px;">
+              <i class="bi bi-arrow-left-right" style="color:#3b82f6; font-size:13px; margin-top:1px; flex-shrink:0;"></i>
+              <div style="font-size:11px; color:#1e40af; line-height:1.5;">
+                <strong>รองรับระบบพิกัด WGS84 (EPSG:4326) และ UTM</strong><br>
+                ระบบแนะนำให้ใช้พิกัด <strong>WGS84 (EPSG:4326)</strong> เป็นหลัก แต่หากไฟล์ใช้ระบบ UTM (เช่น Zone 47N / 48N ที่ใช้ในไทย) ระบบจะแปลงเป็น WGS84 ให้อัตโนมัติ แนะนำให้รวมไฟล์ <strong>.prj</strong> ใน ZIP เพื่อความแม่นยำสูงสุด
+              </div>
+            </div>
           </div>
           <div class="field">
             <label>เลือกไฟล์ ZIP</label>
@@ -2867,6 +2958,7 @@
 
         // Check if coords are WGS84 (EPSG:4326)
         let isWGS84 = true;
+        let detectedCRS = 'WGS84 (EPSG:4326)';
         try {
           let firstCoord = shpFeatures[0].geometry.type === 'MultiPolygon'
             ? shpFeatures[0].geometry.coordinates[0][0][0]
@@ -2878,12 +2970,24 @@
 
         if (!isWGS84) {
           if (typeof proj4 === 'undefined') {
-            throw new Error('พิกัดไม่ใช่ WGS84 และไม่พบไลบรารีแปลงพิกัด');
+            throw new Error('พิกัดไม่ใช่ WGS84 และไม่พบไลบรารีแปลงพิกัด (proj4)');
           }
+
+          // Determine source CRS
+          let usedFallback = false;
           if (!prjText) {
-            // Fallback to UTM 47N (Common in Thailand) if no PRJ found
+            // Fallback to UTM Zone 47N (most common in Thailand)
             prjText = '+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs';
+            detectedCRS = 'UTM Zone 47N (ค่าเริ่มต้น)';
+            usedFallback = true;
+          } else {
+            // Try to detect zone from PRJ text
+            const zoneMatch = prjText.match(/zone=?(\d+)/i) || prjText.match(/UTM.*?(\d{2})N/i);
+            detectedCRS = zoneMatch ? `UTM Zone ${zoneMatch[1]}N` : 'ระบบพิกัดจาก .prj';
           }
+
+          // Show converting status
+          s.innerHTML = `<span style="color:#3b82f6;"><i class="bi bi-arrow-left-right"></i> กำลังแปลงพิกัด ${detectedCRS} → WGS84...</span>`;
 
           // Auto convert coordinates
           const convertCoords = (coords) => {
@@ -2898,6 +3002,27 @@
           shpFeatures.forEach(f => {
             f.geometry.coordinates = convertCoords(f.geometry.coordinates);
           });
+
+          // Verify conversion success
+          try {
+            let testCoord = shpFeatures[0].geometry.type === 'MultiPolygon'
+              ? shpFeatures[0].geometry.coordinates[0][0][0]
+              : shpFeatures[0].geometry.coordinates[0][0];
+            if (!testCoord || testCoord[1] < -90 || testCoord[1] > 90) {
+              throw new Error('แปลงพิกัดไม่สำเร็จ ลองรวมไฟล์ .prj ใน ZIP');
+            }
+          } catch (verifyErr) {
+            throw verifyErr;
+          }
+
+          // Show conversion success note in status
+          const utmNote = usedFallback
+            ? ` <span style="color:#92400e; font-size:10.5px;">(ไม่พบ .prj ใช้ ${detectedCRS} เป็นค่าเริ่มต้น)</span>`
+            : ` <span style="color:#166534; font-size:10.5px;">(แปลงจาก ${detectedCRS} สำเร็จ)</span>`;
+          // Will append after main success message below
+          window._utmConversionNote = utmNote;
+        } else {
+          window._utmConversionNote = '';
         }
 
         // Render multi-select list
@@ -2936,7 +3061,7 @@
         });
 
         listDiv.style.display = 'block';
-        s.textContent = `✓ อ่านไฟล์สำเร็จ กรุณาเลือกแปลงที่ต้องการ`;
+        s.innerHTML = `✓ อ่านไฟล์สำเร็จ — พบ <strong>${shpFeatures.length}</strong> แปลง${window._utmConversionNote || ''}`;
         s.style.color = 'var(--green)';
         document.getElementById('btnLoadShp').disabled = false;
 
@@ -3932,6 +4057,7 @@
           id: p.id || Date.now().toString() + '_' + Math.random().toString(36).substr(2, 5),
           name: p.name || 'แปลงไม่มีชื่อ',
           ownerName: p.ownerName,
+          variety: p.variety || '',
           userId: ME.id,
           areaRai: p.areaRai,
           areaSqm: p.areaSqm,
