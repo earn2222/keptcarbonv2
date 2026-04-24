@@ -4,22 +4,20 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>แดชบอร์ดการจัดการ - KeptCarbon</title>
-  <meta name="description" content="ระบบจัดการข้อมูลแปลงสวนยางพาราและคาร์บอนเครดิตสำหรับองค์กร">
+  <title>ภาพรวมระบบ — KeptCarbon</title>
+  <meta name="description" content="ภาพรวมแปลงสวนยางพาราและคาร์บอนเครดิตในระบบ KeptCarbon">
   <link href="assets/img/favicon.png" rel="icon">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <style>
     :root {
-      --bg-body: #f1f5f9;
+      --bg-body: #f0f4f8;
       --bg-card: #ffffff;
       --brand: #059669;
       --brand-dk: #047857;
@@ -28,15 +26,12 @@
       --text-2: #475569;
       --text-3: #94a3b8;
       --border: #e2e8f0;
-      --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-      --sh-md: 0 4px 12px rgba(0, 0, 0, 0.09);
+      --sh-sm: 0 1px 4px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.03);
+      --sh-md: 0 4px 16px rgba(0,0,0,.10);
+      --sh-lg: 0 10px 30px rgba(0,0,0,.12);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', 'Noto Sans Thai', sans-serif;
@@ -48,703 +43,319 @@
 
     /* ── TOPBAR ── */
     #topbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      z-index: 500;
-      background: #fff;
-      border-bottom: 1px solid #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 500;
+      background: #fff; border-bottom: 1px solid #edf0f3;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; box-shadow: 0 1px 6px rgba(0,0,0,.05);
     }
-
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
 
     .icon-btn {
-      width: 36px;
-      height: 36px;
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      color: #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all .2s;
+      width: 36px; height: 36px; background: #f8f9fa; border: 1px solid #e9ecef;
+      border-radius: 8px; color: #555; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; font-size: 14px; transition: all .2s;
     }
-
-    .icon-btn:hover {
-      background: #e9ecef;
-      color: #000;
-    }
+    .icon-btn:hover { background: #e9ecef; color: #000; }
 
     .btn-primary {
-      background: var(--brand);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background .2s;
-      text-decoration: none;
+      background: var(--brand); color: #fff; border: none; padding: 8px 16px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: background .2s; text-decoration: none;
     }
-
-    .btn-primary:hover {
-      background: var(--brand-dk);
-      color: #fff;
-    }
+    .btn-primary:hover { background: var(--brand-dk); color: #fff; }
 
     /* ── SIDEBAR ── */
     #sidebar-menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 272px;
-      background: #fff;
-      z-index: 600;
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.07);
-      transform: translateX(-100%);
-      transition: transform .3s cubic-bezier(.16, 1, .3, 1);
-      display: flex;
-      flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0; width: 272px; background: #fff;
+      z-index: 600; box-shadow: 4px 0 24px rgba(0,0,0,.07);
+      transform: translateX(-100%); transition: transform .3s cubic-bezier(.16,1,.3,1);
+      display: flex; flex-direction: column;
     }
-
-    #sidebar-menu.open {
-      transform: translateX(0);
-    }
+    #sidebar-menu.open { transform: translateX(0); }
 
     .sidebar-header {
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      border-bottom: 1px solid #f0f0f0;
+      height: 60px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; border-bottom: 1px solid #f0f0f0;
     }
-
-    .sidebar-header .brand {
-      font-weight: 700;
-      color: #2d9e5f;
-      font-size: 15px;
-    }
-
+    .sidebar-header .brand { font-weight: 700; color: #2d9e5f; font-size: 15px; }
     .btn-close-sidebar {
-      width: 26px;
-      height: 26px;
-      background: #ff5252;
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      cursor: pointer;
+      width: 26px; height: 26px; background: #ff5252; color: #fff; border: none;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; cursor: pointer;
     }
-
-    .sidebar-nav {
-      flex: 1;
-      padding: 16px 0;
-      overflow-y: auto;
-    }
-
+    .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
     .sidebar-nav-title {
-      font-size: 10px;
-      font-weight: 600;
-      color: #bbb;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      padding: 0 20px;
-      margin: 16px 0 6px;
+      font-size: 10px; font-weight: 600; color: #bbb; text-transform: uppercase;
+      letter-spacing: .8px; padding: 0 20px; margin: 16px 0 6px;
     }
-
     .sidebar-nav a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 20px;
-      color: #555;
-      text-decoration: none;
-      font-size: 13.5px;
-      font-weight: 500;
-      transition: all .15s;
+      display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+      color: #555; text-decoration: none; font-size: 13.5px; font-weight: 500; transition: all .15s;
     }
-
-    .sidebar-nav a i {
-      font-size: 16px;
-      width: 20px;
-      text-align: center;
-      color: #aaa;
-    }
-
-    .sidebar-nav a:hover {
-      background: #f8f9fa;
-      color: #222;
-    }
-
+    .sidebar-nav a i { font-size: 16px; width: 20px; text-align: center; color: #aaa; }
+    .sidebar-nav a:hover { background: #f8f9fa; color: #222; }
     .sidebar-nav a.active {
-      background: rgba(5, 150, 105, .08);
-      color: var(--brand);
-      border-right: 3px solid var(--brand);
+      background: rgba(5,150,105,.08); color: var(--brand); border-right: 3px solid var(--brand);
     }
-
-    .sidebar-nav a.active i {
-      color: var(--brand);
-    }
-
+    .sidebar-nav a.active i { color: var(--brand); }
     .sidebar-footer {
-      padding: 18px 20px;
-      border-top: 1px solid #f0f0f0;
-      text-align: center;
-      font-size: 11px;
-      color: #bbb;
+      padding: 18px 20px; border-top: 1px solid #f0f0f0;
+      text-align: center; font-size: 11px; color: #bbb;
     }
 
-    /* ── PAGE LAYOUT ── */
-    main {
-      padding-top: 60px;
-      min-height: 100vh;
-    }
+    /* ── MAIN ── */
+    main { padding-top: 60px; min-height: 100vh; }
+    .page-content { padding: 28px 32px; max-width: 1440px; margin: 0 auto; }
 
-    .page-content {
-      padding: 28px 32px;
-      max-width: 1440px;
-      margin: 0 auto;
+    /* ── HERO BANNER ── */
+    .hero-banner {
+      background: linear-gradient(135deg, #064e3b 0%, #059669 55%, #10b981 100%);
+      border-radius: 20px; padding: 30px 36px; margin-bottom: 26px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 8px 32px rgba(5,150,105,.28); position: relative; overflow: hidden;
     }
-
-    /* ── WELCOME BANNER ── */
-    .welcome-banner {
-      background: linear-gradient(130deg, #ecfdf5 0%, #f0fdf4 60%, #f8fafc 100%);
-      border: 1px solid #bbf7d0;
-      border-left: 4px solid var(--brand);
-      border-radius: 14px;
-      padding: 24px 32px;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--sh-sm);
+    .hero-banner::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 260px; height: 260px; border-radius: 50%;
+      background: rgba(255,255,255,.06); pointer-events: none;
     }
-
-    .welcome-text h2 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-1);
-      margin-bottom: 4px;
+    .hero-banner::after {
+      content: ''; position: absolute; bottom: -80px; right: 120px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: rgba(255,255,255,.04); pointer-events: none;
     }
-
-    .welcome-text p {
-      font-size: 13px;
-      color: var(--text-2);
+    .hero-left { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,.9);
+      letter-spacing: .5px; text-transform: uppercase; margin-bottom: 12px;
     }
-
-    .welcome-clock {
-      text-align: right;
+    .hero-title {
+      font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.2;
     }
-
-    .welcome-clock .time {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-1);
-      line-height: 1;
+    .hero-sub { font-size: 13.5px; color: rgba(255,255,255,.75); }
+    .hero-right { position: relative; z-index: 1; text-align: right; }
+    .hero-clock-time {
+      font-size: 32px; font-weight: 800; color: #fff; line-height: 1;
+      font-variant-numeric: tabular-nums;
     }
-
-    .welcome-clock .date {
-      font-size: 12px;
-      color: var(--text-3);
-      margin-top: 4px;
-    }
+    .hero-clock-date { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 5px; }
 
     /* ── STAT CARDS ── */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      margin-bottom: 24px;
+      gap: 18px; margin-bottom: 26px;
     }
-
     .stat-card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 20px 22px;
-      border: 1px solid var(--border);
-      box-shadow: var(--sh-sm);
-      position: relative;
-      overflow: hidden;
-      transition: transform .2s, box-shadow .2s;
+      background: #fff; border-radius: 16px; padding: 22px 24px;
+      border: 1px solid var(--border); box-shadow: var(--sh-sm);
+      position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s;
     }
-
-    .stat-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--sh-md);
-    }
-
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
     .stat-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
       background: var(--accent-bar, linear-gradient(90deg, #059669, #34d399));
     }
-
     .stat-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      color: var(--text-3);
-      margin-bottom: 12px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--text-3); margin-bottom: 14px;
     }
-
-    .stat-body {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-    }
-
-    .stat-num {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--text-1);
-      line-height: 1;
-    }
-
-    .stat-unit {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-3);
-      margin-left: 4px;
-    }
-
+    .stat-body { display: flex; align-items: flex-end; justify-content: space-between; }
+    .stat-num { font-size: 30px; font-weight: 800; color: var(--text-1); line-height: 1; }
+    .stat-unit { font-size: 13px; font-weight: 500; color: var(--text-3); margin-left: 4px; }
     .stat-icon-wrap {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
     }
-
-    .ic-blue {
-      background: #dbeafe;
-      color: #2563eb;
-    }
-
-    .ic-purple {
-      background: #f3e8ff;
-      color: #9333ea;
-    }
-
-    .ic-amber {
-      background: #fef3c7;
-      color: #d97706;
-    }
-
-    .ic-green {
-      background: #dcfce7;
-      color: #16a34a;
-    }
-
+    .ic-blue { background: #dbeafe; color: #2563eb; }
+    .ic-purple { background: #f3e8ff; color: #9333ea; }
+    .ic-amber { background: #fef3c7; color: #d97706; }
+    .ic-green { background: #dcfce7; color: #16a34a; }
+    .ic-teal  { background: #ccfbf1; color: #0d9488; }
     .stat-foot {
-      margin-top: 10px;
-      font-size: 11px;
-      color: var(--text-3);
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      margin-top: 12px; font-size: 11.5px; color: var(--text-3);
+      display: flex; align-items: center; gap: 4px;
     }
-
-    .stat-foot .up {
-      color: #16a34a;
-    }
+    .stat-foot .up { color: #16a34a; font-weight: 600; }
 
     /* ── PANELS ── */
     .panel {
-      background: #fff;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      box-shadow: var(--sh-sm);
-      overflow: hidden;
+      background: #fff; border-radius: 16px; border: 1px solid var(--border);
+      box-shadow: var(--sh-sm); overflow: hidden;
     }
-
     .panel-head {
-      padding: 16px 22px;
-      border-bottom: 1px solid #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid #f1f5f9;
+      display: flex; align-items: center; justify-content: space-between;
     }
-
     .panel-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-1);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 14.5px; font-weight: 700; color: var(--text-1);
+      display: flex; align-items: center; gap: 9px;
     }
-
-    .panel-title i {
-      color: var(--brand);
-    }
-
+    .panel-title i { color: var(--brand); font-size: 16px; }
     .panel-badge {
-      background: #f0fdf4;
-      color: var(--brand);
-      border: 1px solid #bbf7d0;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
+      background: #f0fdf4; color: var(--brand); border: 1px solid #bbf7d0;
+      padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
     }
-
-    .panel-body {
-      padding: 22px;
-    }
-
-    .panel-body-0 {
-      padding: 0;
-    }
+    .panel-body { padding: 24px; }
+    .panel-body-0 { padding: 0; }
+    .mb-26 { margin-bottom: 26px; }
+    .mb-28 { margin-bottom: 28px; }
 
     /* ── MAP ── */
     .map-wrap {
-      width: 100%;
-      height: 420px;
-      border-radius: 10px;
-      overflow: hidden;
+      width: 100%; height: 440px; border-radius: 12px; overflow: hidden;
       border: 1px solid var(--border);
     }
+    #dashboard-map { width: 100%; height: 100%; }
 
-    #dashboard-map {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* ── MAP PIN — minimal flat ── */
     .plot-marker {
-      cursor: pointer;
-      transition: transform .2s ease, filter .2s ease;
-      filter: drop-shadow(0 3px 7px rgba(0, 0, 0, .22));
+      cursor: pointer; transition: transform .2s, filter .2s;
+      filter: drop-shadow(0 3px 8px rgba(0,0,0,.22));
     }
     .plot-marker:hover {
       transform: translateY(-6px) scale(1.12);
-      filter: drop-shadow(0 8px 16px rgba(5, 150, 105, .36));
+      filter: drop-shadow(0 8px 18px rgba(5,150,105,.38));
     }
-
-    /* ── MAP POPUP — minimal ── */
     .maplibregl-popup-content {
-      padding: 0 !important;
-      border-radius: 12px !important;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, .13) !important;
+      padding: 0 !important; border-radius: 12px !important;
+      box-shadow: 0 6px 24px rgba(0,0,0,.13) !important;
       border: 1px solid #e2e8f0 !important;
-      font-family: 'Inter', 'Noto Sans Thai', sans-serif;
-      min-width: 200px;
-      overflow: hidden;
+      font-family: 'Inter','Noto Sans Thai',sans-serif; min-width: 200px; overflow: hidden;
     }
-    .maplibregl-popup-tip { border-top-color: #e2e8f0 !important; }
-
     .mp-title {
-      font-size: 13px; font-weight: 700; color: #0f172a;
-      padding: 13px 15px 10px;
-      border-bottom: 1px solid #f1f5f9;
-      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 700; color: #0f172a; padding: 13px 15px 10px;
+      border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 7px;
     }
-    .mp-title-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #059669; flex-shrink: 0;
-    }
+    .mp-title-dot { width: 8px; height: 8px; border-radius: 50%; background: #059669; flex-shrink: 0; }
     .mp-body { padding: 10px 15px 13px; }
     .mp-row {
-      font-size: 12px; color: #64748b;
-      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 7px;
       padding: 5px 0; border-bottom: 1px solid #f8fafc;
     }
     .mp-row:last-of-type { border-bottom: none; }
     .mp-row i { color: #059669; font-size: 12px; width: 13px; flex-shrink: 0; }
     .mp-row strong { margin-left: auto; color: #0f172a; font-weight: 600; font-size: 12px; }
 
-    /* ── CHART ── */
-    .chart-wrap {
-      width: 100%;
-      height: 260px;
+    /* ── CARBON AGE CHART ── */
+    .carbon-chart-layout {
+      display: grid; grid-template-columns: 1fr 280px; gap: 0;
+    }
+    .chart-main { padding: 24px; border-right: 1px solid #f1f5f9; }
+    .chart-side { padding: 24px; background: #fafbfc; }
+    .chart-wrap-lg { width: 100%; height: 300px; }
+
+    .age-legend {
+      display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .age-legend-item {
+      display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    }
+
+    .info-block {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; margin-bottom: 12px;
+    }
+    .info-block-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--text-3); margin-bottom: 8px;
+    }
+    .info-block-val {
+      font-size: 22px; font-weight: 800; color: var(--text-1); line-height: 1;
+    }
+    .info-block-unit { font-size: 11px; color: var(--text-3); margin-left: 3px; }
+    .info-block-sub { font-size: 11.5px; color: var(--text-2); margin-top: 4px; }
+
+    .age-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 20px;
+      padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--brand); margin: 2px;
     }
 
     /* ── TABLE ── */
-    .tbl-wrap {
-      overflow-x: auto;
-    }
-
-    .dash-tbl {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
+    .tbl-wrap { overflow-x: auto; }
+    .dash-tbl { width: 100%; border-collapse: collapse; }
     .dash-tbl thead th {
-      background: #f8fafc;
-      padding: 12px 18px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      border-bottom: 2px solid var(--border);
-      white-space: nowrap;
-      position: sticky;
-      top: 0;
+      background: #f8fafc; padding: 12px 18px; font-size: 11px; font-weight: 700;
+      color: var(--text-3); text-transform: uppercase; letter-spacing: .5px;
+      border-bottom: 2px solid var(--border); white-space: nowrap; position: sticky; top: 0;
     }
-
     .dash-tbl tbody td {
-      padding: 14px 18px;
-      font-size: 13.5px;
-      color: var(--text-1);
-      border-bottom: 1px solid #f1f5f9;
-      vertical-align: middle;
+      padding: 14px 18px; font-size: 13.5px; color: var(--text-1);
+      border-bottom: 1px solid #f1f5f9; vertical-align: middle;
     }
-
-    .dash-tbl tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .dash-tbl tbody tr:hover td {
-      background: #f8fafc;
-    }
-
-    /* row number pill */
+    .dash-tbl tbody tr:last-child td { border-bottom: none; }
+    .dash-tbl tbody tr:hover td { background: #fafbfc; }
     .row-num {
-      width: 28px;
-      height: 28px;
-      background: #f1f5f9;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-3);
+      width: 28px; height: 28px; background: #f1f5f9; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: var(--text-3);
     }
-
-    /* plot name cell */
-    .pn-cell {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .pn-cell { display: flex; align-items: center; gap: 10px; }
     .pn-icon {
-      width: 36px;
-      height: 36px;
-      background: #dcfce7;
-      color: #16a34a;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
+      width: 36px; height: 36px; background: #dcfce7; color: #16a34a;
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
     }
-
-    .pn-name {
-      font-weight: 700;
-      font-size: 13.5px;
-    }
-
-    .pn-sub {
-      font-size: 11px;
-      color: var(--text-3);
-      margin-top: 1px;
-    }
-
-    /* meta cell */
-    .meta-val {
-      font-weight: 600;
-      font-size: 13.5px;
-    }
-
-    .meta-unit {
-      font-size: 11px;
-      color: var(--text-3);
-    }
-
-    /* status badge */
+    .pn-name { font-weight: 700; font-size: 13.5px; }
+    .pn-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+    .meta-val { font-weight: 600; font-size: 13.5px; }
+    .meta-unit { font-size: 11px; color: var(--text-3); }
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
     }
-
     .badge::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      display: inline-block;
+      content: ''; width: 6px; height: 6px; border-radius: 50%; display: inline-block;
     }
+    .badge-green { background: #dcfce7; color: #16a34a; }
+    .badge-green::before { background: #16a34a; }
+    .badge-amber { background: #fef3c7; color: #d97706; }
+    .badge-amber::before { background: #d97706; }
+    .empty-row td { text-align: center; padding: 56px 24px; color: var(--text-3); }
+    .empty-row .empty-icon { font-size: 40px; display: block; margin-bottom: 12px; opacity: .4; }
+    .empty-row h4 { font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+    .empty-row p { font-size: 13px; }
 
-    .badge-green {
-      background: #dcfce7;
-      color: #16a34a;
+    /* ── MAP-STAT BAR (below map) ── */
+    .map-stat-bar {
+      display: flex; gap: 0; border-top: 1px solid #f1f5f9; background: #fafbfc;
     }
-
-    .badge-green::before {
-      background: #16a34a;
+    .map-stat-item {
+      flex: 1; padding: 14px 20px; border-right: 1px solid #f1f5f9; text-align: center;
     }
-
-    .badge-amber {
-      background: #fef3c7;
-      color: #d97706;
-    }
-
-    .badge-amber::before {
-      background: #d97706;
-    }
-
-    /* empty */
-    .empty-row td {
-      text-align: center;
-      padding: 56px 24px;
-      color: var(--text-3);
-    }
-
-    .empty-row .empty-icon {
-      font-size: 40px;
-      display: block;
-      margin-bottom: 12px;
-      opacity: .4;
-    }
-
-    .empty-row h4 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-2);
-      margin-bottom: 6px;
-    }
-
-    .empty-row p {
-      font-size: 13px;
-    }
-
-    /* ── FORECAST MILESTONES ── */
-    .milestone-grid {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
-    .milestone {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 12px;
-      padding: 12px 18px;
-      min-width: 116px;
-    }
-
-    .ms-tag {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--brand);
-      text-transform: uppercase;
-      letter-spacing: .6px;
-    }
-
-    .ms-sub {
-      font-size: 11px;
-      color: var(--text-2);
-      margin-top: 2px;
-    }
-
-    .ms-val {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--text-1);
-      margin-top: 4px;
-    }
-
-    .ms-unit {
-      font-size: 10px;
-      color: var(--text-3);
-    }
-
-    /* ── LAYOUT HELPERS ── */
-    .row-2 {
-      display: grid;
-      grid-template-columns: 3fr 2fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .mb-20 {
-      margin-bottom: 20px;
-    }
-
-    .mb-28 {
-      margin-bottom: 28px;
-    }
+    .map-stat-item:last-child { border-right: none; }
+    .map-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; color: var(--text-3); margin-bottom: 4px; }
+    .map-stat-val { font-size: 18px; font-weight: 800; color: var(--text-1); }
+    .map-stat-unit { font-size: 11px; color: var(--text-3); margin-left: 3px; }
 
     /* ── RESPONSIVE ── */
-    @media (max-width:1100px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .row-2 {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 1200px) {
+      .carbon-chart-layout { grid-template-columns: 1fr; }
+      .chart-side { border-top: 1px solid #f1f5f9; background: #fafbfc; }
+      .chart-main { border-right: none; }
     }
-
-    @media (max-width:640px) {
-      .stats-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .page-content {
-        padding: 16px;
-      }
-
-      .welcome-banner {
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .welcome-clock {
-        text-align: left;
-      }
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
-
-    @media (max-width:400px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .page-content { padding: 16px; }
+      .hero-banner { flex-direction: column; gap: 16px; }
+      .hero-right { text-align: left; }
+      .map-stat-bar { flex-wrap: wrap; }
+      .map-stat-item { min-width: 50%; }
+    }
+    @media (max-width: 400px) {
+      .stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -757,15 +368,13 @@
       <button class="icon-btn" onclick="document.getElementById('sidebar-menu').classList.add('open')">
         <i class="bi bi-list"></i>
       </button>
-      <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:28px;"
-        onerror="this.style.display='none'">
-      <span style="font-weight:700;font-size:14px;color:#1e293b;">แดชบอร์ด</span>
+      <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:28px;" onerror="this.style.display='none'">
+      <span style="font-weight:700;font-size:14px;color:#1e293b;">ภาพรวมระบบ</span>
     </div>
     <div class="topbar-right">
       <a href="map-draw.html" class="btn-primary">
         <i class="bi bi-plus-lg"></i> เพิ่มแปลงใหม่
       </a>
-      <span id="nav-user" style="font-size:12px;color:#94a3b8;margin-left:4px;"></span>
       <button class="icon-btn" onclick="Auth.logout()" title="ออกจากระบบ">
         <i class="bi bi-box-arrow-right"></i>
       </button>
@@ -776,12 +385,10 @@
   <div id="sidebar-menu">
     <div class="sidebar-header">
       <div style="display:flex;align-items:center;gap:8px;">
-        <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:30px;"
-          onerror="this.style.display='none'">
+        <img src="assets/img/keptcarbon-logo.png" alt="KeptCarbon" style="height:30px;" onerror="this.style.display='none'">
         <div class="brand">KeptCarbon</div>
       </div>
-      <button class="btn-close-sidebar"
-        onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
+      <button class="btn-close-sidebar" onclick="document.getElementById('sidebar-menu').classList.remove('open')">✕</button>
     </div>
     <div class="sidebar-nav">
       <a href="index.html"><i class="bi bi-house"></i> หน้าหลัก</a>
@@ -799,36 +406,28 @@
   <main>
     <div class="page-content">
 
-      <!-- ── WELCOME ── -->
-      <div class="welcome-banner">
-        <div class="welcome-text">
-          <h2 id="welcome-title">ยินดีต้อนรับเข้าสู่ KeptCarbon</h2>
-          <p>ภาพรวมระบบลงทะเบียนแปลงสวนยางพาราและการประเมินคาร์บอน</p>
+      <!-- ── HERO BANNER ── -->
+      <div class="hero-banner">
+        <div class="hero-left">
+          <div class="hero-eyebrow"><i class="bi bi-tree-fill"></i> KeptCarbon · ข้อมูลรวมทั้งระบบ</div>
+          <h1 class="hero-title">ภาพรวมแปลงสวนยางพารา</h1>
+          <p class="hero-sub">ติดตามจำนวนแปลง พื้นที่ และปริมาณคาร์บอนสะสมในระบบแบบ Real-time</p>
         </div>
-        <div class="welcome-clock">
-          <div class="time" id="current-time">00:00</div>
-          <div class="date" id="current-date">—</div>
+        <div class="hero-right">
+          <div class="hero-clock-time" id="current-time">00:00</div>
+          <div class="hero-clock-date" id="current-date">—</div>
         </div>
       </div>
 
-      <!-- ── STATS ── -->
+      <!-- ── STAT CARDS ── -->
       <div class="stats-grid">
-        <div class="stat-card" style="--accent-bar:linear-gradient(90deg,#2563eb,#60a5fa)">
-          <div class="stat-label">ผู้ใช้งานในระบบ</div>
-          <div class="stat-body">
-            <div><span class="stat-num" id="stat-users">0</span><span class="stat-unit">บัญชี</span></div>
-            <div class="stat-icon-wrap ic-blue"><i class="bi bi-people-fill"></i></div>
-          </div>
-          <div class="stat-foot"><i class="bi bi-person-check up"></i> สมาชิกที่ลงทะเบียนทั้งหมด</div>
-        </div>
-
         <div class="stat-card" style="--accent-bar:linear-gradient(90deg,#9333ea,#c084fc)">
-          <div class="stat-label">แปลงในระบบ</div>
+          <div class="stat-label">แปลงในระบบทั้งหมด</div>
           <div class="stat-body">
             <div><span class="stat-num" id="stat-plots">0</span><span class="stat-unit">แปลง</span></div>
             <div class="stat-icon-wrap ic-purple"><i class="bi bi-layers-fill"></i></div>
           </div>
-          <div class="stat-foot"><i class="bi bi-clipboard-data"></i> จากทุกผู้ใช้งาน</div>
+          <div class="stat-foot"><i class="bi bi-clipboard-data"></i> ลงทะเบียนในระบบทั้งหมด</div>
         </div>
 
         <div class="stat-card" style="--accent-bar:linear-gradient(90deg,#d97706,#fbbf24)">
@@ -837,21 +436,30 @@
             <div><span class="stat-num" id="stat-area">0</span><span class="stat-unit">ไร่</span></div>
             <div class="stat-icon-wrap ic-amber"><i class="bi bi-map-fill"></i></div>
           </div>
-          <div class="stat-foot"><i class="bi bi-rulers"></i> พื้นที่รวมทั้งหมด</div>
+          <div class="stat-foot"><i class="bi bi-rulers"></i> พื้นที่รวมของทุกแปลง</div>
         </div>
 
         <div class="stat-card" style="--accent-bar:linear-gradient(90deg,#059669,#34d399)">
+          <div class="stat-label">คาร์บอนสะสมรวม</div>
+          <div class="stat-body">
+            <div><span class="stat-num" id="stat-carbon">0</span><span class="stat-unit">tCO₂e</span></div>
+            <div class="stat-icon-wrap ic-green"><i class="bi bi-wind"></i></div>
+          </div>
+          <div class="stat-foot"><i class="bi bi-arrow-up-right up"></i> ประเมินจากทุกแปลงในระบบ</div>
+        </div>
+
+        <div class="stat-card" style="--accent-bar:linear-gradient(90deg,#2563eb,#60a5fa)">
           <div class="stat-label">แปลงที่ประเมินแล้ว</div>
           <div class="stat-body">
             <div><span class="stat-num" id="stat-assessed">0</span><span class="stat-unit">แปลง</span></div>
-            <div class="stat-icon-wrap ic-green"><i class="bi bi-patch-check-fill"></i></div>
+            <div class="stat-icon-wrap ic-blue"><i class="bi bi-patch-check-fill"></i></div>
           </div>
-          <div class="stat-foot"><i class="bi bi-arrow-up-right up"></i> ผ่านการประเมินคาร์บอน</div>
+          <div class="stat-foot"><i class="bi bi-check-circle"></i> ผ่านการประเมินคาร์บอน</div>
         </div>
       </div>
 
-      <!-- ── MAP (full width) ── -->
-      <div class="panel mb-20">
+      <!-- ── MAP ── -->
+      <div class="panel mb-26">
         <div class="panel-head">
           <h3 class="panel-title">
             <i class="bi bi-geo-alt-fill"></i>
@@ -862,36 +470,100 @@
             คลิกที่หมุดแปลงเพื่อดูรายละเอียด
           </span>
         </div>
-        <div class="panel-body">
+        <div class="panel-body" style="padding-bottom:0;">
           <div class="map-wrap">
             <div id="dashboard-map"></div>
           </div>
-          <!-- no-plot hint -->
           <div id="map-no-plot"
             style="display:none;margin-top:12px;padding:10px 14px;background:#fef9ec;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:8px;">
             <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i>
-            ยังไม่มีแปลงในระบบ — <a href="map-draw.html"
-              style="color:var(--brand);font-weight:600;text-decoration:none;">เพิ่มแปลงแรกของคุณ</a>
+            ยังไม่มีแปลงในระบบ — <a href="map-draw.html" style="color:var(--brand);font-weight:600;text-decoration:none;">เพิ่มแปลงแรกของคุณ</a>
+          </div>
+        </div>
+        <div class="map-stat-bar" id="map-stat-bar">
+          <div class="map-stat-item">
+            <div class="map-stat-label">จำนวนแปลง</div>
+            <div><span class="map-stat-val" id="ms-plots">0</span><span class="map-stat-unit">แปลง</span></div>
+          </div>
+          <div class="map-stat-item">
+            <div class="map-stat-label">พื้นที่รวม</div>
+            <div><span class="map-stat-val" id="ms-area">0</span><span class="map-stat-unit">ไร่</span></div>
+          </div>
+          <div class="map-stat-item">
+            <div class="map-stat-label">อายุต้นยางเฉลี่ย</div>
+            <div><span class="map-stat-val" id="ms-age">—</span><span class="map-stat-unit" id="ms-age-unit"></span></div>
+          </div>
+          <div class="map-stat-item">
+            <div class="map-stat-label">คาร์บอนเฉลี่ย/ไร่</div>
+            <div><span class="map-stat-val" id="ms-carbon-rai">—</span><span class="map-stat-unit" id="ms-carbon-rai-unit"></span></div>
           </div>
         </div>
       </div>
 
-      <!-- ── FORECAST CHART ── -->
-      <div class="panel mb-20" id="forecast-panel">
+      <!-- ── CARBON BY AGE CHART ── -->
+      <div class="panel mb-26">
         <div class="panel-head">
           <h3 class="panel-title">
-            <i class="bi bi-graph-up-arrow"></i>
-            แนวโน้มคาร์บอนสะสมทั้งระบบ 7 ปีข้างหน้า
+            <i class="bi bi-bar-chart-line-fill"></i>
+            ปริมาณคาร์บอนตามอายุต้นยางพารา
           </h3>
-          <span style="font-size:11px;color:var(--text-3);">หน่วย: tCO₂e</span>
+          <span style="font-size:11px;color:var(--text-3);">หน่วย: tCO₂e · ต่อไร่ (ความหนาแน่นมาตรฐาน 80 ต้น/ไร่)</span>
         </div>
-        <div class="panel-body">
-          <div class="chart-wrap"><canvas id="forecast-chart"></canvas></div>
-          <div class="milestone-grid" id="forecast-milestones"></div>
+        <div class="carbon-chart-layout">
+          <div class="chart-main">
+            <div class="age-legend">
+              <div class="age-legend-item">
+                <span class="legend-dot" style="background:#86efac;"></span> อายุ 1–5 ปี (เริ่มต้น)
+              </div>
+              <div class="age-legend-item">
+                <span class="legend-dot" style="background:#34d399;"></span> อายุ 6–12 ปี (กำลังเติบโต)
+              </div>
+              <div class="age-legend-item">
+                <span class="legend-dot" style="background:#059669;"></span> อายุ 13–18 ปี (ให้ผลสูง)
+              </div>
+              <div class="age-legend-item">
+                <span class="legend-dot" style="background:#065f46;"></span> อายุ 19–25 ปี (ผลผลิตสูงสุด)
+              </div>
+              <div class="age-legend-item" id="plot-overlay-legend" style="display:none;">
+                <span class="legend-dot" style="background:#f59e0b;border-radius:50%;"></span> แปลงของคุณในระบบ
+              </div>
+            </div>
+            <div class="chart-wrap-lg"><canvas id="age-chart"></canvas></div>
+          </div>
+          <div class="chart-side">
+            <div style="font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:14px;letter-spacing:.3px;">
+              <i class="bi bi-info-circle" style="color:var(--brand);"></i> ข้อมูลอ้างอิง
+            </div>
+
+            <div class="info-block">
+              <div class="info-block-title">ช่วงอายุให้คาร์บอนสูงสุด</div>
+              <div><span class="info-block-val" id="peak-age">—</span><span class="info-block-unit">ปี</span></div>
+              <div class="info-block-sub">เติบโตมากที่สุดในช่วงนี้</div>
+            </div>
+
+            <div class="info-block">
+              <div class="info-block-title">คาร์บอน ณ อายุ 10 ปี</div>
+              <div><span class="info-block-val" id="carbon-10yr">—</span><span class="info-block-unit">tCO₂e/ไร่</span></div>
+              <div class="info-block-sub">ต่อไร่ที่ความหนาแน่นมาตรฐาน</div>
+            </div>
+
+            <div class="info-block" id="system-avg-block" style="display:none;">
+              <div class="info-block-title">อายุเฉลี่ยในระบบ</div>
+              <div><span class="info-block-val" id="avg-age-info">—</span><span class="info-block-unit">ปี</span></div>
+              <div class="info-block-sub">จากแปลงที่ลงทะเบียนทั้งหมด</div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">
+                แปลงในระบบ (แยกตามช่วงอายุ)
+              </div>
+              <div id="age-group-pills" style="line-height:2;"></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ── RECENT PLOTS TABLE ── -->
+      <!-- ── PLOTS TABLE ── -->
       <div class="panel mb-28">
         <div class="panel-head">
           <h3 class="panel-title">
@@ -910,14 +582,12 @@
                   <th>พื้นที่</th>
                   <th>จำนวนต้น</th>
                   <th>อายุต้นยาง</th>
-                  <th>วันที่ลงทะเบียน</th>
+                  <th>คาร์บอนประเมิน</th>
                   <th>สถานะ</th>
                   <th>แผนที่</th>
                 </tr>
               </thead>
-              <tbody id="plots-tbody">
-                <!-- JS will populate -->
-              </tbody>
+              <tbody id="plots-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -931,13 +601,7 @@
 
   <script>
     /* ── 1. AUTH ── */
-    if (!Auth.requireAuth()) { /* redirect if not logged in */ }
-    const user = Auth.getUser();
-    if (user) {
-      document.getElementById('welcome-title').textContent = `ยินดีต้อนรับคุณ ${user.fullname}`;
-      const nu = document.getElementById('nav-user');
-      if (nu) nu.textContent = user.fullname;
-    }
+    if (!Auth.requireAuth()) { /* redirect handled */ }
 
     /* ── 2. SIDEBAR CLOSE ── */
     document.addEventListener('click', e => {
@@ -958,25 +622,39 @@
     updateClock();
     setInterval(updateClock, 30000);
 
-    /* ── 4. LOAD DATA ── */
+    /* ── 4. DATA ── */
     const allUsers = Auth.getAllUsers();
     let allPlots = [];
     allUsers.forEach(u => {
-      PlotDB.getPlots(u.id).forEach(p =>
-        allPlots.push({ ...p, ownerName: p.ownerName || u.fullname })
-      );
+      PlotDB.getPlots(u.id).forEach(p => allPlots.push({ ...p, ownerName: p.ownerName || u.fullname }));
     });
     allPlots.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    const totalArea = allPlots.reduce((s, p) => s + (p.areaRai || 0), 0);
-    const assessedCount = allPlots.filter(p => p.carbonTotal > 0).length;
     const fmt = (n, d = 0) => (+n).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const totalArea   = allPlots.reduce((s, p) => s + (p.areaRai || 0), 0);
+    const totalCarbon = allPlots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
+    const assessedCount = allPlots.filter(p => p.carbonTotal > 0).length;
+    const avgAge = allPlots.length
+      ? Math.round(allPlots.reduce((s, p) => s + (p.treeAge || 0), 0) / allPlots.length)
+      : null;
 
-    document.getElementById('stat-users').textContent = fmt(allUsers.length);
-    document.getElementById('stat-plots').textContent = fmt(allPlots.length);
-    document.getElementById('stat-area').textContent = fmt(totalArea, 2);
-    document.getElementById('stat-assessed').textContent = fmt(assessedCount);
+    document.getElementById('stat-plots').textContent     = fmt(allPlots.length);
+    document.getElementById('stat-area').textContent      = fmt(totalArea, 2);
+    document.getElementById('stat-carbon').textContent    = fmt(totalCarbon, 2);
+    document.getElementById('stat-assessed').textContent  = fmt(assessedCount);
     document.getElementById('plots-count-badge').textContent = `${allPlots.length} แปลง`;
+
+    /* map stat bar */
+    document.getElementById('ms-plots').textContent = fmt(allPlots.length);
+    document.getElementById('ms-area').textContent  = fmt(totalArea, 2);
+    if (avgAge !== null) {
+      document.getElementById('ms-age').textContent      = avgAge;
+      document.getElementById('ms-age-unit').textContent = 'ปี';
+    }
+    if (allPlots.length > 0 && totalArea > 0) {
+      document.getElementById('ms-carbon-rai').textContent      = fmt(totalCarbon / totalArea, 2);
+      document.getElementById('ms-carbon-rai-unit').textContent = 'tCO₂e/ไร่';
+    }
 
     /* ── 5. MAP ── */
     const map = new maplibregl.Map({
@@ -986,12 +664,10 @@
         sources: { sat: { type: 'raster', tiles: ['https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'], tileSize: 256, attribution: '© Google', maxzoom: 20 } },
         layers: [{ id: 'sat', type: 'raster', source: 'sat' }]
       },
-      center: [101.2587, 12.6819], zoom: 8,
-      attributionControl: false
+      center: [101.2587, 12.6819], zoom: 8, attributionControl: false
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
-    /* compute polygon centroid */
     function centroid(coords) {
       let lng = 0, lat = 0, n = coords.length;
       coords.forEach(c => { lng += c[0]; lat += c[1]; });
@@ -1001,200 +677,257 @@
     map.on('load', () => {
       const bounds = new maplibregl.LngLatBounds();
       let hasCoords = false;
-      const noPlotHint = document.getElementById('map-no-plot');
 
       allPlots.forEach((plot, idx) => {
         if (!plot.geojson || !plot.geojson.geometry) return;
         const geo = plot.geojson.geometry;
+        const assessed = plot.carbonTotal > 0;
+        const fillColor  = assessed ? '#34d399' : '#fbbf24';
+        const lineColor  = assessed ? '#059669' : '#d97706';
 
-        /* fill + outline */
         map.addSource(`p${idx}`, { type: 'geojson', data: plot.geojson });
-        map.addLayer({ id: `pf${idx}`, type: 'fill', source: `p${idx}`, paint: { 'fill-color': '#34d399', 'fill-opacity': 0.28 } });
-        map.addLayer({ id: `pg${idx}`, type: 'line', source: `p${idx}`, paint: { 'line-color': '#10b981', 'line-width': 3, 'line-opacity': 0.4 } });
-        map.addLayer({ id: `pl${idx}`, type: 'line', source: `p${idx}`, paint: { 'line-color': '#059669', 'line-width': 1.5 } });
+        map.addLayer({ id: `pf${idx}`, type: 'fill', source: `p${idx}`, paint: { 'fill-color': fillColor, 'fill-opacity': 0.28 } });
+        map.addLayer({ id: `pl${idx}`, type: 'line', source: `p${idx}`, paint: { 'line-color': lineColor, 'line-width': 2 } });
 
-        /* centroid for marker */
         const ring = geo.type === 'Polygon' ? geo.coordinates[0]
           : geo.type === 'MultiPolygon' ? geo.coordinates[0][0] : null;
         if (!ring || ring.length === 0) return;
-
         ring.forEach(c => { bounds.extend(c); hasCoords = true; });
 
         const c = centroid(ring);
-
-        /* Google Maps-style SVG pin */
         const el = document.createElement('div');
         el.className = 'plot-marker';
         el.innerHTML = `
           <svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M14 0C6.268 0 0 6.268 0 14C0 23.333 14 36 14 36S28 23.333 28 14C28 6.268 21.732 0 14 0Z"
-                  fill="#059669"/>
+                  fill="${assessed ? '#059669' : '#d97706'}"/>
             <circle cx="14" cy="14" r="5.5" fill="white"/>
           </svg>`;
 
-        const assessed = plot.carbonTotal > 0;
-        const popup = new maplibregl.Popup({
-          offset: [0, -44],
-          closeButton: false,
-          maxWidth: '220px'
-        }).setHTML(`
-          <div class="mp-title">
-            <span class="mp-title-dot"></span>
-            ${plot.name || 'ไม่ระบุชื่อ'}
-          </div>
+        const popup = new maplibregl.Popup({ offset: [0,-44], closeButton: false, maxWidth:'220px' }).setHTML(`
+          <div class="mp-title"><span class="mp-title-dot" style="background:${assessed?'#059669':'#d97706'};"></span>${plot.name || 'ไม่ระบุชื่อ'}</div>
           <div class="mp-body">
-            <div class="mp-row">
-              <i class="bi bi-rulers"></i> พื้นที่
-              <strong>${fmt(plot.areaRai || 0, 2)} ไร่</strong>
-            </div>
-            ${plot.treeCount ? `<div class="mp-row"><i class="bi bi-tree"></i> ต้นยาง <strong>${fmt(plot.treeCount)} ต้น</strong></div>` : ''}
-            ${plot.treeAge   ? `<div class="mp-row"><i class="bi bi-calendar3"></i> อายุต้น <strong>${plot.treeAge} ปี</strong></div>` : ''}
+            <div class="mp-row"><i class="bi bi-rulers"></i> พื้นที่<strong>${fmt(plot.areaRai||0,2)} ไร่</strong></div>
+            ${plot.treeCount ? `<div class="mp-row"><i class="bi bi-tree"></i> ต้นยาง<strong>${fmt(plot.treeCount)} ต้น</strong></div>` : ''}
+            ${plot.treeAge   ? `<div class="mp-row"><i class="bi bi-calendar3"></i> อายุต้น<strong>${plot.treeAge} ปี</strong></div>` : ''}
+            ${plot.carbonTotal ? `<div class="mp-row"><i class="bi bi-wind"></i> คาร์บอน<strong>${fmt(plot.carbonTotal,2)} tCO₂e</strong></div>` : ''}
             <div class="mp-row" style="border-bottom:none;padding-top:4px;">
-              <span class="badge ${assessed ? 'badge-green' : 'badge-amber'}" style="font-size:10px;">
-                ${assessed ? 'ประเมินแล้ว' : 'รอดำเนินการ'}
-              </span>
+              <span class="badge ${assessed?'badge-green':'badge-amber'}" style="font-size:10px;">${assessed?'ประเมินแล้ว':'รอดำเนินการ'}</span>
             </div>
           </div>`);
 
-        new maplibregl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat(c)
-          .setPopup(popup)
-          .addTo(map);
+        new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(c).setPopup(popup).addTo(map);
       });
 
       if (hasCoords) {
         map.fitBounds(bounds, { padding: 56, maxZoom: 15 });
       } else {
-        noPlotHint.style.display = 'flex';
+        document.getElementById('map-no-plot').style.display = 'flex';
       }
     });
 
-    /* ── 6. FORECAST CHART ── */
-    (function buildForecast() {
-      if (allPlots.length === 0) {
-        document.getElementById('forecast-panel').style.display = 'none';
-        return;
-      }
+    /* ── 6. CARBON BY AGE CHART ── */
+    (function buildAgeChart() {
+      const STD_TREES = 80; /* standard planting density per rai */
+      const MAX_AGE   = 25;
 
-      function carbonAtAge(age, n) {
-        if (age <= 0 || n <= 0) return 0;
-        const H = Math.min(2 + 1.8 * age, 28);
-        const D = Math.min(3 + 4.5 * age, 60);
+      function carbonPerRai(age) {
+        if (age <= 0) return 0;
+        const H   = Math.min(2 + 1.8 * age, 28);
+        const D   = Math.min(3 + 4.5 * age, 60);
         const AGB = 0.1284 * D * D * H * 0.001;
-        return (AGB + AGB * 0.26) * 0.47 * 3.67 * n;
+        return (AGB + AGB * 0.26) * 0.47 * 3.67 * STD_TREES;
       }
 
-      const YEARS = 7;
-      const now = new Date().getFullYear() + 543;
-      const avgAge = Math.round(allPlots.reduce((s, p) => s + (p.treeAge || 1), 0) / allPlots.length);
-
-      const labels = [], fullLabels = [], vals = [];
-      for (let i = 0; i <= YEARS; i++) {
-        labels.push(`พ.ศ. ${now + i}`);
-        fullLabels.push(`พ.ศ. ${now + i}  |  อายุยางเฉลี่ย ${avgAge + i} ปี`);
-        let t = 0;
-        allPlots.forEach(p => { t += carbonAtAge((p.treeAge || 1) + i, p.treeCount || 0); });
-        vals.push(+t.toFixed(2));
+      /* bar colors by age group */
+      function barColor(age) {
+        if (age <= 5)  return '#86efac';
+        if (age <= 12) return '#34d399';
+        if (age <= 18) return '#059669';
+        return '#065f46';
       }
 
-      const ctx = document.getElementById('forecast-chart').getContext('2d');
-      const grad = ctx.createLinearGradient(0, 0, 0, 260);
-      grad.addColorStop(0, 'rgba(5,150,105,.2)');
-      grad.addColorStop(1, 'rgba(5,150,105,.02)');
+      const labels = [], data = [], colors = [];
+      for (let a = 1; a <= MAX_AGE; a++) {
+        labels.push(`${a} ปี`);
+        data.push(+carbonPerRai(a).toFixed(2));
+        colors.push(barColor(a));
+      }
 
+      /* find peak growth year (max increment) */
+      let peakAge = 1, maxInc = 0;
+      for (let i = 1; i < data.length; i++) {
+        const inc = data[i] - data[i - 1];
+        if (inc > maxInc) { maxInc = inc; peakAge = i + 1; }
+      }
+      document.getElementById('peak-age').textContent = peakAge;
+      document.getElementById('carbon-10yr').textContent = fmt(data[9], 2);
+
+      /* overlay — actual plots as scatter points */
+      const plotAges  = allPlots.filter(p => p.treeAge > 0 && p.treeAge <= MAX_AGE);
+      const scatterPts = plotAges.map(p => ({
+        x: p.treeAge - 1,   /* bar index (0-based) */
+        y: p.carbonTotal > 0 ? (p.areaRai > 0 ? p.carbonTotal / p.areaRai : 0) : carbonPerRai(p.treeAge)
+      }));
+
+      if (scatterPts.length > 0)
+        document.getElementById('plot-overlay-legend').style.display = 'flex';
+
+      /* system average */
+      if (avgAge !== null) {
+        document.getElementById('system-avg-block').style.display = 'block';
+        document.getElementById('avg-age-info').textContent = avgAge;
+      }
+
+      /* age group pills */
+      const groups = { '1–5': 0, '6–12': 0, '13–18': 0, '19–25': 0 };
+      allPlots.forEach(p => {
+        const a = p.treeAge || 0;
+        if (a >= 1  && a <= 5)  groups['1–5']++;
+        else if (a >= 6  && a <= 12) groups['6–12']++;
+        else if (a >= 13 && a <= 18) groups['13–18']++;
+        else if (a >= 19 && a <= 25) groups['19–25']++;
+      });
+      const pillBox = document.getElementById('age-group-pills');
+      const pillColors = { '1–5':'#86efac', '6–12':'#34d399', '13–18':'#059669', '19–25':'#065f46' };
+      Object.entries(groups).forEach(([range, cnt]) => {
+        if (cnt === 0) return;
+        const el = document.createElement('span');
+        el.className = 'age-pill';
+        el.style.background = pillColors[range] + '22';
+        el.style.borderColor = pillColors[range];
+        el.style.color = pillColors[range] === '#86efac' ? '#166534' : pillColors[range];
+        el.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:${pillColors[range]};display:inline-block;"></span> ${range} ปี · ${cnt} แปลง`;
+        pillBox.appendChild(el);
+      });
+      if (pillBox.children.length === 0)
+        pillBox.innerHTML = '<span style="font-size:12px;color:var(--text-3);">ยังไม่มีข้อมูลแปลง</span>';
+
+      /* chart */
+      const ctx = document.getElementById('age-chart').getContext('2d');
       new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
           labels,
-          datasets: [{
-            label: 'tCO₂e',
-            data: vals,
-            borderColor: '#059669', backgroundColor: grad, borderWidth: 2.5,
-            pointRadius: vals.map((_, i) => i === 0 ? 7 : 4),
-            pointHoverRadius: 8,
-            pointBackgroundColor: vals.map((_, i) => i === 0 ? '#f59e0b' : '#059669'),
-            pointBorderColor: vals.map((_, i) => i === 0 ? '#f59e0b' : '#059669'),
-            fill: true, tension: 0.4
-          }]
+          datasets: [
+            {
+              label: 'tCO₂e/ไร่',
+              data,
+              backgroundColor: colors,
+              borderRadius: 6,
+              borderSkipped: false,
+              barPercentage: 0.75,
+              categoryPercentage: 0.85,
+              order: 2
+            },
+            {
+              type: 'line',
+              label: 'เส้นแนวโน้ม',
+              data,
+              borderColor: '#0f172a',
+              borderWidth: 1.5,
+              borderDash: [4, 3],
+              pointRadius: 0,
+              pointHoverRadius: 0,
+              fill: false,
+              tension: 0.4,
+              order: 1
+            },
+            ...(scatterPts.length > 0 ? [{
+              type: 'scatter',
+              label: 'แปลงในระบบ',
+              data: scatterPts.map(pt => ({ x: labels[pt.x], y: pt.y })),
+              backgroundColor: '#f59e0b',
+              borderColor: '#fff',
+              borderWidth: 2,
+              pointRadius: 7,
+              pointHoverRadius: 9,
+              order: 0
+            }] : [])
+          ]
         },
         options: {
-          responsive: true, maintainAspectRatio: false,
+          responsive: true,
+          maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: '#0f172a', padding: 12, cornerRadius: 8,
+              backgroundColor: '#0f172a',
+              padding: 12,
+              cornerRadius: 10,
               titleFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 11 },
-              bodyFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 13, weight: '700' },
+              bodyFont:  { family: "'Inter','Noto Sans Thai',sans-serif", size: 13, weight: '700' },
               callbacks: {
-                title: items => fullLabels[items[0].dataIndex],
-                label: c => ` ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e`
+                title: items => `ต้นยางอายุ ${items[0].label}`,
+                label: c => {
+                  if (c.dataset.label === 'เส้นแนวโน้ม') return null;
+                  if (c.dataset.label === 'แปลงในระบบ')
+                    return ` แปลง: ${c.parsed.y.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})} tCO₂e/ไร่`;
+                  return ` คาร์บอน: ${c.parsed.y.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})} tCO₂e/ไร่`;
+                }
               }
             }
           },
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false }, border: { display: false } },
-            y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } }
+            x: {
+              ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0 },
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: {
+              ticks: {
+                color: '#94a3b8', font: { size: 10 },
+                callback: v => v.toLocaleString('th-TH', { maximumFractionDigits: 0 })
+              },
+              grid: { color: 'rgba(0,0,0,0.04)' },
+              border: { display: false },
+              title: { display: true, text: 'tCO₂e/ไร่', color: '#94a3b8', font: { size: 10 } }
+            }
           }
         }
-      });
-
-      /* milestones */
-      const box = document.getElementById('forecast-milestones');
-      [0, 3, 5, 7].forEach(m => {
-        const d = document.createElement('div');
-        d.className = 'milestone';
-        d.innerHTML = `
-          <div class="ms-tag">${m === 0 ? 'ปัจจุบัน' : `+${m} ปี`}</div>
-          <div class="ms-sub">พ.ศ. ${now + m} · อายุ ${avgAge + m} ปี</div>
-          <div class="ms-val">${fmt(vals[m], 2)}</div>
-          <div class="ms-unit">tCO₂e</div>`;
-        box.appendChild(d);
       });
     })();
 
     /* ── 7. PLOTS TABLE ── */
     (function buildTable() {
-      const tbody = document.getElementById('plots-tbody');
+      const tbody  = document.getElementById('plots-tbody');
       const recent = allPlots.slice(0, 10);
 
       if (recent.length === 0) {
         tbody.innerHTML = `
-          <tr class="empty-row">
-            <td colspan="8">
-              <i class="bi bi-tree empty-icon"></i>
-              <h4>ยังไม่มีแปลงในระบบ</h4>
-              <p>กรุณาเพิ่มแปลงใหม่เพื่อเริ่มต้นการประเมินคาร์บอนเครดิต</p>
-            </td>
-          </tr>`;
+          <tr class="empty-row"><td colspan="8">
+            <i class="bi bi-tree empty-icon"></i>
+            <h4>ยังไม่มีแปลงในระบบ</h4>
+            <p>กรุณาเพิ่มแปลงใหม่เพื่อเริ่มต้นการประเมินคาร์บอนเครดิต</p>
+          </td></tr>`;
         return;
       }
 
       recent.forEach((p, i) => {
-        const date = p.createdAt
-          ? new Date(p.createdAt).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' })
-          : '—';
+        const date     = p.createdAt ? new Date(p.createdAt).toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric' }) : '—';
         const assessed = p.carbonTotal > 0;
-        const hasMap = !!(p.geojson);
-
-        const tr = document.createElement('tr');
+        const hasMap   = !!p.geojson;
+        const tr       = document.createElement('tr');
         tr.innerHTML = `
-          <td style="text-align:center;">
-            <div class="row-num">${i + 1}</div>
-          </td>
+          <td style="text-align:center;"><div class="row-num">${i + 1}</div></td>
           <td>
             <div class="pn-cell">
               <div class="pn-icon"><i class="bi bi-tree-fill"></i></div>
               <div>
                 <div class="pn-name">${p.name || 'ไม่ระบุชื่อ'}</div>
-                <div class="pn-sub">ยางพารา</div>
+                <div class="pn-sub">ยางพารา · ลงทะเบียน ${date}</div>
               </div>
             </div>
           </td>
           <td><span class="meta-val">${fmt(p.areaRai || 0, 2)}</span> <span class="meta-unit">ไร่</span></td>
           <td><span class="meta-val">${p.treeCount ? fmt(p.treeCount) : '—'}</span> <span class="meta-unit">${p.treeCount ? 'ต้น' : ''}</span></td>
           <td><span class="meta-val">${p.treeAge || '—'}</span> <span class="meta-unit">${p.treeAge ? 'ปี' : ''}</span></td>
-          <td style="color:var(--text-2);">${date}</td>
+          <td>
+            ${assessed
+              ? `<span class="meta-val">${fmt(p.carbonTotal, 2)}</span> <span class="meta-unit">tCO₂e</span>`
+              : `<span style="color:var(--text-3);font-size:12px;">—</span>`}
+          </td>
           <td>
             <span class="badge ${assessed ? 'badge-green' : 'badge-amber'}">
               ${assessed ? 'ประเมินแล้ว' : 'รอดำเนินการ'}
@@ -1202,13 +935,12 @@
           </td>
           <td style="text-align:center;">
             ${hasMap
-            ? `<span style="color:var(--brand);font-size:13px;" title="มีข้อมูลแผนที่"><i class="bi bi-geo-alt-fill"></i></span>`
-            : `<span style="color:var(--text-3);font-size:13px;" title="ไม่มีข้อมูลแผนที่"><i class="bi bi-geo-alt"></i></span>`}
+              ? `<span style="color:var(--brand);font-size:14px;" title="มีข้อมูลแผนที่"><i class="bi bi-geo-alt-fill"></i></span>`
+              : `<span style="color:var(--text-3);font-size:14px;" title="ไม่มีข้อมูลแผนที่"><i class="bi bi-geo-alt"></i></span>`}
           </td>`;
         tbody.appendChild(tr);
       });
     })();
   </script>
 </body>
-
 </html>
