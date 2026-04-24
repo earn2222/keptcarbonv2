@@ -1976,6 +1976,10 @@
             </div>
             <hr class="req-divider">
 
+            <div style="font-size:11.5px; font-weight:700; color:var(--text); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+              <i class="bi bi-person-lines-fill"></i> ข้อมูลเจ้าของแปลง (Attribute Data)
+            </div>
+
             <!-- หัวตาราง -->
             <div
               style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; font-size:10.5px; font-weight:700; color:var(--green); padding:2px 2px 5px; border-bottom:1px solid rgba(45,158,95,0.18); margin-bottom:3px;">
@@ -2000,28 +2004,16 @@
               <span>นามสกุล</span>
             </div>
 
-            <!-- เนื้อที่ (geometry) -->
-            <div
-              style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; align-items:center; font-size:11.5px; color:var(--text); padding:4px 2px; border-bottom:1px solid rgba(45,158,95,0.07);">
-              <span class="req-label" style="font-style:italic;">— ไม่มี —</span>
-              <span class="req-label">.shp</span>
-              <span>เนื้อที่ ไร่ <span class="req-label">(คำนวณจาก geometry อัตโนมัติ)</span></span>
-            </div>
-
-            <!-- พิกัด (geometry) -->
-            <div
-              style="display:grid; grid-template-columns:80px 60px 1fr; gap:4px 10px; align-items:center; font-size:11.5px; color:var(--text); padding:4px 2px;">
-              <span class="req-label" style="font-style:italic;">— ไม่มี —</span>
-              <span class="req-label">.shp</span>
-              <span>พิกัด WGS84 <span class="req-label">(ดึงจาก geometry)</span></span>
-            </div>
-
             <!-- UTM note -->
-            <div style="margin-top:10px; padding:8px 10px; background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.2); border-radius:8px; display:flex; align-items:flex-start; gap:7px;">
-              <i class="bi bi-arrow-left-right" style="color:#3b82f6; font-size:13px; margin-top:1px; flex-shrink:0;"></i>
+            <div
+              style="margin-top:10px; padding:8px 10px; background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.2); border-radius:8px; display:flex; align-items:flex-start; gap:7px;">
+              <i class="bi bi-arrow-left-right"
+                style="color:#3b82f6; font-size:13px; margin-top:1px; flex-shrink:0;"></i>
               <div style="font-size:11px; color:#1e40af; line-height:1.5;">
                 <strong>รองรับระบบพิกัด WGS84 (EPSG:4326) และ UTM</strong><br>
-                ระบบแนะนำให้ใช้พิกัด <strong>WGS84 (EPSG:4326)</strong> เป็นหลัก แต่หากไฟล์ใช้ระบบ UTM (เช่น Zone 47N / 48N ที่ใช้ในไทย) ระบบจะแปลงเป็น WGS84 ให้อัตโนมัติ แนะนำให้รวมไฟล์ <strong>.prj</strong> ใน ZIP เพื่อความแม่นยำสูงสุด
+                ระบบแนะนำให้ใช้พิกัด <strong>WGS84 (EPSG:4326)</strong> เป็นหลัก แต่หากไฟล์ใช้ระบบ UTM (เช่น Zone 47N /
+                48N ที่ใช้ในไทย) ระบบจะแปลงเป็น WGS84 ให้อัตโนมัติ แนะนำให้รวมไฟล์ <strong>.prj</strong> ใน ZIP
+                เพื่อความแม่นยำสูงสุด
               </div>
             </div>
           </div>
