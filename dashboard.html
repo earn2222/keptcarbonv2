@@ -730,7 +730,7 @@
         <div class="panel-header">
           <h3 class="panel-title">
             <i class="bi bi-graph-up-arrow" style="color: var(--brand-primary);"></i>
-            คาดการณ์คาร์บอนสะสมทั้งระบบ 10 ปีข้างหน้า
+            คาดการณ์คาร์บอนสะสมทั้งระบบ 7 ปีข้างหน้า
           </h3>
           <span style="font-size:12px;color:var(--text-muted);">หน่วย: tCO₂e</span>
         </div>
@@ -1061,7 +1061,7 @@
       });
 
       // ---------------------------------------------------------
-      // 5b. Carbon Lifespan Forecast Chart (10-year system projection)
+      // 5b. Carbon Forecast Chart (7-year system projection)
       // ---------------------------------------------------------
       (function buildForecastChart() {
         function calcCarbonAtAge(age, treeCount) {
@@ -1072,17 +1072,24 @@
           return (AGB + AGB * 0.26) * 0.47 * 3.67 * treeCount;
         }
 
-        const YEARS = 10;
+        const YEARS = 7;
         const curYearBE = new Date().getFullYear() + 543;
-        const fcLabels = [];
+        const avgAge = allPlots.length > 0
+          ? Math.round(allPlots.reduce((s, p) => s + (p.treeAge || 1), 0) / allPlots.length)
+          : 1;
+
+        const fcLabels = [];   // short x-axis labels
+        const fcFullLabels = []; // tooltip labels
         const fcVals = [];
 
         for (let offset = 0; offset <= YEARS; offset++) {
-          fcLabels.push(`พ.ศ. ${curYearBE + offset}`);
+          const yr  = curYearBE + offset;
+          const age = avgAge + offset;
+          fcLabels.push(`พ.ศ. ${yr}`);
+          fcFullLabels.push(`พ.ศ. ${yr}  |  อายุยางเฉลี่ย ${age} ปี`);
           let total = 0;
           allPlots.forEach(plot => {
-            const projAge = (plot.treeAge || 1) + offset;
-            total += calcCarbonAtAge(projAge, plot.treeCount || 0);
+            total += calcCarbonAtAge((plot.treeAge || 1) + offset, plot.treeCount || 0);
           });
           fcVals.push(+total.toFixed(2));
         }
@@ -1091,6 +1098,10 @@
         const gradFc = fcCtx.createLinearGradient(0, 0, 0, 280);
         gradFc.addColorStop(0, 'rgba(5, 150, 105, 0.25)');
         gradFc.addColorStop(1, 'rgba(5, 150, 105, 0.02)');
+
+        // First point = current (highlight)
+        const ptColors = fcVals.map((_, i) => i === 0 ? '#f59e0b' : '#059669');
+        const ptRadii  = fcVals.map((_, i) => i === 0 ? 7 : 4);
 
         new Chart(fcCtx, {
           type: 'line',
@@ -1102,10 +1113,10 @@
               borderColor: '#059669',
               backgroundColor: gradFc,
               borderWidth: 2.5,
-              pointRadius: 4,
-              pointHoverRadius: 7,
-              pointBackgroundColor: '#ffffff',
-              pointBorderColor: '#059669',
+              pointRadius: ptRadii,
+              pointHoverRadius: 8,
+              pointBackgroundColor: ptColors,
+              pointBorderColor: ptColors,
               pointBorderWidth: 2,
               fill: true,
               tension: 0.4
@@ -1120,10 +1131,11 @@
               tooltip: {
                 backgroundColor: '#0f172a',
                 titleFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 12 },
-                bodyFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 13, weight: '600' },
+                bodyFont:  { family: "'Inter','Noto Sans Thai',sans-serif", size: 13, weight: '600' },
                 padding: 12,
                 cornerRadius: 8,
                 callbacks: {
+                  title: items => fcFullLabels[items[0].dataIndex],
                   label: ctx => ` ${ctx.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e`
                 }
               }
@@ -1143,15 +1155,17 @@
           }
         });
 
-        // Milestone badges
+        // Milestone badges (ปัจจุบัน, +3, +5, +7)
         const milBox = document.getElementById('forecast-milestones');
-        const milYears = [0, 3, 5, 10];
-        milYears.forEach(m => {
-          if (m > YEARS) return;
+        [0, 3, 5, 7].forEach(m => {
+          const yr  = curYearBE + m;
+          const age = avgAge + m;
           const badge = document.createElement('div');
-          badge.style.cssText = 'background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:10px 16px;min-width:120px;';
-          badge.innerHTML = `<div style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${m === 0 ? 'ปัจจุบัน' : `+${m} ปี`}</div>
-            <div style="font-size:18px;font-weight:700;color:#0f172a;margin-top:2px;">${formatNum(fcVals[m], 2)}</div>
+          badge.style.cssText = 'background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:10px 16px;min-width:130px;';
+          badge.innerHTML = `
+            <div style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${m === 0 ? 'ปัจจุบัน' : `+${m} ปี`}</div>
+            <div style="font-size:12px;color:#475569;margin-top:2px;">พ.ศ. ${yr} · อายุ ${age} ปี</div>
+            <div style="font-size:20px;font-weight:700;color:#0f172a;margin-top:4px;">${formatNum(fcVals[m], 2)}</div>
             <div style="font-size:11px;color:#64748b;">tCO₂e</div>`;
           milBox.appendChild(badge);
         });
