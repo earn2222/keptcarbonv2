@@ -725,9 +725,25 @@
               <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">เจ้าของแปลง</div>
               <div style="font-size: 14px; color: var(--text-primary); font-weight: 500;" id="modalOwner"></div>
             </div>
-            
+
           </div>
         </div>
+
+        <!-- Forecast Chart -->
+        <div style="margin-top: 24px; border-top: 1px solid var(--border-light); padding-top: 20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); display:flex; align-items:center; gap:8px;">
+              <i class="bi bi-graph-up-arrow" style="color: var(--brand-primary);"></i>
+              คาดการณ์คาร์บอนตลอดอายุแปลงยางพารา (tCO₂e)
+            </div>
+            <span style="font-size:11px;color:var(--text-muted);">อายุ 1–30 ปี</span>
+          </div>
+          <div style="height: 200px; position: relative;">
+            <canvas id="modal-forecast-chart"></canvas>
+          </div>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:14px;" id="modal-fc-milestones"></div>
+        </div>
+
       </div>
       <div class="modal-footer">
         <button class="btn-primary" onclick="closeModal()" style="background: #f1f5f9; color: var(--text-primary);">ปิดหน้าต่าง</button>
@@ -761,8 +777,30 @@
 
     let originalPlots = [];
     let displayedPlots = [];
-    let maps = {}; // store map instances
+    let maps = {};
+    let renderToken = 0;
     let currentModalMap = null;
+    let modalForecastChart = null;
+
+    function calcCarbonAtAge(age, treeCount) {
+      if (age <= 0 || treeCount <= 0) return 0;
+      const H = Math.min(2.0 + 1.8 * age, 28);
+      const D = Math.min(3 + 4.5 * age, 60);
+      const AGB = 0.1284 * D * D * H * 0.001;
+      return (AGB + AGB * 0.26) * 0.47 * 3.67 * treeCount;
+    }
+
+    function getLifespanForecast(plot, maxAge = 30) {
+      if (plot.carbonForecast && plot.carbonForecast.length >= maxAge) {
+        return plot.carbonForecast.slice(0, maxAge);
+      }
+      const trees = plot.treeCount || 0;
+      const vals = [];
+      for (let age = 1; age <= maxAge; age++) {
+        vals.push(+calcCarbonAtAge(age, trees).toFixed(2));
+      }
+      return vals;
+    }
 
     function init() {
       if (user) {
@@ -823,10 +861,19 @@
       grid.style.display = 'grid';
       rc.textContent = `แสดง ${displayedPlots.length} รายการ`;
 
+      const token = ++renderToken;
+
       displayedPlots.forEach((plot, i) => {
         const mapId = `map-${plot.id}-${i}`;
         const card = document.createElement('div');
         card.className = 'plot-card';
+
+        const fcVals = getLifespanForecast(plot);
+        const currentIdx = (plot.treeAge || 1) - 1;
+        const carbonAtCurrent = fcVals[Math.min(currentIdx, fcVals.length - 1)] || 0;
+        const carbon5yr = fcVals[Math.min(currentIdx + 5, fcVals.length - 1)] || 0;
+        const growthPct = carbonAtCurrent > 0 ? (((carbon5yr - carbonAtCurrent) / carbonAtCurrent) * 100).toFixed(1) : 0;
+
         card.innerHTML = `
           <div class="plot-minimap">
             <div id="${mapId}" class="mini-map-el"></div>
@@ -836,7 +883,7 @@
               <div class="plot-card-name"><i class="bi bi-geo-alt-fill"></i> ${plot.name}</div>
               <div class="plot-date">${formatDate(plot.createdAt)}</div>
             </div>
-            
+
             <div class="carbon-box">
               <span class="carbon-lbl">คาร์บอนเครดิตสุทธิ</span>
               <span class="carbon-val">${formatNum(plot.carbonTotal, 2)} <span style="font-size:12px;color:var(--text-secondary);font-weight:500;">tCO₂e</span></span>
@@ -852,7 +899,12 @@
                 <span class="meta-val">${formatNum(plot.treeCount)}</span>
               </div>
             </div>
-            
+
+            <div style="margin-bottom:12px; padding:8px 10px; background:#f0fdf4; border:1px solid #a7f3d0; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11px; color:#059669; font-weight:600;">คาดการณ์ +5 ปี</span>
+              <span style="font-size:13px; font-weight:700; color:#047857;">${formatNum(carbon5yr, 2)} tCO₂e <span style="font-size:10px; color:#059669;">(+${growthPct}%)</span></span>
+            </div>
+
             <div class="plot-actions">
               <button class="btn-view" onclick="viewPlot('${plot.id}')"><i class="bi bi-eye"></i> ดูข้อมูล</button>
               <button class="btn-del" onclick="deletePlot('${plot.id}', '${plot.name}')" title="ลบแปลง"><i class="bi bi-trash"></i></button>
@@ -861,8 +913,10 @@
         `;
         grid.appendChild(card);
 
-        // Init minimap
         setTimeout(() => {
+          if (renderToken !== token) return;
+          const container = document.getElementById(mapId);
+          if (!container) return;
           const map = new maplibregl.Map({
             container: mapId,
             style: {
@@ -879,12 +933,12 @@
               map.addSource('plot', { type: 'geojson', data: plot.geojson });
               map.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#10b981', 'fill-opacity': 0.3 } });
               map.addLayer({ id: 'plot-line', type: 'line', source: 'plot', paint: { 'line-color': '#059669', 'line-width': 2 } });
-              
+
               const bounds = new maplibregl.LngLatBounds();
               if (plot.geojson.geometry && plot.geojson.geometry.coordinates) {
-                 const coords = plot.geojson.geometry.type === 'Polygon' ? plot.geojson.geometry.coordinates[0] : 
-                                (plot.geojson.geometry.type === 'MultiPolygon' ? plot.geojson.geometry.coordinates[0][0] : []);
-                 coords.forEach(c => bounds.extend(c));
+                const coords = plot.geojson.geometry.type === 'Polygon' ? plot.geojson.geometry.coordinates[0] :
+                  (plot.geojson.geometry.type === 'MultiPolygon' ? plot.geojson.geometry.coordinates[0][0] : []);
+                coords.forEach(c => bounds.extend(c));
               }
               map.fitBounds(bounds, { padding: 20, duration: 0 });
             }
@@ -939,6 +993,100 @@
 
       document.getElementById('plotModal').classList.add('open');
 
+      // Build lifespan forecast chart
+      const MAX_AGE = 30;
+      const fcVals = getLifespanForecast(plot, MAX_AGE);
+      const fcLabels = Array.from({ length: MAX_AGE }, (_, i) => `${i + 1} ปี`);
+      const currentAgeIdx = Math.min((plot.treeAge || 1) - 1, MAX_AGE - 1);
+      const plantYearBE = plot.plantYear || (new Date().getFullYear() + 543 - (plot.treeAge || 1));
+
+      const pointColors = fcLabels.map((_, i) => i === currentAgeIdx ? '#f59e0b' : '#059669');
+      const pointRadii  = fcLabels.map((_, i) => i === currentAgeIdx ? 8 : 3);
+
+      if (modalForecastChart) { modalForecastChart.destroy(); modalForecastChart = null; }
+      const fcCanvas = document.getElementById('modal-forecast-chart');
+      const fcCtx = fcCanvas.getContext('2d');
+      const grad = fcCtx.createLinearGradient(0, 0, 0, 200);
+      grad.addColorStop(0, 'rgba(5,150,105,0.22)');
+      grad.addColorStop(1, 'rgba(5,150,105,0.0)');
+
+      modalForecastChart = new Chart(fcCtx, {
+        type: 'line',
+        data: {
+          labels: fcLabels,
+          datasets: [{
+            data: fcVals,
+            borderColor: '#059669',
+            backgroundColor: grad,
+            borderWidth: 2,
+            pointRadius: pointRadii,
+            pointHoverRadius: 7,
+            pointBackgroundColor: pointColors,
+            pointBorderColor: pointColors,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 11 },
+              bodyFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 12, weight: '600' },
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                title: items => {
+                  const age = items[0].dataIndex + 1;
+                  const yr = plantYearBE + age;
+                  return `อายุ ${age} ปี (พ.ศ. ${yr})${age === (plot.treeAge || 1) ? ' ← ปัจจุบัน' : ''}`;
+                },
+                label: ctx => ` ${ctx.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2 })} tCO₂e`
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: '#64748b',
+                font: { family: "'Inter','Noto Sans Thai',sans-serif", size: 10 },
+                maxTicksLimit: 10
+              },
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: {
+              ticks: { color: '#64748b', font: { family: "'Inter','Noto Sans Thai',sans-serif", size: 10 } },
+              grid: { color: 'rgba(0,0,0,0.04)' },
+              border: { display: false }
+            }
+          }
+        }
+      });
+
+      // Milestone summary boxes
+      const milBox = document.getElementById('modal-fc-milestones');
+      milBox.innerHTML = '';
+      const milestones = [
+        { label: 'ปัจจุบัน', idx: currentAgeIdx },
+        { label: '+5 ปี',    idx: Math.min(currentAgeIdx + 5, MAX_AGE - 1) },
+        { label: '+10 ปี',   idx: Math.min(currentAgeIdx + 10, MAX_AGE - 1) },
+        { label: 'อายุ 30 ปี', idx: MAX_AGE - 1 }
+      ];
+      milestones.forEach(m => {
+        const val = fcVals[m.idx] || 0;
+        const div = document.createElement('div');
+        div.style.cssText = 'flex:1;min-width:90px;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:10px 12px;text-align:center;';
+        div.innerHTML = `<div style="font-size:10px;color:#059669;font-weight:600;text-transform:uppercase;">${m.label}</div>
+          <div style="font-size:16px;font-weight:700;color:#0f172a;margin-top:2px;">${formatNum(val, 2)}</div>
+          <div style="font-size:10px;color:#64748b;">tCO₂e</div>`;
+        milBox.appendChild(div);
+      });
+
       // Setup map
       if(currentModalMap) { currentModalMap.remove(); }
       setTimeout(() => {
@@ -973,6 +1121,7 @@
 
     window.closeModal = function() {
       document.getElementById('plotModal').classList.remove('open');
+      if (modalForecastChart) { modalForecastChart.destroy(); modalForecastChart = null; }
     };
 
     // Close modal on outside click

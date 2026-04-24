@@ -725,6 +725,23 @@
         </div>
       </div>
 
+      <!-- Carbon Forecast Panel -->
+      <div class="panel-card" style="margin-bottom: 32px;">
+        <div class="panel-header">
+          <h3 class="panel-title">
+            <i class="bi bi-graph-up-arrow" style="color: var(--brand-primary);"></i>
+            คาดการณ์คาร์บอนสะสมทั้งระบบ 10 ปีข้างหน้า
+          </h3>
+          <span style="font-size:12px;color:var(--text-muted);">หน่วย: tCO₂e</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-container" style="height: 280px;">
+            <canvas id="forecast-chart"></canvas>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:24px;flex-wrap:wrap;" id="forecast-milestones"></div>
+        </div>
+      </div>
+
       <!-- Bottom Panel: Data Table -->
       <div class="panel-card">
         <div class="panel-header">
@@ -948,6 +965,9 @@
       // Empty State handling
       tbody.parentElement.style.display = 'none';
       emptyState.style.display = 'block';
+      // Hide forecast panel when no data
+      const fcPanel = document.getElementById('forecast-chart');
+      if (fcPanel) fcPanel.closest('.panel-card').style.display = 'none';
 
       // Empty Chart
       new Chart(carbonCtx, {
@@ -1039,6 +1059,103 @@
           }
         }
       });
+
+      // ---------------------------------------------------------
+      // 5b. Carbon Lifespan Forecast Chart (10-year system projection)
+      // ---------------------------------------------------------
+      (function buildForecastChart() {
+        function calcCarbonAtAge(age, treeCount) {
+          if (age <= 0 || treeCount <= 0) return 0;
+          const H = Math.min(2.0 + 1.8 * age, 28);
+          const D = Math.min(3 + 4.5 * age, 60);
+          const AGB = 0.1284 * D * D * H * 0.001;
+          return (AGB + AGB * 0.26) * 0.47 * 3.67 * treeCount;
+        }
+
+        const YEARS = 10;
+        const curYearBE = new Date().getFullYear() + 543;
+        const fcLabels = [];
+        const fcVals = [];
+
+        for (let offset = 0; offset <= YEARS; offset++) {
+          fcLabels.push(`พ.ศ. ${curYearBE + offset}`);
+          let total = 0;
+          allPlots.forEach(plot => {
+            const projAge = (plot.treeAge || 1) + offset;
+            total += calcCarbonAtAge(projAge, plot.treeCount || 0);
+          });
+          fcVals.push(+total.toFixed(2));
+        }
+
+        const fcCtx = document.getElementById('forecast-chart').getContext('2d');
+        const gradFc = fcCtx.createLinearGradient(0, 0, 0, 280);
+        gradFc.addColorStop(0, 'rgba(5, 150, 105, 0.25)');
+        gradFc.addColorStop(1, 'rgba(5, 150, 105, 0.02)');
+
+        new Chart(fcCtx, {
+          type: 'line',
+          data: {
+            labels: fcLabels,
+            datasets: [{
+              label: 'คาร์บอนสะสมรวม (tCO₂e)',
+              data: fcVals,
+              borderColor: '#059669',
+              backgroundColor: gradFc,
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointHoverRadius: 7,
+              pointBackgroundColor: '#ffffff',
+              pointBorderColor: '#059669',
+              pointBorderWidth: 2,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#0f172a',
+                titleFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 12 },
+                bodyFont: { family: "'Inter','Noto Sans Thai',sans-serif", size: 13, weight: '600' },
+                padding: 12,
+                cornerRadius: 8,
+                callbacks: {
+                  label: ctx => ` ${ctx.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e`
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: '#64748b', font: { family: "'Inter','Noto Sans Thai',sans-serif", size: 11 } },
+                grid: { display: false },
+                border: { display: false }
+              },
+              y: {
+                ticks: { color: '#64748b', font: { family: "'Inter','Noto Sans Thai',sans-serif", size: 11 } },
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                border: { display: false }
+              }
+            }
+          }
+        });
+
+        // Milestone badges
+        const milBox = document.getElementById('forecast-milestones');
+        const milYears = [0, 3, 5, 10];
+        milYears.forEach(m => {
+          if (m > YEARS) return;
+          const badge = document.createElement('div');
+          badge.style.cssText = 'background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:10px 16px;min-width:120px;';
+          badge.innerHTML = `<div style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${m === 0 ? 'ปัจจุบัน' : `+${m} ปี`}</div>
+            <div style="font-size:18px;font-weight:700;color:#0f172a;margin-top:2px;">${formatNum(fcVals[m], 2)}</div>
+            <div style="font-size:11px;color:#64748b;">tCO₂e</div>`;
+          milBox.appendChild(badge);
+        });
+      })();
 
       // Populate Data Table (Top 5 recent)
       const recentPlots = allPlots.slice(0, 5);

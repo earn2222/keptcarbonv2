@@ -4039,6 +4039,18 @@
     /* ================================================================
        SAVE
     ================================================================ */
+    function calcForecastForSave(p, maxAge = 30) {
+      const trees = p.treeCount || 0;
+      const forecast = [];
+      for (let age = 1; age <= maxAge; age++) {
+        const H = Math.min(2.0 + 1.8 * age, 28);
+        const D = Math.min(3 + 4.5 * age, 60);
+        const AGB = 0.1284 * D * D * H * 0.001;
+        forecast.push(+((AGB + AGB * 0.26) * 0.47 * 3.67 * trees).toFixed(2));
+      }
+      return forecast;
+    }
+
     function savePlot() {
       if (!ME) return;
 
@@ -4060,6 +4072,8 @@
           dbh: p.D,
           biomassPerTree: p.bio,
           carbonTotal: p.co2,
+          ageDist: p.ageDist || null,
+          carbonForecast: calcForecastForSave(p),
           geojson: p.gj,
           createdAt: new Date().toISOString()
         };
