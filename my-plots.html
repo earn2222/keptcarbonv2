@@ -311,7 +311,7 @@
     }
 
     .plot-minimap {
-      height: 180px;
+      height: 240px;
       background: #e2e8f0;
       position: relative;
     }
@@ -540,7 +540,7 @@
     }
 
     #modal-map {
-      height: 300px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-light);
+      height: 450px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-light);
     }
 
     .modal-stats {
@@ -568,10 +568,66 @@
     }
 
     @media (max-width: 768px) {
-      .summary-bar { grid-template-columns: 1fr; }
-      .sum-item { border-right: none; border-bottom: 1px solid var(--border-light); }
-      .sum-item:last-child { border-bottom: none; }
-      .modal-grid { grid-template-columns: 1fr; }
+      .page-content {
+        padding: 16px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 24px 20px;
+      }
+
+      .summary-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .sum-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border-light);
+        padding: 16px;
+      }
+
+      .sum-item:last-child {
+        border-bottom: none;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .search-wrap {
+        max-width: none;
+      }
+
+      #result-count {
+        margin-left: 0;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #modal-map {
+        height: 300px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .topbar-left span {
+        display: none;
+      }
+      
+      .ph-title h1 {
+        font-size: 20px;
+      }
+      
+      .sum-val {
+        font-size: 24px;
+      }
     }
   </style>
 </head>
@@ -612,9 +668,6 @@
       <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
       <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
       <a href="#" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
-    </div>
-    <div class="sidebar-footer">
-      <i class="bi bi-tree"></i><br>ระบบประเมิน KeptCarbon
     </div>
   </div>
 
@@ -1000,7 +1053,7 @@
       const currentAgeIdx = Math.min((plot.treeAge || 1) - 1, MAX_AGE - 1);
       const plantYearBE = plot.plantYear || (new Date().getFullYear() + 543 - (plot.treeAge || 1));
 
-      const pointColors = fcLabels.map((_, i) => i === currentAgeIdx ? '#f59e0b' : '#059669');
+      const pointColors = fcLabels.map((_, i) => i === currentAgeIdx ? '#10b981' : '#059669');
       const pointRadii  = fcLabels.map((_, i) => i === currentAgeIdx ? 8 : 3);
 
       if (modalForecastChart) { modalForecastChart.destroy(); modalForecastChart = null; }

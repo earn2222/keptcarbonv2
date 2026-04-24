@@ -208,6 +208,13 @@
       color: #333;
     }
 
+    @media (max-width: 576px) {
+      .topbar-left img,
+      .topbar-left .topbar-title {
+        display: none !important;
+      }
+    }
+
     /* ============================================================
    SIDEBAR (LEFT)
 ============================================================ */
@@ -241,14 +248,14 @@
 
     .sidebar-header .brand {
       font-weight: 700;
-      color: #e65100;
+      color: var(--green);
       font-size: 16px;
     }
 
     .sidebar-header .version {
       font-size: 10px;
-      background: #ffe0b2;
-      color: #e65100;
+      background: rgba(45, 158, 95, 0.1);
+      color: var(--green);
       padding: 2px 6px;
       border-radius: 12px;
       margin-left: 8px;
@@ -1801,9 +1808,6 @@
       <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
       <a href="profile.html"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
       <a href="#" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
-    </div>
-    <div class="sidebar-footer">
-      <i class="bi bi-tree"></i><br>ระบบประเมิน KeptCarbon
     </div>
   </div>
 

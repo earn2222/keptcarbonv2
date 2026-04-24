@@ -483,13 +483,13 @@
     }
 
     .form-card-header .icon.blue {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: #ccfbf1;
+      color: #0d9488;
     }
 
     .form-card-header .icon.amber {
-      background: #fef3c7;
-      color: #92400e;
+      background: #f0fdf4;
+      color: #10b981;
     }
 
     .form-card-header h3 {
@@ -655,8 +655,29 @@
         display: none;
       }
 
-      .tb-username {
-        display: none;
+      .topbar-left .topbar-title {
+        display: none !important;
+      }
+
+      .profile-stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .ps-item {
+        border-right: none;
+        border-bottom: 1px solid var(--gray-100);
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .ps-item:last-child {
+        border-bottom: none;
+      }
+
+      .ps-val {
+        font-size: 18px;
       }
     }
   </style>
@@ -701,9 +722,6 @@
       <div class="sidebar-nav-title">ตั้งค่าบัญชี</div>
       <a href="profile.html" class="active"><i class="bi bi-person-circle"></i> โปรไฟล์</a>
       <a href="#" onclick="Auth.logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</a>
-    </div>
-    <div class="sidebar-footer">
-      <i class="bi bi-tree"></i><br>ระบบประเมิน KeptCarbon
     </div>
   </div>
 
