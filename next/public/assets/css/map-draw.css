@@ -38,6 +38,7 @@
     #map {
       position: fixed;
       inset: 0;
+      top: 90px;
       z-index: 0;
       background: #ffffff;
     }
@@ -555,10 +556,10 @@
 ============================================================ */
     #panel {
       position: fixed;
-      top: 24px;
+      top: 114px;
       right: 24px;
       bottom: auto;
-      max-height: calc(100vh - 48px);
+      max-height: calc(100vh - 138px);
       width: var(--panel-w);
       background: var(--surface);
       backdrop-filter: blur(28px) saturate(150%);
@@ -585,7 +586,7 @@
 
     #btn-open-panel {
       position: fixed;
-      top: 84px;
+      top: 114px;
       right: 24px;
       width: 48px;
       height: 48px;

@@ -7,6 +7,10 @@ services:
     container_name: keptcarbon-nextjs
     environment:
       - DATABASE_URL=${DATABASE_URL}
+      - LINE_CHANNEL_ID=${LINE_CHANNEL_ID}
+      - LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
+      - LINE_CALLBACK_URL=${LINE_CALLBACK_URL}
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./next:/app
       - /app/node_modules

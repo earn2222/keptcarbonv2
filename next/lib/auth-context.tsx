@@ -30,16 +30,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [modal, setModal] = useState<ModalKind>(null);
 
-  const refresh = useCallback(() => setUser(Auth.getUser()), []);
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    }
+  }, []);
 
   useEffect(() => {
-    refresh();
-    setReady(true);
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "kc_user" || e.key === null) refresh();
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    refresh().finally(() => setReady(true));
   }, [refresh]);
 
   const value = useMemo<AuthContextValue>(
@@ -51,9 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       openRegister: () => setModal("register"),
       closeModal: () => setModal(null),
       refresh,
-      logout: () => {
-        Auth.logout();
-        refresh();
+      logout: async () => {
+        await fetch("/api/auth/logout", { method: "POST" });
+        setUser(null);
       },
     }),
     [user, ready, modal, refresh],

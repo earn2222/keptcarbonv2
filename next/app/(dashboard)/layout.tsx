@@ -1,4 +1,4 @@
-import { AuthGuard, DashboardChrome } from "@/app/components";
+import { AuthGuard } from "@/app/components";
 
 export default function DashboardLayout({
   children,
@@ -7,7 +7,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <DashboardChrome>{children}</DashboardChrome>
+      <main className="dashboard-page" style={{ paddingTop: '100px' }}>{children}</main>
     </AuthGuard>
   );
 }

@@ -47,23 +47,32 @@ export function LoginModal() {
 
   if (modal !== "login") return null;
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    setTimeout(() => {
-      const result = Auth.login(email.trim(), password);
-      if (result.success) {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login: email.trim(), password }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         setAlert({ type: "success", msg: "✓ เข้าสู่ระบบสำเร็จ! กำลังนำไปยังแดชบอร์ด..." });
-        refresh();
+        await refresh();
         setTimeout(() => {
           closeModal();
           router.push("/dashboard");
         }, 800);
       } else {
-        setAlert({ type: "error", msg: "✗ " + result.message });
+        setAlert({ type: "error", msg: "✗ " + (data.error || "เข้าสู่ระบบไม่สำเร็จ") });
         setBusy(false);
       }
-    }, 600);
+    } catch (err) {
+      setAlert({ type: "error", msg: "✗ เกิดข้อผิดพลาดในการเชื่อมต่อ" });
+      setBusy(false);
+    }
   };
 
   return (
@@ -84,17 +93,17 @@ export function LoginModal() {
 
       <form onSubmit={onSubmit} autoComplete="on">
         <div className="modal-auth-form-group">
-          <label>อีเมล</label>
+          <label>อีเมล / ชื่อผู้ใช้</label>
           <div className="modal-inp-wrap">
-            <i className="bi bi-envelope" />
+            <i className="bi bi-person" />
             <input
               ref={emailRef}
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="กรอกอีเมลของคุณ"
+              placeholder="กรอกอีเมล หรือ ชื่อผู้ใช้"
               required
-              autoComplete="email"
+              autoComplete="username"
             />
           </div>
         </div>
@@ -118,7 +127,15 @@ export function LoginModal() {
       </form>
 
       <div className="modal-divider">หรือ</div>
-      <div className="modal-auth-links">
+
+      <a href="/api/auth/line" className="modal-btn-line">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.271.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+        </svg>
+        เข้าสู่ระบบด้วย LINE
+      </a>
+
+      <div className="modal-auth-links" style={{ marginTop: 16 }}>
         ยังไม่มีบัญชี?{" "}
         <a
           onClick={(e) => {
@@ -163,28 +180,36 @@ export function RegisterModal() {
 
   const strength = strengthFor(password.length);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPwd) {
       setAlert({ type: "error", msg: "✗ รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง" });
       return;
     }
     setBusy(true);
-    setTimeout(() => {
-      const result = Auth.register({ fullname, email: email.trim(), phone, password });
-      if (result.success) {
-        Auth.login(email.trim(), password);
-        refresh();
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password, fullname, phone }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        await refresh();
         setAlert({ type: "success", msg: "✓ สมัครสมาชิกสำเร็จ! กำลังนำไปยังแดชบอร์ด..." });
         setTimeout(() => {
           closeModal();
           router.push("/dashboard");
         }, 900);
       } else {
-        setAlert({ type: "error", msg: "✗ " + result.message });
+        setAlert({ type: "error", msg: "✗ " + (data.error || "สมัครสมาชิกไม่สำเร็จ") });
         setBusy(false);
       }
-    }, 600);
+    } catch (err) {
+      setAlert({ type: "error", msg: "✗ เกิดข้อผิดพลาดในการเชื่อมต่อ" });
+      setBusy(false);
+    }
   };
 
   return (
@@ -300,7 +325,15 @@ export function RegisterModal() {
       </form>
 
       <div className="modal-divider">หรือ</div>
-      <div className="modal-auth-links">
+
+      <a href="/api/auth/line" className="modal-btn-line">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.271.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+        </svg>
+        สมัครสมาชิกด้วย LINE
+      </a>
+
+      <div className="modal-auth-links" style={{ marginTop: 16 }}>
         มีบัญชีอยู่แล้ว?{" "}
         <a
           onClick={(e) => {

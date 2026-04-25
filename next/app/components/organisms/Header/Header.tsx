@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -10,6 +10,18 @@ export default function Header() {
   const { ready, user, openLogin, openRegister, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 100);
@@ -58,11 +70,7 @@ export default function Header() {
                   แปลงของฉัน
                 </Link>
               </li>
-              <li>
-                <Link href="/profile" onClick={closeNav}>
-                  โปรไฟล์
-                </Link>
-              </li>
+
               <li className="d-xl-none">
                 <div className="mobile-auth-divider"></div>
               </li>
@@ -87,22 +95,22 @@ export default function Header() {
           ) : (
             <ul>
               <li>
-                <a href="#hero" onClick={closeNav} className="active">
+                <a href="/#hero" onClick={closeNav} className="active">
                   หน้าแรก
                 </a>
               </li>
               <li>
-                <a href="#project-about" onClick={closeNav}>
+                <a href="/#project-about" onClick={closeNav}>
                   เกี่ยวกับโครงการ
                 </a>
               </li>
               <li>
-                <a href="#team" onClick={closeNav}>
+                <a href="/#team" onClick={closeNav}>
                   ทีมงานของเรา
                 </a>
               </li>
               <li>
-                <a href="#contact" onClick={closeNav}>
+                <a href="/#contact" onClick={closeNav}>
                   ติดต่อเรา
                 </a>
               </li>
@@ -134,22 +142,65 @@ export default function Header() {
 
         <div id="nav-buttons" className="d-flex align-items-center ms-3">
           {ready && user ? (
-            <>
-              <span className="nav-username">
-                <i className="bi bi-person-circle me-1"></i>
-                {user.fullname}
-              </span>
+            <div className="position-relative" ref={dropdownRef}>
               <a
-                className="btn-logout"
                 href="#"
+                className="d-flex align-items-center text-decoration-none"
                 onClick={(e) => {
                   e.preventDefault();
-                  onLogout();
+                  setDropdownOpen(!dropdownOpen);
                 }}
               >
-                ออกจากระบบ
+                <div
+                  className="d-flex align-items-center justify-content-center text-white"
+                  style={{
+                    width: "38px",
+                    height: "38px",
+                    borderRadius: "50%",
+                    backgroundColor: "var(--color-primary, #2d9e5f)",
+                    fontWeight: "600",
+                    fontSize: "16px",
+                  }}
+                >
+                  {(user.fullname?.[0] ?? "U").toUpperCase()}
+                </div>
+                <span className="d-none d-md-block fw-medium ms-2" style={{ color: "var(--heading-color)" }}>
+                  {user.fullname}
+                </span>
+                <i className="bi bi-chevron-down ms-1 text-secondary" style={{ fontSize: "12px" }}></i>
               </a>
-            </>
+
+              {dropdownOpen && (
+                <ul
+                  className="dropdown-menu show dropdown-menu-end shadow"
+                  style={{ position: "absolute", top: "100%", right: 0, marginTop: "10px", border: "none", borderRadius: "10px", minWidth: "160px" }}
+                >
+                  <li>
+                    <Link
+                      href="/profile"
+                      className="dropdown-item d-flex align-items-center py-2"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <i className="bi bi-person me-2 fs-5 text-secondary"></i> โปรไฟล์
+                    </Link>
+                  </li>
+                  <li><hr className="dropdown-divider my-1" /></li>
+                  <li>
+                    <a
+                      className="dropdown-item d-flex align-items-center py-2 text-danger"
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setDropdownOpen(false);
+                        onLogout();
+                      }}
+                    >
+                      <i className="bi bi-box-arrow-right me-2 fs-5"></i> ออกจากระบบ
+                    </a>
+                  </li>
+                </ul>
+              )}
+            </div>
           ) : (
             <>
               <a

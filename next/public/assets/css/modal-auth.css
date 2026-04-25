@@ -236,6 +236,45 @@
   text-decoration: underline;
 }
 
+/* ── LINE Login button ─────────────────────────── */
+.modal-btn-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 24px;
+  background: #06C755;
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  box-shadow: 0 8px 24px rgba(6, 199, 85, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-btn-line:hover {
+  background: #05b04c;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(6, 199, 85, 0.4);
+  color: #fff;
+  text-decoration: none;
+}
+
+.modal-btn-line:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(6, 199, 85, 0.25);
+}
+
+.modal-btn-line svg {
+  flex-shrink: 0;
+}
+
 /* ── Mobile adjustments ────────────────────────── */
 @media (max-width: 540px) {
   .modal-auth-card {

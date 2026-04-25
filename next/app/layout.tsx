@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
-import { AuthModals } from "@/app/components/organisms";
+import { AuthModals, Header } from "@/app/components/organisms";
 import "./globals.css";
 
 const notoSansThai = Noto_Sans_Thai({
@@ -42,6 +42,7 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
+          <Header />
           {children}
           <AuthModals />
         </AuthProvider>
