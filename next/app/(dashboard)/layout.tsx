@@ -1,5 +1,4 @@
-import AuthGuard from "../components/AuthGuard";
-import DashboardChrome from "../components/DashboardChrome";
+import { AuthGuard, DashboardChrome } from "@/app/components";
 
 export default function DashboardLayout({
   children,

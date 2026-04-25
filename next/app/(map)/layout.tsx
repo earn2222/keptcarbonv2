@@ -1,4 +1,4 @@
-import AuthGuard from "../components/AuthGuard";
+import { AuthGuard } from "@/app/components";
 
 export default function MapLayout({
   children,

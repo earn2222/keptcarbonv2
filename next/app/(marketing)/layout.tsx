@@ -1,8 +1,6 @@
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import AOSInit from "../components/AOSInit";
-import ScrollTop from "../components/ScrollTop";
-import SmoothScroll from "../components/SmoothScroll";
+import { Header, Footer, ScrollTop } from "@/app/components";
+import AOSInit from "@/app/components/utilities/AOSInit";
+import SmoothScroll from "@/app/components/utilities/SmoothScroll";
 
 export default function MarketingLayout({
   children,
