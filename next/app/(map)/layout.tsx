@@ -1,0 +1,9 @@
+import AuthGuard from "../components/AuthGuard";
+
+export default function MapLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <AuthGuard>{children}</AuthGuard>;
+}
