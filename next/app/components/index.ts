@@ -22,7 +22,7 @@ export { FormGroup, ModalShell, ScrollTop } from "./molecules";
 export type { FormGroupProps, ModalShellProps } from "./molecules";
 
 /* ── Organisms ────────── complex, self-contained sections ── */
-export { Header, Footer, AuthModals, DashboardChrome } from "./organisms";
+export { Header, Footer, AuthModals } from "./organisms";
 
 /* ── Templates ────────── page-level wrappers and guards ── */
 export { AuthGuard } from "./templates";
