@@ -34,7 +34,6 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/keptcarbon.css" />
         <link rel="stylesheet" href="/assets/css/index-page.css" />
         <link rel="stylesheet" href="/assets/css/kc-design.css" />
-        <link rel="stylesheet" href="/assets/css/auth.css" />
         <link rel="stylesheet" href="/assets/css/dashboard.css" />
         <link rel="stylesheet" href="/assets/css/map-draw.css" />
         <link rel="stylesheet" href="/assets/css/map-draw-redesign.css" />

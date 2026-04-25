@@ -3,9 +3,13 @@
 export type StoredUser = {
   id: string;
   fullname: string;
+  username?: string;
   email: string;
-  password: string;
+  password?: string;
   phone: string;
+  role: "farmer" | "editor" | "admin";
+  pictureUrl?: string;
+  provider?: string;
   createdAt: string;
 };
 

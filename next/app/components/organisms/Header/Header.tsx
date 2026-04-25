@@ -57,20 +57,21 @@ export default function Header() {
           {ready && user ? (
             <ul>
               <li className="dropdown">
-                <a 
-                  href="#" 
+                <Link 
+                  href="/" 
                   className={homeDropdownOpen ? "active" : ""} 
-                  onClick={(e) => { 
-                    e.preventDefault(); 
-                    setHomeDropdownOpen(!homeDropdownOpen); 
-                  }}
                 >
-                  <span>หน้าแรก</span> <i className="bi bi-chevron-down toggle-dropdown"></i>
-                </a>
+                  <span onClick={closeNav}>หน้าแรก</span> 
+                  <i 
+                    className="bi bi-chevron-down toggle-dropdown" 
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      e.stopPropagation();
+                      setHomeDropdownOpen(!homeDropdownOpen); 
+                    }}
+                  ></i>
+                </Link>
                 <ul className={homeDropdownOpen ? "dropdown-active" : ""}>
-                  <li>
-                    <a href="/#hero" onClick={closeNav}>หน้าแรก</a>
-                  </li>
                   <li>
                     <a href="/#project-about" onClick={closeNav}>เกี่ยวกับโครงการ</a>
                   </li>
@@ -97,6 +98,13 @@ export default function Header() {
                   แปลงของฉัน
                 </Link>
               </li>
+              {user.role === "admin" && (
+                <li>
+                  <Link href="/admin/users" onClick={closeNav}>
+                    จัดการผู้ใช้
+                  </Link>
+                </li>
+              )}
 
               <li className="d-xl-none">
                 <div className="mobile-auth-divider"></div>
@@ -130,20 +138,21 @@ export default function Header() {
           ) : (
             <ul>
               <li className="dropdown">
-                <a 
-                  href="#" 
+                <Link 
+                  href="/" 
                   className={homeDropdownOpen ? "active" : ""} 
-                  onClick={(e) => { 
-                    e.preventDefault(); 
-                    setHomeDropdownOpen(!homeDropdownOpen); 
-                  }}
                 >
-                  <span>หน้าแรก</span> <i className="bi bi-chevron-down toggle-dropdown"></i>
-                </a>
+                  <span onClick={closeNav}>หน้าแรก</span> 
+                  <i 
+                    className="bi bi-chevron-down toggle-dropdown" 
+                    onClick={(e) => { 
+                      e.preventDefault(); 
+                      e.stopPropagation();
+                      setHomeDropdownOpen(!homeDropdownOpen); 
+                    }}
+                  ></i>
+                </Link>
                 <ul className={homeDropdownOpen ? "dropdown-active" : ""}>
-                  <li>
-                    <a href="/#hero" onClick={closeNav}>หน้าแรก</a>
-                  </li>
                   <li>
                     <a href="/#project-about" onClick={closeNav}>เกี่ยวกับโครงการ</a>
                   </li>
@@ -154,6 +163,11 @@ export default function Header() {
                     <a href="/#contact" onClick={closeNav}>ติดต่อเรา</a>
                   </li>
                 </ul>
+              </li>
+              <li>
+                <Link href="/dashboard" onClick={closeNav}>
+                  แดชบอร์ด
+                </Link>
               </li>
               <li className="d-xl-none">
                 <div className="mobile-auth-divider"></div>
@@ -205,10 +219,6 @@ export default function Header() {
                 >
                   {(user.fullname?.[0] ?? "U").toUpperCase()}
                 </div>
-                <span className="d-none d-md-block fw-medium ms-2" style={{ color: "var(--heading-color)" }}>
-                  {user.fullname}
-                </span>
-                <i className="bi bi-chevron-down ms-1 text-secondary" style={{ fontSize: "12px" }}></i>
               </a>
 
               {dropdownOpen && (
