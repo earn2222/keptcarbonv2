@@ -57,17 +57,17 @@ export default function Header() {
           {ready && user ? (
             <ul>
               <li className="dropdown">
-                <Link 
-                  href="/" 
-                  className={homeDropdownOpen ? "active" : ""} 
+                <Link
+                  href="/"
+                  className={homeDropdownOpen ? "active" : ""}
                 >
-                  <span onClick={closeNav}>หน้าแรก</span> 
-                  <i 
-                    className="bi bi-chevron-down toggle-dropdown" 
-                    onClick={(e) => { 
-                      e.preventDefault(); 
+                  <span onClick={closeNav}>หน้าแรก</span>
+                  <i
+                    className="bi bi-chevron-down toggle-dropdown"
+                    onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
-                      setHomeDropdownOpen(!homeDropdownOpen); 
+                      setHomeDropdownOpen(!homeDropdownOpen);
                     }}
                   ></i>
                 </Link>
@@ -90,7 +90,7 @@ export default function Header() {
               </li>
               <li>
                 <Link href="/map-draw" onClick={closeNav}>
-                  วาดแปลงยาง
+                  คำนวณคาร์บอน
                 </Link>
               </li>
               <li>
@@ -138,17 +138,17 @@ export default function Header() {
           ) : (
             <ul>
               <li className="dropdown">
-                <Link 
-                  href="/" 
-                  className={homeDropdownOpen ? "active" : ""} 
+                <Link
+                  href="/"
+                  className={homeDropdownOpen ? "active" : ""}
                 >
-                  <span onClick={closeNav}>หน้าแรก</span> 
-                  <i 
-                    className="bi bi-chevron-down toggle-dropdown" 
-                    onClick={(e) => { 
-                      e.preventDefault(); 
+                  <span onClick={closeNav}>หน้าแรก</span>
+                  <i
+                    className="bi bi-chevron-down toggle-dropdown"
+                    onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
-                      setHomeDropdownOpen(!homeDropdownOpen); 
+                      setHomeDropdownOpen(!homeDropdownOpen);
                     }}
                   ></i>
                 </Link>
@@ -206,19 +206,32 @@ export default function Header() {
                   setDropdownOpen(!dropdownOpen);
                 }}
               >
-                <div
-                  className="d-flex align-items-center justify-content-center text-white"
-                  style={{
-                    width: "38px",
-                    height: "38px",
-                    borderRadius: "50%",
-                    backgroundColor: "var(--color-primary, #2d9e5f)",
-                    fontWeight: "600",
-                    fontSize: "16px",
-                  }}
-                >
-                  {(user.fullname?.[0] ?? "U").toUpperCase()}
-                </div>
+                {user.pictureUrl ? (
+                  <img
+                    src={user.pictureUrl}
+                    alt={user.fullname}
+                    style={{
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="d-flex align-items-center justify-content-center text-white"
+                    style={{
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "50%",
+                      backgroundColor: "var(--color-primary, #2d9e5f)",
+                      fontWeight: "600",
+                      fontSize: "16px",
+                    }}
+                  >
+                    {(user.fullname?.[0] ?? "U").toUpperCase()}
+                  </div>
+                )}
               </a>
 
               {dropdownOpen && (

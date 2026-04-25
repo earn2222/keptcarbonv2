@@ -78,14 +78,14 @@ export async function GET(request: NextRequest) {
     const profile: LineProfile = await profileRes.json();
 
     // ── Database Upsert (Register or Login) ────────
-    const email = \`\${profile.userId}@line.me\`;
-    const username = \`line_\${profile.userId.slice(0, 8)}\`;
+    const email = `${profile.userId}@line.me`;
+    const username = `line_${profile.userId.slice(0, 8)}`;
     const fullname = profile.displayName;
     const pictureUrl = profile.pictureUrl || "";
 
     // Check if user exists by line_user_id
     let dbUserResult = await pool.query(
-      \`SELECT id, email, role, provider FROM users WHERE line_user_id = $1 LIMIT 1\`,
+      `SELECT id, email, role, provider FROM users WHERE line_user_id = $1 LIMIT 1`,
       [profile.userId]
     );
 
@@ -94,16 +94,16 @@ export async function GET(request: NextRequest) {
     if (dbUserResult.rows.length === 0) {
       // Auto-register LINE user
       const insertResult = await pool.query(
-        \`INSERT INTO users (email, username, fullname, picture_url, provider, line_user_id, role)
+        `INSERT INTO users (email, username, fullname, picture_url, provider, line_user_id, role)
          VALUES ($1, $2, $3, $4, 'line', $5, 'user')
-         RETURNING id, email, role, provider\`,
+         RETURNING id, email, role, provider`,
         [email, username, fullname, pictureUrl, profile.userId]
       );
       dbUser = insertResult.rows[0];
     } else {
       // User exists, update their profile picture just in case it changed
       await pool.query(
-        \`UPDATE users SET picture_url = $1, fullname = $2 WHERE id = $3\`,
+        `UPDATE users SET picture_url = $1, fullname = $2 WHERE id = $3`,
         [pictureUrl, fullname, dbUserResult.rows[0].id]
       );
       dbUser = dbUserResult.rows[0];
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
 
     // Redirect to dashboard
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
-    
+
     response.cookies.set(AUTH_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
     });
-    
+
     // Clean up state cookie
     response.cookies.delete("line_oauth_state");
 
