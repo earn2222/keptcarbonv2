@@ -11,6 +11,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,6 +56,32 @@ export default function Header() {
         <nav id="navmenu" className="navmenu">
           {ready && user ? (
             <ul>
+              <li className="dropdown">
+                <a 
+                  href="#" 
+                  className={homeDropdownOpen ? "active" : ""} 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setHomeDropdownOpen(!homeDropdownOpen); 
+                  }}
+                >
+                  <span>หน้าแรก</span> <i className="bi bi-chevron-down toggle-dropdown"></i>
+                </a>
+                <ul className={homeDropdownOpen ? "dropdown-active" : ""}>
+                  <li>
+                    <a href="/#hero" onClick={closeNav}>หน้าแรก</a>
+                  </li>
+                  <li>
+                    <a href="/#project-about" onClick={closeNav}>เกี่ยวกับโครงการ</a>
+                  </li>
+                  <li>
+                    <a href="/#team" onClick={closeNav}>ทีมงานของเรา</a>
+                  </li>
+                  <li>
+                    <a href="/#contact" onClick={closeNav}>ติดต่อเรา</a>
+                  </li>
+                </ul>
+              </li>
               <li>
                 <Link href="/dashboard" onClick={closeNav}>
                   แดชบอร์ด
@@ -79,6 +106,14 @@ export default function Header() {
                   <div className="mobile-user-info">
                     <i className="bi bi-person-circle"></i> {user.fullname}
                   </div>
+                  <Link
+                    href="/profile"
+                    className="mobile-btn-profile"
+                    style={{ display: "block", padding: "10px 15px", color: "var(--heading-color)", textDecoration: "none", fontSize: "15px", borderBottom: "1px solid rgba(0,0,0,0.05)" }}
+                    onClick={closeNav}
+                  >
+                    <i className="bi bi-person me-2"></i> โปรไฟล์
+                  </Link>
                   <a
                     className="mobile-btn-logout"
                     href="#"
@@ -94,25 +129,31 @@ export default function Header() {
             </ul>
           ) : (
             <ul>
-              <li>
-                <a href="/#hero" onClick={closeNav} className="active">
-                  หน้าแรก
+              <li className="dropdown">
+                <a 
+                  href="#" 
+                  className={homeDropdownOpen ? "active" : ""} 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setHomeDropdownOpen(!homeDropdownOpen); 
+                  }}
+                >
+                  <span>หน้าแรก</span> <i className="bi bi-chevron-down toggle-dropdown"></i>
                 </a>
-              </li>
-              <li>
-                <a href="/#project-about" onClick={closeNav}>
-                  เกี่ยวกับโครงการ
-                </a>
-              </li>
-              <li>
-                <a href="/#team" onClick={closeNav}>
-                  ทีมงานของเรา
-                </a>
-              </li>
-              <li>
-                <a href="/#contact" onClick={closeNav}>
-                  ติดต่อเรา
-                </a>
+                <ul className={homeDropdownOpen ? "dropdown-active" : ""}>
+                  <li>
+                    <a href="/#hero" onClick={closeNav}>หน้าแรก</a>
+                  </li>
+                  <li>
+                    <a href="/#project-about" onClick={closeNav}>เกี่ยวกับโครงการ</a>
+                  </li>
+                  <li>
+                    <a href="/#team" onClick={closeNav}>ทีมงานของเรา</a>
+                  </li>
+                  <li>
+                    <a href="/#contact" onClick={closeNav}>ติดต่อเรา</a>
+                  </li>
+                </ul>
               </li>
               <li className="d-xl-none">
                 <div className="mobile-auth-divider"></div>
@@ -176,13 +217,17 @@ export default function Header() {
                   style={{ position: "absolute", top: "100%", right: 0, marginTop: "10px", border: "none", borderRadius: "10px", minWidth: "160px" }}
                 >
                   <li>
-                    <Link
-                      href="/profile"
+                    <a
+                      href="#"
                       className="dropdown-item d-flex align-items-center py-2"
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setDropdownOpen(false);
+                        router.push("/profile");
+                      }}
                     >
                       <i className="bi bi-person me-2 fs-5 text-secondary"></i> โปรไฟล์
-                    </Link>
+                    </a>
                   </li>
                   <li><hr className="dropdown-divider my-1" /></li>
                   <li>

@@ -12,9 +12,6 @@ export default function Home() {
               data-aos-duration="1000"
             >
               <div className="hero-content-frame">
-                <div className="hero-badge">
-                  <i className="bi bi-stars"></i> แพลตฟอร์ม GeoAI สำหรับเกษตรกร
-                </div>
                 <h1>
                   Kept<span className="gradient-text">Carbon</span>
                 </h1>
