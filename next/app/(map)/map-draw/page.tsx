@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import maplibregl, { type Map as MLMap, type Marker } from "maplibre-gl";
+import maplibregl, { type Map as MLMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   Chart,
@@ -45,6 +45,7 @@ Chart.register(
 
 type Step = 1 | 2 | 3 | 4 | 5;
 type Tab = "draw" | "shp";
+type NdviStatus = number | null | "loading" | "error";
 
 type PlotData = {
   name: string;
@@ -100,7 +101,6 @@ export default function MapDrawPage() {
   const [drawing, setDrawing] = useState(false);
   const drawingRef = useRef(false);
   const vertsRef = useRef<LngLat[]>([]);
-  const markersRef = useRef<Marker[]>([]);
   const finalGJRef = useRef<GeoJSON.Feature | null>(null);
   const [drawDone, setDrawDone] = useState(false);
   const [drawPreview, setDrawPreview] = useState("—");
@@ -113,11 +113,6 @@ export default function MapDrawPage() {
   const [basemap, setBasemap] = useState<"sat" | "street" | "topo">("sat");
   const [panelOpen, setPanelOpen] = useState(true);
   const [status, setStatus] = useState("🌍 แผนที่ลูกโลก — กด \"เริ่มวาดแปลง\" เพื่อบินไปยังประเทศไทย");
-
-  // Geom output panel
-  const [geomPanelOpen, setGeomPanelOpen] = useState(false);
-  const [geomText, setGeomText] = useState("");
-  const [copyLabel, setCopyLabel] = useState("⧉ คัดลอก GeoJSON");
 
   // Form
   const [pd, setPd] = useState<PlotData>({
@@ -146,6 +141,18 @@ export default function MapDrawPage() {
   // SHP state
   const [shpFile, setShpFile] = useState<File | null>(null);
   const [shpStatus, setShpStatus] = useState<{ msg: string; ok?: boolean } | null>(null);
+
+  // Parcel DB search state (auto-runs ST_Intersects after geometry is set)
+  const [hasGeom, setHasGeom] = useState(false);
+  const [searchRunning, setSearchRunning] = useState(false);
+  const [searchCount, setSearchCount] = useState<number | null>(null);
+  const [searchErr, setSearchErr] = useState<string | null>(null);
+  const [searchTruncated, setSearchTruncated] = useState(false);
+  const [parcelFeatures, setParcelFeatures] = useState<GeoJSON.Feature[]>([]);
+  const [tableOpen, setTableOpen] = useState(false);
+  const [ndviMap, setNdviMap] = useState<Record<number, NdviStatus>>({});
+  const [ndviFetching, setNdviFetching] = useState(false);
+  const [ndviProgress, setNdviProgress] = useState({ done: 0, total: 0 });
 
   // Age detection state
   const [analyzing, setAnalyzing] = useState(false);
@@ -228,7 +235,7 @@ export default function MapDrawPage() {
     map.on("load", () => {
       try {
         (map as unknown as { setProjection?: (p: { type: string }) => void }).setProjection?.({ type: "globe" });
-      } catch {}
+      } catch { }
       mapLoadedRef.current = true;
 
       map.addSource("draw-line", { type: "geojson", data: emptyFC() });
@@ -245,6 +252,18 @@ export default function MapDrawPage() {
         source: "draw-fill",
         paint: { "fill-color": "#2d9e5f", "fill-opacity": 0.12 },
       });
+      map.addSource("draw-verts", { type: "geojson", data: emptyFC() });
+      map.addLayer({
+        id: "draw-verts-l",
+        type: "circle",
+        source: "draw-verts",
+        paint: {
+          "circle-color": "#2d9e5f",
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 4, 14, 6],
+          "circle-stroke-color": "rgba(255,255,255,0.95)",
+          "circle-stroke-width": 2,
+        },
+      });
       map.addSource("plot", { type: "geojson", data: emptyFC() });
       map.addLayer({
         id: "plot-fill",
@@ -257,6 +276,47 @@ export default function MapDrawPage() {
         type: "line",
         source: "plot",
         paint: { "line-color": "#2d9e5f", "line-width": 2.5 },
+      });
+
+      map.addSource("matched-parcels", { type: "geojson", data: emptyFC() });
+      map.addLayer({
+        id: "matched-parcels-fill",
+        type: "fill",
+        source: "matched-parcels",
+        paint: { "fill-color": "#ff9100", "fill-opacity": 0.5 },
+      });
+      map.addLayer({
+        id: "matched-parcels-line",
+        type: "line",
+        source: "matched-parcels",
+        paint: { "line-color": "#ff6a00", "line-width": 2.4 },
+      });
+
+      const fmt = (v: unknown) => (v == null || v === "" ? "—" : String(v));
+      map.on("click", "matched-parcels-fill", (e) => {
+        if (drawingRef.current) return;
+        if (!e.features?.length) return;
+        const p = (e.features[0].properties ?? {}) as Record<string, unknown>;
+        const html = `
+          <div style="font-family:var(--font,inherit); font-size:12px; line-height:1.55; color:#222; min-width:200px;">
+            <div style="font-weight:700; font-size:13px; margin-bottom:5px; color:#1e7a47;">${fmt(p.farm_name)}</div>
+            <div><b>เลขประจำตัว:</b> ${fmt(p.farm_idc)}</div>
+            <div><b>เลขคำขอ:</b> ${fmt(p.app_no)} (แปลงที่ ${fmt(p.land_seq)})</div>
+            <div><b>หมู่ ${fmt(p.land_moo)}</b> ต.${fmt(p.tambon)} อ.${fmt(p.amphur)} จ.${fmt(p.province)}</div>
+            <div><b>ปีปลูก:</b> ${fmt(p.grow_year)} · <b>อายุ:</b> ${fmt(p.rubber_age)} ปี</div>
+            <div><b>พื้นที่:</b> ${fmt(p.grow_area)}</div>
+            <div><b>ประเภท:</b> ${fmt(p.rip_type)}</div>
+          </div>`;
+        new maplibregl.Popup({ closeButton: true, maxWidth: "320px" })
+          .setLngLat(e.lngLat)
+          .setHTML(html)
+          .addTo(map);
+      });
+      map.on("mouseenter", "matched-parcels-fill", () => {
+        if (!drawingRef.current) map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "matched-parcels-fill", () => {
+        if (!drawingRef.current) map.getCanvas().style.cursor = "";
       });
     });
 
@@ -274,7 +334,20 @@ export default function MapDrawPage() {
     const verts = vertsRef.current;
     const lineSrc = map.getSource("draw-line") as maplibregl.GeoJSONSource | undefined;
     const fillSrc = map.getSource("draw-fill") as maplibregl.GeoJSONSource | undefined;
-    if (!lineSrc || !fillSrc) return;
+    const vertsSrc = map.getSource("draw-verts") as maplibregl.GeoJSONSource | undefined;
+    if (!lineSrc || !fillSrc || !vertsSrc) return;
+    if (verts.length) {
+      vertsSrc.setData({
+        type: "FeatureCollection",
+        features: verts.map((v) => ({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: v },
+          properties: {},
+        })),
+      });
+    } else {
+      vertsSrc.setData(emptyFC());
+    }
     if (verts.length < 2) {
       lineSrc.setData(emptyFC());
       fillSrc.setData(emptyFC());
@@ -295,16 +368,6 @@ export default function MapDrawPage() {
     }
   }, []);
 
-  const addMarker = useCallback((ll: LngLat) => {
-    const map = mapRef.current;
-    if (!map) return;
-    const el = document.createElement("div");
-    el.className = "vdot";
-    markersRef.current.push(
-      new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(ll).addTo(map),
-    );
-  }, []);
-
   const fitPlot = useCallback(() => {
     const map = mapRef.current;
     const final = finalGJRef.current;
@@ -318,7 +381,7 @@ export default function MapDrawPage() {
         [Math.max(...lngs), Math.max(...lats)],
       ],
       {
-        padding: { top: 80, bottom: 80, left: 80, right: isMobile() ? 80 : 400 },
+        padding: { top: 80, bottom: 80, left: isMobile() ? 80 : 400, right: 80 },
         duration: 900,
         pitch: 18,
       },
@@ -364,6 +427,7 @@ export default function MapDrawPage() {
     const rai = sqm / 1600;
     setDrawPreview(`${rai.toFixed(2)} ไร่ · ${verts.length} จุด`);
     setDrawDone(true);
+    setHasGeom(true);
     setStatus(`✓ วาดแปลงเสร็จ: ${rai.toFixed(2)} ไร่ — กด "ยืนยันแปลง"`);
     fitPlot();
   }, [fitPlot]);
@@ -375,7 +439,6 @@ export default function MapDrawPage() {
     const onClick = (e: maplibregl.MapMouseEvent) => {
       if (!drawingRef.current) return;
       vertsRef.current.push([e.lngLat.lng, e.lngLat.lat]);
-      addMarker([e.lngLat.lng, e.lngLat.lat]);
       previewDraw();
       setStatus(`จุดที่ ${vertsRef.current.length} — Double-click เพื่อปิดแปลง`);
     };
@@ -390,7 +453,7 @@ export default function MapDrawPage() {
       map.off("click", onClick);
       map.off("dblclick", onDbl);
     };
-  }, [addMarker, previewDraw, finishDraw]);
+  }, [previewDraw, finishDraw]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -415,65 +478,184 @@ export default function MapDrawPage() {
     }
   };
 
-  const undoVertex = () => {
-    if (!vertsRef.current.length) return;
-    vertsRef.current.pop();
-    markersRef.current.pop()?.remove();
-    previewDraw();
-    setStatus(`ยกเลิกจุดล่าสุด (เหลือ ${vertsRef.current.length} จุด)`);
-  };
-
   const clearDraw = () => {
     vertsRef.current = [];
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
     finalGJRef.current = null;
     drawingRef.current = false;
     setDrawing(false);
     setDrawDone(false);
     setDrawPreview("—");
+    setHasGeom(false);
+    setSearchCount(null);
+    setSearchErr(null);
+    setSearchTruncated(false);
+    setParcelFeatures([]);
+    setTableOpen(false);
+    setNdviMap({});
+    setNdviFetching(false);
+    setNdviProgress({ done: 0, total: 0 });
     const map = mapRef.current;
     if (map && mapLoadedRef.current) {
       (map.getSource("draw-line") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
       (map.getSource("draw-fill") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
+      (map.getSource("draw-verts") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
       (map.getSource("plot") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
+      (map.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
     }
     setStatus("ล้างแปลงเรียบร้อย");
   };
 
-  const confirmDraw = () => {
+  // ===== PARCEL DB SEARCH =====
+  const runParcelSearch = useCallback(async () => {
     const final = finalGJRef.current;
-    if (!final || final.geometry.type !== "Polygon") return;
-    updateAreaFromFeat(final);
-    const coords = final.geometry.coordinates[0] as LngLat[];
-    const geomObj = {
-      type: "Polygon",
-      coordinates: [coords.map(([lng, lat]) => [+lng.toFixed(6), +lat.toFixed(6)])],
-    };
-    const geomStr = JSON.stringify(geomObj, null, 2);
-    setGeomText(geomStr);
-    setGeomPanelOpen(true);
-    goStep(2);
-  };
-
-  const copyGeom = () => {
-    navigator.clipboard
-      .writeText(geomText)
-      .then(() => {
-        setCopyLabel("✓ คัดลอกแล้ว!");
-        setTimeout(() => setCopyLabel("⧉ คัดลอก GeoJSON"), 2500);
-      })
-      .catch(() => {
-        const ta = document.createElement("textarea");
-        ta.value = geomText;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        setCopyLabel("✓ คัดลอกแล้ว!");
-        setTimeout(() => setCopyLabel("⧉ คัดลอก GeoJSON"), 2500);
+    if (!final?.geometry) {
+      setSearchErr("กรุณาวาดแปลงหรืออัปโหลด Shapefile ก่อน");
+      return;
+    }
+    setSearchRunning(true);
+    setSearchErr(null);
+    setSearchCount(null);
+    setSearchTruncated(false);
+    try {
+      const res = await fetch("/api/parcels/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ geometry: final.geometry, relation: "intersects" }),
       });
-  };
+      const data: {
+        features?: GeoJSON.Feature[];
+        count?: number;
+        truncated?: boolean;
+        error?: string;
+      } = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error ?? `HTTP ${res.status}`);
+      }
+      const map = mapRef.current;
+      const features = data.features ?? [];
+      console.log("[parcel-search]", {
+        count: data.count,
+        relation: "intersects",
+        sample: features[0],
+      });
+      if (map && mapLoadedRef.current) {
+        const src = map.getSource("matched-parcels") as
+          | maplibregl.GeoJSONSource
+          | undefined;
+        src?.setData({ type: "FeatureCollection", features });
+
+        if (features.length > 0) {
+          let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          const walk = (coords: unknown): void => {
+            if (!Array.isArray(coords)) return;
+            if (typeof coords[0] === "number" && typeof coords[1] === "number") {
+              const x = coords[0] as number;
+              const y = coords[1] as number;
+              if (x < minX) minX = x;
+              if (y < minY) minY = y;
+              if (x > maxX) maxX = x;
+              if (y > maxY) maxY = y;
+              return;
+            }
+            for (const c of coords) walk(c);
+          };
+          features.forEach((f) => walk((f.geometry as { coordinates?: unknown })?.coordinates));
+          const finalCoords =
+            final.geometry.type === "Polygon"
+              ? (final.geometry.coordinates[0] as [number, number][])
+              : [];
+          finalCoords.forEach(([x, y]) => {
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          });
+          if (Number.isFinite(minX) && Number.isFinite(minY)) {
+            map.fitBounds(
+              [
+                [minX, minY],
+                [maxX, maxY],
+              ],
+              {
+                padding: { top: 80, bottom: 80, left: isMobile() ? 80 : 400, right: 80 },
+                duration: 700,
+                maxZoom: 16,
+              },
+            );
+          }
+        }
+      }
+      setParcelFeatures(features);
+      setTableOpen(features.length > 0);
+      setSearchCount(data.count ?? features.length);
+      setSearchTruncated(Boolean(data.truncated));
+      if ((data.count ?? 0) === 0) {
+        setStatus("ไม่พบแปลงในฐานข้อมูลที่ตรงเงื่อนไข");
+      } else {
+        setStatus(`พบ ${data.count} แปลงในฐานข้อมูล (ตัดกับพื้นที่)`);
+      }
+    } catch (err) {
+      setSearchErr(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSearchRunning(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasGeom) return;
+    runParcelSearch();
+  }, [hasGeom, runParcelSearch]);
+
+  const fetchNdviForIndex = useCallback(async (index: number) => {
+    const feat = parcelFeatures[index];
+    if (!feat?.geometry) return;
+    setNdviMap((prev) => ({ ...prev, [index]: "loading" }));
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 90_000);
+      try {
+        const res = await fetch("/api/ndvi", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ geometry: feat.geometry }),
+          signal: controller.signal,
+        });
+        const data = (await res.json()) as { ndvi?: number | null; source?: string; error?: string };
+        if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+        setNdviMap((prev) => ({ ...prev, [index]: data.ndvi ?? null }));
+      } finally {
+        clearTimeout(tid);
+      }
+    } catch {
+      setNdviMap((prev) => ({ ...prev, [index]: "error" }));
+    }
+  }, [parcelFeatures]);
+
+  const fetchAllNdvi = useCallback(async () => {
+    if (ndviFetching || parcelFeatures.length === 0) return;
+    setNdviFetching(true);
+    const MAX = Math.min(parcelFeatures.length, 20);
+    setNdviProgress({ done: 0, total: MAX });
+    setNdviMap((prev) => {
+      const next = { ...prev };
+      for (let i = 0; i < MAX; i++) next[i] = "loading";
+      return next;
+    });
+    const CONCURRENCY = 3;
+    let done = 0;
+    for (let start = 0; start < MAX; start += CONCURRENCY) {
+      const chunk = Array.from(
+        { length: Math.min(CONCURRENCY, MAX - start) },
+        (_, k) => start + k,
+      );
+      await Promise.all(chunk.map((i) => fetchNdviForIndex(i)));
+      done += chunk.length;
+      setNdviProgress({ done, total: MAX });
+    }
+    setNdviFetching(false);
+  }, [parcelFeatures, ndviFetching, fetchNdviForIndex]);
 
   // ===== SHP IMPORT =====
   const onShpSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -507,15 +689,16 @@ export default function MapDrawPage() {
       const final: GeoJSON.Feature =
         poly.geometry.type === "MultiPolygon"
           ? {
-              type: "Feature",
-              geometry: {
-                type: "Polygon",
-                coordinates: poly.geometry.coordinates[0] as GeoJSON.Position[][],
-              },
-              properties: poly.properties ?? {},
-            }
+            type: "Feature",
+            geometry: {
+              type: "Polygon",
+              coordinates: poly.geometry.coordinates[0] as GeoJSON.Position[][],
+            },
+            properties: poly.properties ?? {},
+          }
           : (poly as GeoJSON.Feature);
       finalGJRef.current = final;
+      setHasGeom(true);
       const props = (poly.properties ?? {}) as Record<string, unknown>;
       const nm = (props.PLOT_NAME ?? props.NAME) as string | undefined;
       if (nm) setPd((p) => ({ ...p, name: nm }));
@@ -525,8 +708,10 @@ export default function MapDrawPage() {
       }
       updateAreaFromFeat(final);
       fitPlot();
-      setShpStatus({ msg: `✓ โหลดสำเร็จ — ${feats.length} feature`, ok: true });
-      setTimeout(() => goStep(2), 800);
+      setShpStatus({
+        msg: `✓ โหลดสำเร็จ — ${feats.length} feature — สามารถค้นหาแปลงในฐานข้อมูล หรือกด "ดำเนินการต่อ"`,
+        ok: true,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setShpStatus({ msg: "✗ " + msg });
@@ -899,20 +1084,6 @@ export default function MapDrawPage() {
         </div>
       </div>
 
-      {/* Geom Float Panel */}
-      <div id="geom-panel" className={geomPanelOpen ? "show" : ""}>
-        <div id="geom-panel-header">
-          <span id="geom-panel-title">📍 GeoJSON Polygon</span>
-          <button id="geom-panel-close" onClick={() => setGeomPanelOpen(false)} title="ปิด">
-            ✕
-          </button>
-        </div>
-        <pre id="geom-output-pre">{geomText}</pre>
-        <button id="geom-copy-btn" onClick={copyGeom}>
-          {copyLabel}
-        </button>
-      </div>
-
       {/* Basemap card */}
       <div id="basemap-card" className={basemapOpen ? "open" : ""}>
         <div className="basemap-header">
@@ -996,24 +1167,6 @@ export default function MapDrawPage() {
 
             {tab === "draw" && (
               <div>
-                <div className="info-box">
-                  <div className="info-box-title">วิธีวาด</div>
-                  <ol className="info-steps">
-                    <li>
-                      <span className="sn">1</span>กดปุ่ม &quot;เริ่มวาดแปลง&quot; ด้านล่าง
-                    </li>
-                    <li>
-                      <span className="sn">2</span>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต
-                    </li>
-                    <li>
-                      <span className="sn">3</span>ดับเบิลคลิกเพื่อปิดและบันทึกแปลง
-                    </li>
-                    <li>
-                      <span className="sn">4</span>กด &quot;ยืนยันแปลง&quot; ด้านล่าง
-                    </li>
-                  </ol>
-                </div>
-
                 <div className={`draw-done${drawDone ? " show" : ""}`}>
                   <i className="bi bi-check-circle-fill"></i>
                   <div className="draw-done-text">
@@ -1022,17 +1175,11 @@ export default function MapDrawPage() {
                   </div>
                 </div>
 
-                <button className="btn btn-outline" onClick={drawing ? clearDraw : startDrawFlow}>
+                <button className="btn btn-primary" onClick={drawing ? clearDraw : startDrawFlow}>
                   <i className={`bi ${drawing ? "bi-stop-circle" : "bi-pencil"} me-1`}></i>{" "}
                   {drawing ? "หยุดวาด" : "เริ่มวาดแปลง"}
                 </button>
-                <button className="btn btn-primary" onClick={confirmDraw} disabled={!drawDone}>
-                  <i className="bi bi-check-circle me-1"></i> ยืนยันแปลงที่วาด
-                </button>
-                <button className="btn btn-outline" onClick={undoVertex}>
-                  <i className="bi bi-arrow-counterclockwise me-1"></i> ยกเลิกจุดล่าสุด
-                </button>
-                <button className="btn btn-danger" onClick={clearDraw}>
+                <button className="btn btn-outline" onClick={clearDraw}>
                   <i className="bi bi-trash me-1"></i> ล้างแปลง
                 </button>
               </div>
@@ -1070,6 +1217,189 @@ export default function MapDrawPage() {
                 <button className="btn btn-primary" onClick={loadShp} disabled={!shpFile}>
                   <i className="bi bi-upload me-1"></i> โหลดและแสดงบนแผนที่
                 </button>
+              </div>
+            )}
+
+            {(searchRunning || searchErr || searchCount !== null) && (
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed rgba(45,158,95,0.15)" }}>
+                {/* Header row */}
+                <div
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}
+                >
+                  <div className="info-box-title" style={{ margin: 0 }}>
+                    <i className="bi bi-table" style={{ marginRight: 6 }}></i>
+                    ผลการค้นหาแปลงในฐานข้อมูล
+                  </div>
+                  {!searchRunning && !searchErr && parcelFeatures.length > 0 && (
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      {tableOpen && (
+                        <button
+                          onClick={fetchAllNdvi}
+                          disabled={ndviFetching}
+                          title="ดึง NDVI จาก Google Earth Engine (สูงสุด 20 แปลงแรก, 3 แปลงพร้อมกัน)"
+                          style={{
+                            background: ndviFetching ? "rgba(45,158,95,0.06)" : "rgba(45,158,95,0.12)",
+                            border: "1px solid rgba(45,158,95,0.25)",
+                            borderRadius: 6, padding: "3px 8px",
+                            cursor: ndviFetching ? "not-allowed" : "pointer",
+                            color: "var(--kc-green-d, #1e7a47)", fontSize: 10, fontWeight: 700,
+                            display: "flex", alignItems: "center", gap: 4,
+                          }}
+                        >
+                          {ndviFetching
+                            ? <><span className="spinner-border spinner-border-sm" style={{ width: 10, height: 10 }} /> ดึง NDVI {ndviProgress.done}/{ndviProgress.total}...</>
+                            : <><i className="bi bi-globe2" /> ดึง NDVI (GEE)</>}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setTableOpen((v) => !v)}
+                        style={{
+                          background: "none", border: "none", cursor: "pointer",
+                          color: "var(--kc-green-d, #1e7a47)", fontSize: 11, fontWeight: 700,
+                          display: "flex", alignItems: "center", gap: 4, padding: "2px 6px",
+                        }}
+                      >
+                        {tableOpen ? "ซ่อน" : "แสดงตาราง"}
+                        <i className={`bi bi-chevron-${tableOpen ? "up" : "down"}`} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Loading */}
+                {searchRunning && (
+                  <div style={{ fontSize: 12, color: "var(--text-mid)", display: "flex", alignItems: "center", gap: 8 }}>
+                    <span className="spinner-border spinner-border-sm" role="status" />
+                    กำลังค้นหาแปลงที่ทับซ้อน...
+                  </div>
+                )}
+
+                {/* Error */}
+                {!searchRunning && searchErr && (
+                  <div style={{ fontSize: 12, color: "rgba(255,100,110,0.85)" }}>✗ {searchErr}</div>
+                )}
+
+                {/* Summary badge */}
+                {!searchRunning && !searchErr && searchCount !== null && (
+                  <div style={{ fontSize: 12, lineHeight: 1.5, marginBottom: parcelFeatures.length > 0 ? 8 : 0, color: searchCount > 0 ? "var(--green)" : "var(--text-dim)" }}>
+                    {searchCount > 0 ? (
+                      <>
+                        ✓ พบ <strong>{searchCount.toLocaleString()}</strong> แปลงที่ทับซ้อนกับขอบเขต
+                        {searchTruncated && (
+                          <span style={{ color: "rgba(255,193,7,0.8)" }}> (แสดงไม่เกิน 2,000 แปลง)</span>
+                        )}
+                      </>
+                    ) : (
+                      <>ไม่พบแปลงที่ทับซ้อนกับขอบเขต</>
+                    )}
+                  </div>
+                )}
+
+                {/* Results table */}
+                {!searchRunning && !searchErr && tableOpen && parcelFeatures.length > 0 && (
+                  <div style={{ overflowX: "auto", borderRadius: 10, border: "1px solid rgba(45,158,95,0.18)", marginTop: 4 }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                      <thead>
+                        <tr style={{ background: "rgba(45,158,95,0.10)" }}>
+                          {["ชื่อ", "เลขทะเบียน", "อำเภอ", "จังหวัด", "ปีปลูก", "อายุ", "พื้นที่"].map((h) => (
+                            <th key={h} style={{
+                              padding: "7px 8px", textAlign: "left", fontWeight: 700,
+                              color: "var(--kc-green-d, #1e7a47)", whiteSpace: "nowrap",
+                              borderBottom: "1px solid rgba(45,158,95,0.15)",
+                            }}>{h}</th>
+                          ))}
+                          <th style={{
+                            padding: "7px 8px", textAlign: "left", fontWeight: 700,
+                            color: "var(--kc-green-d, #1e7a47)", whiteSpace: "nowrap",
+                            borderBottom: "1px solid rgba(45,158,95,0.15)",
+                          }}>
+                            <span title="Normalized Difference Vegetation Index — Google Earth Engine Sentinel-2/Landsat-9">
+                              NDVI <i className="bi bi-globe2" style={{ fontSize: 9, opacity: 0.7 }} />
+                            </span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parcelFeatures.slice(0, 200).map((feat, i) => {
+                          const p = (feat.properties ?? {}) as Record<string, unknown>;
+                          const fmt = (v: unknown) => (v == null || v === "" ? "—" : String(v));
+                          const flyTo = () => {
+                            const map = mapRef.current;
+                            if (!map || !feat.geometry) return;
+                            const coords = feat.geometry.type === "Polygon"
+                              ? (feat.geometry as GeoJSON.Polygon).coordinates[0]
+                              : feat.geometry.type === "MultiPolygon"
+                                ? (feat.geometry as GeoJSON.MultiPolygon).coordinates[0][0]
+                                : null;
+                            if (!coords?.length) return;
+                            const lngs = coords.map(([x]) => x);
+                            const lats = coords.map(([, y]) => y);
+                            map.fitBounds(
+                              [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+                              { padding: 80, duration: 600, maxZoom: 18 },
+                            );
+                          };
+                          return (
+                            <tr
+                              key={i}
+                              onClick={flyTo}
+                              style={{
+                                cursor: "pointer",
+                                borderBottom: "1px solid rgba(45,158,95,0.08)",
+                                background: i % 2 === 0 ? "transparent" : "rgba(45,158,95,0.03)",
+                                transition: "background 0.15s",
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(45,158,95,0.10)")}
+                              onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 0 ? "transparent" : "rgba(45,158,95,0.03)")}
+                            >
+                              <td style={{ padding: "6px 8px", maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={fmt(p.farm_name)}>{fmt(p.farm_name)}</td>
+                              <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.farm_idc)}</td>
+                              <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.amphur)}</td>
+                              <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.province)}</td>
+                              <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.grow_year)}</td>
+                              <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.rubber_age)}</td>
+                              <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.grow_area)}</td>
+                              <td
+                                style={{ padding: "6px 8px", whiteSpace: "nowrap", textAlign: "center" }}
+                                onClick={(e) => { e.stopPropagation(); if (ndviMap[i] !== "loading") fetchNdviForIndex(i); }}
+                                title={ndviMap[i] === undefined ? "คลิกเพื่อดึง NDVI จาก Google Earth Engine" : undefined}
+                              >
+                                {ndviMap[i] === undefined && (
+                                  <span style={{ cursor: "pointer", color: "rgba(45,158,95,0.55)", fontSize: 10, textDecoration: "underline dotted" }}>ดึง</span>
+                                )}
+                                {ndviMap[i] === "loading" && (
+                                  <span className="spinner-border spinner-border-sm" style={{ width: 10, height: 10 }} />
+                                )}
+                                {ndviMap[i] === "error" && (
+                                  <span style={{ color: "rgba(220,53,69,0.8)", fontSize: 10, cursor: "pointer" }} title="เกิดข้อผิดพลาด — คลิกลองใหม่">✗</span>
+                                )}
+                                {ndviMap[i] === null && (
+                                  <span style={{ color: "var(--text-dim)", fontSize: 10 }}>N/A</span>
+                                )}
+                                {typeof ndviMap[i] === "number" && (
+                                  <span style={{
+                                    fontWeight: 700, fontSize: 11,
+                                    color: (ndviMap[i] as number) < 0.1 ? "#c0392b"
+                                      : (ndviMap[i] as number) < 0.3 ? "#e67e22"
+                                        : (ndviMap[i] as number) < 0.5 ? "#d4ac0d"
+                                          : "#2d9e5f",
+                                  }}>
+                                    {(ndviMap[i] as number).toFixed(3)}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    {parcelFeatures.length > 200 && (
+                      <div style={{ padding: "6px 10px", fontSize: 11, color: "var(--text-dim)", textAlign: "center", borderTop: "1px solid rgba(45,158,95,0.1)" }}>
+                        แสดง 200 แถวแรก จาก {parcelFeatures.length.toLocaleString()} รายการ
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -552,12 +552,12 @@
     }
 
     /* ============================================================
-   SIDE PANEL (desktop right, mobile bottom sheet)
+   SIDE PANEL (desktop left, mobile bottom sheet)
 ============================================================ */
     #panel {
       position: fixed;
       top: 114px;
-      right: 24px;
+      left: 24px;
       bottom: auto;
       max-height: calc(100vh - 138px);
       width: var(--panel-w);
@@ -572,7 +572,7 @@
       flex-direction: column;
       padding: 0;
       overflow: hidden;
-      transform: translateX(120%);
+      transform: translateX(-120%);
       opacity: 0;
       pointer-events: none;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -587,7 +587,7 @@
     #btn-open-panel {
       position: fixed;
       top: 114px;
-      right: 24px;
+      left: 24px;
       width: 48px;
       height: 48px;
       background: #ffffff;
