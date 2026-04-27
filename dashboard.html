@@ -847,24 +847,24 @@
             <i class="bi bi-bar-chart-line-fill"></i>
             ปริมาณคาร์บอนตามอายุต้นยางพารา
           </h3>
-          <span class="panel-subtitle" style="font-size:11px;color:var(--text-3);">หน่วย: tCO₂e/ไร่ · ความหนาแน่น 80 ต้น/ไร่</span>
+          <span class="panel-subtitle" style="font-size:11px;color:var(--text-3);">ค่าประมาณตามสูตร · tCO₂e/ไร่ · ความหนาแน่น 80 ต้น/ไร่</span>
         </div>
         <div class="panel-body">
           <div class="age-legend">
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#86efac;"></span> 1–5 ปี (เริ่มต้น)
+              <span class="legend-dot" style="background:#86efac;"></span> 1–5 ปี · คาร์บอนน้อย
             </div>
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#34d399;"></span> 6–12 ปี (กำลังเติบโต)
+              <span class="legend-dot" style="background:#34d399;"></span> 6–12 ปี · สะสมเร็ว
             </div>
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#059669;"></span> 13–18 ปี (ให้ผลสูง)
+              <span class="legend-dot" style="background:#059669;"></span> 13–18 ปี · คาร์บอนสูง
             </div>
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#065f46;"></span> 19–25 ปี (ผลผลิตสูงสุด)
+              <span class="legend-dot" style="background:#065f46;"></span> 19–25 ปี · คงตัว
             </div>
             <div class="age-legend-item" id="plot-overlay-legend" style="display:none;">
-              <span class="legend-dot" style="background:#065f46;border-radius:50%;"></span> แปลงในระบบ
+              <span class="legend-dot" style="background:#f97316;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #f97316;"></span> ค่าจริงแปลงในระบบ
             </div>
           </div>
           <div class="chart-wrap-lg"><canvas id="age-chart"></canvas></div>
@@ -1110,13 +1110,13 @@
             },
             ...(scatterPts.length > 0 ? [{
               type: 'scatter',
-              label: 'แปลงในระบบ',
+              label: 'ค่าจริงแปลงในระบบ',
               data: scatterPts.map(pt => ({ x: labels[pt.x], y: pt.y })),
-              backgroundColor: '#065f46',
+              backgroundColor: '#f97316',
               borderColor: '#fff',
               borderWidth: 2,
-              pointRadius: 7,
-              pointHoverRadius: 9,
+              pointRadius: 8,
+              pointHoverRadius: 10,
               order: 0
             }] : [])
           ]
@@ -1137,9 +1137,9 @@
                 title: items => `ต้นยางอายุ ${items[0].label}`,
                 label: c => {
                   if (c.dataset.label === 'เส้นแนวโน้ม') return null;
-                  if (c.dataset.label === 'แปลงในระบบ')
-                    return ` แปลง: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
-                  return ` คาร์บอน: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
+                  if (c.dataset.label === 'ค่าจริงแปลงในระบบ')
+                    return ` 🟠 ค่าจริง: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
+                  return ` 📊 ค่าประมาณ: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
                 }
               }
             }
