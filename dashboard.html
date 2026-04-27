@@ -777,30 +777,30 @@
       <!-- ── STAT CARDS ── -->
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">แปลงในระบบทั้งหมด</div>
+          <div class="stat-label">จำนวนแปลงสวนยาง</div>
           <div class="stat-body">
             <div><span class="stat-num" id="stat-plots">0</span><span class="stat-unit">แปลง</span></div>
             <div class="stat-icon-wrap ic-purple"><i class="bi bi-layers-fill"></i></div>
           </div>
-          <div class="stat-foot"><i class="bi bi-clipboard-data"></i> ลงทะเบียนในระบบทั้งหมด</div>
+          <div class="stat-foot"><i class="bi bi-clipboard-data"></i> แปลงที่ลงทะเบียนในระบบแล้ว</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-label">พื้นที่รวม</div>
+          <div class="stat-label">พื้นที่สวนยางรวม</div>
           <div class="stat-body">
             <div><span class="stat-num" id="stat-area">0</span><span class="stat-unit">ไร่</span></div>
             <div class="stat-icon-wrap ic-amber"><i class="bi bi-map-fill"></i></div>
           </div>
-          <div class="stat-foot"><i class="bi bi-rulers"></i> พื้นที่รวมของทุกแปลง</div>
+          <div class="stat-foot"><i class="bi bi-rulers"></i> พื้นที่รวมของทุกแปลงในระบบ</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-label">คาร์บอนสะสมรวม</div>
+          <div class="stat-label">คาร์บอนที่กักเก็บได้รวม</div>
           <div class="stat-body">
-            <div><span class="stat-num" id="stat-carbon">0</span><span class="stat-unit">tCO₂e</span></div>
+            <div><span class="stat-num" id="stat-carbon">0</span><span class="stat-unit">ตัน CO₂</span></div>
             <div class="stat-icon-wrap ic-green"><i class="bi bi-cloud-check-fill"></i></div>
           </div>
-          <div class="stat-foot"><i class="bi bi-arrow-up-right up"></i> ประเมินจากทุกแปลงในระบบ</div>
+          <div class="stat-foot"><i class="bi bi-arrow-up-right up"></i> คิดจากทุกแปลงที่ประเมินแล้ว</div>
         </div>
 
       </div>
@@ -836,26 +836,26 @@
         <div class="panel-head">
           <h3 class="panel-title">
             <i class="bi bi-bar-chart-line-fill"></i>
-            ปริมาณคาร์บอนตามอายุต้นยางพารา
+            ต้นยางแต่ละอายุกักเก็บคาร์บอนได้เท่าไหร่?
           </h3>
-          <span class="panel-subtitle" style="font-size:11px;color:var(--text-3);">ค่าประมาณตามสูตร · tCO₂e/ไร่ · ความหนาแน่น 80 ต้น/ไร่</span>
+          <span class="panel-subtitle" style="font-size:11px;color:var(--text-3);">ตันคาร์บอน CO₂ ต่อไร่ · สวนยาง 80 ต้น/ไร่ (ค่าประมาณ)</span>
         </div>
         <div class="panel-body">
           <div class="age-legend">
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#86efac;"></span> 1–5 ปี · คาร์บอนน้อย
+              <span class="legend-dot" style="background:#86efac;"></span> 1–5 ปี · กักเก็บได้น้อย
             </div>
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#34d399;"></span> 6–12 ปี · สะสมเร็ว
+              <span class="legend-dot" style="background:#34d399;"></span> 6–12 ปี · กักเก็บเพิ่มขึ้นเร็ว
             </div>
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#059669;"></span> 13–18 ปี · คาร์บอนสูง
+              <span class="legend-dot" style="background:#059669;"></span> 13–18 ปี · กักเก็บได้มาก
             </div>
             <div class="age-legend-item">
-              <span class="legend-dot" style="background:#065f46;"></span> 19–25 ปี · คงตัว
+              <span class="legend-dot" style="background:#065f46;"></span> 19–25 ปี · กักเก็บคงที่
             </div>
             <div class="age-legend-item" id="plot-overlay-legend" style="display:none;">
-              <span class="legend-dot" style="background:#f97316;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #f97316;"></span> ค่าจริงแปลงในระบบ
+              <span class="legend-dot" style="background:#f97316;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #f97316;"></span> ค่าจริงจากแปลงในระบบ
             </div>
           </div>
           <div class="chart-wrap-lg"><canvas id="age-chart"></canvas></div>
@@ -1125,8 +1125,8 @@
                 label: c => {
                   if (c.dataset.label === 'เส้นแนวโน้ม') return null;
                   if (c.dataset.label === 'ค่าจริงแปลงในระบบ')
-                    return ` 🟠 ค่าจริง: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
-                  return ` 📊 ค่าประมาณ: ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} tCO₂e/ไร่`;
+                    return ` 🟠 แปลงของคุณ: กักเก็บได้ ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ตัน CO₂/ไร่`;
+                  return ` 📊 กักเก็บได้ประมาณ ${c.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ตัน CO₂/ไร่`;
                 }
               }
             }
@@ -1149,7 +1149,7 @@
               },
               grid: { color: 'rgba(0,0,0,0.04)' },
               border: { display: false },
-              title: { display: true, text: 'tCO₂e/ไร่', color: '#94a3b8', font: { size: 10 } }
+              title: { display: true, text: 'ตัน CO₂ / ไร่', color: '#94a3b8', font: { size: 10 } }
             }
           }
         }
