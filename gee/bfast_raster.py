@@ -335,6 +335,26 @@ def sample_raster_at_geometry(
     bounds = geom_shape.bounds  # (minx, miny, maxx, maxy)
 
     with rasterio.open(raster_path) as src:
+        # If the raster is not georeferenced, sampling by lat/lon geometries will never match.
+        try:
+            if src.crs is None:
+                return {
+                    "planting_year": None,
+                    "rubber_age": None,
+                    "confidence": None,
+                    "planting_year_mode": None,
+                    "reason": "raster_missing_crs",
+                }
+        except Exception:
+            # If rasterio can't even expose CRS, treat as invalid georeferencing.
+            return {
+                "planting_year": None,
+                "rubber_age": None,
+                "confidence": None,
+                "planting_year_mode": None,
+                "reason": "raster_invalid",
+            }
+
         # Reproject bounds to raster CRS if needed
         from rasterio.crs import CRS
         from pyproj import Transformer
@@ -351,8 +371,34 @@ def sample_raster_at_geometry(
         else:
             minx, miny, maxx, maxy = bounds
 
-        window = from_bounds(minx, miny, maxx, maxy, src.transform).round_offsets().round_lengths()
+        # Clamp to raster bounds; parcels can be outside the raster extent.
+        rb = src.bounds
+        minx2 = max(minx, rb.left)
+        miny2 = max(miny, rb.bottom)
+        maxx2 = min(maxx, rb.right)
+        maxy2 = min(maxy, rb.top)
+
+        # No overlap with raster
+        if not (maxx2 > minx2 and maxy2 > miny2):
+            return {
+                "planting_year": None,
+                "rubber_age": None,
+                "confidence": None,
+                "planting_year_mode": None,
+                "reason": "outside_raster_extent",
+            }
+
+        window = from_bounds(minx2, miny2, maxx2, maxy2, src.transform).round_offsets().round_lengths()
         window_transform = src.window_transform(window)
+
+        if window.width <= 0 or window.height <= 0:
+            return {
+                "planting_year": None,
+                "rubber_age": None,
+                "confidence": None,
+                "planting_year_mode": None,
+                "reason": "empty_window",
+            }
 
         data = src.read(window=window)      # shape: (bands, rows, cols)
         band_names = ["planting_year", "rubber_age", "confidence"]
@@ -384,5 +430,9 @@ def sample_raster_at_geometry(
             result["planting_year_mode"] = int(np.argmax(counts))
         else:
             result["planting_year_mode"] = None
+
+        # If we couldn't sample any valid pixels, report it explicitly.
+        if result.get("planting_year") is None and result.get("planting_year_mode") is None:
+            result["reason"] = "no_valid_pixels"
 
     return result

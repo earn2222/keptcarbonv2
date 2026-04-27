@@ -40,6 +40,7 @@ type BfastResult = {
     age?: number | null;
     confidence?: number;
     method?: "bfast" | "raster";
+    reason?: string | null;
 };
 
 type FilterState = {
@@ -61,6 +62,68 @@ const DEFAULT_FILTERS: FilterState = {
     growYearMax: "",
     limit: DEFAULT_LIMIT,
 };
+
+function bboxFromGeometry(g: GeoJSON.Geometry): { minX: number; minY: number; maxX: number; maxY: number } | null {
+    const push = (x: number, y: number) => {
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+        has = true;
+    };
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    let has = false;
+
+    const walk = (coords: any) => {
+        if (!coords) return;
+        if (typeof coords[0] === "number" && typeof coords[1] === "number") {
+            push(coords[0], coords[1]);
+            return;
+        }
+        if (Array.isArray(coords)) {
+            for (const c of coords) walk(c);
+        }
+    };
+
+    if (g.type === "Polygon" || g.type === "MultiPolygon" || g.type === "LineString" || g.type === "MultiLineString") {
+        // @ts-expect-error coordinates shape varies; we walk generically
+        walk(g.coordinates);
+    } else if (g.type === "Point") {
+        // @ts-expect-error Point coordinates
+        const [x, y] = g.coordinates;
+        push(x, y);
+    } else if (g.type === "MultiPoint") {
+        // @ts-expect-error MultiPoint coordinates
+        walk(g.coordinates);
+    } else if (g.type === "GeometryCollection") {
+        for (const gg of g.geometries ?? []) {
+            const b = bboxFromGeometry(gg);
+            if (b) {
+                push(b.minX, b.minY);
+                push(b.maxX, b.maxY);
+            }
+        }
+    }
+
+    return has ? { minX, minY, maxX, maxY } : null;
+}
+
+function bboxPolygon(b: { minX: number; minY: number; maxX: number; maxY: number }): GeoJSON.Polygon {
+    return {
+        type: "Polygon",
+        coordinates: [[
+            [b.minX, b.minY],
+            [b.maxX, b.minY],
+            [b.maxX, b.maxY],
+            [b.minX, b.maxY],
+            [b.minX, b.minY],
+        ]],
+    };
+}
 
 function fmt(v: unknown) {
     return v == null || v === "" ? "—" : String(v);
@@ -110,6 +173,7 @@ export default function AdminRubberAgePage() {
     const [rasterGenerating, setRasterGenerating] = useState(false);
     const [rasterMsg, setRasterMsg] = useState<{ text: string; ok: boolean } | null>(null);
     const [rasterReady, setRasterReady] = useState(false);
+    const [rasterFilename, setRasterFilename] = useState("rubber_age_selected_area.tif");
 
     // ── Chart ──
     const chartRef = useRef<Chart | null>(null);
@@ -329,13 +393,14 @@ export default function AdminRubberAgePage() {
                         credentials: "include",
                         body: JSON.stringify({
                             geometry: p.geometry,
-                            rasterFilename: "rayong_rubber_age.tif",
+                            rasterFilename,
                         }),
                     });
                     const data = await res.json() as {
                         planting_year?: number | null;
                         rubber_age?: number | null;
                         confidence?: number | null;
+                        reason?: string | null;
                         error?: string;
                     };
                     if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
@@ -348,6 +413,7 @@ export default function AdminRubberAgePage() {
                             plantingYear: data.planting_year == null ? null : Number(data.planting_year),
                             age: data.rubber_age == null ? null : Number(data.rubber_age),
                             confidence: data.confidence == null ? 0 : Math.max(0, Math.min(1, Number(data.confidence) / 100)),
+                            reason: data.reason ?? null,
                         },
                     }));
                 } catch {
@@ -360,7 +426,7 @@ export default function AdminRubberAgePage() {
         }
 
         setBfastRunning(false);
-    }, [parcels, bfastRunning]);
+    }, [parcels, bfastRunning, rasterFilename]);
 
     const generateRasterInGee = useCallback(async () => {
         if (rasterGenerating || bfastRunning || updating) return;
@@ -368,14 +434,36 @@ export default function AdminRubberAgePage() {
         setRasterMsg(null);
         setRasterReady(false);
         try {
+            // Build bbox region from selected parcels (or all loaded if none selected)
+            const targets = parcels.filter((p) => selected.has(p.id));
+            const use = targets.length > 0 ? targets : parcels;
+            let bbox: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
+            for (const p of use) {
+                const b = bboxFromGeometry(p.geometry);
+                if (!b) continue;
+                if (!bbox) bbox = { ...b };
+                else {
+                    bbox.minX = Math.min(bbox.minX, b.minX);
+                    bbox.minY = Math.min(bbox.minY, b.minY);
+                    bbox.maxX = Math.max(bbox.maxX, b.maxX);
+                    bbox.maxY = Math.max(bbox.maxY, b.maxY);
+                }
+            }
+            if (!bbox) throw new Error("ไม่พบ geometry สำหรับสร้าง Raster");
+
+            // Add small padding to bbox (degrees) to avoid edge clipping.
+            const pad = 0.02;
+            bbox = { minX: bbox.minX - pad, minY: bbox.minY - pad, maxX: bbox.maxX + pad, maxY: bbox.maxY + pad };
+            const regionGeojson = bboxPolygon(bbox);
+
             const res = await fetch("/api/rubber-age/bfast-raster/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify({
                     // defaults: endYear/currentYear = now
-                    province: "Rayong",
-                    filename: "rayong_rubber_age",
+                    regionGeojson,
+                    filename: "rubber_age_selected_area",
                     exportMode: "download",
                     scale: 250,
                 }),
@@ -384,8 +472,9 @@ export default function AdminRubberAgePage() {
             if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
             setRasterMsg({
                 ok: true,
-                text: `สร้าง Raster สำเร็จ: ${data.saved_filename ?? "rayong_rubber_age.tif"}`,
+                text: `สร้าง Raster สำเร็จ: ${data.saved_filename ?? "rubber_age_selected_area.tif"}`,
             });
+            setRasterFilename(data.saved_filename ?? "rubber_age_selected_area.tif");
             setRasterReady(true);
         } catch (err) {
             setRasterMsg({
@@ -395,7 +484,7 @@ export default function AdminRubberAgePage() {
         } finally {
             setRasterGenerating(false);
         }
-    }, [rasterGenerating, bfastRunning, updating]);
+    }, [rasterGenerating, bfastRunning, updating, parcels, selected]);
 
     // ── DB update ──
     const saveToDb = useCallback(async () => {
@@ -976,7 +1065,9 @@ export default function AdminRubberAgePage() {
                                                             <span className="badge rounded-pill text-bg-warning text-dark">กำลังคำนวณ</span>
                                                         )}
                                                         {bfast?.state === "done" && (
-                                                            <span className="badge rounded-pill text-bg-success">สำเร็จ</span>
+                                                            bfast.age == null
+                                                                ? <span className="badge rounded-pill text-bg-warning text-dark" title={bfast.reason ?? undefined}>ไม่มีข้อมูล</span>
+                                                                : <span className="badge rounded-pill text-bg-success">สำเร็จ</span>
                                                         )}
                                                         {bfast?.state === "error" && (
                                                             <span className="badge rounded-pill text-bg-danger">ผิดพลาด</span>

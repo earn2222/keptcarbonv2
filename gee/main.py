@@ -732,6 +732,10 @@ RASTERS_DIR = DATA_ROOT / "rasters"
 
 class RasterGenerateRequest(BaseModel):
     province: str = Field(default="Rayong", description="Thai province name (FAO GAUL ADM1_NAME)")
+    region_geojson: dict | None = Field(
+        default=None,
+        description="Optional GeoJSON geometry (Polygon/MultiPolygon). If provided, raster is generated for this region instead of province boundary.",
+    )
     start_year: int = Field(default=2000, ge=1984, le=2100)
     end_year: int = Field(default_factory=lambda: datetime.utcnow().year, ge=1990, le=2100)
     current_year: int = Field(default_factory=lambda: datetime.utcnow().year, ge=1990, le=2100)
@@ -773,7 +777,11 @@ def generate_rubber_age_raster(req: RasterGenerateRequest):
     )
 
     try:
-        geom = get_province_geometry(req.province)
+        if req.region_geojson:
+            import ee
+            geom = ee.Geometry(req.region_geojson)
+        else:
+            geom = get_province_geometry(req.province)
         image = build_rubber_age_raster(
             geom=geom,
             start_year=req.start_year,
@@ -899,6 +907,7 @@ def rubber_age_from_raster(req: FromRasterRequest):
             "planting_year_mean": result.get("planting_year"),
             "rubber_age": result.get("rubber_age"),
             "confidence": result.get("confidence"),
+            "reason": result.get("reason"),
             "method": "raster_sample",
         }
     except Exception as exc:

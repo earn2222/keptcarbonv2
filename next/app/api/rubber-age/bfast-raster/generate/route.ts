@@ -4,6 +4,7 @@ import { pool } from "@/lib/db";
 
 type GenerateBody = {
   province?: string;
+  regionGeojson?: GeoJSON.Geometry;
   startYear?: number;
   endYear?: number;
   currentYear?: number;
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         province: body.province ?? "Rayong",
+        region_geojson: body.regionGeojson ?? null,
         start_year: body.startYear ?? 2000,
         end_year: body.endYear ?? nowYear,
         current_year: body.currentYear ?? nowYear,

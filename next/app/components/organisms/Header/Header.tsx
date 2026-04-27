@@ -99,6 +99,27 @@ export default function Header() {
                 </Link>
               </li>
 
+              {user.role === "admin" && (
+                <li className="dropdown">
+                  <a href="#">
+                    <span>ผู้ดูแลระบบ</span>
+                    <i className="bi bi-chevron-down toggle-dropdown"></i>
+                  </a>
+                  <ul>
+                    <li>
+                      <Link href="/admin/users" onClick={closeNav}>
+                        <i className="bi bi-people me-2"></i>จัดการผู้ใช้
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/admin/rubber-age" onClick={closeNav}>
+                        <i className="bi bi-tree me-2"></i>คำนวณอายุยาง
+                      </Link>
+                    </li>
+                  </ul>
+                </li>
+              )}
+
               <li className="d-xl-none">
                 <div className="mobile-auth-divider"></div>
               </li>
