@@ -241,7 +241,7 @@
     /* ── STAT CARDS ── */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 18px;
       margin-bottom: 26px;
     }
@@ -491,25 +491,23 @@
     }
 
     /* ── CARBON AGE CHART ── */
-    .carbon-chart-layout {
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 0;
-    }
-
-    .chart-main {
-      padding: 24px;
-      border-right: 1px solid #f1f5f9;
-    }
-
-    .chart-side {
-      padding: 24px;
-      background: #fafbfc;
-    }
-
     .chart-wrap-lg {
       width: 100%;
-      height: 300px;
+      height: 360px;
+    }
+
+    .chart-pills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .chart-empty-msg {
+      font-size: 12px;
+      color: var(--text-3);
     }
 
     .age-legend {
@@ -624,18 +622,15 @@
 
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 1200px) {
-      .carbon-chart-layout {
-        grid-template-columns: 1fr;
+    @media (max-width: 1100px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
+    }
 
-      .chart-side {
-        border-top: 1px solid #f1f5f9;
-        background: #fafbfc;
-      }
-
-      .chart-main {
-        border-right: none;
+    @media (max-width: 768px) {
+      .chart-wrap-lg {
+        height: 280px;
       }
     }
 
@@ -643,21 +638,21 @@
       .panel-head {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
-        padding: 22px 20px;
+        gap: 10px;
+        padding: 16px 18px;
       }
 
-      .chart-main, .chart-side {
-        padding: 22px 20px;
+      .panel-body {
+        padding: 18px;
       }
 
       .chart-wrap-lg {
-        height: 300px;
+        height: 240px;
       }
 
       .age-legend {
-        gap: 8px 16px;
-        margin-bottom: 24px;
+        gap: 6px 14px;
+        margin-bottom: 16px;
       }
 
       .age-legend-item {
@@ -669,39 +664,45 @@
         line-height: 1.5;
         opacity: 0.8;
       }
-    }
 
-    @media (max-width: 1100px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+      .chart-pills-row {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+      }
+
+      .age-pill {
+        flex-shrink: 0;
       }
     }
 
     @media (max-width: 576px) {
       .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
       }
 
       .stat-card {
-        padding: 18px 20px;
+        padding: 16px 14px;
       }
 
       .stat-num {
-        font-size: 26px;
+        font-size: 22px;
+      }
+
+      .stat-icon-wrap {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        border-radius: 12px;
+      }
+
+      .stat-foot {
+        font-size: 10.5px;
       }
 
       .page-content {
-        padding: 16px;
-      }
-
-      .hero-banner {
-        flex-direction: column;
-        gap: 16px;
-      }
-
-      .hero-right {
-        text-align: left;
+        padding: 14px 12px;
       }
     }
 
@@ -802,6 +803,15 @@
           <div class="stat-foot"><i class="bi bi-arrow-up-right up"></i> ประเมินจากทุกแปลงในระบบ</div>
         </div>
 
+        <div class="stat-card">
+          <div class="stat-label">อายุต้นยางเฉลี่ย</div>
+          <div class="stat-body">
+            <div><span class="stat-num" id="stat-avg-age">—</span><span class="stat-unit">ปี</span></div>
+            <div class="stat-icon-wrap ic-teal"><i class="bi bi-calendar-check-fill"></i></div>
+          </div>
+          <div class="stat-foot"><i class="bi bi-tree"></i> เฉลี่ยจากทุกแปลงในระบบ</div>
+        </div>
+
       </div>
 
       <!-- ── MAP ── -->
@@ -837,61 +847,28 @@
             <i class="bi bi-bar-chart-line-fill"></i>
             ปริมาณคาร์บอนตามอายุต้นยางพารา
           </h3>
-          <span class="panel-subtitle" style="font-size:11px;color:var(--text-3);">หน่วย: tCO₂e · ต่อไร่ (ความหนาแน่นมาตรฐาน 80 ต้น/ไร่)</span>
+          <span class="panel-subtitle" style="font-size:11px;color:var(--text-3);">หน่วย: tCO₂e/ไร่ · ความหนาแน่น 80 ต้น/ไร่</span>
         </div>
-        <div class="carbon-chart-layout">
-          <div class="chart-main">
-            <div class="age-legend">
-              <div class="age-legend-item">
-                <span class="legend-dot" style="background:#86efac;"></span> อายุ 1–5 ปี (เริ่มต้น)
-              </div>
-              <div class="age-legend-item">
-                <span class="legend-dot" style="background:#34d399;"></span> อายุ 6–12 ปี (กำลังเติบโต)
-              </div>
-              <div class="age-legend-item">
-                <span class="legend-dot" style="background:#059669;"></span> อายุ 13–18 ปี (ให้ผลสูง)
-              </div>
-              <div class="age-legend-item">
-                <span class="legend-dot" style="background:#065f46;"></span> อายุ 19–25 ปี (ผลผลิตสูงสุด)
-              </div>
-              <div class="age-legend-item" id="plot-overlay-legend" style="display:none;">
-                <span class="legend-dot" style="background:#065f46;border-radius:50%;"></span> แปลงของคุณในระบบ
-              </div>
+        <div class="panel-body">
+          <div class="age-legend">
+            <div class="age-legend-item">
+              <span class="legend-dot" style="background:#86efac;"></span> 1–5 ปี (เริ่มต้น)
             </div>
-            <div class="chart-wrap-lg"><canvas id="age-chart"></canvas></div>
-          </div>
-          <div class="chart-side">
-            <div style="font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:14px;letter-spacing:.3px;">
-              <i class="bi bi-info-circle" style="color:var(--brand);"></i> ข้อมูลอ้างอิง
+            <div class="age-legend-item">
+              <span class="legend-dot" style="background:#34d399;"></span> 6–12 ปี (กำลังเติบโต)
             </div>
-
-            <div class="info-block">
-              <div class="info-block-title">ช่วงอายุให้คาร์บอนสูงสุด</div>
-              <div><span class="info-block-val" id="peak-age">—</span><span class="info-block-unit">ปี</span></div>
-              <div class="info-block-sub">เติบโตมากที่สุดในช่วงนี้</div>
+            <div class="age-legend-item">
+              <span class="legend-dot" style="background:#059669;"></span> 13–18 ปี (ให้ผลสูง)
             </div>
-
-            <div class="info-block">
-              <div class="info-block-title">คาร์บอน ณ อายุ 10 ปี</div>
-              <div><span class="info-block-val" id="carbon-10yr">—</span><span class="info-block-unit">tCO₂e/ไร่</span>
-              </div>
-              <div class="info-block-sub">ต่อไร่ที่ความหนาแน่นมาตรฐาน</div>
+            <div class="age-legend-item">
+              <span class="legend-dot" style="background:#065f46;"></span> 19–25 ปี (ผลผลิตสูงสุด)
             </div>
-
-            <div class="info-block" id="system-avg-block" style="display:none;">
-              <div class="info-block-title">อายุเฉลี่ยในระบบ</div>
-              <div><span class="info-block-val" id="avg-age-info">—</span><span class="info-block-unit">ปี</span></div>
-              <div class="info-block-sub">จากแปลงที่ลงทะเบียนทั้งหมด</div>
-            </div>
-
-            <div style="margin-top:16px;">
-              <div
-                style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">
-                แปลงในระบบ (แยกตามช่วงอายุ)
-              </div>
-              <div id="age-group-pills" style="line-height:2;"></div>
+            <div class="age-legend-item" id="plot-overlay-legend" style="display:none;">
+              <span class="legend-dot" style="background:#065f46;border-radius:50%;"></span> แปลงในระบบ
             </div>
           </div>
+          <div class="chart-wrap-lg"><canvas id="age-chart"></canvas></div>
+          <div id="age-group-pills" class="chart-pills-row"></div>
         </div>
       </div>
 
@@ -1054,14 +1031,7 @@
         colors.push(barColor(a));
       }
 
-      /* find peak growth year (max increment) */
-      let peakAge = 1, maxInc = 0;
-      for (let i = 1; i < data.length; i++) {
-        const inc = data[i] - data[i - 1];
-        if (inc > maxInc) { maxInc = inc; peakAge = i + 1; }
-      }
-      document.getElementById('peak-age').textContent = peakAge;
-      document.getElementById('carbon-10yr').textContent = fmt(data[9], 2);
+      /* (peak growth calculation kept for internal use) */
 
       /* overlay — actual plots as scatter points */
       const plotAges = allPlots.filter(p => p.treeAge > 0 && p.treeAge <= MAX_AGE);
@@ -1073,10 +1043,9 @@
       if (scatterPts.length > 0)
         document.getElementById('plot-overlay-legend').style.display = 'flex';
 
-      /* system average */
+      /* system average → stat card */
       if (avgAge !== null) {
-        document.getElementById('system-avg-block').style.display = 'block';
-        document.getElementById('avg-age-info').textContent = avgAge;
+        document.getElementById('stat-avg-age').textContent = avgAge;
       }
 
       /* age group pills */
@@ -1101,7 +1070,13 @@
         pillBox.appendChild(el);
       });
       if (pillBox.children.length === 0)
-        pillBox.innerHTML = '<span style="font-size:12px;color:var(--text-3);">ยังไม่มีข้อมูลแปลง</span>';
+        pillBox.innerHTML = '<span class="chart-empty-msg">ยังไม่มีข้อมูลแปลงในระบบ</span>';
+      else {
+        const label = document.createElement('span');
+        label.style.cssText = 'font-size:11px;font-weight:600;color:var(--text-3);align-self:center;margin-right:4px;';
+        label.textContent = 'แปลงตามช่วงอายุ:';
+        pillBox.prepend(label);
+      }
 
       /* chart */
       const ctx = document.getElementById('age-chart').getContext('2d');
