@@ -14,7 +14,7 @@ async function isAdmin(request: NextRequest) {
 /**
  * GET /api/admin/parcels
  * Query params:
- *   province, amphur, tambon (optional text filters)
+ *   province, amphoe_t, tambon (optional text filters)
  *   grow_year_min, grow_year_max (optional year range)
  *   limit (max 2000, default 500)
  *   offset (default 0)
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     const sp = request.nextUrl.searchParams;
     const province = sp.get("province")?.trim() || null;
-    const amphur = sp.get("amphur")?.trim() || null;
+    const amphoe_t = sp.get("amphoe_t")?.trim() || null;
     const tambon = sp.get("tambon")?.trim() || null;
     const growYearMin = sp.get("grow_year_min") ? Number(sp.get("grow_year_min")) : null;
     const growYearMax = sp.get("grow_year_max") ? Number(sp.get("grow_year_max")) : null;
@@ -40,9 +40,9 @@ export async function GET(request: NextRequest) {
         params.push(province);
         conditions.push(`province ILIKE $${params.length}`);
     }
-    if (amphur) {
-        params.push(amphur);
-        conditions.push(`amphur ILIKE $${params.length}`);
+    if (amphoe_t) {
+        params.push(amphoe_t);
+        conditions.push(`amphoe_t ILIKE $${params.length}`);
     }
     if (tambon) {
         params.push(tambon);
@@ -69,12 +69,12 @@ export async function GET(request: NextRequest) {
         params.push(limit, offset);
         const dataResult = await pool.query(
             `SELECT id, farm_name, farm_idc, app_no, land_seq,
-              tambon, amphur, province,
+              tambon, amphoe_t, province,
               grow_year, rip_type, rubber_age, grow_area,
               ST_AsGeoJSON(geom)::json AS geometry
        FROM rubber_plots
        ${where}
-       ORDER BY province, amphur, tambon, id
+       ORDER BY province, amphoe_t, tambon, id
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
             params,
         );

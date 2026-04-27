@@ -96,13 +96,18 @@ def build_annual_ndvi_images(
     start_year: int,
     end_year: int,
 ) -> list:
-    """Return a list of annual median NDVI ee.Images (int16, scaled ×10000)."""
+    """Return a list of annual dry-season (Jan–Apr) median NDVI ee.Images (int16, scaled ×10000).
+
+    Restricting to Jan–Apr avoids Thailand's monsoon season (May–Oct) which causes
+    heavy cloud cover and degrades NDVI signal quality.
+    """
     import ee
 
     images = []
     for year in range(start_year, end_year + 1):
+        # Jan–Apr: dry season, lowest cloud cover in Thailand
         start = f"{year}-01-01"
-        end = f"{year}-12-31"
+        end = f"{year}-04-30"
 
         l89 = (
             ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
@@ -232,8 +237,8 @@ def build_rubber_age_raster(
     planting_year = best.select("planting_year")
     confidence = best.select("confidence")
 
-    # Mask out low-confidence pixels (score < 35 → confidence < 35)
-    valid_mask = confidence.gte(35)
+    # Mask out low-confidence pixels (score < 20 → confidence < 20)
+    valid_mask = confidence.gte(20)
     planting_year = planting_year.updateMask(valid_mask).unmask(0).int16()
     confidence = confidence.updateMask(valid_mask).unmask(0).int16()
 

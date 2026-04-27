@@ -238,7 +238,7 @@ export default function MapDrawPage() {
             <div style="font-weight:700; font-size:13px; margin-bottom:5px; color:#1e7a47;">${fmt(p.farm_name)}</div>
             <div><b>เลขประจำตัว:</b> ${fmt(p.farm_idc)}</div>
             <div><b>เลขคำขอ:</b> ${fmt(p.app_no)} (แปลงที่ ${fmt(p.land_seq)})</div>
-            <div><b>หมู่ ${fmt(p.land_moo)}</b> ต.${fmt(p.tambon)} อ.${fmt(p.amphur)} จ.${fmt(p.province)}</div>
+            <div><b>หมู่ ${fmt(p.land_moo)}</b> ต.${fmt(p.tambon)} อ.${fmt(p.amphoe_t)} จ.${fmt(p.province)}</div>
             <div><b>ปีปลูก:</b> ${fmt(p.grow_year)}</div>
             <div><b>พื้นที่:</b> ${fmt(p.grow_area)}</div>
             <div><b>ประเภท:</b> ${fmt(p.rip_type)}</div>

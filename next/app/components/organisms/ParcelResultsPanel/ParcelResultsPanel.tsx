@@ -146,7 +146,7 @@ export function ParcelResultsPanel({
                                                 </td>
                                                 <td style={{ padding: "6px 8px", maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={fmt(p.farm_name)}>{fmt(p.farm_name)}</td>
                                                 <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.farm_idc)}</td>
-                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.amphur)}</td>
+                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.amphoe_t)}</td>
                                                 <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.province)}</td>
                                                 <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.grow_year)}</td>
                                                 <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.grow_area)}</td>

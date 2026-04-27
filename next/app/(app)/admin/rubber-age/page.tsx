@@ -26,7 +26,7 @@ type ParcelRow = {
     app_no: string;
     land_seq: number;
     tambon: string;
-    amphur: string;
+    amphoe_t: string;
     province: string;
     grow_year: number | null;
     rip_type: string;
@@ -45,7 +45,7 @@ type BfastResult = {
 
 type FilterState = {
     province: string;
-    amphur: string;
+    amphoe_t: string;
     tambon: string;
     growYearMin: string;
     growYearMax: string;
@@ -56,7 +56,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const DEFAULT_LIMIT = "200";
 const DEFAULT_FILTERS: FilterState = {
     province: "",
-    amphur: "",
+    amphoe_t: "",
     tambon: "",
     growYearMin: "",
     growYearMax: "",
@@ -154,6 +154,25 @@ export default function AdminRubberAgePage() {
     const [parcelErr, setParcelErr] = useState<string | null>(null);
     const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+    // ── Filter dropdown options ──
+    const [provinceOptions, setProvinceOptions] = useState<string[]>([]);
+    const [amphoeOptions, setAmphoeOptions] = useState<string[]>([]);
+
+    useEffect(() => {
+        fetch("/api/admin/parcels/filters", { credentials: "include" })
+            .then((r) => r.json())
+            .then((d: { provinces?: string[] }) => setProvinceOptions(d.provinces ?? []))
+            .catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        if (!filters.province) { setAmphurOptions([]); return; }
+        fetch(`/api/admin/parcels/filters?province=${encodeURIComponent(filters.province)}`, { credentials: "include" })
+            .then((r) => r.json())
+            .then((d: { amphoe_ts?: string[] }) => setAmphoeOptions(d.amphoe_ts ?? []))
+            .catch(() => {});
+    }, [filters.province]);
+
     // ── Selection state ──
     const [selected, setSelected] = useState<Set<number>>(new Set()); // Set of parcel `id`
 
@@ -197,7 +216,7 @@ export default function AdminRubberAgePage() {
 
         const sp = new URLSearchParams();
         if (active.province.trim()) sp.set("province", active.province.trim());
-        if (active.amphur.trim()) sp.set("amphur", active.amphur.trim());
+        if (active.amphoe_t.trim()) sp.set("amphoe_t", active.amphoe_t.trim());
         if (active.tambon.trim()) sp.set("tambon", active.tambon.trim());
         if (active.growYearMin.trim()) sp.set("grow_year_min", active.growYearMin.trim());
         if (active.growYearMax.trim()) sp.set("grow_year_max", active.growYearMax.trim());
@@ -434,11 +453,10 @@ export default function AdminRubberAgePage() {
         setRasterMsg(null);
         setRasterReady(false);
         try {
-            // Build bbox region from selected parcels (or all loaded if none selected)
             const targets = parcels.filter((p) => selected.has(p.id));
-            const use = targets.length > 0 ? targets : parcels;
+            if (targets.length === 0) throw new Error("กรุณาเลือกแปลงก่อนสร้าง Raster");
             let bbox: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
-            for (const p of use) {
+            for (const p of targets) {
                 const b = bboxFromGeometry(p.geometry);
                 if (!b) continue;
                 if (!bbox) bbox = { ...b };
@@ -461,11 +479,10 @@ export default function AdminRubberAgePage() {
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify({
-                    // defaults: endYear/currentYear = now
                     regionGeojson,
                     filename: "rubber_age_selected_area",
                     exportMode: "download",
-                    scale: 250,
+                    scale: 100,
                 }),
             });
             const data = await res.json() as { saved_filename?: string; saved_path?: string; error?: string };
@@ -652,21 +669,30 @@ export default function AdminRubberAgePage() {
                     <div className="mt-3 row g-2 align-items-end">
                         <div className="col-md-2">
                             <label className="form-label small mb-1">จังหวัด</label>
-                            <input
-                                className="form-control form-control-sm"
-                                placeholder="เช่น จันทบุรี"
+                            <select
+                                className="form-select form-select-sm"
                                 value={filters.province}
-                                onChange={(e) => setFilters((prev) => ({ ...prev, province: e.target.value }))}
-                            />
+                                onChange={(e) => setFilters((prev) => ({ ...prev, province: e.target.value, amphoe_t: "" }))}
+                            >
+                                <option value="">ทุกจังหวัด</option>
+                                {provinceOptions.map((p) => (
+                                    <option key={p} value={p}>{p}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="col-md-2">
                             <label className="form-label small mb-1">อำเภอ</label>
-                            <input
-                                className="form-control form-control-sm"
-                                placeholder="เช่น แก่งหางแมว"
-                                value={filters.amphur}
-                                onChange={(e) => setFilters((prev) => ({ ...prev, amphur: e.target.value }))}
-                            />
+                            <select
+                                className="form-select form-select-sm"
+                                value={filters.amphoe_t}
+                                disabled={!filters.province || amphoeOptions.length === 0}
+                                onChange={(e) => setFilters((prev) => ({ ...prev, amphoe_t: e.target.value }))}
+                            >
+                                <option value="">ทุกอำเภอ</option>
+                                {amphoeOptions.map((a) => (
+                                    <option key={a} value={a}>{a}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="col-md-2">
                             <label className="form-label small mb-1">ตำบล</label>
@@ -864,13 +890,16 @@ export default function AdminRubberAgePage() {
                                                 <div className="d-grid gap-2">
                                                     <button
                                                         className="btn btn-success btn-sm rounded-pill"
-                                                        disabled={rasterGenerating || bfastRunning || updating}
+                                                        disabled={rasterGenerating || bfastRunning || updating || selected.size === 0}
                                                         onClick={generateRasterInGee}
                                                     >
                                                         {rasterGenerating
                                                             ? <><span className="spinner-border spinner-border-sm me-1" style={{ width: 12, height: 12 }} />กำลังสร้าง…</>
-                                                            : <><i className="bi bi-globe2 me-1" />สร้าง Raster (ปีล่าสุด)</>}
+                                                            : <><i className="bi bi-globe2 me-1" />สร้าง Raster ({selectedCount} แปลงที่เลือก)</>}
                                                     </button>
+                                                    {selected.size === 0 && (
+                                                        <div className="small text-muted">เลือกแปลงใน Step 1 ก่อน</div>
+                                                    )}
 
                                                     <details className="small">
                                                         <summary className="text-muted" style={{ cursor: "pointer" }}>
@@ -1056,7 +1085,7 @@ export default function AdminRubberAgePage() {
                                                     {/* Province / Amphur */}
                                                     <td>
                                                         <div>{fmt(p.province)}</div>
-                                                        <div className="text-muted" style={{ fontSize: 11 }}>{fmt(p.amphur)}</div>
+                                                        <div className="text-muted" style={{ fontSize: 11 }}>{fmt(p.amphoe_t)}</div>
                                                     </td>
 
                                                     {/* Row status */}
