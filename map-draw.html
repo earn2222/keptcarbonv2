@@ -2579,6 +2579,10 @@
       map.addLayer({ id: 'saved-plots-fill', type: 'fill', source: 'saved-plots', paint: { 'fill-color': '#2d9e5f', 'fill-opacity': 0.15 } });
       map.addLayer({ id: 'saved-plots-line', type: 'line', source: 'saved-plots', paint: { 'line-color': '#2d9e5f', 'line-width': 1.5, 'line-opacity': 0.6 } });
 
+      // Saved boundaries
+      map.addSource('saved-boundaries', { type: 'geojson', data: empty() });
+      map.addLayer({ id: 'saved-boundaries-line', type: 'line', source: 'saved-boundaries', paint: { 'line-color': '#f59e0b', 'line-width': 2.5, 'line-opacity': 0.9 } });
+
       // Detected sub-plots layer
       map.addSource('det-plots', { type: 'geojson', data: empty() });
       map.addLayer({
@@ -3720,34 +3724,18 @@
       if (!multiPlots.length) return;
 
       // Generate sub-polygons from drawn boundary or use SHP polygons
-      let features;
-      if (sourceMode === 'shp') {
-        features = multiPlots.map((p, i) => ({
-          type: 'Feature',
-          geometry: p.gj.geometry,
-          properties: {
-            plotIdx: i, name: p.name,
-            areaRai: p.areaRai.toFixed(2),
-            treeAge: p.treeAge, plantYear: p.plantYear,
-            co2: p.co2.toFixed(2),
-            color: PLOT_COLORS[i % PLOT_COLORS.length],
-            selected: i === 0
-          }
-        }));
-      } else {
-        const subPolys = generateSubPolygons(finalGJ, multiPlots.length);
-        features = multiPlots.map((p, i) => ({
-          ...(subPolys[i] || { type: 'Feature', geometry: finalGJ.geometry, properties: {} }),
-          properties: {
-            plotIdx: i, name: p.name,
-            areaRai: p.areaRai.toFixed(2),
-            treeAge: p.treeAge, plantYear: p.plantYear,
-            co2: p.co2.toFixed(2),
-            color: PLOT_COLORS[i % PLOT_COLORS.length],
-            selected: i === 0
-          }
-        }));
-      }
+      const features = multiPlots.map((p, i) => ({
+        type: 'Feature',
+        geometry: p.gj.geometry,
+        properties: {
+          plotIdx: i, name: p.name,
+          areaRai: p.areaRai.toFixed(2),
+          treeAge: p.treeAge, plantYear: p.plantYear,
+          co2: p.co2.toFixed(2),
+          color: PLOT_COLORS[i % PLOT_COLORS.length],
+          selected: i === 0
+        }
+      }));
 
       if (map.getSource('det-plots')) {
         map.getSource('det-plots').setData({ type: 'FeatureCollection', features });
@@ -3869,6 +3857,8 @@
         document.getElementById('detect-msg').textContent = 'คำนวณคาร์บอนเครดิตแต่ละแปลง...';
 
         const N = Math.max(2, Math.min(7, Math.round(boundaryArea / 3 + Math.random() * 2 + 1)));
+        const subPolys = generateSubPolygons(finalGJ, N);
+        const boundaryId = `bnd_${Date.now()}`;
         multiPlots = [];
         let remaining = boundaryArea * 0.94;
 
@@ -3889,7 +3879,9 @@
             name: `แปลงที่ ${i + 1}`,
             ownerName: ME ? ME.fullname : '',
             variety: '',
-            gj: finalGJ,
+            gj: subPolys[i] || finalGJ,
+            boundaryId: boundaryId,
+            boundaryGeojson: finalGJ,
             areaSqm: subArea * 1600,
             areaRai: +subArea.toFixed(2),
             treeCount,
@@ -4180,6 +4172,8 @@
           ageDist: p.ageDist || null,
           carbonForecast: calcForecastForSave(p),
           geojson: p.gj,
+          boundaryId: p.boundaryId,
+          boundaryGeojson: p.boundaryGeojson,
           createdAt: new Date().toISOString()
         };
         PlotDB.savePlot(ME.id, plotData);
@@ -4215,6 +4209,18 @@
       };
       if (map.getSource('saved-plots')) {
         map.getSource('saved-plots').setData(collection);
+      }
+
+      const bCollection = { type: 'FeatureCollection', features: [] };
+      const bSet = new Set();
+      plots.forEach(p => {
+        if (p.boundaryGeojson && p.boundaryId && !bSet.has(p.boundaryId)) {
+          bSet.add(p.boundaryId);
+          bCollection.features.push(p.boundaryGeojson);
+        }
+      });
+      if (map.getSource('saved-boundaries')) {
+        map.getSource('saved-boundaries').setData(bCollection);
       }
     }
 

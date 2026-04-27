@@ -802,7 +802,6 @@
           <div class="stat-foot"><i class="bi bi-arrow-up-right up"></i> ประเมินจากทุกแปลงในระบบ</div>
         </div>
 
-
       </div>
 
       <!-- ── MAP ── -->
@@ -960,6 +959,7 @@
     map.on('load', () => {
       const bounds = new maplibregl.LngLatBounds();
       let hasCoords = false;
+      const drawnBoundaries = new Set();
 
       allPlots.forEach((plot, idx) => {
         if (!plot.geojson || !plot.geojson.geometry) return;
@@ -971,6 +971,14 @@
         map.addSource(`p${idx}`, { type: 'geojson', data: plot.geojson });
         map.addLayer({ id: `pf${idx}`, type: 'fill', source: `p${idx}`, paint: { 'fill-color': fillColor, 'fill-opacity': 0.28 } });
         map.addLayer({ id: `pl${idx}`, type: 'line', source: `p${idx}`, paint: { 'line-color': lineColor, 'line-width': 2 } });
+
+        if (plot.boundaryGeojson && plot.boundaryGeojson.geometry && plot.boundaryId) {
+          if (!drawnBoundaries.has(plot.boundaryId)) {
+            drawnBoundaries.add(plot.boundaryId);
+            map.addSource(`bnd${idx}`, { type: 'geojson', data: plot.boundaryGeojson });
+            map.addLayer({ id: `bnd-l${idx}`, type: 'line', source: `bnd${idx}`, paint: { 'line-color': '#f59e0b', 'line-width': 2.5, 'line-opacity': 0.9 } });
+          }
+        }
 
         const ring = geo.type === 'Polygon' ? geo.coordinates[0]
           : geo.type === 'MultiPolygon' ? geo.coordinates[0][0] : null;
@@ -989,7 +997,26 @@
 
 
 
-        new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(c).addTo(map);
+        const popupContent = document.createElement('div');
+        popupContent.innerHTML = `
+          <div class="mp-title">
+            <div class="mp-title-dot"></div>
+            ${plot.name || 'แปลงยางพารา'}
+          </div>
+          <div class="mp-body">
+            <div class="mp-row"><i class="bi bi-map"></i> พื้นที่: <strong>${fmt(plot.areaRai, 2)} ไร่</strong></div>
+            <div class="mp-row"><i class="bi bi-tree"></i> ต้นยาง: <strong>${fmt(plot.treeCount || 0)} ต้น</strong></div>
+            <div class="mp-row"><i class="bi bi-cloud-check"></i> คาร์บอน: <strong>${fmt(plot.carbonTotal, 2)} tCO₂e</strong></div>
+          </div>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 15, closeButton: false, closeOnClick: true, className: 'custom-popup' })
+          .setDOMContent(popupContent);
+
+        new maplibregl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat(c)
+          .setPopup(popup)
+          .addTo(map);
       });
 
       if (hasCoords) {

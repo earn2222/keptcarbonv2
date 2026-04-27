@@ -982,6 +982,10 @@
           });
 
           map.on('load', () => {
+            if (plot.boundaryGeojson) {
+              map.addSource('boundary', { type: 'geojson', data: plot.boundaryGeojson });
+              map.addLayer({ id: 'boundary-line', type: 'line', source: 'boundary', paint: { 'line-color': '#f59e0b', 'line-width': 2.5, 'line-opacity': 0.9 } });
+            }
             if (plot.geojson) {
               map.addSource('plot', { type: 'geojson', data: plot.geojson });
               map.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#10b981', 'fill-opacity': 0.3 } });
@@ -1155,6 +1159,10 @@
         currentModalMap.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
 
         currentModalMap.on('load', () => {
+          if (plot.boundaryGeojson) {
+            currentModalMap.addSource('boundary', { type: 'geojson', data: plot.boundaryGeojson });
+            currentModalMap.addLayer({ id: 'boundary-line', type: 'line', source: 'boundary', paint: { 'line-color': '#f59e0b', 'line-width': 2.5, 'line-opacity': 0.9 } });
+          }
           if (plot.geojson) {
             currentModalMap.addSource('plot', { type: 'geojson', data: plot.geojson });
             currentModalMap.addLayer({ id: 'plot-fill', type: 'fill', source: 'plot', paint: { 'fill-color': '#10b981', 'fill-opacity': 0.3 } });
