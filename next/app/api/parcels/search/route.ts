@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
   const sql = `
     SELECT id, farm_name, farm_idc, app_no, land_seq, land_right, land_name,
            land_moo, land_vill, tambon, amphur, province,
-           grow_year, rip_type, rubber_age, grow_area,
+          grow_year, rip_type, grow_area,
            ST_AsGeoJSON(geom)::json AS geometry
     FROM rubber_plots
     WHERE ${buildWhere(rel)}

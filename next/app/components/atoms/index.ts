@@ -16,3 +16,5 @@ export type { EyebrowProps } from "./Eyebrow";
 
 export { GradientText } from "./GradientText";
 export type { GradientTextProps } from "./GradientText";
+
+export { InfoKPI } from "./InfoKPI/InfoKPI";

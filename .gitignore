@@ -19,3 +19,7 @@ yarn-error.log*
 
 ee-sakda-451407-6e75df41c955.json
 gee/service_account.json
+
+# Python cache
+__pycache__/
+*.pyc

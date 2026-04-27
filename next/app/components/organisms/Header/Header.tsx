@@ -98,13 +98,6 @@ export default function Header() {
                   แปลงของฉัน
                 </Link>
               </li>
-              {user.role === "admin" && (
-                <li>
-                  <Link href="/admin/users" onClick={closeNav}>
-                    จัดการผู้ใช้
-                  </Link>
-                </li>
-              )}
 
               <li className="d-xl-none">
                 <div className="mobile-auth-divider"></div>
@@ -252,6 +245,37 @@ export default function Header() {
                       <i className="bi bi-person me-2 fs-5 text-secondary"></i> โปรไฟล์
                     </a>
                   </li>
+                  {user.role === "admin" && (
+                    <>
+                      <li><hr className="dropdown-divider my-1" /></li>
+                      <li>
+                        <a
+                          href="#"
+                          className="dropdown-item d-flex align-items-center py-2"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setDropdownOpen(false);
+                            router.push("/admin/users");
+                          }}
+                        >
+                          <i className="bi bi-people me-2 fs-5 text-secondary"></i> จัดการผู้ใช้
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          className="dropdown-item d-flex align-items-center py-2"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setDropdownOpen(false);
+                            router.push("/admin/rubber-age");
+                          }}
+                        >
+                          <i className="bi bi-tree me-2 fs-5 text-secondary"></i> คำนวณอายุยาง
+                        </a>
+                      </li>
+                    </>
+                  )}
                   <li><hr className="dropdown-divider my-1" /></li>
                   <li>
                     <a

@@ -2,3 +2,13 @@ earthengine-api
 google-auth
 fastapi
 uvicorn[standard]
+geopandas
+rasterio
+xarray
+pandas
+numpy
+scipy
+ruptures
+matplotlib
+scikit-learn
+pyproj

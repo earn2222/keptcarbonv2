@@ -32,8 +32,10 @@ services:
     environment:
       - GEE_KEY_FILE=/run/secrets/gee_key.json
       - GEE_PROJECT_ID=${GEE_PROJECT_ID}
+      - RUBBER_DATA_ROOT=/workspace/data
     volumes:
       - ./gee/service_account.json:/run/secrets/gee_key.json:ro
+      - ./data:/workspace/data
     restart: unless-stopped
 
   # ── PostgreSQL + PostGIS ───────────────────────

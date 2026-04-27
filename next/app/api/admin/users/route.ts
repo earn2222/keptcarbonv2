@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const result = await pool.query(
-      `SELECT id, email, username, fullname, phone, role, createdAt
+      `SELECT id, email, username, fullname, phone, role, created_at AS "createdAt"
        FROM users
-       ORDER BY createdAt DESC`
+       ORDER BY created_at DESC`
     );
     return NextResponse.json({ users: result.rows });
   } catch (err) {

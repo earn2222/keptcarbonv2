@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
-import { Alert, Card, Button, Eyebrow } from "@/app/components";
+import { Alert, Card, Eyebrow } from "@/app/components";
 
 type UserRecord = {
   id: string;
@@ -11,9 +11,29 @@ type UserRecord = {
   username: string;
   fullname: string;
   phone: string;
-  role: "farmer" | "editor" | "admin";
+  role: "user" | "farmer" | "editor" | "admin";
   createdAt: string;
 };
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!domain) return "***";
+  const visible = local[0] ?? "*";
+  return `${visible}${"*".repeat(Math.min(local.length - 1, 4))}@${domain}`;
+}
+
+function maskName(name: string): string {
+  if (!name) return "ไม่ระบุชื่อ";
+  return name
+    .split(" ")
+    .map((part) => (part[0] ?? "") + "*".repeat(Math.min(part.length - 1, 3)))
+    .join(" ");
+}
+
+function maskPhone(phone: string): string {
+  if (!phone || phone.length < 4) return "-";
+  return phone.slice(0, 3) + "*".repeat(phone.length - 6) + phone.slice(-3);
+}
 
 export default function UserManagementPage() {
   const { ready, user } = useAuth();
@@ -22,6 +42,7 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [privacyOn, setPrivacyOn] = useState(false);
 
   useEffect(() => {
     if (ready) {
@@ -43,7 +64,7 @@ export default function UserManagementPage() {
       } else {
         setError("ไม่สามารถดึงข้อมูลผู้ใช้ได้");
       }
-    } catch (err) {
+    } catch {
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setLoading(false);
@@ -60,7 +81,7 @@ export default function UserManagementPage() {
 
       if (res.ok) {
         setUsers((prev) =>
-          prev.map((u) => (u.id === userId ? { ...u, role: newRole as any } : u))
+          prev.map((u) => (u.id === userId ? { ...u, role: newRole as UserRecord["role"] } : u))
         );
         setSuccess("อัปเดตบทบาทผู้ใช้สำเร็จ");
         setTimeout(() => setSuccess(null), 3000);
@@ -68,7 +89,7 @@ export default function UserManagementPage() {
         const data = await res.json();
         setError(data.error || "ไม่สามารถอัปเดตบทบาทได้");
       }
-    } catch (err) {
+    } catch {
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     }
   }
@@ -91,7 +112,7 @@ export default function UserManagementPage() {
         const data = await res.json();
         setError(data.error || "ไม่สามารถลบผู้ใช้ได้");
       }
-    } catch (err) {
+    } catch {
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     }
   }
@@ -113,8 +134,16 @@ export default function UserManagementPage() {
           <Eyebrow text="แผงควบคุมผู้ดูแลระบบ" color="var(--accent-color)" />
           <h1 className="fw-bold mb-0">จัดการผู้ใช้</h1>
         </div>
-        <div className="text-muted small">
-          ทั้งหมด {users.length} บัญชี
+        <div className="d-flex align-items-center gap-3">
+          <span className="text-muted small">ทั้งหมด {users.length} บัญชี</span>
+          <button
+            className={`btn btn-sm rounded-pill px-3 ${privacyOn ? "btn-secondary" : "btn-outline-secondary"}`}
+            onClick={() => setPrivacyOn((v) => !v)}
+            title={privacyOn ? "แสดงข้อมูลจริง" : "ซ่อนข้อมูลส่วนตัว"}
+          >
+            <i className={`bi ${privacyOn ? "bi-eye-slash" : "bi-eye"} me-1`}></i>
+            {privacyOn ? "ซ่อนอยู่" : "เปิดเผย"}
+          </button>
         </div>
       </div>
 
@@ -134,61 +163,73 @@ export default function UserManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td className="px-4 py-3">
-                    <div className="d-flex align-items-center">
-                      <div 
-                        className="rounded-circle d-flex align-items-center justify-content-center bg-light text-primary fw-bold me-3"
-                        style={{ width: "40px", height: "40px", fontSize: "14px" }}
+              {users.map((u) => {
+                const displayName = privacyOn ? maskName(u.fullname) : (u.fullname || "ไม่ระบุชื่อ");
+                const displayEmail = privacyOn ? maskEmail(u.email) : u.email;
+                const displayPhone = privacyOn ? maskPhone(u.phone) : (u.phone || "-");
+                const initial = (u.fullname?.[0] || u.email[0]).toUpperCase();
+
+                return (
+                  <tr key={u.id}>
+                    <td className="px-4 py-3">
+                      <div className="d-flex align-items-center">
+                        <div
+                          className="rounded-circle d-flex align-items-center justify-content-center bg-light text-primary fw-bold me-3"
+                          style={{ width: "40px", height: "40px", fontSize: "14px" }}
+                        >
+                          {initial}
+                        </div>
+                        <div>
+                          <div className="fw-bold text-dark">{displayName}</div>
+                          <div className="text-muted small">{displayEmail}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <select
+                        className={`form-select form-select-sm border-0 bg-light fw-medium rounded-pill px-3 ${
+                          u.role === "admin"
+                            ? "text-danger"
+                            : u.role === "editor"
+                            ? "text-primary"
+                            : u.role === "farmer"
+                            ? "text-success"
+                            : "text-muted"
+                        }`}
+                        style={{ width: "fit-content" }}
+                        value={u.role}
+                        onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                        disabled={u.id === user?.id}
                       >
-                        {(u.fullname?.[0] || u.email[0]).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="fw-bold text-dark">{u.fullname || "ไม่ระบุชื่อ"}</div>
-                        <div className="text-muted small">{u.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3">
-                    <select
-                      className={`form-select form-select-sm border-0 bg-light fw-medium rounded-pill px-3 ${
-                        u.role === "admin" ? "text-danger" : u.role === "editor" ? "text-primary" : "text-success"
-                      }`}
-                      style={{ width: "fit-content" }}
-                      value={u.role}
-                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      disabled={u.id === user?.id} // Prevent self-demotion
-                    >
-                      <option value="farmer">Farmer</option>
-                      <option value="editor">Editor</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </td>
-                  <td className="py-3 text-muted">
-                    {u.phone || "-"}
-                  </td>
-                  <td className="py-3 text-muted small">
-                    {new Date(u.createdAt).toLocaleDateString("th-TH", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </td>
-                  <td className="px-4 py-3 text-end">
-                    <button
-                      className="btn btn-outline-danger btn-sm rounded-pill px-3"
-                      onClick={() => handleDeleteUser(u.id)}
-                      disabled={u.id === user?.id} // Prevent self-deletion
-                    >
-                      <i className="bi bi-trash me-1"></i> ลบ
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                        <option value="user">User</option>
+                        <option value="farmer">Farmer</option>
+                        <option value="editor">Editor</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </td>
+                    <td className="py-3 text-muted">{displayPhone}</td>
+                    <td className="py-3 text-muted small">
+                      {new Date(u.createdAt).toLocaleDateString("th-TH", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-3 text-end">
+                      <button
+                        className="btn btn-outline-danger btn-sm rounded-pill px-3"
+                        onClick={() => handleDeleteUser(u.id)}
+                        disabled={u.id === user?.id}
+                      >
+                        <i className="bi bi-trash me-1"></i> ลบ
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-5 text-muted italic">
+                  <td colSpan={5} className="text-center py-5 text-muted">
                     ไม่พบข้อมูลผู้ใช้ในระบบ
                   </td>
                 </tr>
