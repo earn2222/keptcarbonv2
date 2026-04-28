@@ -14,13 +14,16 @@ async function isAdmin(request: NextRequest) {
 type UpdateEntry = {
     id: number;
     rubber_age: number;
-    grow_year?: number;
+    gee_plant_year?: number | null;
+    gee_age?: number | null;
+    gee_confidence?: number | null;
 };
 
 /**
  * PATCH /api/admin/rubber-age
  * Body: { updates: UpdateEntry[] }
- * Updates rubber_age (and optionally grow_year) for each given plot id.
+ * Saves rubber_age, gee_plant_year, gee_age, gee_confidence for each plot.
+ * grow_year (original DB planting year) is never overwritten.
  */
 export async function PATCH(request: NextRequest) {
     if (!(await isAdmin(request))) {
@@ -55,17 +58,16 @@ export async function PATCH(request: NextRequest) {
     try {
         await client.query("BEGIN");
         for (const u of updates) {
-            if (u.grow_year != null && typeof u.grow_year === "number") {
-                await client.query(
-                    "UPDATE rubber_plots SET rubber_age = $1, grow_year = $2 WHERE id = $3",
-                    [u.rubber_age, u.grow_year, u.id],
-                );
-            } else {
-                await client.query(
-                    "UPDATE rubber_plots SET rubber_age = $1 WHERE id = $2",
-                    [u.rubber_age, u.id],
-                );
-            }
+            const age = Math.round(u.rubber_age);
+            const geePlantYear = u.gee_plant_year != null ? Math.round(u.gee_plant_year) : null;
+            const geeAge = u.gee_age != null ? Math.round(u.gee_age) : null;
+            const geeConf = u.gee_confidence != null ? Math.min(1, Math.max(0, u.gee_confidence)) : null;
+            await client.query(
+                `UPDATE rubber_plots
+                    SET rubber_age = $1, gee_plant_year = $2, gee_age = $3, gee_confidence = $4
+                  WHERE id = $5`,
+                [age, geePlantYear, geeAge, geeConf, u.id],
+            );
             updatedCount++;
         }
         await client.query("COMMIT");

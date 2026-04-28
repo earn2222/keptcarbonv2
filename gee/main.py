@@ -774,6 +774,7 @@ def generate_rubber_age_raster(req: RasterGenerateRequest):
         build_rubber_age_raster,
         submit_export_to_drive,
         get_download_url,
+        get_map_tile_url,
     )
 
     try:
@@ -809,6 +810,13 @@ def generate_rubber_age_raster(req: RasterGenerateRequest):
                         tmp_path.unlink()
                     except Exception:
                         pass
+
+            try:
+                tile_url = get_map_tile_url(image)
+            except Exception as tile_exc:
+                logger.warning("Could not get map tile URL: %s", tile_exc)
+                tile_url = None
+
             return {
                 "success": True,
                 "export_mode": "download",
@@ -816,6 +824,7 @@ def generate_rubber_age_raster(req: RasterGenerateRequest):
                 "saved": True,
                 "saved_path": str(out_path),
                 "saved_filename": out_name,
+                "tile_url": tile_url,
                 "note": "File downloaded and saved under RUBBER_DATA_ROOT/rasters/",
             }
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Alert, Card, Eyebrow } from "@/app/components";
+import RubberAgeMap from "./RubberAgeMap";
 import {
     Chart,
     BarController,
@@ -29,6 +30,10 @@ type ParcelRow = {
     amphoe_t: string;
     province: string;
     grow_year: number | null;
+    rubber_age: number | null;
+    gee_plant_year: number | null;
+    gee_age: number | null;
+    gee_confidence: number | null;
     rip_type: string;
     grow_area: string;
     geometry: GeoJSON.Geometry;
@@ -46,21 +51,20 @@ type BfastResult = {
 type FilterState = {
     province: string;
     amphoe_t: string;
-    tambon: string;
-    growYearMin: string;
-    growYearMax: string;
-    limit: string;
 };
 
 const CURRENT_YEAR = new Date().getFullYear();
-const DEFAULT_LIMIT = "200";
+
+const REASON_LABELS: Record<string, string> = {
+    no_valid_pixels:      "ไม่พบสัญญาณในราสเตอร์",
+    empty_window:         "แปลงเล็กเกินไปสำหรับราสเตอร์",
+    outside_raster_extent:"นอกพื้นที่ราสเตอร์",
+    raster_missing_crs:   "ราสเตอร์ไม่มี CRS",
+    raster_invalid:       "ราสเตอร์ไม่ถูกต้อง",
+};
 const DEFAULT_FILTERS: FilterState = {
-    province: "",
+    province: "ระยอง",
     amphoe_t: "",
-    tambon: "",
-    growYearMin: "",
-    growYearMax: "",
-    limit: DEFAULT_LIMIT,
 };
 
 function bboxFromGeometry(g: GeoJSON.Geometry): { minX: number; minY: number; maxX: number; maxY: number } | null {
@@ -166,7 +170,7 @@ export default function AdminRubberAgePage() {
     }, []);
 
     useEffect(() => {
-        if (!filters.province) { setAmphurOptions([]); return; }
+        if (!filters.province) { setAmphoeOptions([]); return; }
         fetch(`/api/admin/parcels/filters?province=${encodeURIComponent(filters.province)}`, { credentials: "include" })
             .then((r) => r.json())
             .then((d: { amphoe_ts?: string[] }) => setAmphoeOptions(d.amphoe_ts ?? []))
@@ -193,6 +197,8 @@ export default function AdminRubberAgePage() {
     const [rasterMsg, setRasterMsg] = useState<{ text: string; ok: boolean } | null>(null);
     const [rasterReady, setRasterReady] = useState(false);
     const [rasterFilename, setRasterFilename] = useState("rubber_age_selected_area.tif");
+    const [rasterTileUrl, setRasterTileUrl] = useState<string | null>(null);
+    const [focusedParcelId, setFocusedParcelId] = useState<number | null>(null);
 
     // ── Chart ──
     const chartRef = useRef<Chart | null>(null);
@@ -213,14 +219,12 @@ export default function AdminRubberAgePage() {
         setUpdateMsg(null);
         setRasterMsg(null);
         setRasterReady(false);
+        setRasterTileUrl(null);
 
         const sp = new URLSearchParams();
         if (active.province.trim()) sp.set("province", active.province.trim());
         if (active.amphoe_t.trim()) sp.set("amphoe_t", active.amphoe_t.trim());
-        if (active.tambon.trim()) sp.set("tambon", active.tambon.trim());
-        if (active.growYearMin.trim()) sp.set("grow_year_min", active.growYearMin.trim());
-        if (active.growYearMax.trim()) sp.set("grow_year_max", active.growYearMax.trim());
-        sp.set("limit", String(Math.min(Number(active.limit) || 200, 2000)));
+        sp.set("limit", "2000");
 
         try {
             const res = await fetch(`/api/admin/parcels?${sp.toString()}`, {
@@ -245,11 +249,21 @@ export default function AdminRubberAgePage() {
         }
     }, [filters]);
 
+    // Initial load
     useEffect(() => {
         if (!ready || !user || user.role !== "admin") return;
         if (fetchingParcels || total !== null) return;
         fetchParcels();
     }, [ready, user, fetchParcels, fetchingParcels, total]);
+
+    // Auto-fetch when filters change (skip first render — initial load handles it)
+    const filtersMountedRef = useRef(false);
+    useEffect(() => {
+        if (!filtersMountedRef.current) { filtersMountedRef.current = true; return; }
+        if (!ready || !user || user.role !== "admin") return;
+        fetchParcels();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters]);
 
     // ── Chart: age distribution from GEE+BFAST results ──
     useEffect(() => {
@@ -482,16 +496,17 @@ export default function AdminRubberAgePage() {
                     regionGeojson,
                     filename: "rubber_age_selected_area",
                     exportMode: "download",
-                    scale: 100,
+                    scale: 30,
                 }),
             });
-            const data = await res.json() as { saved_filename?: string; saved_path?: string; error?: string };
+            const data = await res.json() as { saved_filename?: string; saved_path?: string; tile_url?: string; error?: string };
             if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
             setRasterMsg({
                 ok: true,
                 text: `สร้าง Raster สำเร็จ: ${data.saved_filename ?? "rubber_age_selected_area.tif"}`,
             });
             setRasterFilename(data.saved_filename ?? "rubber_age_selected_area.tif");
+            setRasterTileUrl(data.tile_url ?? null);
             setRasterReady(true);
         } catch (err) {
             setRasterMsg({
@@ -515,7 +530,9 @@ export default function AdminRubberAgePage() {
                 return {
                     id: p.id,
                     rubber_age: r.age as number,
-                    grow_year: r.plantingYear != null ? r.plantingYear : undefined,
+                    gee_plant_year: r.plantingYear ?? null,
+                    gee_age: r.age ?? null,
+                    gee_confidence: r.confidence ?? null,
                 };
             });
 
@@ -540,7 +557,10 @@ export default function AdminRubberAgePage() {
                     if (!u) return p;
                     return {
                         ...p,
-                        grow_year: u.grow_year ?? p.grow_year,
+                        rubber_age: Math.round(u.rubber_age),
+                        gee_plant_year: u.gee_plant_year != null ? Math.round(u.gee_plant_year) : p.gee_plant_year,
+                        gee_age: u.gee_age != null ? Math.round(u.gee_age) : p.gee_age,
+                        gee_confidence: u.gee_confidence ?? p.gee_confidence,
                     };
                 }),
             );
@@ -659,6 +679,7 @@ export default function AdminRubberAgePage() {
                         style={{ cursor: "pointer", listStyle: "none" }}
                     >
                         <div className="d-flex align-items-center gap-2">
+                            <span className="badge rounded-pill text-bg-dark">Step 1</span>
                             <i className="bi bi-funnel text-success" />
                             <div className="fw-bold">ตัวกรองแปลง</div>
                             <div className="small text-muted d-none d-md-inline">กรองก่อนคำนวณเพื่อลดเวลา</div>
@@ -667,11 +688,12 @@ export default function AdminRubberAgePage() {
                     </summary>
 
                     <div className="mt-3 row g-2 align-items-end">
-                        <div className="col-md-2">
+                        <div className="col-md-5">
                             <label className="form-label small mb-1">จังหวัด</label>
                             <select
                                 className="form-select form-select-sm"
                                 value={filters.province}
+                                disabled={fetchingParcels || bfastRunning || updating}
                                 onChange={(e) => setFilters((prev) => ({ ...prev, province: e.target.value, amphoe_t: "" }))}
                             >
                                 <option value="">ทุกจังหวัด</option>
@@ -680,12 +702,12 @@ export default function AdminRubberAgePage() {
                                 ))}
                             </select>
                         </div>
-                        <div className="col-md-2">
+                        <div className="col-md-5">
                             <label className="form-label small mb-1">อำเภอ</label>
                             <select
                                 className="form-select form-select-sm"
                                 value={filters.amphoe_t}
-                                disabled={!filters.province || amphoeOptions.length === 0}
+                                disabled={!filters.province || amphoeOptions.length === 0 || fetchingParcels || bfastRunning || updating}
                                 onChange={(e) => setFilters((prev) => ({ ...prev, amphoe_t: e.target.value }))}
                             >
                                 <option value="">ทุกอำเภอ</option>
@@ -694,64 +716,27 @@ export default function AdminRubberAgePage() {
                                 ))}
                             </select>
                         </div>
-                        <div className="col-md-2">
-                            <label className="form-label small mb-1">ตำบล</label>
-                            <input
-                                className="form-control form-control-sm"
-                                placeholder="เช่น เขาวงกต"
-                                value={filters.tambon}
-                                onChange={(e) => setFilters((prev) => ({ ...prev, tambon: e.target.value }))}
-                            />
-                        </div>
-                        <div className="col-md-2">
-                            <label className="form-label small mb-1">ปีปลูก (จาก–ถึง)</label>
-                            <div className="d-flex gap-2">
-                                <input
-                                    className="form-control form-control-sm"
-                                    placeholder="2550"
-                                    value={filters.growYearMin}
-                                    onChange={(e) => setFilters((prev) => ({ ...prev, growYearMin: e.target.value }))}
-                                />
-                                <input
-                                    className="form-control form-control-sm"
-                                    placeholder="2568"
-                                    value={filters.growYearMax}
-                                    onChange={(e) => setFilters((prev) => ({ ...prev, growYearMax: e.target.value }))}
-                                />
-                            </div>
-                        </div>
-                        <div className="col-md-2">
-                            <label className="form-label small mb-1">จำนวนที่โหลด</label>
-                            <input
-                                className="form-control form-control-sm"
-                                type="number"
-                                min={1}
-                                max={2000}
-                                value={filters.limit}
-                                onChange={(e) => setFilters((prev) => ({ ...prev, limit: e.target.value }))}
-                            />
-                        </div>
-                        <div className="col-md-2 d-flex gap-2">
+                        <div className="col-md-2 d-flex align-items-end gap-2">
+                            {fetchingParcels && (
+                                <span className="spinner-border spinner-border-sm text-success" style={{ width: 16, height: 16 }} />
+                            )}
                             <button
-                                className="btn btn-success btn-sm rounded-pill px-3 flex-grow-1"
-                                onClick={() => fetchParcels()}
+                                className="btn btn-sm"
                                 disabled={fetchingParcels || bfastRunning || updating}
-                                title="โหลดรายการแปลงตามตัวกรอง"
-                            >
-                                {fetchingParcels
-                                    ? <span className="spinner-border spinner-border-sm" style={{ width: 12, height: 12 }} />
-                                    : <><i className="bi bi-search me-1" />โหลดแปลง</>}
-                            </button>
-                            <button
-                                className="btn btn-outline-secondary btn-sm rounded-pill px-3"
-                                disabled={fetchingParcels || bfastRunning || updating}
-                                onClick={() => {
-                                    setFilters(DEFAULT_FILTERS);
-                                    fetchParcels(DEFAULT_FILTERS);
+                                onClick={() => setFilters(DEFAULT_FILTERS)}
+                                title="ล้างตัวกรอง"
+                                style={{
+                                    borderRadius: 8,
+                                    border: "1.5px solid #d1d5db",
+                                    background: "white",
+                                    color: "#6b7280",
+                                    fontWeight: 500,
+                                    padding: "5px 14px",
+                                    transition: "all 0.15s",
+                                    whiteSpace: "nowrap",
                                 }}
-                                title="ล้างตัวกรองและโหลดใหม่"
                             >
-                                <i className="bi bi-x-circle" />
+                                <i className="bi bi-x-circle me-1" />ล้างตัวกรอง
                             </button>
                         </div>
                     </div>
@@ -837,45 +822,8 @@ export default function AdminRubberAgePage() {
                             <Card className="border-0 shadow-sm">
                                 <div className="p-3 p-md-4">
                                     <div className="row g-3">
-                                        {/* Step 1 */}
-                                        <div className="col-12 col-lg-3">
-                                            <div className="p-3 rounded-4 border h-100" style={{ background: "rgba(255,255,255,0.75)" }}>
-                                                <div className="d-flex align-items-center justify-content-between mb-2">
-                                                    <div className="d-flex align-items-center gap-2">
-                                                        <span className="badge rounded-pill text-bg-dark">Step 1</span>
-                                                        <span className="fw-semibold">เลือกแปลง</span>
-                                                    </div>
-                                                    <span className="small text-muted">{selectedCount.toLocaleString()} เลือก</span>
-                                                </div>
-
-                                                <div className="d-grid gap-2">
-                                                    <button
-                                                        className="btn btn-outline-secondary btn-sm rounded-pill"
-                                                        onClick={toggleAll}
-                                                        disabled={parcels.length === 0}
-                                                    >
-                                                        <i className="bi bi-check2-square me-1" />
-                                                        {selected.size === parcels.length ? "ยกเลิกทั้งหมด" : "เลือกทั้งหมด"}
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-light btn-sm rounded-pill border"
-                                                        onClick={() => fetchParcels()}
-                                                        disabled={fetchingParcels || bfastRunning || updating}
-                                                    >
-                                                        {fetchingParcels
-                                                            ? <><span className="spinner-border spinner-border-sm me-1" style={{ width: 12, height: 12 }} />กำลังโหลด…</>
-                                                            : <><i className="bi bi-arrow-clockwise me-1" />โหลดใหม่ตามตัวกรอง</>}
-                                                    </button>
-                                                </div>
-
-                                                <div className="small text-muted mt-2">
-                                                    แนะนำ: กรองให้เหลือ ~200 แปลงก่อนคำนวณ
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         {/* Step 2 */}
-                                        <div className="col-12 col-lg-3">
+                                        <div className="col-12 col-lg-4">
                                             <div className="p-3 rounded-4 border h-100" style={{ background: "rgba(240,253,244,0.55)" }}>
                                                 <div className="d-flex align-items-center justify-content-between mb-2">
                                                     <div className="d-flex align-items-center gap-2">
@@ -889,37 +837,61 @@ export default function AdminRubberAgePage() {
 
                                                 <div className="d-grid gap-2">
                                                     <button
-                                                        className="btn btn-success btn-sm rounded-pill"
+                                                        className="btn"
                                                         disabled={rasterGenerating || bfastRunning || updating || selected.size === 0}
                                                         onClick={generateRasterInGee}
+                                                        style={{
+                                                            background: (rasterGenerating || bfastRunning || updating || selected.size === 0)
+                                                                ? "#d1fae5"
+                                                                : "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                                                            color: (rasterGenerating || bfastRunning || updating || selected.size === 0) ? "#6b7280" : "white",
+                                                            border: "none",
+                                                            borderRadius: 10,
+                                                            padding: "9px 16px",
+                                                            fontWeight: 600,
+                                                            fontSize: "0.85rem",
+                                                            letterSpacing: "0.01em",
+                                                            boxShadow: "none",
+                                                            transition: "all 0.15s ease",
+                                                        }}
                                                     >
                                                         {rasterGenerating
-                                                            ? <><span className="spinner-border spinner-border-sm me-1" style={{ width: 12, height: 12 }} />กำลังสร้าง…</>
-                                                            : <><i className="bi bi-globe2 me-1" />สร้าง Raster ({selectedCount} แปลงที่เลือก)</>}
+                                                            ? <><span className="spinner-border spinner-border-sm me-1" style={{ width: 14, height: 14 }} />กำลังสร้าง…</>
+                                                            : <><i className="bi bi-globe2 me-1" />สร้าง Raster</>}
                                                     </button>
-                                                    {selected.size === 0 && (
-                                                        <div className="small text-muted">เลือกแปลงใน Step 1 ก่อน</div>
-                                                    )}
+                                                    {selected.size === 0
+                                                        ? <div className="small text-muted">เลือกแปลงใน Step 1 ก่อน</div>
+                                                        : <div className="small text-muted">
+                                                            <i className="bi bi-info-circle me-1" />
+                                                            30m · ควรเลือกแปลงในอำเภอเดียวกัน เพื่อไม่ให้ไฟล์ใหญ่เกินไป
+                                                          </div>
+                                                    }
 
                                                     <details className="small">
                                                         <summary className="text-muted" style={{ cursor: "pointer" }}>
                                                             ขั้นสูง (BFAST)
                                                         </summary>
-                                                        <div className="mt-2 d-flex gap-2">
-                                                            <button
-                                                                className={`btn btn-sm rounded-pill ${calcMethod === "raster" ? "btn-outline-success" : "btn-outline-secondary"}`}
-                                                                onClick={() => setCalcMethod("raster")}
-                                                                disabled={bfastRunning || updating}
-                                                            >
-                                                                Raster
-                                                            </button>
-                                                            <button
-                                                                className={`btn btn-sm rounded-pill ${calcMethod === "bfast" ? "btn-outline-success" : "btn-outline-secondary"}`}
-                                                                onClick={() => setCalcMethod("bfast")}
-                                                                disabled={bfastRunning || updating}
-                                                            >
-                                                                BFAST
-                                                            </button>
+                                                        <div className="mt-2 d-flex" style={{ background: "#f1f5f9", borderRadius: 8, padding: 3, gap: 2 }}>
+                                                            {(["raster", "bfast"] as const).map((m) => (
+                                                                <button
+                                                                    key={m}
+                                                                    className="btn btn-sm flex-fill"
+                                                                    onClick={() => setCalcMethod(m)}
+                                                                    disabled={bfastRunning || updating}
+                                                                    style={{
+                                                                        borderRadius: 6,
+                                                                        border: "none",
+                                                                        fontWeight: calcMethod === m ? 600 : 400,
+                                                                        background: calcMethod === m ? "white" : "transparent",
+                                                                        color: calcMethod === m ? "#065f46" : "#6b7280",
+                                                                        boxShadow: "none",
+                                                                        transition: "all 0.15s",
+                                                                        fontSize: "0.8rem",
+                                                                    }}
+                                                                >
+                                                                    {m === "raster" ? "Raster" : "BFAST"}
+                                                                </button>
+                                                            ))}
                                                         </div>
                                                         <div className="text-muted mt-2">
                                                             BFAST จะคำนวณจาก GEE รายแปลง (ช้ากว่า)
@@ -934,7 +906,7 @@ export default function AdminRubberAgePage() {
                                         </div>
 
                                         {/* Step 3 */}
-                                        <div className="col-12 col-lg-3">
+                                        <div className="col-12 col-lg-4">
                                             <div className="p-3 rounded-4 border h-100" style={{ background: "rgba(239,246,255,0.55)" }}>
                                                 <div className="d-flex align-items-center justify-content-between mb-2">
                                                     <div className="d-flex align-items-center gap-2">
@@ -945,35 +917,49 @@ export default function AdminRubberAgePage() {
                                                 </div>
 
                                                 <div className="d-grid gap-2">
-                                                    <button
-                                                        className="btn btn-primary btn-sm rounded-pill"
-                                                        disabled={
-                                                            selected.size === 0 ||
-                                                            bfastRunning ||
-                                                            parcels.length === 0 ||
-                                                            (calcMethod === "raster" && !rasterReady && rasterGenerating)
-                                                        }
-                                                        onClick={async () => {
-                                                            if (calcMethod === "raster" && !rasterReady) {
-                                                                await generateRasterInGee();
-                                                            }
-                                                            if (calcMethod === "raster") {
-                                                                await runRasterSample(selected);
-                                                            } else {
-                                                                await runBfast(selected);
-                                                            }
-                                                        }}
-                                                    >
-                                                        {bfastRunning
-                                                            ? <>
-                                                                <span className="spinner-border spinner-border-sm me-1" style={{ width: 12, height: 12 }} />
-                                                                กำลังทำงาน… ({bfastProgress.done}/{bfastProgress.total})
-                                                            </>
-                                                            : <>
-                                                                <i className="bi bi-cpu me-1" />
-                                                                {selected.size === 0 ? "เลือกแปลงก่อน" : "คำนวณอายุให้แปลงที่เลือก"}
-                                                            </>}
-                                                    </button>
+                                                    {(() => {
+                                                        const step3Disabled = selected.size === 0 || bfastRunning || parcels.length === 0 || (calcMethod === "raster" && !rasterReady && rasterGenerating);
+                                                        return (
+                                                            <button
+                                                                className="btn"
+                                                                disabled={step3Disabled}
+                                                                onClick={async () => {
+                                                                    if (calcMethod === "raster" && !rasterReady) {
+                                                                        await generateRasterInGee();
+                                                                    }
+                                                                    if (calcMethod === "raster") {
+                                                                        await runRasterSample(selected);
+                                                                    } else {
+                                                                        await runBfast(selected);
+                                                                    }
+                                                                }}
+                                                                style={{
+                                                                    background: step3Disabled
+                                                                        ? "#dbeafe"
+                                                                        : "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+                                                                    color: step3Disabled ? "#6b7280" : "white",
+                                                                    border: "none",
+                                                                    borderRadius: 10,
+                                                                    padding: "9px 16px",
+                                                                    fontWeight: 600,
+                                                                    fontSize: "0.85rem",
+                                                                    letterSpacing: "0.01em",
+                                                                    boxShadow: "none",
+                                                                    transition: "all 0.15s ease",
+                                                                }}
+                                                            >
+                                                                {bfastRunning
+                                                                    ? <>
+                                                                        <span className="spinner-border spinner-border-sm me-1" style={{ width: 14, height: 14 }} />
+                                                                        กำลังทำงาน… ({bfastProgress.done}/{bfastProgress.total})
+                                                                    </>
+                                                                    : <>
+                                                                        <i className="bi bi-cpu me-1" />
+                                                                        {selected.size === 0 ? "เลือกแปลงก่อน" : "คำนวณอายุให้แปลงที่เลือก"}
+                                                                    </>}
+                                                            </button>
+                                                        );
+                                                    })()}
                                                     <div className="d-flex flex-wrap gap-2">
                                                         <span className="badge rounded-pill text-bg-success">สำเร็จ {selectedDone}</span>
                                                         <span className="badge rounded-pill text-bg-danger">ผิดพลาด {selectedError}</span>
@@ -993,7 +979,7 @@ export default function AdminRubberAgePage() {
                                         </div>
 
                                         {/* Step 4 */}
-                                        <div className="col-12 col-lg-3">
+                                        <div className="col-12 col-lg-4">
                                             <div className="p-3 rounded-4 border h-100" style={{ background: "rgba(255,247,237,0.55)" }}>
                                                 <div className="d-flex align-items-center justify-content-between mb-2">
                                                     <div className="d-flex align-items-center gap-2">
@@ -1004,15 +990,40 @@ export default function AdminRubberAgePage() {
                                                 </div>
 
                                                 <div className="d-grid gap-2">
-                                                    <button
-                                                        className="btn btn-dark btn-sm rounded-pill"
-                                                        disabled={readyToSaveCount === 0 || updating || parcels.length === 0}
-                                                        onClick={saveToDb}
-                                                    >
-                                                        {updating
-                                                            ? <><span className="spinner-border spinner-border-sm me-1" style={{ width: 12, height: 12 }} />กำลังบันทึก…</>
-                                                            : <><i className="bi bi-cloud-upload me-1" />บันทึกผล ({readyToSaveCount} แปลง)</>}
-                                                    </button>
+                                                    {(() => {
+                                                        const step4Disabled = readyToSaveCount === 0 || updating || parcels.length === 0;
+                                                        return (
+                                                            <button
+                                                                className="btn"
+                                                                disabled={step4Disabled}
+                                                                onClick={saveToDb}
+                                                                style={{
+                                                                    background: step4Disabled
+                                                                        ? "#f1f5f9"
+                                                                        : "linear-gradient(135deg, #0f172a 0%, #334155 100%)",
+                                                                    color: step4Disabled ? "#9ca3af" : "white",
+                                                                    border: step4Disabled ? "1.5px solid #e2e8f0" : "none",
+                                                                    borderRadius: 10,
+                                                                    padding: "9px 16px",
+                                                                    fontWeight: 600,
+                                                                    fontSize: "0.85rem",
+                                                                    letterSpacing: "0.01em",
+                                                                    boxShadow: "none",
+                                                                    transition: "all 0.15s ease",
+                                                                }}
+                                                            >
+                                                                {updating
+                                                                    ? <><span className="spinner-border spinner-border-sm me-1" style={{ width: 14, height: 14 }} />กำลังบันทึก…</>
+                                                                    : <><i className="bi bi-cloud-upload me-1" />บันทึกผล ({readyToSaveCount} แปลง)</>}
+                                                            </button>
+                                                        );
+                                                    })()}
+                                                    {readyToSaveCount === 0 && selectedDone > 0 && (
+                                                        <div className="small text-warning fw-medium">
+                                                            <i className="bi bi-exclamation-triangle me-1" />
+                                                            GEE คำนวณแล้ว {selectedDone} แปลง แต่ไม่พบอายุ — อาจต้องสร้าง Raster ใหม่
+                                                        </div>
+                                                    )}
                                                     <div className="small text-muted">
                                                         แสดง {parcels.length.toLocaleString()} / {total.toLocaleString()} รายการ
                                                         {total > parcels.length && " · ตอนนี้โหลดชุดแรก"}
@@ -1024,6 +1035,20 @@ export default function AdminRubberAgePage() {
                                 </div>
                             </Card>
                         </div>
+                    )}
+
+                    {/* Map */}
+                    {parcels.length > 0 && (
+                        <Card className="border-0 shadow-sm mb-4">
+                            <div className="p-3 pb-0 d-flex align-items-center gap-2">
+                                <i className="bi bi-map text-success" />
+                                <span className="fw-bold">แผนที่อายุต้นยาง</span>
+                                <span className="small text-muted">(คลิกแปลงเพื่อดูรายละเอียด)</span>
+                            </div>
+                            <div className="p-3">
+                                <RubberAgeMap parcels={parcels} bfastMap={bfastMap} tileUrl={rasterTileUrl ?? undefined} focusParcelId={focusedParcelId} />
+                            </div>
+                        </Card>
                     )}
 
                     {/* Table */}
@@ -1045,6 +1070,7 @@ export default function AdminRubberAgePage() {
                                             <th className="py-2">จังหวัด / อำเภอ</th>
                                             <th className="py-2 text-center">สถานะ</th>
                                             <th className="py-2 text-center">ปีปลูก (DB)</th>
+                                            <th className="py-2 text-center">อายุ (DB)</th>
                                             <th className="py-2 text-center">ปีปลูก (GEE)</th>
                                             <th className="py-2 text-center">อายุ (GEE) ปี</th>
                                             <th className="py-2 text-center">ความเชื่อมั่น</th>
@@ -1059,7 +1085,8 @@ export default function AdminRubberAgePage() {
                                                 <tr
                                                     key={p.id}
                                                     className={isSelected ? "table-success" : ""}
-                                                    style={{ cursor: "default" }}
+                                                    style={{ cursor: "pointer" }}
+                                                    onClick={() => setFocusedParcelId(p.id)}
                                                 >
                                                     <td className="px-3" onClick={(e) => e.stopPropagation()}>
                                                         <input
@@ -1095,14 +1122,23 @@ export default function AdminRubberAgePage() {
                                                         )}
                                                         {bfast?.state === "done" && (
                                                             bfast.age == null
-                                                                ? <span className="badge rounded-pill text-bg-warning text-dark" title={bfast.reason ?? undefined}>ไม่มีข้อมูล</span>
+                                                                ? <div>
+                                                                    <span className="badge rounded-pill text-bg-warning text-dark">ไม่มีข้อมูล</span>
+                                                                    {bfast.reason && (
+                                                                        <div className="text-muted mt-1" style={{ fontSize: 10 }}>
+                                                                            {REASON_LABELS[bfast.reason] ?? bfast.reason}
+                                                                        </div>
+                                                                    )}
+                                                                  </div>
                                                                 : <span className="badge rounded-pill text-bg-success">สำเร็จ</span>
                                                         )}
                                                         {bfast?.state === "error" && (
                                                             <span className="badge rounded-pill text-bg-danger">ผิดพลาด</span>
                                                         )}
                                                         {(!bfast || bfast.state === "idle") && (
-                                                            <span className="badge rounded-pill text-bg-light border">รอคำนวณ</span>
+                                                            p.gee_age != null
+                                                                ? <span className="badge rounded-pill" style={{ background: "rgba(16,185,129,0.12)", color: "#065f46" }}>บันทึกแล้ว</span>
+                                                                : <span className="badge rounded-pill text-bg-light border">รอคำนวณ</span>
                                                         )}
                                                     </td>
 
@@ -1111,42 +1147,59 @@ export default function AdminRubberAgePage() {
                                                         {formatThaiYear(p.grow_year)}
                                                     </td>
 
-                                                    {/* GEE planting year */}
+                                                    {/* DB rubber age */}
+                                                    <td className="text-center fw-medium">
+                                                        {p.rubber_age != null
+                                                            ? <span className="badge rounded-pill text-bg-success">{p.rubber_age} ปี</span>
+                                                            : <span className="text-muted">—</span>}
+                                                    </td>
+
+                                                    {/* GEE planting year — live result takes priority, fall back to DB-saved value */}
                                                     <td className="text-center">
                                                         {bfast?.state === "loading" && (
                                                             <span className="spinner-border spinner-border-sm text-success" style={{ width: 12, height: 12 }} />
                                                         )}
                                                         {bfast?.state === "error" && <span className="text-danger">✗</span>}
-                                                        {bfast?.state === "done" && bfast.plantingYear != null
-                                                            ? formatThaiYear(bfast.plantingYear)
-                                                            : bfast?.state === "done" ? "—" : ""}
+                                                        {bfast?.state === "done"
+                                                            ? (bfast.plantingYear != null ? formatThaiYear(bfast.plantingYear) : "—")
+                                                            : (!bfast || bfast.state === "idle")
+                                                                ? (p.gee_plant_year != null ? formatThaiYear(p.gee_plant_year) : <span className="text-muted">—</span>)
+                                                                : null}
                                                     </td>
 
-                                                    {/* GEE age */}
+                                                    {/* GEE age — live result takes priority, fall back to DB-saved value */}
                                                     <td className="text-center fw-bold">
                                                         {bfast?.state === "loading" && (
                                                             <span className="spinner-border spinner-border-sm text-success" style={{ width: 12, height: 12 }} />
                                                         )}
                                                         {bfast?.state === "error" && <span className="text-danger small">ผิดพลาด</span>}
-                                                        {bfast?.state === "done" && bfast.age != null ? bfast.age : "—"}
+                                                        {bfast?.state === "done"
+                                                            ? (bfast.age != null ? bfast.age : "—")
+                                                            : (!bfast || bfast.state === "idle")
+                                                                ? (p.gee_age != null ? p.gee_age : <span className="text-muted">—</span>)
+                                                                : null}
                                                     </td>
 
-                                                    {/* Confidence */}
-                                                    <td className="text-center">
-                                                        {bfast?.state === "done" && bfast.confidence != null && (
-                                                            <span
-                                                                className={`badge rounded-pill ${bfast.confidence >= 0.7
-                                                                    ? "bg-success"
-                                                                    : bfast.confidence >= 0.4
-                                                                        ? "bg-warning text-dark"
-                                                                        : "bg-danger"
-                                                                    }`}
-                                                                style={{ fontSize: 10 }}
-                                                            >
-                                                                {(bfast.confidence * 100).toFixed(0)}%
-                                                            </span>
-                                                        )}
-                                                    </td>
+                                                    {/* Confidence — live result takes priority, fall back to DB-saved value */}
+                                                    {(() => {
+                                                        const conf = bfast?.state === "done" && bfast.confidence != null
+                                                            ? bfast.confidence
+                                                            : (!bfast || bfast.state === "idle") && p.gee_confidence != null
+                                                                ? Number(p.gee_confidence)
+                                                                : null;
+                                                        return (
+                                                            <td className="text-center">
+                                                                {conf != null && (
+                                                                    <span
+                                                                        className={`badge rounded-pill ${conf >= 0.7 ? "bg-success" : conf >= 0.4 ? "bg-warning text-dark" : "bg-danger"}`}
+                                                                        style={{ fontSize: 10 }}
+                                                                    >
+                                                                        {(conf * 100).toFixed(0)}%
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                        );
+                                                    })()}
                                                 </tr>
                                             );
                                         })}

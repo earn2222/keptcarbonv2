@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
             `SELECT id, farm_name, farm_idc, app_no, land_seq,
               tambon, amphoe_t, province,
               grow_year, rip_type, rubber_age, grow_area,
+              gee_plant_year, gee_age, gee_confidence,
               ST_AsGeoJSON(geom)::json AS geometry
        FROM rubber_plots
        ${where}

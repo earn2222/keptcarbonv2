@@ -4,8 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PlotDB, type Plot } from "@/lib/auth";
 import { useAuth } from "@/lib/auth-context";
+import { Card, Eyebrow } from "@/app/components";
 import DashboardMap from "./DashboardMap";
 import CarbonChart from "./CarbonChart";
+
+const HERO_BG =
+    "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
+    "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
+    "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
+    "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
 
 function formatDate(iso: string | undefined): string {
   if (!iso) return "-";
@@ -49,29 +56,43 @@ export default function DashboardPage() {
   return (
     <>
       {/* === Welcome hero === */}
-      <section className="kc-welcome">
+      <section style={{ paddingTop: 8, paddingBottom: 0 }}>
         <div className="container">
-          <div className="row align-items-end g-4">
-            <div className="col-md-8">
-              <div className="kc-welcome-tag">
-                <i className="bi bi-stars"></i> ภาพรวมประจำวัน
+          <Card className="border-0 shadow-sm mb-2 overflow-hidden">
+            <div className="p-4 p-md-5" style={{ background: HERO_BG, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+              <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                <div style={{ maxWidth: 640 }}>
+                  <Eyebrow icon="bi-stars" className="mb-2">ภาพรวมประจำวัน</Eyebrow>
+                  <h1 className="fw-bold mb-2" style={{ letterSpacing: "-0.02em" }}>
+                    {user ? user.fullname : "ยินดีต้อนรับ"}
+                    {", "}
+                    <span className="kc-grad-text">เริ่มต้นวันที่ดี</span>
+                  </h1>
+                  <p className="text-muted mb-0">
+                    ติดตามแปลงยางพารา การกักเก็บคาร์บอน และความเปลี่ยนแปลงในระบบนิเวศของคุณในมุมมองเดียว
+                  </p>
+                </div>
+                <Link
+                  href="/map-draw"
+                  className="btn"
+                  style={{
+                    background: "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "10px 20px",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    boxShadow: "none",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <i className="bi bi-plus-circle me-2"></i>วาดแปลงใหม่
+                </Link>
               </div>
-              <h1>
-                {user ? user.fullname : "ยินดีต้อนรับ"}
-                {", "}
-                <span className="kc-grad-text">เริ่มต้นวันที่ดี</span>
-              </h1>
-              <p>
-                ติดตามแปลงยางพารา การกักเก็บคาร์บอน และความเปลี่ยนแปลงในระบบนิเวศของคุณ
-                ในมุมมองเดียว
-              </p>
             </div>
-            <div className="col-md-4 text-md-end">
-              <Link href="/map-draw" className="kc-welcome-cta">
-                <i className="bi bi-plus-circle"></i> วาดแปลงใหม่
-              </Link>
-            </div>
-          </div>
+          </Card>
         </div>
       </section>
 

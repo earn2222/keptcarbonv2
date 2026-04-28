@@ -13,10 +13,12 @@ async function isAdmin(request: NextRequest) {
 
 /**
  * GET /api/admin/parcels/filters
- *   → { provinces: string[] }
+ *   → { provinces: string[] }   — distinct province names from districts table (prefix stripped)
  *
- * GET /api/admin/parcels/filters?province=จันทบุรี
- *   → { amphoe_ts: string[] }
+ * GET /api/admin/parcels/filters?province=ระยอง
+ *   → { amphoe_ts: string[] }   — districts for that province (prefix stripped)
+ *
+ * Prefixes "จ." and "อ." are stripped so values match rubber_plots.province / amphoe_t.
  */
 export async function GET(request: NextRequest) {
     if (!(await isAdmin(request))) {
@@ -28,9 +30,9 @@ export async function GET(request: NextRequest) {
     try {
         if (province) {
             const result = await pool.query(
-                `SELECT DISTINCT amphoe_t
-                 FROM rubber_plots
-                 WHERE province = $1 AND amphoe_t IS NOT NULL AND amphoe_t <> ''
+                `SELECT DISTINCT REPLACE(amphoe_t, 'อ.', '') AS amphoe_t
+                 FROM districts
+                 WHERE REPLACE(prov_nam_t, 'จ.', '') = $1
                  ORDER BY amphoe_t`,
                 [province],
             );
@@ -38,9 +40,8 @@ export async function GET(request: NextRequest) {
         }
 
         const result = await pool.query(
-            `SELECT DISTINCT province
-             FROM rubber_plots
-             WHERE province IS NOT NULL AND province <> ''
+            `SELECT DISTINCT REPLACE(prov_nam_t, 'จ.', '') AS province
+             FROM districts
              ORDER BY province`,
         );
         return NextResponse.json({ provinces: result.rows.map((r: { province: string }) => r.province) });

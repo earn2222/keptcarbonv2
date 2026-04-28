@@ -93,33 +93,6 @@ export default function Header() {
                   คำนวณคาร์บอน
                 </Link>
               </li>
-              <li>
-                <Link href="/my-plots" onClick={closeNav}>
-                  แปลงของฉัน
-                </Link>
-              </li>
-
-              {user.role === "admin" && (
-                <li className="dropdown">
-                  <a href="#">
-                    <span>ผู้ดูแลระบบ</span>
-                    <i className="bi bi-chevron-down toggle-dropdown"></i>
-                  </a>
-                  <ul>
-                    <li>
-                      <Link href="/admin/users" onClick={closeNav}>
-                        <i className="bi bi-people me-2"></i>จัดการผู้ใช้
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="/admin/rubber-age" onClick={closeNav}>
-                        <i className="bi bi-tree me-2"></i>คำนวณอายุยาง
-                      </Link>
-                    </li>
-                  </ul>
-                </li>
-              )}
-
               <li className="d-xl-none">
                 <div className="mobile-auth-divider"></div>
               </li>
@@ -253,6 +226,19 @@ export default function Header() {
                   className="dropdown-menu show dropdown-menu-end shadow"
                   style={{ position: "absolute", top: "100%", right: 0, marginTop: "10px", border: "none", borderRadius: "10px", minWidth: "160px" }}
                 >
+                  <li>
+                    <a
+                      href="#"
+                      className="dropdown-item d-flex align-items-center py-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setDropdownOpen(false);
+                        router.push("/my-plots");
+                      }}
+                    >
+                      <i className="bi bi-map me-2 fs-5 text-secondary"></i> แปลงของฉัน
+                    </a>
+                  </li>
                   <li>
                     <a
                       href="#"

@@ -96,17 +96,20 @@ def build_annual_ndvi_images(
     start_year: int,
     end_year: int,
 ) -> list:
-    """Return a list of annual dry-season (Jan–Apr) median NDVI ee.Images (int16, scaled ×10000).
+    """Return a list of annual dry-season (Nov–Apr) median NDVI ee.Images (int16, scaled ×10000).
 
-    Restricting to Jan–Apr avoids Thailand's monsoon season (May–Oct) which causes
-    heavy cloud cover and degrades NDVI signal quality.
+    Each composite for year Y uses Nov(Y-1)–Apr(Y): the full pre-monsoon dry window
+    in Thailand. Nov–Dec are already clear in Rayong; doubling available scenes per
+    median composite reduces null pixels on small parcels without mixing monsoon signal.
     """
     import ee
 
     images = []
     for year in range(start_year, end_year + 1):
-        # Jan–Apr: dry season, lowest cloud cover in Thailand
-        start = f"{year}-01-01"
+        # Nov(Y-1)–Apr(Y): full dry season, lowest cloud cover in Thailand.
+        # Nov–Dec are already dry in Rayong; including them doubles available
+        # scenes per annual median without mixing in monsoon signal.
+        start = f"{year - 1}-11-01"
         end = f"{year}-04-30"
 
         l89 = (
@@ -295,6 +298,23 @@ def get_task_status(task_id: str) -> dict:
     if not statuses:
         return {"state": "UNKNOWN", "id": task_id}
     return statuses[0]
+
+
+def get_map_tile_url(image) -> str:
+    """
+    Return a GEE XYZ tile URL for the rubber_age band, styled with the age colour ramp.
+    Valid for ~24 hours. Use as an XYZ raster source in MapLibre / Leaflet.
+    """
+    import ee
+    vis = {
+        "bands": ["rubber_age"],
+        "min": 1,
+        "max": 25,
+        "palette": ["#bbf7d0", "#4ade80", "#16a34a", "#166534", "#14532d"],
+    }
+    display = image.select("rubber_age").updateMask(image.select("rubber_age").gt(0))
+    map_id = display.getMapId(vis)
+    return map_id["tile_fetcher"].url_format
 
 
 def get_download_url(
