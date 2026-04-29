@@ -152,7 +152,7 @@ export default function MapDrawPage() {
         ],
       },
       center: [101.258, 15],
-      zoom: 5,
+      zoom: 3,
       pitch: 0,
       bearing: 0,
       attributionControl: false,

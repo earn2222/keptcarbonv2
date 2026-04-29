@@ -5,6 +5,22 @@
    status bar, search, basemap card.
    ========================================================================== */
 
+/* === GLOBAL HEADER — glass overlay on map-draw ===
+   The page has no #md-topbar in its DOM — the root layout's <Header> is used.
+   We give it the frosted-glass look that #md-topbar previously provided. */
+body.map-draw-active .header {
+  background-color: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(18px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+  border-bottom: 1px solid rgba(45, 158, 95, 0.1) !important;
+  box-shadow: 0 2px 16px rgba(45, 158, 95, 0.06) !important;
+  z-index: 1000 !important;
+}
+
+body.map-draw-active.scrolled .header {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
 /* === TOPBAR (matches dashboard) === */
 #md-topbar {
   height: 64px !important;
