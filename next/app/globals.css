@@ -1,0 +1,31 @@
+/* ==========================================================================
+   KeptCarbon Global Styles
+   1. Design tokens (single source of truth)
+   2. Legacy vendor CSS is loaded via <link> in layout.tsx
+   ========================================================================== */
+
+@import "./styles/tokens.css";
+
+/* ── Global resets using token values ──────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--kc-font-family);
+  color: var(--kc-ink);
+  line-height: var(--kc-line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Field error (atoms/Input) ─────────────────── */
+.kc-field-error {
+  display: block;
+  margin-top: var(--kc-space-1);
+  font-size: var(--kc-font-size-xs);
+  color: var(--kc-error);
+}
+
