@@ -127,10 +127,13 @@ class BFASTFeature(BaseModel):
 
 class BFASTAgeRequest(BaseModel):
     features: list[BFASTFeature]
-    start_date: str = "2017-01-01"
-    end_date: str | None = None
+    start_date: str = "2017-01-01"   # kept for legacy; ignored when use_annual=True
+    end_date: str | None = None       # kept for legacy; ignored when use_annual=True
+    start_year: int = 2000
+    end_year: int | None = None       # defaults to current year
     current_year: int = Field(default_factory=lambda: datetime.utcnow().year)
     max_plots: int = 50
+    use_annual: bool = True           # True = annual Landsat; False = monthly S2 (legacy)
 
 
 def _ensure_data_root() -> None:
@@ -409,6 +412,142 @@ def _bfast_like_breakpoint(dates: list[datetime], ndvi_values: list[float | None
     }
 
 
+def _annual_ndvi_from_gee(geom: dict, start_year: int, end_year: int) -> tuple[list[int], list[float | None]]:
+    """Return annual dry-season (Nov–Apr) mean NDVI per parcel using Landsat 5/7/8/9.
+
+    Mirrors build_annual_ndvi_images() from bfast_raster.py but reduces each image
+    to a scalar mean over the parcel geometry instead of keeping it as a raster.
+    """
+    import ee
+
+    ee_geom = ee.Geometry(geom)
+    years: list[int] = []
+    ndvi_values: list[float | None] = []
+
+    for year in range(start_year, end_year + 1):
+        start = f"{year - 1}-11-01"
+        end   = f"{year}-04-30"
+
+        l89 = (
+            ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
+            .merge(ee.ImageCollection("LANDSAT/LC09/C02/T1_L2"))
+            .filterDate(start, end)
+            .filterBounds(ee_geom)
+            .filter(ee.Filter.lt("CLOUD_COVER", 60))
+            .map(lambda img: (
+                img.normalizedDifference(["SR_B5", "SR_B4"])
+                .rename("NDVI")
+                .updateMask(
+                    img.select("QA_PIXEL").bitwiseAnd(1 << 3).eq(0)
+                    .And(img.select("QA_PIXEL").bitwiseAnd(1 << 5).eq(0))
+                )
+                .copyProperties(img, ["system:time_start"])
+            ))
+        )
+        l57 = (
+            ee.ImageCollection("LANDSAT/LT05/C02/T1_L2")
+            .merge(ee.ImageCollection("LANDSAT/LE07/C02/T1_L2"))
+            .filterDate(start, end)
+            .filterBounds(ee_geom)
+            .filter(ee.Filter.lt("CLOUD_COVER", 60))
+            .map(lambda img: (
+                img.normalizedDifference(["SR_B4", "SR_B3"])
+                .rename("NDVI")
+                .updateMask(
+                    img.select("QA_PIXEL").bitwiseAnd(1 << 3).eq(0)
+                    .And(img.select("QA_PIXEL").bitwiseAnd(1 << 5).eq(0))
+                )
+                .copyProperties(img, ["system:time_start"])
+            ))
+        )
+
+        merged = l89.merge(l57)
+        count = int(merged.size().getInfo())
+        years.append(year)
+
+        if count == 0:
+            ndvi_values.append(None)
+            continue
+
+        median_img = merged.median().rename("NDVI")
+        stat = median_img.reduceRegion(
+            reducer=ee.Reducer.mean(),
+            geometry=ee_geom,
+            scale=30,
+            maxPixels=int(1e8),
+            bestEffort=True,
+        )
+        val = stat.getInfo().get("NDVI")
+        ndvi_values.append(float(val) if val is not None else None)
+
+    return years, ndvi_values
+
+
+def _bfast_like_breakpoint_annual(years: list[int], ndvi_values: list[float | None]) -> dict:
+    """Breakpoint detection on annual NDVI time series using a 2-year sliding window.
+
+    Same scoring logic as _bfast_like_breakpoint but adapted for yearly resolution:
+    - Minimum 6 valid annual observations (vs 18 monthly)
+    - 2-year pre/post windows (vs 6-month)
+    - Returns break_year instead of break_idx
+    """
+    arr = np.array([np.nan if v is None else float(v) for v in ndvi_values], dtype=float)
+    valid_count = int(np.isfinite(arr).sum())
+
+    if valid_count < 6:
+        return {
+            "break_year": None,
+            "confidence": 0.0,
+            "reason": "insufficient_observations",
+            "smoothed": _linear_fill_nan(arr).tolist(),
+        }
+
+    arr_filled = _linear_fill_nan(arr)
+    n = len(arr_filled)
+
+    best_idx: int | None = None
+    best_score = -1.0
+
+    NDVI_LOW  = 0.25
+    NDVI_HIGH = 0.45
+
+    for i in range(2, n - 2):
+        pre  = arr_filled[i - 2:i]
+        post = arr_filled[i:i + 2]
+
+        pre_mean  = float(pre.mean())
+        post_mean = float(post.mean())
+        level_jump = post_mean - pre_mean
+
+        pre_bare  = 1.0 if pre_mean  < NDVI_LOW  else max(0.0, 1.0 - (pre_mean  - NDVI_LOW)  / NDVI_LOW)
+        post_green = 1.0 if post_mean > NDVI_HIGH else max(0.0, (post_mean - NDVI_LOW) / (NDVI_HIGH - NDVI_LOW))
+
+        score = (
+            0.40 * pre_bare
+            + 0.40 * post_green
+            + 0.20 * max(0.0, min(1.0, level_jump / 0.30))
+        )
+
+        if score > best_score:
+            best_score = score
+            best_idx = i
+
+    if best_idx is None or best_score < 0.35:
+        return {
+            "break_year": None,
+            "confidence": max(0.0, best_score),
+            "reason": "no_clear_break",
+            "smoothed": arr_filled.tolist(),
+        }
+
+    return {
+        "break_year": years[best_idx],
+        "confidence": float(round(min(1.0, best_score), 4)),
+        "reason": "ok",
+        "smoothed": arr_filled.tolist(),
+    }
+
+
 # ── Endpoints ───────────────────────────────────────────────────────────────
 
 @app.get("/health")
@@ -659,64 +798,99 @@ def detect_rubber_age_bfast(req: BFASTAgeRequest):
     if not req.features:
         raise HTTPException(status_code=400, detail="features is required")
 
-    end_date = req.end_date or datetime.utcnow().strftime("%Y-%m-%d")
     features = req.features[: max(1, min(req.max_plots, 300))]
+    end_year = req.end_year or req.current_year
 
     rows: list[dict] = []
-    for item in features:
-        try:
-            dates, ndvi, image_counts = _monthly_ndvi_from_gee(
-                item.geometry, req.start_date, end_date)
-            bfast = _bfast_like_breakpoint(dates, ndvi)
-            break_idx = bfast["break_idx"]
 
-            planting_year = dates[break_idx].year if break_idx is not None else None
-            age = req.current_year - planting_year if planting_year is not None else None
+    if req.use_annual:
+        # ── Annual Landsat mode (default) ──────────────────────────────────
+        method_label = "GEE_BFAST_annual_Landsat"
+        for item in features:
+            try:
+                years, ndvi = _annual_ndvi_from_gee(item.geometry, req.start_year, end_year)
+                bfast = _bfast_like_breakpoint_annual(years, ndvi)
+                planting_year = bfast["break_year"]
+                age = req.current_year - planting_year if planting_year is not None else None
 
-            latest_idx = None
-            for i in range(len(ndvi) - 1, -1, -1):
-                if ndvi[i] is not None:
-                    latest_idx = i
-                    break
+                rows.append({
+                    "plot_id": item.plot_id,
+                    "planting_year": planting_year,
+                    "age": age,
+                    "confidence": bfast["confidence"],
+                    "breakpoint_date": str(planting_year) if planting_year is not None else None,
+                    "ndvi_latest": round(float(ndvi[-1]), 4) if ndvi and ndvi[-1] is not None else None,
+                    "latest_month": str(years[-1]) if years else None,
+                    "image_count_total": sum(1 for v in ndvi if v is not None),
+                    "method": method_label,
+                    "reason": bfast["reason"],
+                })
+            except Exception as exc:
+                logger.error("BFAST-annual failed for plot_id=%s: %s", item.plot_id, exc)
+                rows.append({
+                    "plot_id": item.plot_id,
+                    "planting_year": None,
+                    "age": None,
+                    "confidence": 0.0,
+                    "breakpoint_date": None,
+                    "ndvi_latest": None,
+                    "latest_month": None,
+                    "image_count_total": 0,
+                    "method": method_label,
+                    "reason": "error",
+                    "error": str(exc),
+                })
+    else:
+        # ── Monthly Sentinel-2 mode (legacy) ──────────────────────────────
+        method_label = "GEE_BFAST_like"
+        end_date = req.end_date or datetime.utcnow().strftime("%Y-%m-%d")
+        for item in features:
+            try:
+                dates, ndvi, image_counts = _monthly_ndvi_from_gee(
+                    item.geometry, req.start_date, end_date)
+                bfast = _bfast_like_breakpoint(dates, ndvi)
+                break_idx = bfast["break_idx"]
+                planting_year = dates[break_idx].year if break_idx is not None else None
+                age = req.current_year - planting_year if planting_year is not None else None
 
-            rows.append({
-                "plot_id": item.plot_id,
-                "planting_year": planting_year,
-                "age": age,
-                "confidence": bfast["confidence"],
-                "breakpoint_date": dates[break_idx].strftime("%Y-%m-%d") if break_idx is not None else None,
-                "ndvi_latest": round(float(ndvi[latest_idx]), 4) if latest_idx is not None and ndvi[latest_idx] is not None else None,
-                "latest_month": dates[latest_idx].strftime("%Y-%m") if latest_idx is not None else None,
-                "image_count_total": int(sum(image_counts)),
-                "method": "GEE_BFAST_like",
-                "reason": bfast["reason"],
-            })
-        except Exception as exc:
-            logger.error(
-                "BFAST age detection failed for plot_id=%s: %s", item.plot_id, exc)
-            rows.append({
-                "plot_id": item.plot_id,
-                "planting_year": None,
-                "age": None,
-                "confidence": 0.0,
-                "breakpoint_date": None,
-                "ndvi_latest": None,
-                "latest_month": None,
-                "image_count_total": 0,
-                "method": "GEE_BFAST_like",
-                "reason": "error",
-                "error": str(exc),
-            })
+                latest_idx = next((i for i in range(len(ndvi) - 1, -1, -1) if ndvi[i] is not None), None)
+                rows.append({
+                    "plot_id": item.plot_id,
+                    "planting_year": planting_year,
+                    "age": age,
+                    "confidence": bfast["confidence"],
+                    "breakpoint_date": dates[break_idx].strftime("%Y-%m-%d") if break_idx is not None else None,
+                    "ndvi_latest": round(float(ndvi[latest_idx]), 4) if latest_idx is not None and ndvi[latest_idx] is not None else None,
+                    "latest_month": dates[latest_idx].strftime("%Y-%m") if latest_idx is not None else None,
+                    "image_count_total": int(sum(image_counts)),
+                    "method": method_label,
+                    "reason": bfast["reason"],
+                })
+            except Exception as exc:
+                logger.error("BFAST-monthly failed for plot_id=%s: %s", item.plot_id, exc)
+                rows.append({
+                    "plot_id": item.plot_id,
+                    "planting_year": None,
+                    "age": None,
+                    "confidence": 0.0,
+                    "breakpoint_date": None,
+                    "ndvi_latest": None,
+                    "latest_month": None,
+                    "image_count_total": 0,
+                    "method": method_label,
+                    "reason": "error",
+                    "error": str(exc),
+                })
 
     detected = sum(1 for r in rows if r.get("planting_year") is not None)
-    avg_conf = round(float(sum(float(r.get("confidence", 0.0))
-                     for r in rows) / len(rows)), 4) if rows else 0.0
+    avg_conf = round(sum(float(r.get("confidence", 0.0)) for r in rows) / len(rows), 4) if rows else 0.0
 
     return {
         "success": True,
-        "method": "GEE_BFAST_like",
-        "start_date": req.start_date,
-        "end_date": end_date,
+        "method": method_label,
+        "use_annual": req.use_annual,
+        "start_year": req.start_year if req.use_annual else req.start_date,
+        "end_year": end_year if req.use_annual else (req.end_date or datetime.utcnow().strftime("%Y-%m-%d")),
         "count": len(rows),
         "detected": detected,
         "avg_confidence": avg_conf,

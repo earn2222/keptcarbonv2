@@ -11,8 +11,11 @@ type BFASTBody = {
     features?: BFASTFeature[];
     startDate?: string;
     endDate?: string;
+    startYear?: number;
+    endYear?: number;
     currentYear?: number;
     maxPlots?: number;
+    useAnnual?: boolean;
 };
 
 async function isAdmin(request: NextRequest) {
@@ -52,8 +55,11 @@ export async function POST(request: NextRequest) {
                 features: body.features,
                 start_date: body.startDate ?? "2017-01-01",
                 end_date: body.endDate ?? null,
+                start_year: body.startYear ?? 2000,
+                end_year: body.endYear ?? null,
                 current_year: body.currentYear ?? new Date().getFullYear(),
                 max_plots: body.maxPlots ?? 50,
+                use_annual: body.useAnnual ?? true,
             }),
             signal: controller.signal,
         });

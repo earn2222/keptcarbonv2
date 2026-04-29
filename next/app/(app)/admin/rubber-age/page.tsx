@@ -56,7 +56,7 @@ type FilterState = {
 const CURRENT_YEAR = new Date().getFullYear();
 
 const REASON_LABELS: Record<string, string> = {
-    no_valid_pixels:      "ไม่พบสัญญาณในราสเตอร์",
+    no_valid_pixels:      "ไม่พบข้อมูลราสเตอร์",
     empty_window:         "แปลงเล็กเกินไปสำหรับราสเตอร์",
     outside_raster_extent:"นอกพื้นที่ราสเตอร์",
     raster_missing_crs:   "ราสเตอร์ไม่มี CRS",
@@ -241,6 +241,7 @@ export default function AdminRubberAgePage() {
                 geometry: f.geometry,
             }));
             setParcels(rows);
+            setSelected(new Set(rows.slice(0, 100).map((p) => p.id)));
             setTotal(data.total ?? rows.length);
         } catch (err) {
             setParcelErr(err instanceof Error ? err.message : String(err));
@@ -632,41 +633,60 @@ export default function AdminRubberAgePage() {
                         borderBottom: "1px solid rgba(0,0,0,0.06)",
                     }}
                 >
-                    <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
-                        <div style={{ maxWidth: 760 }}>
-                            <Eyebrow icon="bi-shield-check" className="mb-2">
-                                แผงควบคุมผู้ดูแลระบบ
-                            </Eyebrow>
-                            <h1 className="fw-bold mb-2" style={{ letterSpacing: "-0.02em" }}>
-                                คำนวณอายุต้นยาง
-                            </h1>
-                            <div className="text-muted">
-                                โหมดแนะนำ: <span className="fw-semibold">Raster</span> → สร้างอายุใน GEE ครั้งเดียว → ลดผลลงแต่ละแปลง → บันทึกลงฐานข้อมูล
-                            </div>
+                    <div>
+                        <h1 className="fw-bold mb-3" style={{ letterSpacing: "-0.02em" }}>
+                            คำนวณอายุต้นยาง
+                        </h1>
+                        <div className="row g-3" style={{ fontSize: 12.5 }}>
+                                {/* Raster */}
+                                <div className="col-md-6">
+                                <div className="p-3 rounded-3 h-100" style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.18)" }}>
+                                    <div className="fw-bold mb-2" style={{ color: "#065f46", fontSize: 13 }}>
+                                        Raster
+                                        <span className="fw-normal text-muted ms-2" style={{ fontSize: 11 }}>pixel-wise บน GEE · เร็ว · แนะนำ</span>
+                                    </div>
+                                    <div className="text-muted mb-2" style={{ lineHeight: 1.7 }}>
+                                        คำนวณ NDVI median รายปี (Landsat 5/7/8/9, ช่วง Nov–Apr) ครอบทั้งพื้นที่พร้อมกัน
+                                        แล้วหา <strong style={{ color: "#374151" }}>ปีที่ score สูงสุด</strong> ในแต่ละ pixel
+                                    </div>
+                                    <code style={{ fontSize: 11, background: "rgba(0,0,0,0.05)", borderRadius: 4, padding: "4px 8px", color: "#374151", display: "block", marginBottom: 8 }}>
+                                        score = 0.4×pre_bare + 0.4×post_green + 0.2×level_jump
+                                    </code>
+                                    <div className="text-muted" style={{ lineHeight: 1.75 }}>
+                                        <div>· <span className="fw-medium" style={{ color: "#374151" }}>pre_bare</span> — NDVI เฉลี่ย 2 ปีก่อน ต่ำ หมายถึงดินโล่ง/พึ่งโค่น</div>
+                                        <div>· <span className="fw-medium" style={{ color: "#374151" }}>post_green</span> — NDVI เฉลี่ย 2 ปีหลัง สูง หมายถึงต้นไม้เริ่มฟื้นตัว</div>
+                                        <div>· <span className="fw-medium" style={{ color: "#374151" }}>level_jump</span> — ส่วนต่างระหว่าง post และ pre</div>
+                                    </div>
+                                    <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(16,185,129,0.15)", color: "#374151" }}>
+                                        ข้อมูล Landsat ย้อนหลังถึงปี 2000 · ความแม่นยำระดับ <strong>ปี</strong>
+                                    </div>
+                                </div>
+                                </div>
+                                {/* BFAST */}
+                                <div className="col-md-6">
+                                <div className="p-3 rounded-3 h-100" style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.18)" }}>
+                                    <div className="fw-bold mb-2" style={{ color: "#1e40af", fontSize: 13 }}>
+                                        BFAST
+                                        <span className="fw-normal text-muted ms-2" style={{ fontSize: 11 }}>รายแปลง · ช้ากว่า</span>
+                                    </div>
+                                    <div className="text-muted mb-2" style={{ lineHeight: 1.7 }}>
+                                        ดึง NDVI mean รายปี (Landsat Nov–Apr) ของแต่ละแปลงแยกกัน
+                                        แล้วหา <strong style={{ color: "#374151" }}>breakpoint</strong> ด้วย sliding window 2 ปี pre/post
+                                    </div>
+                                    <code style={{ fontSize: 11, background: "rgba(0,0,0,0.05)", borderRadius: 4, padding: "4px 8px", color: "#374151", display: "block", marginBottom: 8 }}>
+                                        score = 0.4×pre_bare + 0.4×post_green + 0.2×level_jump
+                                    </code>
+                                    <div className="text-muted" style={{ lineHeight: 1.75 }}>
+                                        <div>· ใช้ score formula เดียวกับ Raster แต่คำนวณต่อแปลง ไม่ใช่ต่อ pixel</div>
+                                        <div>· ต้องมีข้อมูลอย่างน้อย 6 ปีที่ถ่ายได้ (ไม่มีเมฆ) จึงจะตรวจได้</div>
+                                        <div>· score ต้องผ่าน threshold 0.35 จึงถือว่าพบ breakpoint</div>
+                                    </div>
+                                    <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(59,130,246,0.15)", color: "#374151" }}>
+                                        ข้อมูล Landsat ย้อนหลังถึงปี 2000 · ความแม่นยำระดับ <strong>ปี</strong>
+                                    </div>
+                                </div>
+                                </div>
                         </div>
-
-                        <div className="d-flex flex-column gap-2 align-items-start align-items-md-end">
-                            <div className="small text-muted">ปีปัจจุบัน</div>
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="badge rounded-pill text-bg-dark">{CURRENT_YEAR}</span>
-                                <span className="badge rounded-pill text-bg-light border">เลือกสูงสุด 200 แปลง/รอบ (แนะนำ)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-3 d-flex flex-wrap gap-2">
-                        <span className="badge rounded-pill text-bg-light border">
-                            <span className="fw-semibold">1)</span> โหลด/กรองแปลง
-                        </span>
-                        <span className="badge rounded-pill text-bg-light border">
-                            <span className="fw-semibold">2)</span> สร้าง Raster ใน GEE (ปีล่าสุด)
-                        </span>
-                        <span className="badge rounded-pill text-bg-light border">
-                            <span className="fw-semibold">3)</span> ลดผลลงแปลงที่เลือก
-                        </span>
-                        <span className="badge rounded-pill text-bg-light border">
-                            <span className="fw-semibold">4)</span> บันทึกลงฐานข้อมูล
-                        </span>
                     </div>
                 </div>
             </Card>
@@ -684,7 +704,7 @@ export default function AdminRubberAgePage() {
                             <div className="fw-bold">ตัวกรองแปลง</div>
                             <div className="small text-muted d-none d-md-inline">กรองก่อนคำนวณเพื่อลดเวลา</div>
                         </div>
-                        <span className="small text-muted">คลิกเพื่อยุบ/ขยาย</span>
+                        <span className="small text-muted">คลิกเพื่อย่อ/ขยาย</span>
                     </summary>
 
                     <div className="mt-3 row g-2 align-items-end">
@@ -740,6 +760,20 @@ export default function AdminRubberAgePage() {
                             </button>
                         </div>
                     </div>
+                    {parcels.length > 0 && (
+                        <div className="mt-3 pt-3" style={{ borderTop: "1px solid #f1f5f9" }}>
+                            <span className="small text-muted">
+                                เลือกแล้ว{" "}
+                                <span className="fw-semibold" style={{ color: "#065f46" }}>{selected.size.toLocaleString()}</span>
+                                {" "}/ โหลดมา{" "}
+                                <span className="fw-semibold" style={{ color: "#111827" }}>{parcels.length.toLocaleString()}</span>
+                                {total !== null && total > parcels.length && (
+                                    <> / ทั้งหมด <span className="fw-semibold" style={{ color: "#111827" }}>{total.toLocaleString()}</span></>
+                                )}
+                                {" "}แปลง
+                            </span>
+                        </div>
+                    )}
                 </details>
             </Card>
 
@@ -859,17 +893,13 @@ export default function AdminRubberAgePage() {
                                                             ? <><span className="spinner-border spinner-border-sm me-1" style={{ width: 14, height: 14 }} />กำลังสร้าง…</>
                                                             : <><i className="bi bi-globe2 me-1" />สร้าง Raster</>}
                                                     </button>
-                                                    {selected.size === 0
-                                                        ? <div className="small text-muted">เลือกแปลงใน Step 1 ก่อน</div>
-                                                        : <div className="small text-muted">
-                                                            <i className="bi bi-info-circle me-1" />
-                                                            30m · ควรเลือกแปลงในอำเภอเดียวกัน เพื่อไม่ให้ไฟล์ใหญ่เกินไป
-                                                          </div>
-                                                    }
+                                                    {selected.size === 0 && (
+                                                        <div className="small text-muted">เลือกแปลงใน Step 1 ก่อน</div>
+                                                    )}
 
                                                     <details className="small">
                                                         <summary className="text-muted" style={{ cursor: "pointer" }}>
-                                                            ขั้นสูง (BFAST)
+                                                            เลือกโมเดล
                                                         </summary>
                                                         <div className="mt-2 d-flex" style={{ background: "#f1f5f9", borderRadius: 8, padding: 3, gap: 2 }}>
                                                             {(["raster", "bfast"] as const).map((m) => (
@@ -893,8 +923,24 @@ export default function AdminRubberAgePage() {
                                                                 </button>
                                                             ))}
                                                         </div>
-                                                        <div className="text-muted mt-2">
-                                                            BFAST จะคำนวณจาก GEE รายแปลง (ช้ากว่า)
+                                                        <div className="mt-2 p-2 rounded-3" style={{ background: "#f8fafc", border: "1px solid #e2e8f0", fontSize: 10.5, lineHeight: 1.7, color: "#475569" }}>
+                                                            {calcMethod === "raster" ? (
+                                                                <>
+                                                                    <div className="fw-semibold mb-1" style={{ color: "#065f46" }}>Raster (แนะนำ)</div>
+                                                                    <div>· ข้อมูล: Landsat 5/7/8/9 ย้อนหลังถึงปี 2000</div>
+                                                                    <div>· NDVI median รายปี ช่วง Nov–Apr</div>
+                                                                    <div>· เปรียบ 2 ปีก่อน vs 2 ปีหลัง → หาปีที่ดินเปลี่ยนจากโล่งเป็นเขียว</div>
+                                                                    <div>· เร็ว — คำนวณทุก pixel พร้อมกันบน GEE</div>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <div className="fw-semibold mb-1" style={{ color: "#1e40af" }}>BFAST</div>
+                                                                    <div>· ข้อมูล: Landsat 5/7/8/9 ย้อนหลังถึงปี 2000</div>
+                                                                    <div>· ดึง NDVI mean รายปีต่อแปลง แล้วหา breakpoint</div>
+                                                                    <div>· Sliding window 2 ปี pre/post</div>
+                                                                    <div>· ช้ากว่า — คำนวณทีละแปลง</div>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     </details>
                                                 </div>
