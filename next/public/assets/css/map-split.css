@@ -1526,14 +1526,7 @@ body.map-draw-active {
 
 /* large decorative step number */
 .mds-s1-num {
-  font-size: 52px;
-  font-weight: 900;
-  color: rgba(22, 163, 74, 0.08);
-  letter-spacing: -4px;
-  line-height: 1;
-  flex-shrink: 0;
-  user-select: none;
-  margin-top: -4px;
+  display: none !important;
 }
 
 /* ── Method toggle (replaces old method-grid/card) ──────────────────────── */
