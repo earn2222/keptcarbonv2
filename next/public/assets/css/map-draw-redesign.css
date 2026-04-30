@@ -3907,6 +3907,12 @@ body.map-draw-active.scrolled .header {
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .prp-save-summary {
@@ -3918,21 +3924,29 @@ body.map-draw-active.scrolled .header {
   color: #064e3b;
   margin-bottom: 18px;
   font-weight: 500;
+  animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.1s;
+  opacity: 0;
 }
 
 .prp-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .prp-label {
   font-size: 13px;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: -4px;
+  margin-bottom: 6px;
   display: block;
+  transition: color 0.2s ease;
+}
+
+.prp-input:focus-within + .prp-label {
+  color: #16a34a;
 }
 
 .prp-required {
@@ -3950,16 +3964,22 @@ body.map-draw-active.scrolled .header {
   color: #1e293b;
   background: #ffffff;
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   appearance: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.prp-input:hover {
+  border-color: rgba(22, 163, 74, 0.4);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);
+  transform: translateY(-1px);
 }
 
 .prp-input:focus {
   border-color: #16a34a;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
-  transform: translateY(-1px);
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+  transform: translateY(-2px);
 }
 
 .prp-save-success {
