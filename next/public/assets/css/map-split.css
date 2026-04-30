@@ -1400,7 +1400,7 @@ body.map-draw-active {
 .mds-stepper {
   display: flex !important;
   align-items: center !important;
-  padding: 18px 20px 16px !important;
+  padding: 18px 20px 16px 48px !important;
   background: #ffffff !important;
   border-bottom: 1px solid rgba(22, 163, 74, 0.1) !important;
   position: relative !important;
@@ -1434,12 +1434,11 @@ body.map-draw-active {
   left: 50%;
   width: 100%;
   height: 2px;
-  background: #dcfce7 !important;
+  background: rgba(22, 163, 74, 0.18) !important;
   z-index: 0 !important;
 }
 
-/* Hide line after step 3 */
-.mds-step:nth-child(4)::after,
+/* Hide line after last step */
 .mds-step:last-of-type::after {
   display: none !important;
 }
