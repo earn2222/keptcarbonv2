@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { AuthModals, Header } from "@/app/components/organisms";
@@ -18,8 +18,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/assets/img/favicon.png", type: "image/png" },
-      { url: "/assets/img/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/assets/img/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
     apple: [
       { url: "/assets/img/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
@@ -27,6 +25,9 @@ export const metadata: Metadata = {
     shortcut: "/assets/img/favicon.png",
   },
   manifest: "/site.webmanifest",
+};
+
+export const viewport: Viewport = {
   themeColor: "#16a34a",
 };
 
