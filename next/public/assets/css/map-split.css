@@ -164,7 +164,8 @@ body.map-draw-active {
 .mds-map-controls {
   position: absolute;
   bottom: 36px;
-  left: 14px;
+  right: 14px;
+  left: auto;
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -198,7 +199,8 @@ body.map-draw-active {
 .mds-basemap-card {
   position: absolute;
   bottom: 36px;
-  left: 58px;
+  right: 58px;
+  left: auto;
   width: 216px;
   background: #fff;
   border: 1px solid rgba(45, 158, 95, 0.12);
@@ -208,7 +210,7 @@ body.map-draw-active {
   padding: 14px;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-10px) scale(0.97);
+  transform: translateX(10px) scale(0.97);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -310,8 +312,8 @@ body.map-draw-active {
 
 /* ── MapLibre overrides ── */
 .mds-map-container .maplibregl-ctrl-bottom-right {
-  bottom: 40px !important;
-  right: 12px !important;
+  bottom: 84px !important;
+  right: 14px !important;
 }
 
 .mds-map-container .maplibregl-ctrl-group {
@@ -1130,8 +1132,8 @@ body.map-draw-active {
   }
 
   .mds-map-container .maplibregl-ctrl-bottom-right {
-    bottom: 30px !important;
-    right: 10px !important;
+    bottom: 58px !important;
+    right: 14px !important;
   }
 }
 
@@ -1980,5 +1982,12 @@ body.map-draw-active {
 /* ── Hide MapLibre logo ── */
 .maplibregl-ctrl-logo,
 .maplibregl-logo {
+  display: none !important;
+}
+
+/* Hide Next.js Dev Indicator ("N" logo) */
+nextjs-portal,
+#nextjs-portal,
+[data-nextjs-dialog-overlay] {
   display: none !important;
 }
