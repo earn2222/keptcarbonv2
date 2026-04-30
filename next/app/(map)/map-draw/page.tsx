@@ -766,7 +766,7 @@ export default function MapDrawPage() {
           onClick={() => setIsPanelOpen(true)}
           title="เปิดแผงเครื่องมือ"
         >
-          <i className="bi bi-layout-text-sidebar-reverse" />
+          <i className="bi bi-geo-alt-fill" />
         </button>
       )}
 

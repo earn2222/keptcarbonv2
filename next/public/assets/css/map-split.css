@@ -395,6 +395,10 @@ body.map-draw-active {
   box-shadow: 0 8px 24px rgba(45, 158, 95, 0.45);
 }
 
+.mds-panel-toggle-text {
+  display: none;
+}
+
 .mds-panel-close-btn {
   position: absolute;
   left: 14px;
@@ -1968,13 +1972,15 @@ body.map-draw-active {
   }
 
   .mds-map-side {
-    height: 45vh;
-    transition: height 0.4s ease;
+    height: 42vh;
+    transition: height 0.4s ease, flex 0.4s ease;
   }
 
-  /* When panel is closed on mobile, map takes full height */
+  /* When panel is closed on mobile, map fills remaining space */
   .mds-shell:has(.mds-panel-side.closed) .mds-map-side {
-    height: 100vh !important;
+    height: auto !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
   }
 
   .mds-panel-side {
@@ -2000,38 +2006,38 @@ body.map-draw-active {
   .mds-mobile-drag-handle::after {
     content: '';
     position: absolute;
-    top: 12px;
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 40px;
+    width: 44px;
     height: 5px;
-    background: rgba(22, 163, 74, 0.2);
+    background: rgba(22, 163, 74, 0.28);
     border-radius: 10px;
   }
 
   .mds-stepper {
-    padding: 18px 16px 14px !important;
+    padding: 20px 16px 14px 48px !important;
     border-radius: 24px 24px 0 0 !important;
   }
 
   .mds-step-circle {
-    width: 32px !important;
-    height: 32px !important;
+    width: 34px !important;
+    height: 34px !important;
     font-size: 12px !important;
   }
 
   .mds-step.active .mds-step-circle {
-    transform: scale(1.12) !important;
+    transform: scale(1.1) !important;
   }
 
   .mds-stepper-track {
-    left: calc(16px + 16px) !important;
+    left: calc(48px + 16px) !important;
     right: calc(16px + 26px + 10px + 16px) !important;
     top: 33px !important;
   }
 
   .mds-step-label {
-    font-size: 9px !important;
+    font-size: 9.5px !important;
   }
 
   .mds-step-close {
@@ -2079,6 +2085,51 @@ body.map-draw-active {
     border-radius: 18px;
     padding: 16px !important;
   }
+
+  .mds-map-container .maplibregl-ctrl-bottom-right {
+    bottom: 60px !important;
+    right: 14px !important;
+  }
+
+  /* Icon button — top right, below navbar */
+  .mds-panel-toggle-btn {
+    position: fixed !important;
+    top: 84px !important;
+    right: 14px !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: 40 !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    font-size: 20px !important;
+    white-space: normal !important;
+    gap: 0 !important;
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.42), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    animation: mdsFabIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  @keyframes mdsFabIn {
+    from { opacity: 0; transform: scale(0.6); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .mds-panel-toggle-btn:hover,
+  .mds-panel-toggle-btn:active {
+    transform: scale(1.1) !important;
+    box-shadow: 0 10px 28px rgba(22, 163, 74, 0.52) !important;
+  }
+
+  .mds-panel-toggle-text {
+    display: none !important;
+  }
+
+  /* Hide during drawing mode (full map needed) */
+  .mds-shell.drawing .mds-panel-toggle-btn {
+    display: none !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2095,9 +2146,10 @@ body.map-draw-active {
   }
 
   .mds-btn {
-    padding: 11px 16px !important;
+    padding: 12px 16px !important;
     font-size: 13px !important;
   }
+
 }
 
 /* ── Hide MapLibre logo ── */
