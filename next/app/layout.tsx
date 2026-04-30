@@ -34,10 +34,11 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/keptcarbon.css" />
         <link rel="stylesheet" href="/assets/css/index-page.css" />
         <link rel="stylesheet" href="/assets/css/kc-design.css" />
-        <link rel="stylesheet" href="/assets/css/dashboard.css" />
-        <link rel="stylesheet" href="/assets/css/map-draw.css" />
-        <link rel="stylesheet" href="/assets/css/map-draw-redesign.css" />
-        <link rel="stylesheet" href="/assets/css/modal-auth.css" />
+        <link rel="stylesheet" href="/assets/css/dashboard.css?v=3" />
+        <link rel="stylesheet" href="/assets/css/map-draw.css?v=4" />
+        <link rel="stylesheet" href="/assets/css/map-draw-redesign.css?v=4" />
+        <link rel="stylesheet" href="/assets/css/map-split.css?v=5" />
+        <link rel="stylesheet" href="/assets/css/modal-auth.css?v=3" />
       </head>
       <body>
         <AuthProvider>

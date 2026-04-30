@@ -61,6 +61,7 @@ export const Auth = {
       email: input.email,
       password: input.password,
       phone: input.phone ?? "",
+      role: "farmer",
       createdAt: new Date().toISOString(),
     };
     users.push(newUser);

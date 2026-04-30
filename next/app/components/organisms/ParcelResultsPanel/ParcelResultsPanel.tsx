@@ -1,215 +1,537 @@
-import type { RefObject } from "react";
-import { InfoKPI } from "@/app/components/atoms";
-import { ParcelActionButtons } from "@/app/components/molecules";
+"use client";
+import { useState, useMemo } from "react";
+import { carbonForAge } from "@/lib/map-utils";
 
-type NdviStatus = number | null | "loading" | "error";
-
-type InfographicData = {
-    bracketCounts: number[];
-    avgAge: number;
-    topProvinces: Array<[string, number]>;
-};
-
+// ── Types ─────────────────────────────────────────────────────────────────
 type Props = {
     searchRunning: boolean;
     searchErr: string | null;
     searchCount: number | null;
     searchTruncated: boolean;
     parcelFeatures: GeoJSON.Feature[];
-    selectedParcelIdx: number[];
-    tableOpen: boolean;
-    ndviMap: Record<number, NdviStatus>;
-    ndviFetching: boolean;
-    ndviProgress: { done: number; total: number };
-    infographic: InfographicData | null;
-    ageCanvasRef: RefObject<HTMLCanvasElement | null>;
-    onFetchAllNdvi: () => void;
-    onToggleTable: () => void;
-    onSelectAll: () => void;
-    onClearSelection: () => void;
-    onToggleSelection: (index: number) => void;
+    userDisplayName?: string;
     onFlyTo: (feature: GeoJSON.Feature) => void;
-    onFetchNdvi: (index: number) => void;
+    onReset?: () => void;
+    currentStep: 1 | 2 | 3;
+    onStepChange: (step: 1 | 2 | 3) => void;
 };
 
-const COL_HEADS = ["ชื่อ", "เลขทะเบียน", "อำเภอ", "จังหวัด", "ปีปลูก(DB)", "พื้นที่"];
+type PanelStep = 2 | 3;
+type PlotTab = "analyze" | "forecast";
+type ForecastYr = 3 | 5 | 7;
 
-function fmt(v: unknown) {
-    return v == null || v === "" ? "—" : String(v);
+interface PlotInfo {
+    age: number;
+    plantYearBE: number;
+    areaRai: number;
+    trees: number;
+    co2: number;
+    confidence: number;
+    province: string;
 }
 
+// ── Constants ─────────────────────────────────────────────────────────────
+const CURRENT_CE = new Date().getFullYear();
+const CURRENT_BE = CURRENT_CE + 543;
+
+const THAI_PROVINCES = [
+    "กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา",
+    "ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก",
+    "นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี",
+    "นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี",
+    "ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก",
+    "เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน",
+    "ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน",
+    "เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม",
+    "สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี",
+    "สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์",
+    "อุทัยธานี","อุบลราชธานี",
+];
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function parseRai(v: unknown): number {
+    if (!v) return 0;
+    const s = String(v).trim();
+    const m = s.match(/^(\d+)-(\d+)-(\d+)/);
+    if (m) return +m[1] + +m[2] * 0.25 + +m[3] / 400;
+    return parseFloat(s) || 0;
+}
+
+function computePlot(feat: GeoJSON.Feature): PlotInfo {
+    const p = (feat.properties ?? {}) as Record<string, unknown>;
+    const age = Number(
+        p.rubber_age ?? p.gee_age ??
+        (p.grow_year ? CURRENT_BE - Number(p.grow_year) : 0)
+    );
+    const rawPlantYear = p.gee_plant_year
+        ? Number(p.gee_plant_year) + 543
+        : Number(p.grow_year ?? 0);
+    const areaRai = parseRai(p.grow_area);
+    const trees = Math.max(Math.round(areaRai * 80), 0);
+    const co2 = age > 0 && trees > 0 ? carbonForAge(age, trees).co2 : 0;
+    return {
+        age,
+        plantYearBE: rawPlantYear,
+        areaRai,
+        trees,
+        co2,
+        confidence: Number(p.gee_confidence ?? 0.65),
+        province: String(p.province ?? ""),
+    };
+}
+
+function ageDistribution(age: number, conf: number) {
+    const c = Math.min(Math.max(conf || 0.65, 0.1), 0.9);
+    const rest = 1 - c;
+    const raw = [rest * 0.18, rest * 0.32, c, rest * 0.35, rest * 0.15];
+    const total = raw.reduce((a, b) => a + b, 0);
+    return [age - 2, age - 1, age, age + 1, age + 2]
+        .map((a, i) => ({ a, pct: Math.round((raw[i] / total) * 1000) / 10 }))
+        .filter(({ a }) => a > 0);
+}
+
+function forecastPts(age: number, trees: number, years: ForecastYr) {
+    return Array.from({ length: years + 1 }, (_, i) => ({
+        yearBE: CURRENT_BE + i,
+        co2: trees > 0 ? carbonForAge(age + i, trees).co2 : 0,
+    }));
+}
+
+function summaryForecast(plots: PlotInfo[], years: ForecastYr) {
+    return Array.from({ length: years + 1 }, (_, i) => ({
+        yearBE: CURRENT_BE + i,
+        co2: plots.reduce((s, pl) => s + (pl.trees > 0 ? carbonForAge(pl.age + i, pl.trees).co2 : 0), 0),
+    }));
+}
+
+// ── SVG: Age distribution bar chart ──────────────────────────────────────
+function AgeBarChart({ age, conf }: { age: number; conf: number }) {
+    const dist = ageDistribution(age, conf);
+    const maxPct = Math.max(...dist.map(d => d.pct));
+    const W = 200, BAR_W = 30, GAP = 10;
+    const totalW = dist.length * BAR_W + (dist.length - 1) * GAP;
+    const sx = (W - totalW) / 2;
+
+    return (
+        <svg viewBox={`0 0 ${W} 72`} style={{ width: "100%", height: 72 }}>
+            {dist.map(({ a, pct }, i) => {
+                const bh = Math.max((pct / maxPct) * 46, 3);
+                const x = sx + i * (BAR_W + GAP);
+                const isMain = a === age;
+                return (
+                    <g key={i}>
+                        <rect x={x} y={52 - bh} width={BAR_W} height={bh} rx={5}
+                            fill={isMain ? "#2d9e5f" : "rgba(45,158,95,0.2)"} />
+                        <text x={x + BAR_W / 2} y={65} textAnchor="middle" fontSize={9} fill="#6b9e7e">
+                            {a}.0
+                        </text>
+                        {isMain && (
+                            <text x={x + BAR_W / 2} y={52 - bh - 4} textAnchor="middle" fontSize={8}
+                                fontWeight="700" fill="#1e7a47">
+                                {pct}%
+                            </text>
+                        )}
+                    </g>
+                );
+            })}
+        </svg>
+    );
+}
+
+// ── SVG: Carbon forecast line chart ──────────────────────────────────────
+function ForecastChart({ pts }: { pts: Array<{ yearBE: number; co2: number }> }) {
+    const W = 220, H = 80, PL = 8, PR = 32, PT = 14, PB = 18;
+    const iW = W - PL - PR, iH = H - PT - PB;
+    const vals = pts.map(p => p.co2);
+    const minV = Math.min(...vals), maxV = Math.max(...vals);
+    const rng = maxV - minV || 1;
+
+    const svgPts = pts.map((d, i) => ({
+        x: PL + (i / (pts.length - 1)) * iW,
+        y: PT + (1 - (d.co2 - minV) / rng) * iH,
+        ...d,
+    }));
+    const line = svgPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+    const fill = `${PL},${PT + iH} ${line} ${(PL + iW).toFixed(1)},${PT + iH}`;
+
+    return (
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H }}>
+            {[0, 0.5, 1].map(t => (
+                <line key={t} x1={PL} y1={PT + t * iH} x2={PL + iW} y2={PT + t * iH}
+                    stroke="rgba(45,158,95,0.12)" strokeWidth={0.6} />
+            ))}
+            <polygon points={fill} fill="rgba(45,158,95,0.12)" />
+            <polyline points={line} fill="none" stroke="#2d9e5f" strokeWidth={1.8} strokeLinejoin="round" />
+            {svgPts.map((p, i) => (
+                <circle key={i} cx={p.x} cy={p.y} r={2.8} fill="#2d9e5f" />
+            ))}
+            {svgPts.map(p => (
+                <text key={p.yearBE} x={p.x} y={H - 2} textAnchor="middle" fontSize={7.5} fill="#8aaa95">
+                    {p.yearBE}
+                </text>
+            ))}
+            <text x={PL + iW + 3} y={PT + 4} fontSize={7} fill="#6b9e7e" textAnchor="start">
+                {Math.round(maxV).toLocaleString()}
+            </text>
+            <text x={PL + iW + 3} y={PT + iH + 1} fontSize={7} fill="#6b9e7e" textAnchor="start">
+                {Math.round(minV).toLocaleString()}
+            </text>
+        </svg>
+    );
+}
+
+
+// ── Main component ─────────────────────────────────────────────────────────
 export function ParcelResultsPanel({
     searchRunning,
     searchErr,
     searchCount,
     searchTruncated,
     parcelFeatures,
-    selectedParcelIdx,
-    tableOpen,
-    ndviMap,
-    ndviFetching,
-    ndviProgress,
-    infographic,
-    ageCanvasRef,
-    onFetchAllNdvi,
-    onToggleTable,
-    onSelectAll,
-    onClearSelection,
-    onToggleSelection,
+    userDisplayName = "",
     onFlyTo,
-    onFetchNdvi,
+    onReset,
+    currentStep,
+    onStepChange,
 }: Props) {
+    const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+    const [plotTabs, setPlotTabs] = useState<Record<number, PlotTab>>({});
+    const [forecastYrs, setForecastYrs] = useState<Record<number, ForecastYr>>({});
+    const [summaryFcYrs, setSummaryFcYrs] = useState<ForecastYr>(7);
+
+    // Step 3 form
+    const [projectName, setProjectName] = useState("");
+    const [ownerName, setOwnerName] = useState(userDisplayName);
+    const [province, setProvince] = useState("");
+    const [saveState, setSaveState] = useState<"idle" | "saving" | "done">("idle");
+
+    const plots = useMemo(() => parcelFeatures.map(computePlot), [parcelFeatures]);
+    const totalArea = useMemo(() => plots.reduce((s, p) => s + p.areaRai, 0), [plots]);
+    const totalCO2 = useMemo(() => plots.reduce((s, p) => s + p.co2, 0), [plots]);
+    const summaryPts = useMemo(() => summaryForecast(plots, summaryFcYrs), [plots, summaryFcYrs]);
+    const dominantProvince = useMemo(() => {
+        const freq: Record<string, number> = {};
+        plots.forEach(p => { if (p.province) freq[p.province] = (freq[p.province] ?? 0) + 1; });
+        return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+    }, [plots]);
+
     if (!(searchRunning || searchErr || searchCount !== null)) return null;
 
-    return (
-        <div className="s1-results">
-            {searchRunning && (
+    const toggleExpand = (i: number) => setExpandedIdx(prev => prev === i ? null : i);
+    const tabFor = (i: number): PlotTab => plotTabs[i] ?? "analyze";
+    const fcYrFor = (i: number): ForecastYr => forecastYrs[i] ?? 3;
+
+    // ── Step 3: save handler ─────────────────────────────────────────────
+    const handleSave = async () => {
+        setSaveState("saving");
+        await new Promise(r => setTimeout(r, 900)); // placeholder
+        setSaveState("done");
+    };
+
+    // ── Loading / Error states ────────────────────────────────────────────
+    if (searchRunning) {
+        return (
+            <div className="prp-shell">
                 <div className="s1-results-loading">
                     <div className="s1-spin" />
                     <span>กำลังค้นหาแปลงที่ทับซ้อน...</span>
                 </div>
-            )}
-
-            {!searchRunning && searchErr && (
+            </div>
+        );
+    }
+    if (searchErr) {
+        return (
+            <div className="prp-shell">
                 <div className="s1-results-error">
-                    <i className="bi bi-exclamation-triangle me-2"></i>{searchErr}
+                    <i className="bi bi-exclamation-triangle me-2" />{searchErr}
                 </div>
-            )}
+            </div>
+        );
+    }
+    if (searchCount === null) return null;
 
-            {!searchRunning && !searchErr && searchCount !== null && (
+    // ── Step 3: Save form ─────────────────────────────────────────────────
+    if (currentStep === 3) {
+        return (
+            <div className="prp-shell">
+                <div className="prp-section-title" style={{ marginTop: 16 }}>
+                    <i className="bi bi-floppy me-2" />บันทึกแปลง
+                </div>
+
+                <div className="prp-warn-banner">
+                    <i className="bi bi-info-circle me-2" />
+                    ขั้นตอนนี้ไม่บังคับ — กด &ldquo;เสร็จสิ้น ไม่บันทึก&rdquo; หากไม่ต้องการบันทึก
+                </div>
+
+                <div className="prp-save-summary">
+                    สรุปแปลงที่จะบันทึก:{" "}
+                    <strong>{plots.length} แปลง</strong> · รวม{" "}
+                    <strong>{totalArea.toFixed(1)} ไร่</strong>
+                </div>
+
+                {saveState === "done" ? (
+                    <div className="prp-save-success">
+                        <i className="bi bi-check-circle-fill me-2" />
+                        บันทึกแปลงสำเร็จ!
+                    </div>
+                ) : (
+                    <div className="prp-form">
+                        <label className="prp-label">
+                            ชื่อโครงการ / แปลง <span className="prp-required">*</span>
+                        </label>
+                        <input
+                            className="prp-input"
+                            placeholder="เช่น สวนยางบ้านนาดี"
+                            value={projectName}
+                            onChange={e => setProjectName(e.target.value)}
+                        />
+
+                        <label className="prp-label">เจ้าของแปลง</label>
+                        <input
+                            className="prp-input"
+                            placeholder="ชื่อเจ้าของ"
+                            value={ownerName}
+                            onChange={e => setOwnerName(e.target.value)}
+                        />
+
+                        <label className="prp-label">จังหวัดหลัก</label>
+                        <select
+                            className="prp-input"
+                            value={province || dominantProvince}
+                            onChange={e => setProvince(e.target.value)}
+                        >
+                            <option value="">— เลือกจังหวัด —</option>
+                            {THAI_PROVINCES.map(p => (
+                                <option key={p} value={p}>{p}</option>
+                            ))}
+                        </select>
+
+                        <button
+                            className="prp-btn-primary"
+                            onClick={handleSave}
+                            disabled={!projectName.trim() || saveState === "saving"}
+                        >
+                            {saveState === "saving"
+                                ? <><span className="s1-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }} /> กำลังบันทึก...</>
+                                : <><i className="bi bi-floppy me-2" />บันทึกแปลงในระบบ</>
+                            }
+                        </button>
+                    </div>
+                )}
+
+                <button className="prp-btn-ghost" onClick={() => { setSaveState("idle"); setSummaryFcYrs(7); onStepChange(2); }}>
+                    ← กลับ
+                </button>
+                <button className="prp-btn-text" onClick={onReset}>
+                    <i className="bi bi-check2-circle me-1" />เสร็จสิ้น ไม่บันทึก
+                </button>
+            </div>
+        );
+    }
+
+    // ── Step 2: Analysis ──────────────────────────────────────────────────
+    return (
+        <div className="prp-shell">
+            <div className="prp-header-block">
+                <div className="prp-main-title">ผลการตรวจจับแปลง</div>
+                <div className="prp-subtitle">
+                    วิเคราะห์แปลงยางตามใบขอบเขตที่กำหนดด้วยภาพถ่ายดาวเทียม
+                </div>
+            </div>
+
+            {searchCount === 0 ? (
+                <div className="prp-empty">
+                    <i className="bi bi-geo-alt" style={{ fontSize: 32, opacity: 0.3 }} />
+                    <div>ไม่พบแปลงในขอบเขต</div>
+                </div>
+            ) : (
                 <>
-                    <div className={`s1-count-hero${searchCount === 0 ? " empty" : ""}`}>
-                        <div className="s1-count-number">{searchCount > 0 ? searchCount.toLocaleString() : "—"}</div>
-                        <div className="s1-count-label">{searchCount > 0 ? "แปลงยางในขอบเขต" : "ไม่พบแปลงในขอบเขต"}</div>
-                        {parcelFeatures.length > 0 && (
-                            <div className="s1-count-sub">
-                                เลือกไว้ {selectedParcelIdx.length.toLocaleString()} แปลง
-                                {searchTruncated && <span className="s1-truncated-badge"> · สูงสุด 2,000</span>}
+                    {/* ── KPI row ─────────────────────────────────────── */}
+                    <div className="prp-kpi-row">
+                        <div className="prp-kpi-card">
+                            <div className="prp-kpi-num">{searchCount.toLocaleString()}</div>
+                            <div className="prp-kpi-label">แปลงที่ตรวจพบ</div>
+                            <div className="prp-kpi-unit">แปลง</div>
+                            {searchTruncated && <div className="prp-trunc-badge">สูงสุด 2,000</div>}
+                        </div>
+                        <div className="prp-kpi-card">
+                            <div className="prp-kpi-num">{totalArea.toFixed(2)}</div>
+                            <div className="prp-kpi-label">พื้นที่รวมทั้งหมด</div>
+                            <div className="prp-kpi-unit">ไร่</div>
+                        </div>
+                    </div>
+
+                    {/* ── Plot list ───────────────────────────────────── */}
+                    <div className="prp-list-header">
+                        <span>รายแปลงที่พบ</span>
+                        <span className="prp-pill">{parcelFeatures.length} แปลง</span>
+                    </div>
+
+                    <div className="prp-plot-list">
+                        {parcelFeatures.slice(0, 50).map((feat, i) => {
+                            const pl = plots[i];
+                            if (!pl) return null;
+                            const isOpen = expandedIdx === i;
+                            const tab = tabFor(i);
+                            const fcYr = fcYrFor(i);
+                            const dist = ageDistribution(pl.age, pl.confidence);
+                            const fcPts = forecastPts(pl.age, pl.trees, fcYr);
+
+                            return (
+                                <div key={i} className={`prp-plot-card${isOpen ? " open" : ""}`}>
+                                    {/* Card header */}
+                                    <div className="prp-plot-head" onClick={() => toggleExpand(i)}>
+                                        <div className="prp-plot-num">{i + 1}</div>
+                                        <div className="prp-plot-info">
+                                            <div className="prp-plot-name">แปลงที่ {i + 1}</div>
+                                            <div className="prp-plot-meta">
+                                                {pl.areaRai > 0 ? `${pl.areaRai.toFixed(2)} ไร่` : "—"}
+                                                {pl.age > 0 ? ` · อายุ ${pl.age.toFixed(1)}` : ""}
+                                                {pl.co2 > 0 ? ` · ${pl.co2.toFixed(1)} tCO₂` : ""}
+                                            </div>
+                                        </div>
+                                        <button
+                                            className="prp-analyze-btn"
+                                            onClick={e => { e.stopPropagation(); onFlyTo(feat); }}
+                                        >
+                                            <i className="bi bi-check-lg me-1" />วิเคราะห์แล้ว
+                                        </button>
+                                        <i className={`bi bi-chevron-${isOpen ? "up" : "down"} prp-chevron`} />
+                                    </div>
+
+                                    {/* Expanded content */}
+                                    {isOpen && (
+                                        <div className="prp-plot-body">
+                                            {/* Tabs */}
+                                            <div className="prp-tabs">
+                                                <button
+                                                    className={`prp-tab${tab === "analyze" ? " active" : ""}`}
+                                                    onClick={() => setPlotTabs(prev => ({ ...prev, [i]: "analyze" }))}
+                                                >
+                                                    <i className="bi bi-bar-chart me-1" />วิเคราะห์
+                                                </button>
+                                                <button
+                                                    className={`prp-tab${tab === "forecast" ? " active" : ""}`}
+                                                    onClick={() => setPlotTabs(prev => ({ ...prev, [i]: "forecast" }))}
+                                                >
+                                                    <i className="bi bi-graph-up me-1" />พยากรณ์
+                                                </button>
+                                            </div>
+
+                                            {/* วิเคราะห์ tab */}
+                                            {tab === "analyze" && (
+                                                <div className="prp-tab-content">
+                                                    <div className="prp-chart-label">การกระจายอายุยาง</div>
+                                                    <AgeBarChart age={pl.age} conf={pl.confidence} />
+
+                                                    <div className="prp-stat-row">
+                                                        <div className="prp-stat">
+                                                            <div className="prp-stat-val">{pl.plantYearBE || "—"}</div>
+                                                            <div className="prp-stat-key">ปีปลูก</div>
+                                                            <div className="prp-stat-unit">พ.ศ.</div>
+                                                        </div>
+                                                        <div className="prp-stat">
+                                                            <div className="prp-stat-val">{pl.age || "—"}</div>
+                                                            <div className="prp-stat-key">อายุ</div>
+                                                            <div className="prp-stat-unit">ปี</div>
+                                                        </div>
+                                                        <div className="prp-stat">
+                                                            <div className="prp-stat-val">{pl.areaRai.toFixed(2)}</div>
+                                                            <div className="prp-stat-key">เนื้อที่</div>
+                                                            <div className="prp-stat-unit">ไร่</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="prp-age-chips">
+                                                        {dist.map(({ a, pct }) => (
+                                                            <span
+                                                                key={a}
+                                                                className={`prp-age-chip${a === pl.age ? " main" : ""}`}
+                                                            >
+                                                                อายุ {a}.0: {pct}%
+                                                            </span>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="prp-carbon-card">
+                                                        <div className="prp-carbon-label">คาร์บอนแปลงนี้</div>
+                                                        <div className="prp-carbon-num">
+                                                            {pl.co2 > 0 ? pl.co2.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
+                                                        </div>
+                                                        <div className="prp-carbon-unit">tCO₂ eq.</div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* พยากรณ์ tab */}
+                                            {tab === "forecast" && (
+                                                <div className="prp-tab-content">
+                                                    <div className="prp-fc-yr-row">
+                                                        {([3, 5, 7] as ForecastYr[]).map(yr => (
+                                                            <button
+                                                                key={yr}
+                                                                className={`prp-fc-yr-btn${fcYr === yr ? " active" : ""}`}
+                                                                onClick={() => setForecastYrs(prev => ({ ...prev, [i]: yr }))}
+                                                            >
+                                                                {yr}.0
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="prp-chart-label">พยากรณ์คาร์บอน — แปลงที่ {i + 1}</div>
+                                                    <ForecastChart pts={fcPts} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                        {parcelFeatures.length > 50 && (
+                            <div className="prp-more-note">
+                                แสดง 50 แปลงแรก จาก {parcelFeatures.length.toLocaleString()} แปลง
                             </div>
                         )}
                     </div>
 
-                    {parcelFeatures.length > 0 && (
-                        <ParcelActionButtons
-                            ndviFetching={ndviFetching}
-                            ndviDone={ndviProgress.done}
-                            ndviTotal={ndviProgress.total}
-                            tableOpen={tableOpen}
-                            onFetchNdvi={onFetchAllNdvi}
-                            onToggleTable={onToggleTable}
-                            onSelectAll={onSelectAll}
-                        />
-                    )}
+                    {/* ── Summary section ─────────────────────────────── */}
+                    <div className="prp-summary-box">
+                        <div className="prp-summary-title">
+                            <i className="bi bi-bar-chart-line-fill me-2" />ภาพรวมของเขตที่พบ
+                        </div>
+                        <div className="prp-summary-sub">คาร์บอนรวมสะสมที่ขอบเขต</div>
+                        <div className="prp-summary-num">
+                            {totalCO2.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className="prp-summary-unit">tCO₂ eq.</div>
 
-                    {tableOpen && parcelFeatures.length > 0 && (
-                        <div style={{ overflowX: "auto", borderRadius: 10, border: "1px solid rgba(45,158,95,0.18)", marginBottom: 10 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 8px", borderBottom: "1px solid rgba(45,158,95,0.15)", background: "rgba(45,158,95,0.04)" }}>
-                                <div style={{ fontSize: 11, color: "var(--text-mid)" }}>
-                                    Step 3 ใช้: <strong>{selectedParcelIdx.length.toLocaleString()}</strong> / {parcelFeatures.length.toLocaleString()} แปลง
-                                </div>
+                        <div className="prp-fc-yr-row" style={{ marginTop: 10 }}>
+                            {([3, 5, 7] as ForecastYr[]).map(yr => (
                                 <button
-                                    onClick={onClearSelection}
-                                    style={{ background: "rgba(255,99,71,0.08)", border: "1px solid rgba(255,99,71,0.25)", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 700, color: "rgba(176,43,43,0.95)", cursor: "pointer" }}
+                                    key={yr}
+                                    className={`prp-fc-yr-btn${summaryFcYrs === yr ? " active" : ""}`}
+                                    onClick={() => setSummaryFcYrs(yr)}
                                 >
-                                    ล้างเลือก
+                                    {yr} ปี
                                 </button>
-                            </div>
-                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-                                <thead>
-                                    <tr style={{ background: "rgba(45,158,95,0.10)" }}>
-                                        <th style={{ padding: "7px 8px", textAlign: "center", fontWeight: 700, color: "var(--kc-green-d, #1e7a47)", whiteSpace: "nowrap", borderBottom: "1px solid rgba(45,158,95,0.15)" }}>เลือก</th>
-                                        {COL_HEADS.map((h) => (
-                                            <th key={h} style={{ padding: "7px 8px", textAlign: "left", fontWeight: 700, color: "var(--kc-green-d, #1e7a47)", whiteSpace: "nowrap", borderBottom: "1px solid rgba(45,158,95,0.15)" }}>{h}</th>
-                                        ))}
-                                        <th style={{ padding: "7px 8px", textAlign: "left", fontWeight: 700, color: "var(--kc-green-d, #1e7a47)", whiteSpace: "nowrap", borderBottom: "1px solid rgba(45,158,95,0.15)" }}>
-                                            <span title="Normalized Difference Vegetation Index — Google Earth Engine Sentinel-2/Landsat-9">
-                                                NDVI <i className="bi bi-globe2" style={{ fontSize: 9, opacity: 0.7 }} />
-                                            </span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {parcelFeatures.slice(0, 200).map((feat, i) => {
-                                        const p = (feat.properties ?? {}) as Record<string, unknown>;
-                                        const selected = selectedParcelIdx.includes(i);
-
-                                        return (
-                                            <tr
-                                                key={i}
-                                                onClick={() => onFlyTo(feat)}
-                                                style={{ cursor: "pointer", borderBottom: "1px solid rgba(45,158,95,0.08)", background: i % 2 === 0 ? "transparent" : "rgba(45,158,95,0.03)", transition: "background 0.15s" }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(45,158,95,0.10)")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 0 ? "transparent" : "rgba(45,158,95,0.03)")}
-                                            >
-                                                <td style={{ padding: "6px 8px", textAlign: "center" }} onClick={(e) => { e.stopPropagation(); onToggleSelection(i); }}>
-                                                    <input type="checkbox" checked={selected} readOnly />
-                                                </td>
-                                                <td style={{ padding: "6px 8px", maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={fmt(p.farm_name)}>{fmt(p.farm_name)}</td>
-                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.farm_idc)}</td>
-                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.amphoe_t)}</td>
-                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.province)}</td>
-                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.grow_year)}</td>
-                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>{fmt(p.grow_area)}</td>
-                                                <td style={{ padding: "6px 8px", whiteSpace: "nowrap", textAlign: "center" }} onClick={(e) => { e.stopPropagation(); onFetchNdvi(i); }}>
-                                                    {ndviMap[i] === undefined && <span style={{ cursor: "pointer", color: "rgba(45,158,95,0.55)", fontSize: 10, textDecoration: "underline dotted" }}>ดึง</span>}
-                                                    {ndviMap[i] === "loading" && <span className="spinner-border spinner-border-sm" style={{ width: 10, height: 10 }} />}
-                                                    {ndviMap[i] === "error" && <span style={{ color: "rgba(220,53,69,0.8)", fontSize: 10, cursor: "pointer" }} title="เกิดข้อผิดพลาด — คลิกลองใหม่">✗</span>}
-                                                    {ndviMap[i] === null && <span style={{ color: "var(--text-dim)", fontSize: 10 }}>N/A</span>}
-                                                    {typeof ndviMap[i] === "number" && (
-                                                        <span style={{ fontWeight: 700, fontSize: 11, color: (ndviMap[i] as number) < 0.1 ? "#c0392b" : (ndviMap[i] as number) < 0.3 ? "#e67e22" : (ndviMap[i] as number) < 0.5 ? "#d4ac0d" : "#2d9e5f" }}>
-                                                            {(ndviMap[i] as number).toFixed(3)}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                            {parcelFeatures.length > 200 && (
-                                <div style={{ padding: "6px 10px", fontSize: 11, color: "var(--text-dim)", textAlign: "center", borderTop: "1px solid rgba(45,158,95,0.1)" }}>
-                                    แสดง 200 แถวแรก จาก {parcelFeatures.length.toLocaleString()} รายการ
-                                </div>
-                            )}
+                            ))}
                         </div>
-                    )}
+                        <ForecastChart pts={summaryPts} />
 
-                    {infographic && (
-                        <div className="s1-infographic">
-                            <div className="s1-infographic-header">
-                                <i className="bi bi-bar-chart-line"></i> ข้อมูลอายุต้นยางในพื้นที่
-                            </div>
-
-                            <div className="s1-kpi-row">
-                                <InfoKPI value={parcelFeatures.length.toLocaleString()} label="แปลงทั้งหมด" />
-                                <InfoKPI value={infographic.avgAge.toFixed(1)} label="อายุเฉลี่ย (ปี)" />
-                                <InfoKPI value={infographic.topProvinces.length.toString()} label="จังหวัด" />
-                            </div>
-
-                            <div className="s1-chart-wrap">
-                                <div className="s1-chart-title">การกระจายอายุต้นยาง</div>
-                                <canvas ref={ageCanvasRef} height={140} />
-                            </div>
-
-                            {infographic.topProvinces.length > 0 && (
-                                <div className="s1-province-list">
-                                    <div className="s1-chart-title">จังหวัดที่พบมากสุด</div>
-                                    {infographic.topProvinces.map(([prov, count]) => {
-                                        const pct = Math.round((count / parcelFeatures.length) * 100);
-                                        return (
-                                            <div key={prov} className="s1-prov-row">
-                                                <span className="s1-prov-name">{prov}</span>
-                                                <div className="s1-prov-bar-wrap">
-                                                    <div className="s1-prov-bar" style={{ width: `${pct}%` }} />
-                                                </div>
-                                                <span className="s1-prov-count">{count.toLocaleString()}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                        <div className="prp-summary-note">
+                            พยากรณ์รวมทั้งหมด ({plots.length} แปลง)
                         </div>
-                    )}
+                    </div>
+
+                    {/* ── Action buttons ──────────────────────────────── */}
+                    <button className="prp-btn-primary" onClick={() => onStepChange(3)}>
+                        <i className="bi bi-floppy me-2" />บันทึกแปลงในระบบ
+                    </button>
+                    <button className="prp-btn-ghost" onClick={onReset}>
+                        <i className="bi bi-check2-circle me-1" />เสร็จสิ้น (ไม่บันทึก)
+                    </button>
+                    <button className="prp-back-link" onClick={onReset}>
+                        ← กลับ / วาดใหม่
+                    </button>
                 </>
             )}
         </div>
