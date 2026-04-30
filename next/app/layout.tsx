@@ -46,7 +46,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/dashboard.css?v=3" />
         <link rel="stylesheet" href="/assets/css/map-draw.css?v=4" />
         <link rel="stylesheet" href="/assets/css/map-draw-redesign.css?v=7" />
-        <link rel="stylesheet" href="/assets/css/map-split.css?v=21" />
+        <link rel="stylesheet" href="/assets/css/map-split.css?v=23" />
         <link rel="stylesheet" href="/assets/css/modal-auth.css?v=3" />
       </head>
       <body>

@@ -92,18 +92,24 @@ export default function MapDrawPage() {
             type: "raster",
             tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
             tileSize: 256,
+            minzoom: 1,
+            maxzoom: 17,
             attribution: "",
           },
           street: {
             type: "raster",
             tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
+            minzoom: 1,
+            maxzoom: 19,
             attribution: "",
           },
           topo: {
             type: "raster",
             tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"],
             tileSize: 256,
+            minzoom: 1,
+            maxzoom: 17,
             attribution: "",
           },
         },
@@ -113,8 +119,9 @@ export default function MapDrawPage() {
           { id: "topo", type: "raster", source: "topo", layout: { visibility: "none" } },
         ],
       },
-      center: [101.258, 15],
-      zoom: 3,
+      center: [101.258, 13.5],
+      zoom: 5,
+      minZoom: 3,
       pitch: 0,
       bearing: 0,
       attributionControl: false,
@@ -131,9 +138,7 @@ export default function MapDrawPage() {
     );
 
     map.on("load", () => {
-      try {
-        (map as unknown as { setProjection?: (p: { type: string }) => void }).setProjection?.({ type: "globe" });
-      } catch { }
+      // We intentionally skip setProjection globe to avoid tile availability issues at low zoom
       mapLoadedRef.current = true;
 
       map.addSource("draw-line", { type: "geojson", data: emptyFC() });
@@ -779,15 +784,6 @@ export default function MapDrawPage() {
 
         {/* ── Step Tracker ── */}
         <div className="mds-stepper">
-          {/* Close Panel Button */}
-          <button
-            className="mds-panel-close-btn"
-            onClick={() => setIsPanelOpen(false)}
-            title="ซ่อนแผงเครื่องมือ"
-          >
-            <i className="bi bi-x-lg" />
-          </button>
-          
           <div className="mds-stepper-track">
             <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
           </div>
@@ -807,7 +803,12 @@ export default function MapDrawPage() {
               </div>
             );
           })}
-          <button className="mds-step-close" onClick={clearDraw} title="เริ่มต้นใหม่">
+          {/* Close Panel Button — green, right side only */}
+          <button
+            className="mds-panel-close-btn mds-panel-close-inline"
+            onClick={() => setIsPanelOpen(false)}
+            title="ซ่อนแผงเครื่องมือ"
+          >
             <i className="bi bi-x-lg" />
           </button>
         </div>

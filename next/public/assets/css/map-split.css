@@ -399,29 +399,36 @@ body.map-draw-active {
   display: none;
 }
 
+/* ── Close button — now a flex inline item on the right ── */
 .mds-panel-close-btn {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  background: rgba(45, 158, 95, 0.1);
-  border: 1px solid rgba(45, 158, 95, 0.2);
-  color: #1e7a47;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  z-index: 10;
+  display: none !important;     /* hide old absolute version */
 }
 
-.mds-panel-close-btn:hover {
-  background: rgba(45, 158, 95, 0.2);
-  color: #0f2d1c;
+/* Inline version used in JSX */
+.mds-panel-close-inline {
+  flex-shrink: 0 !important;
+  margin-left: 8px !important;
+  width: 32px !important;
+  height: 32px !important;
+  background: rgba(22, 163, 74, 0.1) !important;
+  border: 1.5px solid rgba(22, 163, 74, 0.25) !important;
+  color: #16a34a !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: all 0.22s ease !important;
+  position: static !important;
+  transform: none !important;
+}
+
+.mds-panel-close-inline:hover {
+  background: rgba(22, 163, 74, 0.2) !important;
+  border-color: #22c55e !important;
+  color: #0f2d1c !important;
+  transform: rotate(90deg) scale(1.08) !important;
 }
 
 /* ── Panel Header ── */
@@ -1408,7 +1415,7 @@ body.map-draw-active {
 .mds-stepper {
   display: flex !important;
   align-items: center !important;
-  padding: 18px 20px 16px 48px !important;
+  padding: 18px 16px 16px 16px !important;
   background: #ffffff !important;
   border-bottom: 1px solid rgba(22, 163, 74, 0.1) !important;
   position: relative !important;
@@ -2015,9 +2022,9 @@ body.map-draw-active {
     border-radius: 10px;
   }
 
-  /* Stepper — sits BELOW the drag handle (32px) so close button is visible */
+  /* Stepper — sits BELOW the drag handle (36px) so close button is visible */
   .mds-stepper {
-    padding: 38px 14px 14px 14px !important;
+    padding: 42px 12px 14px 12px !important;
     border-radius: 24px 24px 0 0 !important;
     z-index: 101 !important;
     position: relative !important;
@@ -2030,9 +2037,9 @@ body.map-draw-active {
   }
 
   .mds-step-circle {
-    width: 34px !important;
-    height: 34px !important;
-    font-size: 12px !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 11px !important;
   }
 
   .mds-step.active .mds-step-circle {
@@ -2040,23 +2047,26 @@ body.map-draw-active {
   }
 
   .mds-stepper-track {
-    left: calc(48px + 16px) !important;
-    right: calc(16px + 26px + 10px + 16px) !important;
-    top: 33px !important;
+    left: 12px !important;
+    right: calc(12px + 32px + 8px) !important;
+    top: 30px !important;
   }
 
   .mds-step-label {
     font-size: 9.5px !important;
   }
 
-  .mds-step-close {
-    width: 28px !important;
-    height: 28px !important;
+  /* Inline close button on mobile */
+  .mds-panel-close-inline {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 12px !important;
     z-index: 103 !important;
     position: relative !important;
+    flex-shrink: 0 !important;
   }
 
-  /* Hide the old panel-close-btn on mobile — use step-close instead */
+  /* Ensure old absolute button stays hidden */
   .mds-panel-close-btn {
     display: none !important;
   }
@@ -2164,6 +2174,95 @@ body.map-draw-active {
 .maplibregl-ctrl-logo,
 .maplibregl-logo {
   display: none !important;
+}
+
+/* ── ParcelResultsPanel: improved empty state ── */
+.prp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 20px 24px;
+  gap: 6px;
+}
+
+.prp-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(22, 163, 74, 0.07);
+  border: 1.5px solid rgba(22, 163, 74, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: rgba(22, 163, 74, 0.45);
+  margin-bottom: 8px;
+}
+
+.prp-empty-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a3d2b;
+  letter-spacing: -0.3px;
+}
+
+.prp-empty-hint {
+  font-size: 12.5px;
+  color: #7aaa8a;
+  line-height: 1.55;
+  max-width: 240px;
+  margin-top: 2px;
+}
+
+.prp-empty .prp-btn-primary {
+  width: 100%;
+  max-width: 260px;
+  padding: 13px 20px;
+  border-radius: 50px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.32);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prp-empty .prp-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(22, 163, 74, 0.44);
+}
+
+.prp-empty .prp-btn-ghost {
+  width: 100%;
+  max-width: 260px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+  border: 1.5px solid rgba(22, 163, 74, 0.25);
+  cursor: pointer;
+  background: #ffffff;
+  color: #16a34a;
+  transition: all 0.22s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  gap: 6px;
+}
+
+.prp-empty .prp-btn-ghost:hover {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  transform: translateY(-1px);
 }
 
 /* Hide Next.js Dev Indicator ("N" logo) */
