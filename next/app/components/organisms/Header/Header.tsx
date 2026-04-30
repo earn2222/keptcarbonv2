@@ -308,7 +308,7 @@ export default function Header() {
                     <i className="bi bi-person-circle"></i> โปรไฟล์
                   </Link>
                   <Link href="/my-plots" className={`drawer-nav-item ${pathname === '/my-plots' ? 'active' : ''}`} onClick={closeNav}>
-                    <i className="bi bi-geo-alt"></i> แปลงของฉัน
+                    <i className="bi bi-map"></i> แปลงของฉัน
                   </Link>
                 </>
               )}
@@ -351,7 +351,7 @@ export default function Header() {
           </div>
 
           <div className="drawer-footer">
-            <i className="bi bi-geo-alt"></i>
+            <i className="bi bi-leaf-fill"></i>
             <div className="footer-title">KeptCarbon</div>
 
           </div>

@@ -282,7 +282,7 @@ export function ParcelResultsPanel({
         return (
             <div className="prp-shell">
                 <div className="prp-section-title" style={{ marginTop: 16 }}>
-                    <i className="bi bi-floppy me-2" />บันทึกแปลง
+                    <i className="bi bi-pencil-square me-2" />บันทึกแปลง
                 </div>
 
                 <div className="prp-warn-banner">
@@ -340,7 +340,7 @@ export function ParcelResultsPanel({
                         >
                             {saveState === "saving"
                                 ? <><span className="s1-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }} /> กำลังบันทึก...</>
-                                : <><i className="bi bi-floppy me-2" />บันทึกแปลงในระบบ</>
+                                : <><i className="bi bi-pencil-square me-2" />บันทึกแปลงในระบบ</>
                             }
                         </button>
                     </div>
@@ -369,7 +369,7 @@ export function ParcelResultsPanel({
             {searchCount === 0 ? (
                 <div className="prp-empty">
                     <div className="prp-empty-icon">
-                        <i className="bi bi-geo-alt" />
+                        <i className="bi bi-search" />
                     </div>
                     <div className="prp-empty-title">ไม่พบแปลงในขอบเขต</div>
                     <div className="prp-empty-hint">
@@ -566,7 +566,7 @@ export function ParcelResultsPanel({
 
                     {/* ── Action buttons ──────────────────────────────── */}
                     <button className="prp-btn-primary" onClick={() => onStepChange(3)}>
-                        <i className="bi bi-floppy me-2" />บันทึกแปลงในระบบ
+                        <i className="bi bi-pencil-square me-2" />บันทึกแปลงในระบบ
                     </button>
                     <button className="prp-btn-ghost" onClick={onReset}>
                         <i className="bi bi-check2-circle me-1" />เสร็จสิ้น (ไม่บันทึก)

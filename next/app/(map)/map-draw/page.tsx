@@ -725,7 +725,7 @@ export default function MapDrawPage() {
               )}
               {searchResults.map((item, i) => (
                 <div key={i} className="mds-search-item" onClick={() => pickSearchResult(item)}>
-                  <i className="bi bi-geo-alt me-2" style={{ color: "#2d9e5f" }} />
+                  <i className="bi bi-compass me-2" style={{ color: "#2d9e5f" }} />
                   {item.display_name}
                 </div>
               ))}
@@ -771,7 +771,7 @@ export default function MapDrawPage() {
           onClick={() => setIsPanelOpen(true)}
           title="เปิดแผงเครื่องมือ"
         >
-          <i className="bi bi-geo-alt-fill" />
+          <i className="bi bi-clipboard2-data-fill" />
         </button>
       )}
 
@@ -823,7 +823,7 @@ export default function MapDrawPage() {
                 <div className="mds-s1-hd">
                   <div>
                     <div className="mds-section-tag">
-                      <i className="bi bi-geo-alt-fill" /> ขั้นตอนที่ 1
+                      <i className="bi bi-pencil-square" /> ขั้นตอนที่ 1
                     </div>
                     <h2 className="mds-s1-title">กำหนดขอบเขตแปลง</h2>
                     <p className="mds-s1-sub">
