@@ -7,13 +7,24 @@
 /* ── Base reset ─────────────────────────────────────────────────────────── */
 .mds-shell *,
 .mds-shell *::before,
-.mds-shell *::after { box-sizing: border-box; }
+.mds-shell *::after {
+  box-sizing: border-box;
+}
 
 html:has(body.map-draw-active),
-body.map-draw-active { overflow: hidden !important; height: 100%; }
+body.map-draw-active {
+  overflow: hidden !important;
+  height: 100%;
+}
 
 /* Suppress conflicting legacy rules that would show old panel UI */
-#panel, #statusbar, #btn-open-panel, #btn-close-panel, #md-topbar { display: none !important; }
+#panel,
+#statusbar,
+#btn-open-panel,
+#btn-close-panel,
+#md-topbar {
+  display: none !important;
+}
 
 /* ── Shell ──────────────────────────────────────────────────────────────── */
 .mds-shell {
@@ -25,7 +36,8 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   display: flex;
   flex-direction: row;
   overflow: hidden;
-  padding-top: 88px;            /* global header height */
+  padding-top: 88px;
+  /* global header height */
   font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
   background: #f0faf5;
 }
@@ -37,7 +49,8 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: #ffffff;           /* white until map tiles load */
+  background: #ffffff;
+  /* white until map tiles load */
 }
 
 .mds-map-container {
@@ -48,7 +61,9 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   z-index: 0;
 }
 
-.mds-shell.drawing .mds-map-container { cursor: crosshair !important; }
+.mds-shell.drawing .mds-map-container {
+  cursor: crosshair !important;
+}
 
 /* ── Search overlay ── */
 .mds-search-wrap {
@@ -90,7 +105,9 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   outline: none;
 }
 
-.mds-search-input::placeholder { color: #94a3b0; }
+.mds-search-input::placeholder {
+  color: #94a3b0;
+}
 
 .mds-search-btn {
   width: 42px;
@@ -110,7 +127,10 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   flex-shrink: 0;
 }
 
-.mds-search-btn:hover { transform: scale(1.06); box-shadow: 0 6px 18px rgba(45, 158, 95, 0.4); }
+.mds-search-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 18px rgba(45, 158, 95, 0.4);
+}
 
 .mds-search-results {
   background: #fff;
@@ -131,8 +151,14 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
 }
 
-.mds-search-item:last-child { border-bottom: none; }
-.mds-search-item:hover { background: rgba(45, 158, 95, 0.06); padding-left: 20px; }
+.mds-search-item:last-child {
+  border-bottom: none;
+}
+
+.mds-search-item:hover {
+  background: rgba(45, 158, 95, 0.06);
+  padding-left: 20px;
+}
 
 /* ── Map controls ── */
 .mds-map-controls {
@@ -219,10 +245,24 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   transition: all 0.2s;
 }
 
-.mds-basemap-option:last-child { margin-bottom: 0; }
-.mds-basemap-option:hover { background: rgba(45, 158, 95, 0.06); border-color: rgba(45, 158, 95, 0.22); }
-.mds-basemap-option.active { background: rgba(45, 158, 95, 0.1); border-color: #2d9e5f; color: #1e7a47; }
-.mds-basemap-option i { font-size: 14px; }
+.mds-basemap-option:last-child {
+  margin-bottom: 0;
+}
+
+.mds-basemap-option:hover {
+  background: rgba(45, 158, 95, 0.06);
+  border-color: rgba(45, 158, 95, 0.22);
+}
+
+.mds-basemap-option.active {
+  background: rgba(45, 158, 95, 0.1);
+  border-color: #2d9e5f;
+  color: #1e7a47;
+}
+
+.mds-basemap-option i {
+  font-size: 14px;
+}
 
 /* ── Status bar ── */
 .mds-statusbar {
@@ -257,8 +297,15 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 }
 
 @keyframes mdsStatusPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
 }
 
 /* ── MapLibre overrides ── */
@@ -292,19 +339,21 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15) !important;
 }
 
-.mds-map-container .maplibregl-ctrl-attrib { display: none !important; }
+.mds-map-container .maplibregl-ctrl-attrib {
+  display: none !important;
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    RIGHT — Data Panel
    ══════════════════════════════════════════════════════════════════════════ */
 .mds-panel-side {
-  width: 420px;
+  width: 540px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #ffffff;
-  border-left: 1px solid rgba(45, 158, 95, 0.1);
+  background: #f8fdf9;
+  border-left: 1px solid rgba(22, 163, 74, 0.12);
   box-shadow: -6px 0 40px rgba(0, 0, 0, 0.07);
   z-index: 10;
 }
@@ -313,12 +362,13 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 .mds-panel-hd {
   flex-shrink: 0;
   padding: 16px 20px 14px;
-  background: linear-gradient(155deg, #0a2016 0%, #143a22 60%, #0e3020 100%);
+  background: linear-gradient(155deg, #ffffff 0%, #f0fdf4 60%, #e8faf0 100%);
+  border-bottom: 1.5px solid rgba(22, 163, 74, 0.12);
   position: relative;
   overflow: hidden;
 }
 
-/* Glowing background orb */
+/* Subtle green orb */
 .mds-panel-hd::before {
   content: '';
   position: absolute;
@@ -326,7 +376,7 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   right: -30px;
   width: 160px;
   height: 160px;
-  background: radial-gradient(circle, rgba(74, 222, 128, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(22, 163, 74, 0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -348,14 +398,14 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 .mds-brand-icon {
   width: 38px;
   height: 38px;
-  background: rgba(74, 222, 128, 0.15);
-  border: 1px solid rgba(74, 222, 128, 0.3);
+  background: rgba(22, 163, 74, 0.1);
+  border: 1px solid rgba(22, 163, 74, 0.25);
   border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 19px;
-  color: #4ade80;
+  color: #16a34a;
   flex-shrink: 0;
 }
 
@@ -366,15 +416,17 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 .mds-brand-name {
   font-size: 16px;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f2d1c;
   letter-spacing: -0.4px;
 }
 
-.mds-brand-name span { color: #4ade80; }
+.mds-brand-name span {
+  color: #16a34a;
+}
 
 .mds-brand-sub {
   font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.4);
+  color: #6b9e7e;
   margin-top: 1px;
 }
 
@@ -383,8 +435,8 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   display: flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.18);
   border-radius: 50px;
   padding: 5px 12px 5px 5px;
   flex-shrink: 0;
@@ -394,20 +446,20 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4ade80, #2dd4bf);
+  background: linear-gradient(135deg, #16a34a, #22c55e);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 800;
-  color: #0a2016;
+  color: #ffffff;
   flex-shrink: 0;
 }
 
 .mds-user-name {
   font-size: 11.5px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.75);
+  color: #15803d;
   max-width: 88px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -493,8 +545,14 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   transition: color 0.25s;
 }
 
-.mds-step.active .mds-step-label { color: #1e7a47; font-weight: 800; }
-.mds-step.done .mds-step-label { color: #2d9e5f; }
+.mds-step.active .mds-step-label {
+  color: #1e7a47;
+  font-weight: 800;
+}
+
+.mds-step.done .mds-step-label {
+  color: #2d9e5f;
+}
 
 /* ── Panel Body ── */
 .mds-panel-body {
@@ -503,7 +561,10 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   overscroll-behavior: contain;
 }
 
-.mds-panel-body::-webkit-scrollbar { width: 3px; }
+.mds-panel-body::-webkit-scrollbar {
+  width: 3px;
+}
+
 .mds-panel-body::-webkit-scrollbar-thumb {
   background: rgba(45, 158, 95, 0.18);
   border-radius: 3px;
@@ -590,7 +651,9 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   box-shadow: 0 4px 14px rgba(45, 158, 95, 0.1);
 }
 
-.mds-method-card:hover:not(.active) i { opacity: 1; }
+.mds-method-card:hover:not(.active) i {
+  opacity: 1;
+}
 
 .mds-method-card.active {
   background: linear-gradient(135deg, rgba(45, 158, 95, 0.12), rgba(13, 148, 136, 0.08));
@@ -600,7 +663,9 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   transform: translateY(-1px);
 }
 
-.mds-method-card.active i { opacity: 1; }
+.mds-method-card.active i {
+  opacity: 1;
+}
 
 /* Draw hint banner */
 .mds-draw-hint {
@@ -608,10 +673,10 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   align-items: center;
   gap: 10px;
   padding: 11px 15px;
-  background: linear-gradient(135deg, rgba(8, 28, 18, 0.97), rgba(5, 18, 10, 0.97));
-  border: 1px solid rgba(62, 207, 142, 0.35);
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid rgba(22, 163, 74, 0.25);
   border-radius: 12px;
-  color: #3ecf8e;
+  color: #15803d;
   font-size: 12px;
   font-weight: 600;
   margin-top: 10px;
@@ -620,22 +685,36 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 }
 
 @keyframes mdsHintFade {
-  from { opacity: 0; transform: translateY(-5px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mds-dot-pulse {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #3ecf8e;
+  background: #16a34a;
   flex-shrink: 0;
   animation: mdsDP 1.4s ease-in-out infinite;
 }
 
 @keyframes mdsDP {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(62, 207, 142, 0.6); }
-  50%       { box-shadow: 0 0 0 7px rgba(62, 207, 142, 0); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
+  }
+
+  50% {
+    box-shadow: 0 0 0 7px rgba(22, 163, 74, 0);
+  }
 }
 
 /* Draw success card */
@@ -652,8 +731,15 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 }
 
 @keyframes mdsSuccessFade {
-  from { opacity: 0; transform: scale(0.97); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .mds-success-icon {
@@ -718,13 +804,15 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   letter-spacing: 0.2px;
 }
 
-.mds-dropzone:hover, .mds-dropzone.drag-over {
+.mds-dropzone:hover,
+.mds-dropzone.drag-over {
   border-color: #2d9e5f;
   background: rgba(45, 158, 95, 0.07);
   transform: scale(1.015);
 }
 
-.mds-dropzone:hover i, .mds-dropzone.drag-over i {
+.mds-dropzone:hover i,
+.mds-dropzone.drag-over i {
   color: #2d9e5f;
   transform: translateY(-3px);
 }
@@ -734,8 +822,14 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   box-shadow: 0 0 0 4px rgba(45, 158, 95, 0.12);
 }
 
-.mds-dropzone.has-file i { color: #2d9e5f; }
-.mds-dropzone.has-file p { color: #1e7a47; font-weight: 700; }
+.mds-dropzone.has-file i {
+  color: #2d9e5f;
+}
+
+.mds-dropzone.has-file p {
+  color: #1e7a47;
+  font-weight: 700;
+}
 
 .mds-shp-msg {
   font-size: 12px;
@@ -819,8 +913,14 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   transition: color 0.25s;
 }
 
-.mds-v-label.active { color: #0f2d1c; font-weight: 800; }
-.mds-v-label.done { color: #2d9e5f; }
+.mds-v-label.active {
+  color: #0f2d1c;
+  font-weight: 800;
+}
+
+.mds-v-label.done {
+  color: #2d9e5f;
+}
 
 .mds-v-line {
   position: absolute;
@@ -833,7 +933,9 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   transition: background 0.3s;
 }
 
-.mds-v-line.done { background: rgba(45, 158, 95, 0.4); }
+.mds-v-line.done {
+  background: rgba(45, 158, 95, 0.4);
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    BUTTONS
@@ -934,8 +1036,15 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 }
 
 @keyframes mdsToastIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -948,46 +1057,61 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   }
 
   .mds-map-side {
-    flex: 0 0 45vh;
+    flex: 0 0 42vh;
     min-height: 180px;
     z-index: 1;
   }
 
   .mds-panel-side {
-    width: 100%;
+    width: 100% !important;
     flex: 1;
     border-left: none;
     border-top: none;
-    margin-top: -22px;
-    border-radius: 22px 22px 0 0;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.14);
+    margin-top: -24px;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.12);
     z-index: 2;
     position: relative;
     overflow: hidden;
   }
 
   .mds-panel-hd {
-    border-radius: 22px 22px 0 0;
-    padding-top: 16px;
+    border-radius: 24px 24px 0 0;
+    padding-top: 18px;
   }
 
   /* Drag handle */
   .mds-panel-hd::after {
     content: '';
     display: block;
-    width: 38px;
+    width: 36px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(22, 163, 74, 0.2);
     border-radius: 4px;
-    margin: 10px auto 0;
+    margin: 8px auto 0;
   }
 
-  .mds-stepper { padding: 12px 16px 10px; }
-  .mds-step-label { font-size: 8.5px; }
-  .mds-step-circle { width: 26px; height: 26px; font-size: 10px; }
+  .mds-stepper {
+    padding: 12px 16px 10px;
+  }
 
-  .mds-s1 { padding: 16px 16px 24px; }
-  .mds-results-container { padding: 0 16px 24px; }
+  .mds-step-label {
+    font-size: 8.5px;
+  }
+
+  .mds-step-circle {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+
+  .mds-s1 {
+    padding: 16px 16px 24px;
+  }
+
+  .mds-results-container {
+    padding: 0 16px 24px;
+  }
 
   .mds-search-wrap {
     top: 10px;
@@ -996,8 +1120,14 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
     transform: none;
   }
 
-  .mds-map-controls { bottom: 10px; }
-  .mds-statusbar { height: 26px; font-size: 10.5px; }
+  .mds-map-controls {
+    bottom: 10px;
+  }
+
+  .mds-statusbar {
+    height: 26px;
+    font-size: 10.5px;
+  }
 
   .mds-map-container .maplibregl-ctrl-bottom-right {
     bottom: 30px !important;
@@ -1006,10 +1136,21 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
 }
 
 @media (max-width: 480px) {
-  .mds-map-side { flex: 0 0 38vh; }
-  .mds-user-name { display: none; }
-  .mds-brand-sub { display: none; }
-  .mds-s1-title { font-size: 18px; }
+  .mds-map-side {
+    flex: 0 0 38vh;
+  }
+
+  .mds-user-name {
+    display: none;
+  }
+
+  .mds-brand-sub {
+    display: none;
+  }
+
+  .mds-s1-title {
+    font-size: 18px;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1073,7 +1214,9 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   margin-top: 1px;
 }
 
-.mds-instr-list li strong { color: #1e7a47; }
+.mds-instr-list li strong {
+  color: #1e7a47;
+}
 
 /* ── Stepper close button ── */
 .mds-step-close {
@@ -1120,7 +1263,9 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   transition: color 0.18s;
 }
 
-.mds-btn-link-danger:hover { color: #dc2626; }
+.mds-btn-link-danger:hover {
+  color: #dc2626;
+}
 
 /* ── Back / secondary link (prp panels) ── */
 .prp-back-link {
@@ -1141,4 +1286,704 @@ body.map-draw-active { overflow: hidden !important; height: 100%; }
   margin-top: 2px;
 }
 
-.prp-back-link:hover { color: #1e7a47; }
+.prp-back-link:hover {
+  color: #1e7a47;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ▌ NEW DESIGN v2 — Complete panel & step-1 redesign
+   ▌ Overrides all earlier panel/stepper/step-1 rules above
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Panel shell ────────────────────────────────────────────────────────── */
+.mds-panel-side {
+  width: 540px !important;
+  background: #f8fdf9 !important;
+  border-left: 1px solid rgba(22, 163, 74, 0.12) !important;
+  box-shadow: -4px 0 32px rgba(0, 0, 0, 0.06) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* top accent bar */
+.mds-panel-side::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
+  z-index: 30;
+}
+
+/* ── Stepper ────────────────────────────────────────────────────────────── */
+.mds-stepper {
+  display: flex !important;
+  align-items: center !important;
+  padding: 18px 20px 16px !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(22, 163, 74, 0.1) !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  gap: 0 !important;
+}
+
+/* animated progress track */
+.mds-stepper-track {
+  position: absolute;
+  top: 31px;
+  left: calc(20px + 20px);
+  right: calc(20px + 26px + 12px + 20px);
+  height: 2px;
+  background: rgba(22, 163, 74, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mds-stepper-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mds-step {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex: 1 !important;
+  position: relative !important;
+}
+
+/* remove old connector — replaced by .mds-stepper-track */
+.mds-step::after {
+  display: none !important;
+}
+
+.mds-step-circle {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  border: 2px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  z-index: 1 !important;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+.mds-step.active .mds-step-circle {
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 22px rgba(22, 163, 74, 0.42) !important;
+  transform: scale(1.18) !important;
+}
+
+.mds-step.done .mds-step-circle {
+  background: rgba(22, 163, 74, 0.1) !important;
+  border-color: #22c55e !important;
+  color: #16a34a !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.mds-step-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #94a3b8 !important;
+  white-space: nowrap !important;
+  letter-spacing: 0.2px !important;
+  transition: color 0.25s !important;
+}
+
+.mds-step.active .mds-step-label {
+  color: #15803d !important;
+  font-weight: 800 !important;
+}
+
+.mds-step.done .mds-step-label {
+  color: #16a34a !important;
+}
+
+.mds-step-close {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.18) !important;
+  color: #ef4444 !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  margin-left: 10px !important;
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mds-step-close:hover {
+  background: #ef4444 !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  transform: rotate(90deg) scale(1.1) !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* ── Panel body ─────────────────────────────────────────────────────────── */
+.mds-panel-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  padding: 14px !important;
+  background: #f8fdf9 !important;
+}
+
+.mds-panel-body::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.mds-panel-body::-webkit-scrollbar-thumb {
+  background: rgba(22, 163, 74, 0.2) !important;
+  border-radius: 4px !important;
+}
+
+/* ── Step 1 ─────────────────────────────────────────────────────────────── */
+.mds-s1 {
+  padding: 0 !important;
+}
+
+.mds-s1-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 22px 20px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.08);
+  animation: s1CardIn 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes s1CardIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mds-s1-hd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 8px;
+}
+
+.mds-section-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.1), rgba(34, 197, 94, 0.06)) !important;
+  border: 1px solid rgba(22, 163, 74, 0.2) !important;
+  color: #15803d !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  padding: 4px 12px !important;
+  border-radius: 50px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.7px !important;
+  margin-bottom: 8px !important;
+}
+
+.mds-s1-title {
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  color: #0f2d1c !important;
+  letter-spacing: -0.6px !important;
+  line-height: 1.2 !important;
+  margin: 0 0 6px !important;
+  -webkit-text-fill-color: unset !important;
+  background: none !important;
+}
+
+.mds-s1-sub {
+  font-size: 12.5px !important;
+  color: #6b8f78 !important;
+  margin: 0 !important;
+  line-height: 1.55 !important;
+}
+
+/* large decorative step number */
+.mds-s1-num {
+  font-size: 52px;
+  font-weight: 900;
+  color: rgba(22, 163, 74, 0.08);
+  letter-spacing: -4px;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+  margin-top: -4px;
+}
+
+/* ── Method toggle (replaces old method-grid/card) ──────────────────────── */
+.mds-method-toggle {
+  display: flex;
+  background: #f1f5f2;
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.mds-mtab {
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.mds-mtab:hover:not(.active) {
+  background: rgba(22, 163, 74, 0.06);
+  color: #15803d;
+}
+
+.mds-mtab.active {
+  background: #ffffff;
+  color: #15803d;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.09);
+}
+
+.mds-mtab i {
+  font-size: 14px;
+}
+
+/* ── Action content ─────────────────────────────────────────────────────── */
+.mds-action-content {
+  margin-bottom: 4px;
+}
+
+/* ── Info note ──────────────────────────────────────────────────────────── */
+.mds-instr-note {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: rgba(22, 163, 74, 0.06) !important;
+  border: 1px solid rgba(22, 163, 74, 0.18) !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #15803d !important;
+  margin-bottom: 14px !important;
+  line-height: 1.45 !important;
+}
+
+.mds-instr-note i {
+  color: #22c55e !important;
+  font-size: 15px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Instruction list — timeline style ──────────────────────────────────── */
+.mds-instr-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 0 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  counter-reset: instr !important;
+  position: relative !important;
+}
+
+/* vertical timeline line */
+.mds-instr-list::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 24px;
+  bottom: 10px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.3), rgba(22, 163, 74, 0.06));
+}
+
+.mds-instr-list li {
+  counter-increment: instr !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  font-size: 13px !important;
+  color: #3a5a4a !important;
+  line-height: 1.55 !important;
+  padding: 10px 0 !important;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: color 0.2s !important;
+  position: relative !important;
+}
+
+.mds-instr-list li::before {
+  content: counter(instr) !important;
+  flex-shrink: 0 !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  border: 2px solid rgba(22, 163, 74, 0.3) !important;
+  color: #16a34a !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.12) !important;
+  margin-top: 0 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  transition: all 0.25s !important;
+}
+
+.mds-instr-list li:hover::before {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3) !important;
+}
+
+.mds-instr-list li:hover {
+  color: #0f2d1c !important;
+}
+
+.mds-instr-list li strong {
+  color: #16a34a !important;
+}
+
+/* ── Draw hint ──────────────────────────────────────────────────────────── */
+.mds-draw-hint {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 15px !important;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+  border: 1px solid rgba(22, 163, 74, 0.25) !important;
+  border-radius: 14px !important;
+  color: #15803d !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  margin-top: 0 !important;
+  animation: s1CardIn 0.3s ease !important;
+  line-height: 1.45 !important;
+}
+
+.mds-dot-pulse {
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: #16a34a !important;
+  flex-shrink: 0 !important;
+  animation: mdsDP 1.4s ease-in-out infinite !important;
+}
+
+/* ── Success box ────────────────────────────────────────────────────────── */
+.mds-success-box {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 16px !important;
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.08), rgba(34, 197, 94, 0.05)) !important;
+  border: 1.5px solid rgba(22, 163, 74, 0.25) !important;
+  border-radius: 16px !important;
+  margin-bottom: 14px !important;
+}
+
+.mds-success-icon {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  color: #fff !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35) !important;
+}
+
+.mds-success-text strong {
+  display: block !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #0f2d1c !important;
+  margin-bottom: 3px !important;
+}
+
+.mds-success-text span {
+  font-size: 12px !important;
+  color: #6b8f78 !important;
+}
+
+/* ── Buttons — pill style ───────────────────────────────────────────────── */
+.mds-btn {
+  width: 100% !important;
+  padding: 13px 20px !important;
+  border-radius: 50px !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  margin-bottom: 10px !important;
+  letter-spacing: 0.2px !important;
+}
+
+.mds-btn:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
+
+.mds-btn-solid {
+  background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.32) !important;
+}
+
+.mds-btn-solid:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 32px rgba(22, 163, 74, 0.44) !important;
+}
+
+.mds-btn-soft {
+  background: #ffffff !important;
+  color: #16a34a !important;
+  border: 1.5px solid rgba(22, 163, 74, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.mds-btn-soft:hover:not(:disabled) {
+  background: #f0fdf4 !important;
+  border-color: #22c55e !important;
+  transform: translateY(-1px) !important;
+}
+
+.mds-btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.28) !important;
+}
+
+.mds-btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 26px rgba(239, 68, 68, 0.4) !important;
+}
+
+.mds-btn-link-danger {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  padding: 6px !important;
+  background: none !important;
+  border: none !important;
+  color: rgba(200, 53, 53, 0.65) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  cursor: pointer !important;
+  transition: color 0.18s !important;
+}
+
+.mds-btn-link-danger:hover {
+  color: #dc2626 !important;
+}
+
+/* ── Dropzone ───────────────────────────────────────────────────────────── */
+.mds-dropzone {
+  border: 2px dashed rgba(22, 163, 74, 0.25) !important;
+  border-radius: 18px !important;
+  padding: 30px 18px 24px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  background: rgba(22, 163, 74, 0.02) !important;
+  margin-bottom: 14px !important;
+  user-select: none !important;
+}
+
+.mds-dropzone:hover,
+.mds-dropzone.drag-over {
+  border-color: #22c55e !important;
+  background: rgba(22, 163, 74, 0.06) !important;
+  transform: scale(1.012) !important;
+}
+
+.mds-dropzone.has-file {
+  border-style: solid !important;
+  border-color: #22c55e !important;
+  background: rgba(22, 163, 74, 0.04) !important;
+}
+
+/* ── Results container ──────────────────────────────────────────────────── */
+.mds-results-container {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 20px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.08);
+  animation: s1CardIn 0.38s ease;
+}
+
+.mds-results-container .prp-shell {
+  padding: 0 !important;
+  margin-top: 0 !important;
+  border-top: none !important;
+}
+
+/* ── Mobile v2 ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .mds-panel-side {
+    width: 100% !important;
+    border-left: none !important;
+    margin-top: -24px !important;
+    border-radius: 24px 24px 0 0 !important;
+    box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* drag handle */
+  .mds-panel-side::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background: rgba(22, 163, 74, 0.25);
+    border-radius: 4px;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .mds-stepper {
+    padding: 18px 16px 14px !important;
+    border-radius: 24px 24px 0 0 !important;
+  }
+
+  .mds-step-circle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+  }
+
+  .mds-step.active .mds-step-circle {
+    transform: scale(1.12) !important;
+  }
+
+  .mds-stepper-track {
+    left: calc(16px + 16px) !important;
+    right: calc(16px + 26px + 10px + 16px) !important;
+    top: 33px !important;
+  }
+
+  .mds-step-label {
+    font-size: 9px !important;
+  }
+
+  .mds-step-close {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .mds-panel-body {
+    padding: 10px !important;
+  }
+
+  .mds-s1-card {
+    padding: 18px 16px 16px;
+    border-radius: 18px;
+  }
+
+  .mds-s1-title {
+    font-size: 19px !important;
+  }
+
+  .mds-s1-num {
+    font-size: 40px;
+  }
+
+  .mds-mtab {
+    font-size: 12px;
+    padding: 9px 8px;
+  }
+
+  .mds-instr-list li {
+    font-size: 12.5px !important;
+  }
+
+  .mds-results-container {
+    border-radius: 18px;
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .mds-s1-title {
+    font-size: 17px !important;
+  }
+
+  .mds-s1-sub {
+    font-size: 12px !important;
+  }
+
+  .mds-s1-num {
+    font-size: 34px;
+  }
+
+  .mds-btn {
+    padding: 11px 16px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* ── Hide MapLibre logo ── */
+.maplibregl-ctrl-logo,
+.maplibregl-logo {
+  display: none !important;
+}

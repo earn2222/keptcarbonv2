@@ -753,19 +753,16 @@ export default function MapDrawPage() {
           ))}
         </div>
 
-        {/* Status bar */}
-        <div className="mds-statusbar">
-          <div className="mds-status-dot" />
-          <span>{status}</span>
-        </div>
       </div>
 
       {/* ══ RIGHT: Data Panel ══ */}
       <div className="mds-panel-side">
 
-
         {/* ── Step Tracker ── */}
         <div className="mds-stepper">
+          <div className="mds-stepper-track">
+            <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
+          </div>
           {([
             { n: 1 as const, label: "กำหนดพื้นที่" },
             { n: 2 as const, label: "ผลวิเคราะห์" },
@@ -776,14 +773,14 @@ export default function MapDrawPage() {
             return (
               <div key={n} className={`mds-step${isActive ? " active" : isDone ? " done" : ""}`}>
                 <div className="mds-step-circle">
-                  {isDone ? <i className="bi bi-check2" /> : n}
+                  {isDone ? <i className="bi bi-check-lg" /> : n}
                 </div>
                 <span className="mds-step-label">{label}</span>
               </div>
             );
           })}
           <button className="mds-step-close" onClick={clearDraw} title="เริ่มต้นใหม่">
-            <i className="bi bi-x" />
+            <i className="bi bi-x-lg" />
           </button>
         </div>
 
@@ -793,30 +790,34 @@ export default function MapDrawPage() {
           {/* STEP 1: Draw / Upload */}
           {currentStep === 1 && (
             <div className="mds-s1">
-              <div className="mds-section-tag">
-                <i className="bi bi-geo-alt" /> ขั้นตอนที่ 1
-              </div>
-              <h2 className="mds-s1-title">กำหนดขอบเขตแปลง</h2>
-              <p className="mds-s1-sub">
-                วาดหรือนำเข้าพื้นที่บนแผนที่เพื่อค้นหาแปลงยางในฐานข้อมูล
-              </p>
+              <div className="mds-s1-card">
+                <div className="mds-s1-hd">
+                  <div>
+                    <div className="mds-section-tag">
+                      <i className="bi bi-geo-alt-fill" /> ขั้นตอนที่ 1
+                    </div>
+                    <h2 className="mds-s1-title">กำหนดขอบเขตแปลง</h2>
+                    <p className="mds-s1-sub">
+                      วาดหรือนำเข้าพื้นที่บนแผนที่เพื่อค้นหาแปลงยางในฐานข้อมูล
+                    </p>
+                  </div>
+                  <div className="mds-s1-num">01</div>
+                </div>
 
               {/* Method selector */}
-              <div className="mds-method-grid">
-                <div
-                  className={`mds-method-card${tab === "draw" ? " active" : ""}`}
+              <div className="mds-method-toggle">
+                <button
+                  className={`mds-mtab${tab === "draw" ? " active" : ""}`}
                   onClick={() => setTab("draw")}
                 >
-                  <i className="bi bi-pencil-square" />
-                  <span>วาดแปลง</span>
-                </div>
-                <div
-                  className={`mds-method-card${tab === "shp" ? " active" : ""}`}
+                  <i className="bi bi-pencil-square" /> วาดแปลง
+                </button>
+                <button
+                  className={`mds-mtab${tab === "shp" ? " active" : ""}`}
                   onClick={() => setTab("shp")}
                 >
-                  <i className="bi bi-file-earmark-zip" />
-                  <span>นำเข้า SHP</span>
-                </div>
+                  <i className="bi bi-file-earmark-zip" /> นำเข้า SHP
+                </button>
               </div>
 
               {/* ── Draw tab ── */}
@@ -922,6 +923,7 @@ export default function MapDrawPage() {
                 </div>
               )}
 
+              </div>{/* /mds-s1-card */}
             </div>
           )}
 

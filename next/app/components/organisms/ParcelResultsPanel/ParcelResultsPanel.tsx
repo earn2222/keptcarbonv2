@@ -108,72 +108,99 @@ function summaryForecast(plots: PlotInfo[], years: ForecastYr) {
 function AgeBarChart({ age, conf }: { age: number; conf: number }) {
     const dist = ageDistribution(age, conf);
     const maxPct = Math.max(...dist.map(d => d.pct));
-    const W = 200, BAR_W = 30, GAP = 10;
+    const W = 220, BAR_W = 32, GAP = 12;
     const totalW = dist.length * BAR_W + (dist.length - 1) * GAP;
     const sx = (W - totalW) / 2;
+    // Extra top padding (20px) so percentage labels don't clip
+    const BASE_Y = 72, MAX_BH = 48;
 
     return (
-        <svg viewBox={`0 0 ${W} 72`} style={{ width: "100%", height: 72 }}>
+        <svg viewBox={`0 0 ${W} 96`} style={{ width: "100%", height: 96, display: "block" }}>
+            {/* subtle grid line */}
+            <line x1={sx} y1={BASE_Y - MAX_BH} x2={sx + totalW} y2={BASE_Y - MAX_BH}
+                stroke="rgba(45,158,95,0.08)" strokeWidth={1} />
             {dist.map(({ a, pct }, i) => {
-                const bh = Math.max((pct / maxPct) * 46, 3);
+                const bh = Math.max((pct / maxPct) * MAX_BH, 3);
                 const x = sx + i * (BAR_W + GAP);
                 const isMain = a === age;
                 return (
                     <g key={i}>
-                        <rect x={x} y={52 - bh} width={BAR_W} height={bh} rx={5}
-                            fill={isMain ? "#2d9e5f" : "rgba(45,158,95,0.2)"} />
-                        <text x={x + BAR_W / 2} y={65} textAnchor="middle" fontSize={9} fill="#6b9e7e">
+                        {isMain && (
+                            <rect x={x - 2} y={BASE_Y - bh - 18} width={BAR_W + 4} height={bh + 18}
+                                rx={7} fill="rgba(45,158,95,0.06)" />
+                        )}
+                        <rect x={x} y={BASE_Y - bh} width={BAR_W} height={bh} rx={6}
+                            fill={isMain ? "url(#barGrad)" : "rgba(45,158,95,0.18)"} />
+                        <text x={x + BAR_W / 2} y={BASE_Y + 14} textAnchor="middle" fontSize={9.5} fill="#6b9e7e" fontWeight={isMain ? "700" : "400"}>
                             {a}.0
                         </text>
                         {isMain && (
-                            <text x={x + BAR_W / 2} y={52 - bh - 4} textAnchor="middle" fontSize={8}
-                                fontWeight="700" fill="#1e7a47">
+                            <text x={x + BAR_W / 2} y={BASE_Y - bh - 6} textAnchor="middle" fontSize={9}
+                                fontWeight="800" fill="#1e7a47">
                                 {pct}%
                             </text>
                         )}
                     </g>
                 );
             })}
+            <defs>
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#059669" />
+                </linearGradient>
+            </defs>
         </svg>
     );
 }
 
 // ── SVG: Carbon forecast line chart ──────────────────────────────────────
 function ForecastChart({ pts }: { pts: Array<{ yearBE: number; co2: number }> }) {
-    const W = 220, H = 80, PL = 8, PR = 32, PT = 14, PB = 18;
+    const W = 260, H = 120, PL = 12, PR = 48, PT = 20, PB = 24;
     const iW = W - PL - PR, iH = H - PT - PB;
     const vals = pts.map(p => p.co2);
     const minV = Math.min(...vals), maxV = Math.max(...vals);
     const rng = maxV - minV || 1;
 
     const svgPts = pts.map((d, i) => ({
-        x: PL + (i / (pts.length - 1)) * iW,
+        x: PL + (i / Math.max(pts.length - 1, 1)) * iW,
         y: PT + (1 - (d.co2 - minV) / rng) * iH,
         ...d,
     }));
     const line = svgPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-    const fill = `${PL},${PT + iH} ${line} ${(PL + iW).toFixed(1)},${PT + iH}`;
+    const fillPath = `${PL},${PT + iH} ${line} ${(PL + iW).toFixed(1)},${PT + iH}`;
 
     return (
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H }}>
-            {[0, 0.5, 1].map(t => (
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H, display: "block" }}>
+            <defs>
+                <linearGradient id="fcAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+                </linearGradient>
+            </defs>
+            {/* Grid lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map(t => (
                 <line key={t} x1={PL} y1={PT + t * iH} x2={PL + iW} y2={PT + t * iH}
-                    stroke="rgba(45,158,95,0.12)" strokeWidth={0.6} />
+                    stroke="rgba(45,158,95,0.1)" strokeWidth={t === 0 || t === 1 ? 1 : 0.5} strokeDasharray={t === 0 || t === 1 ? "none" : "3,3"} />
             ))}
-            <polygon points={fill} fill="rgba(45,158,95,0.12)" />
-            <polyline points={line} fill="none" stroke="#2d9e5f" strokeWidth={1.8} strokeLinejoin="round" />
+            {/* Area fill */}
+            <polygon points={fillPath} fill="url(#fcAreaGrad)" />
+            {/* Line */}
+            <polyline points={line} fill="none" stroke="#059669" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+            {/* Data points */}
             {svgPts.map((p, i) => (
-                <circle key={i} cx={p.x} cy={p.y} r={2.8} fill="#2d9e5f" />
+                <circle key={i} cx={p.x} cy={p.y} r={3.5} fill="#ffffff" stroke="#059669" strokeWidth={2} />
             ))}
+            {/* Year labels */}
             {svgPts.map(p => (
-                <text key={p.yearBE} x={p.x} y={H - 2} textAnchor="middle" fontSize={7.5} fill="#8aaa95">
+                <text key={p.yearBE} x={p.x} y={H - 6} textAnchor="middle" fontSize={8} fill="#94a3b8">
                     {p.yearBE}
                 </text>
             ))}
-            <text x={PL + iW + 3} y={PT + 4} fontSize={7} fill="#6b9e7e" textAnchor="start">
+            {/* Y-axis value labels */}
+            <text x={PL + iW + 4} y={PT + 4} fontSize={7.5} fill="#6b9e7e" textAnchor="start">
                 {Math.round(maxV).toLocaleString()}
             </text>
-            <text x={PL + iW + 3} y={PT + iH + 1} fontSize={7} fill="#6b9e7e" textAnchor="start">
+            <text x={PL + iW + 4} y={PT + iH + 4} fontSize={7.5} fill="#6b9e7e" textAnchor="start">
                 {Math.round(minV).toLocaleString()}
             </text>
         </svg>
