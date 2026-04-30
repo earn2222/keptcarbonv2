@@ -75,6 +75,9 @@ export default function MapDrawPage() {
   // Stepper state
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
+  // Panel toggle state
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
 
   // ===== MAP INIT =====
   useEffect(() => {
@@ -755,11 +758,31 @@ export default function MapDrawPage() {
 
       </div>
 
+      {/* ── Toggle Panel Button (when closed) ── */}
+      {!isPanelOpen && (
+        <button
+          className="mds-panel-toggle-btn"
+          onClick={() => setIsPanelOpen(true)}
+          title="เปิดแผงเครื่องมือ"
+        >
+          <i className="bi bi-chevron-left" />
+        </button>
+      )}
+
       {/* ══ RIGHT: Data Panel ══ */}
-      <div className="mds-panel-side">
+      <div className={`mds-panel-side ${isPanelOpen ? "open" : "closed"}`}>
 
         {/* ── Step Tracker ── */}
         <div className="mds-stepper">
+          {/* Close Panel Button */}
+          <button
+            className="mds-panel-close-btn"
+            onClick={() => setIsPanelOpen(false)}
+            title="ซ่อนแผงเครื่องมือ"
+          >
+            <i className="bi bi-chevron-right" />
+          </button>
+          
           <div className="mds-stepper-track">
             <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
           </div>
