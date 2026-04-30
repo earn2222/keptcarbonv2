@@ -414,6 +414,7 @@ export default function MapDrawPage() {
   const startDrawFlow = () => {
     const map = mapRef.current;
     if (!map) return;
+    setIsPanelOpen(true);
     drawingRef.current = true;
     setDrawing(true);
     setStatus("โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click หรือกดเสร็จสิ้น เพื่อปิดแปลง | Esc ยกเลิก");
@@ -765,12 +766,16 @@ export default function MapDrawPage() {
           onClick={() => setIsPanelOpen(true)}
           title="เปิดแผงเครื่องมือ"
         >
-          <i className="bi bi-chevron-left" />
+          <i className="bi bi-layout-text-sidebar-reverse" />
         </button>
       )}
 
       {/* ══ RIGHT: Data Panel ══ */}
       <div className={`mds-panel-side ${isPanelOpen ? "open" : "closed"}`}>
+        
+        {/* Drag handle for mobile toggle */}
+        <div className="mds-mobile-drag-handle" onClick={() => setIsPanelOpen(false)} />
+
 
         {/* ── Step Tracker ── */}
         <div className="mds-stepper">
@@ -780,7 +785,7 @@ export default function MapDrawPage() {
             onClick={() => setIsPanelOpen(false)}
             title="ซ่อนแผงเครื่องมือ"
           >
-            <i className="bi bi-chevron-right" />
+            <i className="bi bi-x-lg" />
           </button>
           
           <div className="mds-stepper-track">

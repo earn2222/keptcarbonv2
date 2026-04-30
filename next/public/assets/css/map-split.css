@@ -365,6 +365,10 @@ body.map-draw-active {
   display: none !important;
 }
 
+.mds-mobile-drag-handle {
+  display: none;
+}
+
 /* ── Toggle Buttons ── */
 .mds-panel-toggle-btn {
   position: absolute;
@@ -1959,6 +1963,20 @@ body.map-draw-active {
 
 /* ── Mobile v2 ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .mds-panel-side.closed {
+    display: none !important;
+  }
+
+  .mds-map-side {
+    height: 45vh;
+    transition: height 0.4s ease;
+  }
+
+  /* When panel is closed on mobile, map takes full height */
+  .mds-shell:has(.mds-panel-side.closed) .mds-map-side {
+    height: 100vh !important;
+  }
+
   .mds-panel-side {
     width: 100% !important;
     border-left: none !important;
@@ -1967,19 +1985,28 @@ body.map-draw-active {
     box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* drag handle */
-  .mds-panel-side::after {
+  /* clickable drag handle area */
+  .mds-mobile-drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    z-index: 100;
+    cursor: pointer;
+    display: block;
+  }
+
+  .mds-mobile-drag-handle::after {
     content: '';
     position: absolute;
-    top: 8px;
+    top: 12px;
     left: 50%;
     transform: translateX(-50%);
-    width: 36px;
-    height: 4px;
-    background: rgba(22, 163, 74, 0.25);
-    border-radius: 4px;
-    z-index: 20;
-    pointer-events: none;
+    width: 40px;
+    height: 5px;
+    background: rgba(22, 163, 74, 0.2);
+    border-radius: 10px;
   }
 
   .mds-stepper {
@@ -2012,8 +2039,18 @@ body.map-draw-active {
     height: 28px !important;
   }
 
+  .mds-panel-close-btn {
+    left: 10px !important;
+    width: 32px !important;
+    height: 32px !important;
+    background: rgba(0,0,0,0.04) !important;
+    border: none !important;
+    font-size: 16px !important;
+  }
+
   .mds-panel-body {
     padding: 10px !important;
+    padding-bottom: 80px !important;
   }
 
   .mds-s1-card {
