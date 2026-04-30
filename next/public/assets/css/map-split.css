@@ -1062,6 +1062,21 @@ body.map-draw-active {
     flex: 0 0 42vh;
     min-height: 180px;
     z-index: 1;
+    transition: flex 0.3s ease;
+  }
+
+  .mds-shell.drawing .mds-map-side {
+    flex: 1 1 auto;
+  }
+
+  .mds-shell.drawing .mds-panel-side {
+    flex: 0 0 auto;
+  }
+
+  /* Hide headers when drawing on mobile to save space */
+  .mds-shell.drawing .mds-s1-hd,
+  .mds-shell.drawing .mds-method-toggle {
+    display: none !important;
   }
 
   .mds-panel-side {
@@ -1105,6 +1120,10 @@ body.map-draw-active {
     width: 26px;
     height: 26px;
     font-size: 10px;
+  }
+
+  .mds-step::after {
+    top: 12px;
   }
 
   .mds-s1 {
@@ -1335,13 +1354,7 @@ body.map-draw-active {
 
 /* animated progress track */
 .mds-stepper-track {
-  position: absolute;
-  top: 37px;
-  left: calc(20px + ((100% - 80px) / 6));
-  right: calc(60px + ((100% - 80px) / 6));
-  height: 2px;
-  background: #dcfce7 !important;
-  border-radius: 2px;
+  display: none !important;
 }
 
 .mds-stepper-fill {
@@ -1357,8 +1370,21 @@ body.map-draw-active {
   position: relative !important;
 }
 
-/* remove old connector — replaced by .mds-stepper-track */
+/* connector between steps */
 .mds-step::after {
+  content: '';
+  position: absolute;
+  top: 19px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: #dcfce7 !important;
+  z-index: 0 !important;
+}
+
+/* Hide line after step 3 */
+.mds-step:nth-child(4)::after,
+.mds-step:last-of-type::after {
   display: none !important;
 }
 
@@ -1427,15 +1453,25 @@ body.map-draw-active {
   cursor: pointer !important;
   flex-shrink: 0 !important;
   margin-left: 10px !important;
+  position: relative !important;
+  z-index: 10 !important;
   transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.mds-step-close:hover {
+@media (hover: hover) and (pointer: fine) {
+  .mds-step-close:hover {
+    background: #ef4444 !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    transform: rotate(90deg) scale(1.1) !important;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
+  }
+}
+
+.mds-step-close:active {
   background: #ef4444 !important;
-  border-color: transparent !important;
   color: #fff !important;
-  transform: rotate(90deg) scale(1.1) !important;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
+  transform: scale(0.95) !important;
 }
 
 /* ── Panel body ─────────────────────────────────────────────────────────── */

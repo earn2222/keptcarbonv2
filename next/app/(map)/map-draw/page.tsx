@@ -321,7 +321,7 @@ export default function MapDrawPage() {
       if (!drawingRef.current) return;
       vertsRef.current.push([e.lngLat.lng, e.lngLat.lat]);
       previewDraw();
-      setStatus(`จุดที่ ${vertsRef.current.length} — Double-click เพื่อปิดแปลง`);
+      setStatus(`จุดที่ ${vertsRef.current.length} — Double-click หรือกดเสร็จสิ้น เพื่อปิดแปลง`);
     };
     const onDbl = (e: maplibregl.MapMouseEvent) => {
       if (!drawingRef.current || vertsRef.current.length < 3) return;
@@ -413,7 +413,7 @@ export default function MapDrawPage() {
     if (!map) return;
     drawingRef.current = true;
     setDrawing(true);
-    setStatus("โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click เพื่อปิดแปลง | Esc ยกเลิก");
+    setStatus("โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click หรือกดเสร็จสิ้น เพื่อปิดแปลง | Esc ยกเลิก");
     if (map.getZoom() < 8) {
       map.flyTo({ center: [101.258, 12.682], zoom: 10, pitch: 20, bearing: 0, duration: 2000 });
     }
@@ -836,7 +836,7 @@ export default function MapDrawPage() {
                         </div>
                       </div>
                       <button className="mds-btn mds-btn-solid" onClick={runParcelSearch}>
-                        <i className="bi bi-search" /> ยืนยันแปลงที่วาด
+                        <i className="bi bi-search" /> ตกลงเพื่อประมวลผล
                       </button>
                       <button className="mds-btn mds-btn-soft" onClick={() => { clearDraw(); startDrawFlow(); }}>
                         <i className="bi bi-arrow-repeat" /> เริ่มวาดแปลงใหม่
@@ -850,11 +850,16 @@ export default function MapDrawPage() {
                     <>
                       <div className="mds-draw-hint">
                         <div className="mds-dot-pulse" />
-                        คลิกบนแผนที่เพื่อเพิ่มจุด · Double-click เพื่อปิดแปลง
+                        คลิกบนแผนที่เพื่อเพิ่มจุด · Double-click หรือกด <strong>เสร็จสิ้น</strong> เพื่อปิดแปลง
                       </div>
-                      <button className="mds-btn mds-btn-danger" onClick={clearDraw} style={{ marginTop: 10 }}>
-                        <i className="bi bi-stop-circle" /> หยุดวาด (Esc)
-                      </button>
+                      <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                        <button className="mds-btn mds-btn-solid" onClick={() => finishDraw(false)} style={{ flex: 1 }}>
+                          <i className="bi bi-check-circle" /> เสร็จสิ้น
+                        </button>
+                        <button className="mds-btn mds-btn-danger" onClick={clearDraw} style={{ flex: 1 }}>
+                          <i className="bi bi-x-circle" /> ยกเลิก
+                        </button>
+                      </div>
                     </>
                   ) : (
                     /* ── Default: show instructions + start button ── */
