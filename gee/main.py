@@ -41,10 +41,26 @@ def _init_ee() -> bool:
         "GEE_KEY_FILE", "/run/secrets/gee_key.json").strip()
     project = os.environ.get("GEE_PROJECT_ID", "").strip()
 
-    if not os.path.isfile(key_file):
+    # Load key_dict from file or fall back to GEE_SERVICE_ACCOUNT_JSON env var
+    key_dict = None
+    if os.path.isfile(key_file):
+        try:
+            with open(key_file, "r") as f:
+                key_dict = json.load(f)
+        except Exception as exc:
+            logger.error("Failed to read GEE key file %s: %s", key_file, exc)
+    else:
+        inline_json = os.environ.get("GEE_SERVICE_ACCOUNT_JSON", "").strip()
+        if inline_json:
+            try:
+                key_dict = json.loads(inline_json)
+                logger.info("GEE key file not found; using GEE_SERVICE_ACCOUNT_JSON env var.")
+            except Exception as exc:
+                logger.error("Failed to parse GEE_SERVICE_ACCOUNT_JSON: %s", exc)
+
+    if key_dict is None:
         logger.warning(
-            "GEE key file not found at %s — Earth Engine will NOT be initialized. "
-            "Mount the service-account JSON at that path (see docker-compose.yml).",
+            "No GEE credentials found — set GEE_SERVICE_ACCOUNT_JSON or mount a key file at %s.",
             key_file,
         )
         return False
@@ -53,8 +69,6 @@ def _init_ee() -> bool:
         import ee
         from google.oauth2.service_account import Credentials
 
-        with open(key_file, "r") as f:
-            key_dict = json.load(f)
         credentials = Credentials.from_service_account_info(
             key_dict,
             scopes=["https://www.googleapis.com/auth/earthengine"],

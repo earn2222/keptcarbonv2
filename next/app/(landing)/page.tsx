@@ -332,7 +332,7 @@ export default function Home() {
             <div className="col-lg-6" data-aos="fade-right" data-aos-delay="150">
               <div className="contact-card">
                 <div className="contact-card-icon">
-                  <i className="bi bi-geo-alt-fill"></i>
+                  <i className="bi bi-building-fill"></i>
                 </div>
                 <h3>ข้อมูลการติดต่อ</h3>
                 <div className="contact-divider"></div>

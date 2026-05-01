@@ -7,16 +7,12 @@ type Relation = "intersects" | "touches" | "contains";
 const RELATIONS: Relation[] = ["intersects", "touches", "contains"];
 const HARD_LIMIT = 2000;
 
-function buildWhere(rel: Relation): string {
-  const g = "ST_SetSRID(ST_GeomFromGeoJSON($1::text), 4326)";
+function buildCondition(rel: Relation): string {
   switch (rel) {
-    case "touches":
-      return `ST_Touches(geom, ${g})`;
-    case "contains":
-      return `ST_Within(geom, ${g})`;
+    case "touches":  return "ST_Touches(p.geom, q.g)";
+    case "contains": return "ST_Within(p.geom, q.g)";
     case "intersects":
-    default:
-      return `ST_Intersects(geom, ${g})`;
+    default:         return "p.geom && q.g AND ST_Intersects(p.geom, q.g)";
   }
 }
 
@@ -46,13 +42,18 @@ export async function POST(request: NextRequest) {
     ? (relation as Relation)
     : "intersects";
 
+  // CTE computes ST_MakeValid once and reuses it; bbox pre-filter (&&) hits the spatial index.
   const sql = `
-    SELECT id, farm_name, farm_idc, app_no, land_seq, land_right, land_name,
-           land_moo, land_vill, tambon, amphoe_t, province,
-          grow_year, rip_type, grow_area,
-           ST_AsGeoJSON(geom)::json AS geometry
-    FROM rubber_plots
-    WHERE ${buildWhere(rel)}
+    WITH q AS (
+      SELECT ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($1::text), 4326)) AS g
+    )
+    SELECT p.id, p.farm_name, p.farm_idc, p.app_no, p.land_seq, p.land_right, p.land_name,
+           p.land_moo, p.land_vill, p.tambon, p.amphoe_t, p.province,
+           p.grow_year, p.rip_type, p.grow_area,
+           p.rubber_age, p.gee_age, p.gee_plant_year, p.gee_confidence, p.gee_carbon,
+           ST_AsGeoJSON(p.geom)::json AS geometry
+    FROM rubber_plots p, q
+    WHERE ${buildCondition(rel)}
     LIMIT ${HARD_LIMIT}
   `;
 

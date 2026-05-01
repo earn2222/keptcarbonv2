@@ -132,7 +132,7 @@ export default function DashboardPage() {
               <div className="kc-panel">
                 <div className="kc-panel-header">
                   <div className="title">
-                    <i className="bi bi-geo-alt-fill"></i>
+                    <i className="bi bi-map-fill"></i>
                     <span>แผนที่ภาพรวมแปลง</span>
                   </div>
                   <span className="meta">{plots.length} แปลง · ภาคตะวันออก</span>

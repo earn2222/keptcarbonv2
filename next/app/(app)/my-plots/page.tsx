@@ -44,7 +44,7 @@ export default function MyPlotsPage() {
                 <div className="p-4 p-md-5" style={{ background: HERO_BG, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                     <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
                         <div style={{ maxWidth: 640 }}>
-                            <Eyebrow icon="bi-geo-alt" className="mb-2">ข้อมูลของฉัน</Eyebrow>
+                            <Eyebrow icon="bi-map" className="mb-2">ข้อมูลของฉัน</Eyebrow>
                             <h1 className="fw-bold mb-2" style={{ letterSpacing: "-0.02em" }}>แปลงยางพาราของฉัน</h1>
                             <div className="text-muted">
                                 จัดการ ติดตาม และตรวจสอบข้อมูลแปลงยางพาราของคุณทั้งหมดในที่เดียว

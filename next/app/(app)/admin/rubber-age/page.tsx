@@ -94,14 +94,11 @@ function bboxFromGeometry(g: GeoJSON.Geometry): { minX: number; minY: number; ma
     };
 
     if (g.type === "Polygon" || g.type === "MultiPolygon" || g.type === "LineString" || g.type === "MultiLineString") {
-        // @ts-expect-error coordinates shape varies; we walk generically
         walk(g.coordinates);
     } else if (g.type === "Point") {
-        // @ts-expect-error Point coordinates
         const [x, y] = g.coordinates;
         push(x, y);
     } else if (g.type === "MultiPoint") {
-        // @ts-expect-error MultiPoint coordinates
         walk(g.coordinates);
     } else if (g.type === "GeometryCollection") {
         for (const gg of g.geometries ?? []) {
