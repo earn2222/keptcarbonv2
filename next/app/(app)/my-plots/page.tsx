@@ -25,6 +25,7 @@ type SavedPlot = {
   province?: string;
   date: string;
   geojson?: unknown;
+  boundaryGeojson?: unknown;
   forecast?: Forecast;
 };
 

@@ -83,6 +83,9 @@ export default function MapDrawPage() {
   // Panel toggle state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+  // Drawn boundary geometry (set when search is confirmed)
+  const [drawnGeometry, setDrawnGeometry] = useState<GeoJSON.Geometry | null>(null);
+
 
   // ===== MAP INIT =====
   useEffect(() => {
@@ -450,6 +453,7 @@ export default function MapDrawPage() {
     setDrawDone(false);
     setDrawPreview("—");
     setHasGeom(false);
+    setDrawnGeometry(null);
     setSearchCount(null);
     setSearchErr(null);
     setSearchTruncated(false);
@@ -506,6 +510,7 @@ export default function MapDrawPage() {
     const abort = new AbortController();
     searchAbortRef.current = abort;
 
+    setDrawnGeometry(final.geometry);
     setSearchRunning(true);
     setCurrentStep(2);
     setSearchErr(null);
@@ -1055,6 +1060,7 @@ export default function MapDrawPage() {
                 searchTruncated={searchTruncated}
                 parcelFeatures={parcelFeatures}
                 userDisplayName={user?.fullname ?? ""}
+                drawnGeometry={drawnGeometry}
                 onFlyTo={flyToFeature}
                 onReset={clearDraw}
                 onBack={backToStep1}

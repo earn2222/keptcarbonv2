@@ -17,6 +17,7 @@ type SavedPlot = {
   province?: string;
   date?: string;
   geojson?: GeoJSON.GeoJSON | null;
+  boundaryGeojson?: GeoJSON.GeoJSON | null;
   forecast?: { yr3: number; yr5: number; yr7: number };
 };
 
@@ -117,6 +118,7 @@ export default function DashboardPage() {
           areaRai: p.areaRai,
           carbonTotal: p.carbonTotal,
           geojson: p.geojson as GeoJSON.GeoJSON,
+          boundaryGeojson: (p.boundaryGeojson as GeoJSON.GeoJSON) ?? null,
         })),
     [plots],
   );

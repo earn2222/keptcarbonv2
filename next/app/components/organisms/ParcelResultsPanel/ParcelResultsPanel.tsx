@@ -11,6 +11,7 @@ type Props = {
     searchTruncated: boolean;
     parcelFeatures: GeoJSON.Feature[];
     userDisplayName?: string;
+    drawnGeometry?: GeoJSON.Geometry | null;
     onFlyTo: (feature: GeoJSON.Feature) => void;
     onReset?: () => void;
     onBack?: () => void;
@@ -324,6 +325,7 @@ export function ParcelResultsPanel({
     searchTruncated,
     parcelFeatures,
     userDisplayName = "",
+    drawnGeometry = null,
     onFlyTo,
     onReset,
     onBack,
@@ -383,6 +385,7 @@ export function ParcelResultsPanel({
                     province: province || dominantProvince,
                     date: new Date().toISOString(),
                     geojson: feat?.geometry || null,
+                    boundaryGeojson: drawnGeometry || null,
                     forecast: {
                         yr3: p.trees > 0 ? carbonForAge(p.age + 3, p.trees).co2 : 0,
                         yr5: p.trees > 0 ? carbonForAge(p.age + 5, p.trees).co2 : 0,
