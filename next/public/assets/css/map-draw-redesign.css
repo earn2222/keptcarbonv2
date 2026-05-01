@@ -1590,22 +1590,27 @@ body.map-draw-active.scrolled .header {
 .prp-analyze-btn {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  background: rgba(45, 158, 95, 0.09);
-  border: 1px solid rgba(45, 158, 95, 0.25);
-  border-radius: 8px;
-  padding: 4px 9px;
-  font-size: 10px;
+  gap: 5px;
+  background: #ffffff;
+  border: 1.5px solid #10b981;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
   font-weight: 700;
-  color: #2d9e5f;
+  color: #059669;
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
-  transition: background 0.18s;
+  transition: all 0.18s;
+  flex-shrink: 0;
+  letter-spacing: 0.1px;
 }
 
 .prp-analyze-btn:hover {
-  background: rgba(45, 158, 95, 0.18);
+  background: #f0fdf4;
+  border-color: #059669;
+  color: #047857;
+  transform: scale(1.03);
 }
 
 .prp-chevron {
@@ -3464,22 +3469,26 @@ body.map-draw-active.scrolled .header {
 .prp-analyze-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 10px;
-  padding: 5px 10px;
-  font-size: 10.5px;
+  gap: 5px;
+  background: #ffffff;
+  border: 1.5px solid #10b981;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
   font-weight: 700;
   color: #059669;
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
   transition: all 0.18s;
+  flex-shrink: 0;
+  letter-spacing: 0.1px;
 }
 
 .prp-analyze-btn:hover {
-  background: rgba(16, 185, 129, 0.16);
+  background: #f0fdf4;
+  border-color: #059669;
+  color: #047857;
   transform: scale(1.03);
 }
 
@@ -3497,19 +3506,20 @@ body.map-draw-active.scrolled .header {
 
 /* ── Expanded body ──────────────────────────────────────────── */
 .prp-plot-body {
-  border-top: 1.5px solid rgba(16, 185, 129, 0.1);
+  border-top: 1.5px solid #e8faf3;
   padding: 14px;
-  background: linear-gradient(180deg, #f8fffe 0%, #ffffff 100%);
+  background: #ffffff;
 }
 
 /* ── Tabs ────────────────────────────────────────────────────── */
 .prp-tabs {
   display: flex;
   gap: 0;
-  background: rgba(16, 185, 129, 0.07);
+  background: #f0fdf4;
   border-radius: 12px;
   padding: 3px;
   margin-bottom: 14px;
+  border: 1px solid rgba(16, 185, 129, 0.12);
 }
 
 .prp-tab {
@@ -3534,31 +3544,32 @@ body.map-draw-active.scrolled .header {
   background: #ffffff;
   color: #059669;
   font-weight: 800;
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.18);
 }
 
 .prp-tab-content {
   animation: prpFadeIn 0.3s ease;
 }
 
-/* ── Chart container ─────────────────────────────────────────── */
+/* ── Chart label ─────────────────────────────────────────────── */
 .prp-chart-label {
   font-size: 11.5px;
   font-weight: 700;
-  color: #475569;
-  margin-bottom: 6px;
+  color: #374151;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .prp-chart-label::before {
   content: "";
   display: inline-block;
   width: 3px;
-  height: 12px;
+  height: 13px;
   background: linear-gradient(180deg, #10b981, #059669);
   border-radius: 2px;
+  flex-shrink: 0;
 }
 
 /* ── Stat row ────────────────────────────────────────────────── */
@@ -3566,21 +3577,23 @@ body.map-draw-active.scrolled .header {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin: 12px 0;
+  margin: 12px 0 4px;
 }
 
 .prp-stat {
   text-align: center;
   background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.12);
+  border: 1.5px solid #e8faf3;
+  border-top: 3px solid #10b981;
   border-radius: 12px;
-  padding: 10px 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  transition: transform 0.2s;
+  padding: 10px 6px 8px;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .prp-stat:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.12);
 }
 
 .prp-stat-val {
@@ -3594,15 +3607,13 @@ body.map-draw-active.scrolled .header {
   font-size: 10px;
   color: #64748b;
   font-weight: 600;
-  margin-top: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  margin-top: 4px;
 }
 
 .prp-stat-unit {
   font-size: 9px;
   color: #94a3b8;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* ── Age chips ───────────────────────────────────────────────── */

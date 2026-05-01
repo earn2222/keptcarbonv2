@@ -110,103 +110,91 @@ function AgeBarChart({ age, conf, trees }: { age: number; conf: number; trees: n
     const [hoverIdx, setHoverIdx] = useState<number | null>(null);
     const dist = ageDistribution(age, conf);
     const maxPct = Math.max(...dist.map(d => d.pct));
-    const W = 240, BAR_W = 34, GAP = 10;
+
+    const W = 300, BAR_W = 46, GAP = 14;
     const totalW = dist.length * BAR_W + (dist.length - 1) * GAP;
     const sx = (W - totalW) / 2;
-    const BASE_Y = 76, MAX_BH = 52;
+    const BASE_Y = 110, MAX_BH = 72, H = 148;
 
     return (
-        <svg viewBox={`0 0 ${W} 110`} style={{ width: "100%", height: 110, display: "block", overflow: "visible" }}>
-            <defs>
-                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#059669" />
-                </linearGradient>
-                <linearGradient id="barHoverGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#34d399" />
-                    <stop offset="100%" stopColor="#10b981" />
-                </linearGradient>
-                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#059669" floodOpacity="0.25" />
-                </filter>
-            </defs>
+        <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)", borderRadius: 14, padding: "12px 8px 8px", marginBottom: 12 }}>
+            <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H, display: "block", overflow: "visible" }}>
+                <defs>
+                    <linearGradient id="barGradMain" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="#047857" />
+                    </linearGradient>
+                    <filter id="barShadow">
+                        <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#059669" floodOpacity="0.3" />
+                    </filter>
+                </defs>
 
-            {/* grid line */}
-            <line x1={sx} y1={BASE_Y - MAX_BH} x2={sx + totalW} y2={BASE_Y - MAX_BH}
-                stroke="rgba(45,158,95,0.08)" strokeWidth={1} />
+                {/* background grid */}
+                {[0.25, 0.5, 0.75, 1].map(t => (
+                    <line key={t}
+                        x1={sx} y1={BASE_Y - t * MAX_BH} x2={sx + totalW} y2={BASE_Y - t * MAX_BH}
+                        stroke="rgba(16,185,129,0.1)" strokeWidth={t === 1 ? 1.2 : 0.6}
+                        strokeDasharray={t < 1 ? "4,4" : undefined} />
+                ))}
 
-            {dist.map(({ a, pct }, i) => {
-                const bh = Math.max((pct / maxPct) * MAX_BH, 4);
-                const x = sx + i * (BAR_W + GAP);
-                const isMain = a === age;
-                const isHover = hoverIdx === i;
-                const co2Val = trees > 0 ? carbonForAge(a, trees).co2 : 0;
+                {dist.map(({ a, pct }, i) => {
+                    const bh = Math.max((pct / maxPct) * MAX_BH, 5);
+                    const x = sx + i * (BAR_W + GAP);
+                    const cx = x + BAR_W / 2;
+                    const isMain = a === age;
+                    const isHov = hoverIdx === i;
+                    const co2Val = trees > 0 ? carbonForAge(a, trees).co2 : 0;
 
-                // Tooltip position (flip if near right edge)
-                const ttX = x + BAR_W / 2;
-                const ttY = BASE_Y - bh - 14;
-                const ttW = 88, ttH = 40;
-                const ttLeft = ttX - ttW / 2;
-                const ttRight = ttLeft + ttW;
-                const ttAdjX = ttRight > W - 4 ? W - 4 - ttW : ttLeft < 4 ? 4 : ttLeft;
+                    const ttW = 102, ttH = 46;
+                    const ttLeft = Math.min(Math.max(cx - ttW / 2, 2), W - ttW - 2);
+                    const ttTop = BASE_Y - bh - ttH - 16;
 
-                return (
-                    <g key={i}
-                        onMouseEnter={() => setHoverIdx(i)}
-                        onMouseLeave={() => setHoverIdx(null)}
-                        style={{ cursor: "pointer" }}
-                    >
-                        {/* hover bg glow */}
-                        {(isMain || isHover) && (
-                            <rect x={x - 3} y={BASE_Y - bh - 20} width={BAR_W + 6} height={bh + 20}
-                                rx={8} fill={isHover ? "rgba(16,185,129,0.1)" : "rgba(45,158,95,0.06)"} />
-                        )}
-                        {/* bar */}
-                        <rect
-                            x={x} y={BASE_Y - bh} width={BAR_W} height={bh} rx={6}
-                            fill={isMain ? "url(#barGrad)" : isHover ? "rgba(16,185,129,0.5)" : "rgba(45,158,95,0.18)"}
-                            filter={isMain ? "url(#shadow)" : undefined}
-                            style={{ transition: "all 0.15s ease" }}
-                        />
-                        {/* % label on bar top */}
-                        <text x={x + BAR_W / 2} y={BASE_Y - bh - 5} textAnchor="middle"
-                            fontSize={isMain || isHover ? 9.5 : 8.5}
-                            fontWeight={isMain ? "800" : isHover ? "700" : "400"}
-                            fill={isMain ? "#059669" : isHover ? "#10b981" : "#94a3b8"}>
-                            {pct}%
-                        </text>
-                        {/* age label */}
-                        <text x={x + BAR_W / 2} y={BASE_Y + 14} textAnchor="middle"
-                            fontSize={9.5}
-                            fill={isMain ? "#059669" : isHover ? "#10b981" : "#94a3b8"}
-                            fontWeight={isMain ? "700" : "400"}>
-                            {a}.0
-                        </text>
+                    return (
+                        <g key={i} onMouseEnter={() => setHoverIdx(i)} onMouseLeave={() => setHoverIdx(null)} style={{ cursor: "pointer" }}>
+                            {/* hover glow bg */}
+                            {(isMain || isHov) && (
+                                <rect x={x - 4} y={BASE_Y - bh - 4} width={BAR_W + 8} height={bh + 4}
+                                    rx={10} fill={isHov ? "rgba(16,185,129,0.12)" : "rgba(45,158,95,0.07)"} />
+                            )}
+                            {/* bar */}
+                            <rect x={x} y={BASE_Y - bh} width={BAR_W} height={bh} rx={8}
+                                fill={isMain ? "url(#barGradMain)" : isHov ? "rgba(16,185,129,0.45)" : "rgba(16,185,129,0.18)"}
+                                filter={isMain ? "url(#barShadow)" : undefined}
+                                style={{ transition: "fill 0.15s" }} />
+                            {/* % label above bar */}
+                            <text x={cx} y={BASE_Y - bh - 8} textAnchor="middle"
+                                fontSize={isMain ? 12 : isHov ? 11 : 10}
+                                fontWeight={isMain ? "900" : isHov ? "700" : "500"}
+                                fill={isMain ? "#065f46" : isHov ? "#059669" : "#94a3b8"}>
+                                {pct}%
+                            </text>
+                            {/* age label below */}
+                            <text x={cx} y={BASE_Y + 18} textAnchor="middle" fontSize={11}
+                                fontWeight={isMain ? "800" : "500"}
+                                fill={isMain ? "#059669" : isHov ? "#10b981" : "#94a3b8"}>
+                                {a}.0
+                            </text>
+                            {/* age unit */}
+                            <text x={cx} y={BASE_Y + 30} textAnchor="middle" fontSize={8.5} fill="#cbd5e1" fontWeight="400">ปี</text>
 
-                        {/* hover tooltip */}
-                        {isHover && (
-                            <g>
-                                <rect x={ttAdjX} y={ttY - ttH - 2} width={ttW} height={ttH}
-                                    rx={7} fill="#0f1f17" opacity={0.92} />
-                                <text x={ttAdjX + ttW / 2} y={ttY - ttH + 13} textAnchor="middle"
-                                    fontSize={9} fill="#6ee7b7" fontWeight="600">
-                                    อายุ {a} ปี · {pct}%
-                                </text>
-                                <text x={ttAdjX + ttW / 2} y={ttY - ttH + 27} textAnchor="middle"
-                                    fontSize={10} fill="#ffffff" fontWeight="700">
-                                    {co2Val > 0 ? `${co2Val.toLocaleString("th-TH", { maximumFractionDigits: 0 })} tCO₂` : "—"}
-                                </text>
-                                {/* caret */}
-                                <polygon
-                                    points={`${ttAdjX + ttW / 2 - 5},${ttY - 2} ${ttAdjX + ttW / 2 + 5},${ttY - 2} ${ttAdjX + ttW / 2},${ttY + 4}`}
-                                    fill="#0f1f17" opacity={0.92}
-                                />
-                            </g>
-                        )}
-                    </g>
-                );
-            })}
-        </svg>
+                            {/* tooltip */}
+                            {isHov && (
+                                <g pointerEvents="none">
+                                    <rect x={ttLeft} y={ttTop} width={ttW} height={ttH} rx={9} fill="#064e3b" opacity={0.95} />
+                                    <text x={ttLeft + ttW / 2} y={ttTop + 16} textAnchor="middle" fontSize={10} fill="#6ee7b7" fontWeight="600">
+                                        อายุ {a} ปี · {pct}%
+                                    </text>
+                                    <text x={ttLeft + ttW / 2} y={ttTop + 33} textAnchor="middle" fontSize={12} fill="#fff" fontWeight="800">
+                                        {co2Val > 0 ? `${co2Val.toLocaleString("th-TH", { maximumFractionDigits: 0 })} tCO₂` : "—"}
+                                    </text>
+                                    <polygon points={`${cx - 5},${ttTop + ttH} ${cx + 5},${ttTop + ttH} ${cx},${ttTop + ttH + 6}`} fill="#064e3b" opacity={0.95} />
+                                </g>
+                            )}
+                        </g>
+                    );
+                })}
+            </svg>
+        </div>
     );
 }
 
@@ -524,14 +512,9 @@ export function ParcelResultsPanel({
                                                 {pl.age > 0 ? ` · อายุ ${pl.age} ปี` : ""}
                                             </div>
                                         </div>
-                                        {/* inline carbon badge */}
-                                        {pl.co2 > 0 && (
-                                            <div className="prp-co2-badge">
-                                                <i className="bi bi-tree-fill" />
-                                                {pl.co2.toLocaleString("th-TH", { maximumFractionDigits: 0 })}
-                                                <span>tCO₂</span>
-                                            </div>
-                                        )}
+                                        <button className="prp-analyze-btn" onClick={e => { e.stopPropagation(); onFlyTo(feat); }}>
+                                            <i className="bi bi-check-circle-fill" /> วิเคราะห์แล้ว
+                                        </button>
                                         <i className={`bi bi-chevron-${isOpen ? "up" : "down"} prp-chevron`} />
                                     </div>
 
@@ -576,16 +559,6 @@ export function ParcelResultsPanel({
                                                         </div>
                                                     </div>
 
-                                                    <div className="prp-carbon-card">
-                                                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                            <i className="bi bi-tree-fill" style={{ color: "#34d399", fontSize: 14 }} />
-                                                            <div className="prp-carbon-label">คาร์บอนแปลงนี้</div>
-                                                        </div>
-                                                        <div className="prp-carbon-num">
-                                                            {pl.co2 > 0 ? pl.co2.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
-                                                        </div>
-                                                        <div className="prp-carbon-unit">tCO₂ eq.</div>
-                                                    </div>
                                                 </div>
                                             )}
 
