@@ -401,24 +401,6 @@ export function ParcelResultsPanel({
                             <div className="prp-kpi-label">พื้นที่รวมทั้งหมด</div>
                             <div className="prp-kpi-unit">ไร่</div>
                         </div>
-                        <button 
-                            className="prp-kpi-card prp-download-card"
-                            onClick={() => {
-                                const fc = { type: "FeatureCollection", features: parcelFeatures };
-                                const blob = new Blob([JSON.stringify(fc, null, 2)], { type: "application/json" });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement("a");
-                                a.href = url;
-                                a.download = `keptcarbon_results_${new Date().getTime()}.geojson`;
-                                a.click();
-                            }}
-                            title="ดาวน์โหลดผลลัพธ์เป็น GeoJSON"
-                            style={{ cursor: "pointer", border: "1px dashed #2d9e5f", background: "rgba(45,158,95,0.03)" }}
-                        >
-                            <div className="prp-kpi-num"><i className="bi bi-download" /></div>
-                            <div className="prp-kpi-label">ดาวน์โหลดผลลัพธ์</div>
-                            <div className="prp-kpi-unit">GeoJSON</div>
-                        </button>
                     </div>
 
                     {/* ── Plot list ───────────────────────────────────── */}

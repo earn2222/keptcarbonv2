@@ -33,7 +33,95 @@ export function carbonForAge(age: number, trees: number) {
   return { H, D, AGB, BGB, co2 };
 }
 
-export function validateAndFixGeoJSON(feature: GeoJSON.Feature): GeoJSON.Feature {
+// UTM (WGS84) → WGS84 geographic [lng, lat] in degrees.
+export function utmToWgs84(
+  easting: number,
+  northing: number,
+  zone: number,
+  isNorth: boolean,
+): LngLat {
+  const a = 6378137.0;
+  const e2 = 0.00669437999014;
+  const ePrime2 = e2 / (1 - e2);
+  const k0 = 0.9996;
+
+  const x = easting - 500000;
+  const y = isNorth ? northing : northing - 10000000;
+  const lon0 = ((zone - 1) * 6 - 180 + 3) * (Math.PI / 180);
+
+  const M = y / k0;
+  const mu =
+    M /
+    (a *
+      (1 -
+        e2 / 4 -
+        (3 * e2 * e2) / 64 -
+        (5 * e2 ** 3) / 256));
+
+  const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+  const phi1 =
+    mu +
+    ((3 * e1) / 2 - (27 * e1 ** 3) / 32) * Math.sin(2 * mu) +
+    ((21 * e1 ** 2) / 16 - (55 * e1 ** 4) / 32) * Math.sin(4 * mu) +
+    ((151 * e1 ** 3) / 96) * Math.sin(6 * mu) +
+    ((1097 * e1 ** 4) / 512) * Math.sin(8 * mu);
+
+  const N1 = a / Math.sqrt(1 - e2 * Math.sin(phi1) ** 2);
+  const T1 = Math.tan(phi1) ** 2;
+  const C1 = ePrime2 * Math.cos(phi1) ** 2;
+  const R1 = (a * (1 - e2)) / (1 - e2 * Math.sin(phi1) ** 2) ** 1.5;
+  const D = x / (N1 * k0);
+
+  const lat =
+    phi1 -
+    ((N1 * Math.tan(phi1)) / R1) *
+      (D ** 2 / 2 -
+        ((5 + 3 * T1 + 10 * C1 - 4 * C1 ** 2 - 9 * ePrime2) * D ** 4) / 24 +
+        ((61 + 90 * T1 + 298 * C1 + 45 * T1 ** 2 - 252 * ePrime2 - 3 * C1 ** 2) * D ** 6) / 720);
+
+  const lon =
+    lon0 +
+    (D -
+      ((1 + 2 * T1 + C1) * D ** 3) / 6 +
+      ((5 - 2 * C1 + 28 * T1 - 3 * C1 ** 2 + 8 * ePrime2 + 24 * T1 ** 2) * D ** 5) / 120) /
+      Math.cos(phi1);
+
+  return [lon * (180 / Math.PI), lat * (180 / Math.PI)];
+}
+
+// Parse UTM zone info from a .prj file string.
+// Returns null if the projection is not a recognisable UTM.
+export function detectUtmFromPrj(prjText: string): { zone: number; isNorth: boolean } | null {
+  const m =
+    prjText.match(/UTM[_\s-]*Zone[_\s-]*(\d+)\s*([NS])/i) ??
+    prjText.match(/Zone[_\s-]*(\d+)[_\s-]*([NS])/i) ??
+    prjText.match(/(\d{2})[_\s]*([NS])["\s]/i);
+  if (!m) return null;
+  const zone = parseInt(m[1], 10);
+  if (zone < 1 || zone > 60) return null;
+  return { zone, isNorth: m[2].toUpperCase() === "N" };
+}
+
+// Auto-detect UTM zone for a sample point when no .prj is available.
+// Tries zones 47N and 48N (covers all of Thailand) and returns the one
+// whose converted coordinate lands inside the Thailand bounding box.
+export function detectUtmZoneAuto(
+  sampleEasting: number,
+  sampleNorthing: number,
+): { zone: number; isNorth: boolean } | null {
+  for (const zone of [47, 48, 46, 49]) {
+    const [lng, lat] = utmToWgs84(sampleEasting, sampleNorthing, zone, true);
+    if (lng >= 97 && lng <= 107 && lat >= 4 && lat <= 22) {
+      return { zone, isNorth: true };
+    }
+  }
+  return null;
+}
+
+export function validateAndFixGeoJSON(
+  feature: GeoJSON.Feature,
+  utm?: { zone: number; isNorth: boolean },
+): GeoJSON.Feature {
   const f = JSON.parse(JSON.stringify(feature)) as GeoJSON.Feature;
 
   const walk = (coords: any) => {
@@ -41,17 +129,22 @@ export function validateAndFixGeoJSON(feature: GeoJSON.Feature): GeoJSON.Feature
       const x = coords[0];
       const y = coords[1];
 
-      // Check for UTM or other large projected coordinates (> 2000 is safe since max lng is 180)
       if (Math.abs(x) > 2000 || Math.abs(y) > 2000) {
-        throw new Error("ไฟล์ของคุณอาจใช้พิกัด UTM หรือโปรเจกชันอื่น กรุณาใช้ไฟล์ที่เป็น WGS84 (EPSG:4326) เท่านั้น");
+        if (!utm) {
+          throw new Error(
+            "ไฟล์ของคุณอาจใช้พิกัด UTM หรือโปรเจกชันอื่น กรุณาใช้ไฟล์ที่เป็น WGS84 (EPSG:4326) หรือ UTM WGS84",
+          );
+        }
+        const [lng, lat] = utmToWgs84(x, y, utm.zone, utm.isNorth);
+        coords[0] = lng;
+        coords[1] = lat;
+        return;
       }
 
-      // Check for swapped Lng/Lat specifically for Thailand context
-      // Thailand: Lng ~100, Lat ~13
-      // If swapped: Lng ~13, Lat ~100 -> Lat > 90 (Invalid for Mapbox/MapLibre)
+      // Swap swapped Lng/Lat for Thailand context
       if (Math.abs(y) > 90 && Math.abs(x) <= 90) {
-        coords[0] = y; // Lng
-        coords[1] = x; // Lat
+        coords[0] = y;
+        coords[1] = x;
       }
       return;
     }

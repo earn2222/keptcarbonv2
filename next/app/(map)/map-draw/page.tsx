@@ -11,6 +11,8 @@ import {
   polygonAreaM2,
   type LngLat,
   validateAndFixGeoJSON,
+  detectUtmFromPrj,
+  detectUtmZoneAuto,
 } from "@/lib/map-utils";
 import { ParcelResultsPanel } from "@/app/components/organisms";
 
@@ -572,6 +574,7 @@ export default function MapDrawPage() {
       const fns = Object.keys(zip.files);
       const sk = fns.find((f) => f.toLowerCase().endsWith(".shp"));
       const dk = fns.find((f) => f.toLowerCase().endsWith(".dbf"));
+      const pk = fns.find((f) => f.toLowerCase().endsWith(".prj"));
       if (!sk) throw new Error("ไม่พบไฟล์ .shp ใน zip");
       const shpBuf = await zip.files[sk].async("arraybuffer");
       const dbfBuf = dk ? await zip.files[dk].async("arraybuffer") : undefined;
@@ -582,8 +585,28 @@ export default function MapDrawPage() {
       while (!(r = await src.read()).done) rawFeats.push(r.value);
       if (!rawFeats.length) throw new Error("ไม่พบ Feature ในไฟล์");
 
-      // Validate and fix coordinates (swapping Lng/Lat if needed)
-      const feats = rawFeats.map((f) => validateAndFixGeoJSON(f));
+      // Detect projection from .prj, or auto-detect UTM zone from coordinates
+      let utm: { zone: number; isNorth: boolean } | undefined;
+      if (pk) {
+        const prjText = await zip.files[pk].async("string");
+        utm = detectUtmFromPrj(prjText) ?? undefined;
+      }
+      // If no .prj or not parseable, check first coordinate for UTM range and auto-detect
+      if (!utm) {
+        const sample = (rawFeats[0]?.geometry as any)?.coordinates;
+        const flat = (function first(c: any): [number, number] | null {
+          if (!Array.isArray(c)) return null;
+          if (typeof c[0] === "number") return c as [number, number];
+          return first(c[0]);
+        })(sample);
+        if (flat && (Math.abs(flat[0]) > 2000 || Math.abs(flat[1]) > 2000)) {
+          utm = detectUtmZoneAuto(flat[0], flat[1]) ?? undefined;
+          if (!utm) throw new Error("ไม่สามารถตรวจจับระบบพิกัดได้ กรุณาใส่ไฟล์ .prj หรือแปลงเป็น WGS84 (EPSG:4326) ก่อน");
+        }
+      }
+
+      const projLabel = utm ? ` (UTM Zone ${utm.zone}${utm.isNorth ? "N" : "S"} → WGS84)` : " (WGS84)";
+      const feats = rawFeats.map((f) => validateAndFixGeoJSON(f, utm));
 
       const poly = feats.find(
         (f) => f.geometry?.type === "Polygon" || f.geometry?.type === "MultiPolygon",
@@ -609,7 +632,7 @@ export default function MapDrawPage() {
       fitPlot();
       void runParcelSearch();
       setShpStatus({
-        msg: `✓ โหลดสำเร็จ — ${feats.length} feature`,
+        msg: `✓ โหลดสำเร็จ — ${feats.length} feature${projLabel}`,
         ok: true,
       });
     } catch (err) {
