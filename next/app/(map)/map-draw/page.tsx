@@ -865,26 +865,29 @@ export default function MapDrawPage() {
 
         {/* ── Step Tracker ── */}
         <div className="mds-stepper">
-          <div className="mds-stepper-track">
-            <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
-          </div>
-          {([
-            { n: 1 as const, label: "กำหนดพื้นที่" },
-            { n: 2 as const, label: "ผลวิเคราะห์" },
-            { n: 3 as const, label: "บันทึก" },
-          ]).map(({ n, label }) => {
-            const isActive = currentStep === n;
-            const isDone = currentStep > n;
-            return (
-              <div key={n} className={`mds-step${isActive ? " active" : isDone ? " done" : ""}`}>
-                <div className="mds-step-circle">
-                  {isDone ? <i className="bi bi-check-lg" /> : n}
+          {/* Steps row — track is positioned inside this wrapper */}
+          <div className="mds-steps-row">
+            <div className="mds-stepper-track">
+              <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
+            </div>
+            {([
+              { n: 1 as const, label: "กำหนดพื้นที่" },
+              { n: 2 as const, label: "ผลวิเคราะห์" },
+              { n: 3 as const, label: "บันทึก" },
+            ]).map(({ n, label }) => {
+              const isActive = currentStep === n;
+              const isDone = currentStep > n;
+              return (
+                <div key={n} className={`mds-step${isActive ? " active" : isDone ? " done" : ""}`}>
+                  <div className="mds-step-circle">
+                    {isDone ? <i className="bi bi-check-lg" /> : n}
+                  </div>
+                  <span className="mds-step-label">{label}</span>
                 </div>
-                <span className="mds-step-label">{label}</span>
-              </div>
-            );
-          })}
-          {/* Close Panel Button — green, right side only */}
+              );
+            })}
+          </div>
+          {/* Close Panel Button */}
           <button
             className="mds-panel-close-btn mds-panel-close-inline"
             onClick={() => setIsPanelOpen(false)}

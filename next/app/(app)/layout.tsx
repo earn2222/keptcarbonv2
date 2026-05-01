@@ -6,6 +6,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="dashboard-page" style={{ paddingTop: '100px' }}>{children}</main>
+    <AuthGuard>
+      <main className="db-layout" style={{ paddingTop: 64, minHeight: "100vh" }}>
+        {children}
+      </main>
+    </AuthGuard>
   );
 }
