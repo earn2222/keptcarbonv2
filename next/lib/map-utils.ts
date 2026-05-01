@@ -118,6 +118,16 @@ export function detectUtmZoneAuto(
   return null;
 }
 
+// Reduce coordinate precision to 6 decimal places (~10 cm) to shrink payload.
+export function truncateCoords(geom: GeoJSON.Geometry): GeoJSON.Geometry {
+  const F = 1e6;
+  const walk = (c: any): any => {
+    if (typeof c[0] === "number") return [Math.round(c[0] * F) / F, Math.round(c[1] * F) / F];
+    return c.map(walk);
+  };
+  return { ...(geom as any), coordinates: walk((geom as any).coordinates) } as GeoJSON.Geometry;
+}
+
 export function validateAndFixGeoJSON(
   feature: GeoJSON.Feature,
   utm?: { zone: number; isNorth: boolean },

@@ -13,6 +13,7 @@ type Props = {
     onFlyTo: (feature: GeoJSON.Feature) => void;
     onReset?: () => void;
     onBack?: () => void;
+    onCancel?: () => void;
     currentStep: 1 | 2 | 3;
     onStepChange: (step: 1 | 2 | 3) => void;
 };
@@ -220,6 +221,7 @@ export function ParcelResultsPanel({
     onFlyTo,
     onReset,
     onBack,
+    onCancel,
     currentStep,
     onStepChange,
 }: Props) {
@@ -265,6 +267,14 @@ export function ParcelResultsPanel({
                     <div className="s1-spin" />
                     <span>กำลังค้นหาแปลงที่ทับซ้อน...</span>
                 </div>
+                {onCancel && (
+                    <button
+                        onClick={onCancel}
+                        style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 8, border: "1px solid #dc3545", background: "transparent", color: "#dc3545", fontSize: 13, cursor: "pointer", fontWeight: 500, margin: "16px auto 0" }}
+                    >
+                        <i className="bi bi-x-circle" /> ยกเลิกการประมวลผล
+                    </button>
+                )}
             </div>
         );
     }

@@ -13,6 +13,7 @@ import {
   validateAndFixGeoJSON,
   detectUtmFromPrj,
   detectUtmZoneAuto,
+  truncateCoords,
 } from "@/lib/map-utils";
 import { ParcelResultsPanel } from "@/app/components/organisms";
 
@@ -39,6 +40,7 @@ export default function MapDrawPage() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const mapLoadedRef = useRef(false);
+  const searchAbortRef = useRef<AbortController | null>(null);
 
   // Draw state
   const [drawing, setDrawing] = useState(false);
@@ -465,6 +467,21 @@ export default function MapDrawPage() {
     setCurrentStep(1);
   };
 
+  const cancelSearch = useCallback(() => {
+    searchAbortRef.current?.abort();
+    searchAbortRef.current = null;
+    setSearchRunning(false);
+    setCurrentStep(1);
+    setSearchCount(null);
+    setSearchErr(null);
+    setSearchTruncated(false);
+    setParcelFeatures([]);
+    const map = mapRef.current;
+    if (map && mapLoadedRef.current) {
+      (map.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
+    }
+  }, []);
+
   const backToStep1 = useCallback(() => {
     setCurrentStep(1);
     setSearchCount(null);
@@ -484,6 +501,11 @@ export default function MapDrawPage() {
       setSearchErr("กรุณาวาดแปลงหรืออัปโหลด Shapefile ก่อน");
       return;
     }
+    // Abort any previous in-flight search
+    searchAbortRef.current?.abort();
+    const abort = new AbortController();
+    searchAbortRef.current = abort;
+
     setSearchRunning(true);
     setCurrentStep(2);
     setSearchErr(null);
@@ -494,7 +516,8 @@ export default function MapDrawPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ geometry: final.geometry, relation: "intersects" }),
+        signal: abort.signal,
+        body: JSON.stringify({ geometry: truncateCoords(final.geometry), relation: "intersects" }),
       });
       const data: {
         features?: GeoJSON.Feature[];
@@ -568,6 +591,7 @@ export default function MapDrawPage() {
         setStatus(`พบ ${data.count} แปลงในฐานข้อมูล (ตัดกับพื้นที่)`);
       }
     } catch (err) {
+      if ((err as any)?.name === "AbortError") return; // cancelled — don't set error
       setSearchErr(err instanceof Error ? err.message : String(err));
     } finally {
       setSearchRunning(false);
@@ -1031,6 +1055,7 @@ export default function MapDrawPage() {
                 onFlyTo={flyToFeature}
                 onReset={clearDraw}
                 onBack={backToStep1}
+                onCancel={cancelSearch}
                 currentStep={currentStep}
                 onStepChange={setCurrentStep}
               />
