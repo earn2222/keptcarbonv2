@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const HERO_BG =
   "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)," +
@@ -260,6 +260,8 @@ export default function MyPlotsPage() {
   const { user, ready } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [plots, setPlots] = useState<SavedPlot[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -277,6 +279,19 @@ export default function MyPlotsPage() {
     } catch {}
   };
 
+  const totalArea = plots.reduce((s, p) => s + (p.areaRai || 0), 0);
+  const totalCarbon = plots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
+
+  const filteredPlots = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return plots;
+    return plots.filter(p =>
+      p.name.toLowerCase().includes(term) ||
+      (p.province ?? "").toLowerCase().includes(term) ||
+      (p.ownerName ?? "").toLowerCase().includes(term)
+    );
+  }, [plots, searchTerm]);
+
   if (!ready || !mounted)
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fdfb" }}>
@@ -285,9 +300,6 @@ export default function MyPlotsPage() {
     );
 
   if (!user) return null;
-
-  const totalArea = plots.reduce((s, p) => s + (p.areaRai || 0), 0);
-  const totalCarbon = plots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
 
   return (
     <div style={{ minHeight: "100vh", background: "#f4fcf8", paddingTop: "80px", paddingBottom: "60px", fontFamily: "'Inter', 'Noto Sans Thai', sans-serif" }}>
@@ -326,9 +338,45 @@ export default function MyPlotsPage() {
             <h1 style={{ fontSize: "32px", fontWeight: 800, color: "#064e3b", marginBottom: "10px", lineHeight: 1.2 }}>
               แปลงยางพาราของฉัน
             </h1>
-            <p style={{ fontSize: "14px", color: "#475569", lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: "14px", color: "#475569", lineHeight: 1.6, margin: "0 0 20px" }}>
               จัดการและติดตามข้อมูลแปลงยาง รวมการพยากรณ์คาร์บอนในอนาคต
             </p>
+            {/* Search bar */}
+            <div style={{ position: "relative", maxWidth: 480 }}>
+              <i className="bi bi-search" style={{
+                position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)",
+                color: searchFocused ? "#059669" : "#94a3b8", fontSize: 15, pointerEvents: "none",
+                transition: "color 0.15s",
+              }} />
+              <input
+                type="text"
+                placeholder="ค้นหาแปลง ชื่อเจ้าของ หรือจังหวัด..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                style={{
+                  width: "100%", padding: "12px 40px 12px 42px",
+                  borderRadius: 14, fontSize: 14, color: "#0f172a",
+                  border: `2px solid ${searchFocused ? "#10b981" : "rgba(16,185,129,0.25)"}`,
+                  background: "rgba(255,255,255,0.95)", outline: "none",
+                  boxShadow: searchFocused ? "0 0 0 4px rgba(16,185,129,0.1)" : "0 4px 14px rgba(0,0,0,0.05)",
+                  transition: "border-color 0.15s, box-shadow 0.15s",
+                }}
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  style={{
+                    position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+                    background: "none", border: "none", cursor: "pointer",
+                    color: "#94a3b8", fontSize: 17, padding: 2, lineHeight: 1,
+                  }}
+                >
+                  <i className="bi bi-x-circle-fill" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ position: "relative", zIndex: 1 }}>
@@ -408,19 +456,42 @@ export default function MyPlotsPage() {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", padding: "0 4px" }}>
               <h2 style={{ fontSize: "18px", fontWeight: 800, color: "#064e3b", margin: 0 }}>
-                รายการแปลงที่บันทึกแล้ว ({plots.length})
+                รายการแปลงที่บันทึกแล้ว
+                {searchTerm ? (
+                  <span style={{ fontSize: 13, fontWeight: 400, color: "#64748b", marginLeft: 8 }}>
+                    พบ {filteredPlots.length} จาก {plots.length} แปลง
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 13, fontWeight: 400, color: "#64748b", marginLeft: 8 }}>
+                    ({plots.length})
+                  </span>
+                )}
               </h2>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {plots.map((plot) => (
-                <PlotCard
-                  key={plot.id}
-                  plot={plot}
-                  onDelete={() => handleDelete(plot.id)}
-                />
-              ))}
-            </div>
+            {filteredPlots.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 24px", background: "#fff", borderRadius: 20, color: "#94a3b8", fontSize: 14 }}>
+                <i className="bi bi-search" style={{ fontSize: 32, display: "block", marginBottom: 10 }} />
+                ไม่พบแปลงที่ตรงกับ &ldquo;<strong style={{ color: "#64748b" }}>{searchTerm}</strong>&rdquo;
+                <br />
+                <button
+                  onClick={() => setSearchTerm("")}
+                  style={{ marginTop: 14, padding: "6px 16px", background: "rgba(16,185,129,0.08)", color: "#059669", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
+                >
+                  ล้างการค้นหา
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {filteredPlots.map((plot) => (
+                  <PlotCard
+                    key={plot.id}
+                    plot={plot}
+                    onDelete={() => handleDelete(plot.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
