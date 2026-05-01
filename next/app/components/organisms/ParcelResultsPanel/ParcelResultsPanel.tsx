@@ -559,6 +559,25 @@ export function ParcelResultsPanel({
                                                         </div>
                                                     </div>
 
+                                                    {pl.co2 > 0 && (
+                                                        <div className="prp-co2-display">
+                                                            <div className="prp-co2-display-left">
+                                                                <div className="prp-co2-icon-wrap">
+                                                                    <i className="bi bi-tree-fill" />
+                                                                </div>
+                                                                <div>
+                                                                    <div className="prp-co2-display-label">คาร์บอนสะสม</div>
+                                                                    <div className="prp-co2-display-sub">ณ ปัจจุบัน · tCO₂ eq.</div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="prp-co2-display-right">
+                                                                <span className="prp-co2-display-num">
+                                                                    {pl.co2.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
                                                 </div>
                                             )}
 
