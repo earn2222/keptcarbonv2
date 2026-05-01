@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { carbonForAge } from "@/lib/map-utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -357,10 +358,49 @@ export function ParcelResultsPanel({
     const tabFor = (i: number): PlotTab => plotTabs[i] ?? "analyze";
     const fcYrFor = (i: number): ForecastYr => forecastYrs[i] ?? 3;
 
+    const router = useRouter();
+
     const handleSave = async () => {
         setSaveState("saving");
         await new Promise(r => setTimeout(r, 900));
+
+        try {
+            const existingStr = localStorage.getItem("user_saved_plots");
+            const existing = existingStr ? JSON.parse(existingStr) : [];
+            const newPlots = plots.map((p, i) => {
+                const feat = parcelFeatures[i];
+                const props = (feat?.properties || {}) as any;
+                return {
+                    id: props.id || Math.random().toString(36).substring(7),
+                    name: projectName || props.farm_name || "แปลงยางใหม่",
+                    areaRai: p.areaRai,
+                    carbonTotal: p.co2,
+                    rubberAge: p.age,
+                    plantYearBE: p.plantYearBE,
+                    trees: p.trees,
+                    confidence: p.confidence,
+                    ownerName: ownerName || props.owner_name || "",
+                    province: province || dominantProvince,
+                    date: new Date().toISOString(),
+                    geojson: feat?.geometry || null,
+                    forecast: {
+                        yr3: p.trees > 0 ? carbonForAge(p.age + 3, p.trees).co2 : 0,
+                        yr5: p.trees > 0 ? carbonForAge(p.age + 5, p.trees).co2 : 0,
+                        yr7: p.trees > 0 ? carbonForAge(p.age + 7, p.trees).co2 : 0,
+                    },
+                };
+            });
+            localStorage.setItem("user_saved_plots", JSON.stringify([...newPlots, ...existing]));
+        } catch (e) {
+            console.error("Failed to save plots to localStorage", e);
+        }
+
         setSaveState("done");
+        
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+            router.push("/dashboard");
+        }, 1500);
     };
 
     // ── Loading ────────────────────────────────────────────────────────────
