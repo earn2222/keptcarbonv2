@@ -495,12 +495,6 @@ export function ParcelResultsPanel({
                             <div className="prp-kpi-label">พื้นที่รวม</div>
                             <div className="prp-kpi-unit">ไร่</div>
                         </div>
-                        <div className="prp-kpi-card prp-kpi-carbon">
-                            <div className="prp-kpi-icon"><i className="bi bi-tree" /></div>
-                            <div className="prp-kpi-num">{totalCO2 > 0 ? totalCO2.toLocaleString("th-TH", { maximumFractionDigits: 0 }) : "—"}</div>
-                            <div className="prp-kpi-label">คาร์บอนรวม</div>
-                            <div className="prp-kpi-unit">tCO₂ eq.</div>
-                        </div>
                     </div>
 
                     {/* Plot list header */}

@@ -4028,8 +4028,7 @@ body.map-draw-active.scrolled .header {
   .prp-btn-ghost { padding: 10px 14px; font-size: 12.5px; }
 }
 
-/* ── KPI 3-column + icon ────────────────────────────────────── */
-.prp-kpi-row { grid-template-columns: 1fr 1fr 1fr; }
+/* ── KPI icon ───────────────────────────────────────────────── */
 .prp-kpi-icon {
   font-size: 18px;
   color: #10b981;
