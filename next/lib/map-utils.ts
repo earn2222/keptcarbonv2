@@ -32,3 +32,36 @@ export function carbonForAge(age: number, trees: number) {
   const co2 = (AGB + BGB) * 0.47 * 3.67 * trees; // tCO2 total
   return { H, D, AGB, BGB, co2 };
 }
+
+export function validateAndFixGeoJSON(feature: GeoJSON.Feature): GeoJSON.Feature {
+  const f = JSON.parse(JSON.stringify(feature)) as GeoJSON.Feature;
+
+  const walk = (coords: any) => {
+    if (typeof coords[0] === "number" && typeof coords[1] === "number") {
+      const x = coords[0];
+      const y = coords[1];
+
+      // Check for UTM or other large projected coordinates (> 2000 is safe since max lng is 180)
+      if (Math.abs(x) > 2000 || Math.abs(y) > 2000) {
+        throw new Error("ไฟล์ของคุณอาจใช้พิกัด UTM หรือโปรเจกชันอื่น กรุณาใช้ไฟล์ที่เป็น WGS84 (EPSG:4326) เท่านั้น");
+      }
+
+      // Check for swapped Lng/Lat specifically for Thailand context
+      // Thailand: Lng ~100, Lat ~13
+      // If swapped: Lng ~13, Lat ~100 -> Lat > 90 (Invalid for Mapbox/MapLibre)
+      if (Math.abs(y) > 90 && Math.abs(x) <= 90) {
+        coords[0] = y; // Lng
+        coords[1] = x; // Lat
+      }
+      return;
+    }
+    if (Array.isArray(coords)) {
+      for (const c of coords) walk(c);
+    }
+  };
+
+  if (f.geometry) {
+    walk((f.geometry as any).coordinates);
+  }
+  return f;
+}

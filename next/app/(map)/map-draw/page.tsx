@@ -10,6 +10,7 @@ import {
   isMobile,
   polygonAreaM2,
   type LngLat,
+  validateAndFixGeoJSON,
 } from "@/lib/map-utils";
 import { ParcelResultsPanel } from "@/app/components/organisms";
 
@@ -114,14 +115,15 @@ export default function MapDrawPage() {
           },
         },
         layers: [
+          { id: "background", type: "background", paint: { "background-color": "#ffffff" } },
           { id: "sat", type: "raster", source: "sat", layout: { visibility: "visible" } },
           { id: "street", type: "raster", source: "street", layout: { visibility: "none" } },
           { id: "topo", type: "raster", source: "topo", layout: { visibility: "none" } },
         ],
       },
       center: [101.258, 13.5],
-      zoom: 5,
-      minZoom: 3,
+      zoom: 2,
+      minZoom: 1,
       pitch: 0,
       bearing: 0,
       attributionControl: false,
@@ -138,8 +140,9 @@ export default function MapDrawPage() {
     );
 
     map.on("load", () => {
-      // We intentionally skip setProjection globe to avoid tile availability issues at low zoom
+      map.setProjection({ type: "globe" });
       mapLoadedRef.current = true;
+
 
       map.addSource("draw-line", { type: "geojson", data: emptyFC() });
       map.addLayer({
@@ -574,10 +577,14 @@ export default function MapDrawPage() {
       const dbfBuf = dk ? await zip.files[dk].async("arraybuffer") : undefined;
       const shapefile = await import("shapefile");
       const src = await shapefile.open(shpBuf, dbfBuf);
-      const feats: GeoJSON.Feature[] = [];
+      const rawFeats: GeoJSON.Feature[] = [];
       let r;
-      while (!(r = await src.read()).done) feats.push(r.value);
-      if (!feats.length) throw new Error("ไม่พบ Feature ในไฟล์");
+      while (!(r = await src.read()).done) rawFeats.push(r.value);
+      if (!rawFeats.length) throw new Error("ไม่พบ Feature ในไฟล์");
+
+      // Validate and fix coordinates (swapping Lng/Lat if needed)
+      const feats = rawFeats.map((f) => validateAndFixGeoJSON(f));
+
       const poly = feats.find(
         (f) => f.geometry?.type === "Polygon" || f.geometry?.type === "MultiPolygon",
       );
