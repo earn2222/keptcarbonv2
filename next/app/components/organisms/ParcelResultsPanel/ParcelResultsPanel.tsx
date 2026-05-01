@@ -12,6 +12,7 @@ type Props = {
     userDisplayName?: string;
     onFlyTo: (feature: GeoJSON.Feature) => void;
     onReset?: () => void;
+    onBack?: () => void;
     currentStep: 1 | 2 | 3;
     onStepChange: (step: 1 | 2 | 3) => void;
 };
@@ -218,6 +219,7 @@ export function ParcelResultsPanel({
     userDisplayName = "",
     onFlyTo,
     onReset,
+    onBack,
     currentStep,
     onStepChange,
 }: Props) {
@@ -272,6 +274,11 @@ export function ParcelResultsPanel({
                 <div className="s1-results-error">
                     <i className="bi bi-exclamation-triangle me-2" />{searchErr}
                 </div>
+                {onBack && (
+                    <button className="mds-btn mds-btn-soft" style={{ marginTop: 12 }} onClick={onBack}>
+                        <i className="bi bi-arrow-left me-1" /> กลับขั้นตอนที่ 1
+                    </button>
+                )}
             </div>
         );
     }
@@ -360,7 +367,18 @@ export function ParcelResultsPanel({
     return (
         <div className="prp-shell">
             <div className="prp-header-block">
-                <div className="prp-main-title">ผลการตรวจจับแปลง</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <div className="prp-main-title">ผลการตรวจจับแปลง</div>
+                    {onBack && (
+                        <button
+                            onClick={onBack}
+                            title="กลับขั้นตอนที่ 1"
+                            style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8, border: "1px solid #2d9e5f", background: "transparent", color: "#2d9e5f", fontSize: 13, cursor: "pointer", fontWeight: 500 }}
+                        >
+                            <i className="bi bi-arrow-left" /> กลับ
+                        </button>
+                    )}
+                </div>
                 <div className="prp-subtitle">
                     วิเคราะห์แปลงยางตามใบขอบเขตที่กำหนดด้วยภาพถ่ายดาวเทียม
                 </div>
@@ -422,7 +440,7 @@ export function ParcelResultsPanel({
                             return (
                                 <div key={i} className={`prp-plot-card${isOpen ? " open" : ""}`}>
                                     {/* Card header */}
-                                    <div className="prp-plot-head" onClick={() => toggleExpand(i)}>
+                                    <div className="prp-plot-head" onClick={() => { toggleExpand(i); onFlyTo(feat); }}>
                                         <div className="prp-plot-num">{i + 1}</div>
                                         <div className="prp-plot-info">
                                             <div className="prp-plot-name">แปลงที่ {i + 1}</div>

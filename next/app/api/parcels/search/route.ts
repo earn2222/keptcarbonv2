@@ -8,7 +8,7 @@ const RELATIONS: Relation[] = ["intersects", "touches", "contains"];
 const HARD_LIMIT = 2000;
 
 function buildWhere(rel: Relation): string {
-  const g = "ST_SetSRID(ST_GeomFromGeoJSON($1::text), 4326)";
+  const g = "ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON($1::text), 4326))";
   switch (rel) {
     case "touches":
       return `ST_Touches(geom, ${g})`;

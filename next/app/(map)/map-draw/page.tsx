@@ -279,10 +279,16 @@ export default function MapDrawPage() {
   const fitPlot = useCallback(() => {
     const map = mapRef.current;
     const final = finalGJRef.current;
-    if (!map || !final || final.geometry.type !== "Polygon") return;
-    const c = final.geometry.coordinates[0] as LngLat[];
-    const lngs = c.map((p) => p[0]);
-    const lats = c.map((p) => p[1]);
+    if (!map || !final) return;
+    let coords: LngLat[] = [];
+    if (final.geometry.type === "Polygon") {
+      coords = final.geometry.coordinates[0] as LngLat[];
+    } else if (final.geometry.type === "MultiPolygon") {
+      coords = (final.geometry.coordinates as GeoJSON.Position[][][]).flatMap((poly) => poly[0]) as LngLat[];
+    }
+    if (!coords.length) return;
+    const lngs = coords.map((p) => p[0]);
+    const lats = coords.map((p) => p[1]);
     map.fitBounds(
       [
         [Math.min(...lngs), Math.min(...lats)],
@@ -424,6 +430,7 @@ export default function MapDrawPage() {
   const startDrawFlow = () => {
     const map = mapRef.current;
     if (!map) return;
+    clearDraw();
     setIsPanelOpen(true);
     drawingRef.current = true;
     setDrawing(true);
@@ -444,8 +451,9 @@ export default function MapDrawPage() {
     setSearchCount(null);
     setSearchErr(null);
     setSearchTruncated(false);
-    setSearchTruncated(false);
     setParcelFeatures([]);
+    setShpFile(null);
+    setShpStatus(null);
     const map = mapRef.current;
     if (map && mapLoadedRef.current) {
       (map.getSource("draw-line") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
@@ -455,8 +463,19 @@ export default function MapDrawPage() {
       (map.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
     }
     setCurrentStep(1);
-    setStatus("ล้างแปลงเรียบร้อย");
   };
+
+  const backToStep1 = useCallback(() => {
+    setCurrentStep(1);
+    setSearchCount(null);
+    setSearchErr(null);
+    setSearchTruncated(false);
+    setParcelFeatures([]);
+    const map = mapRef.current;
+    if (map && mapLoadedRef.current) {
+      (map.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
+    }
+  }, []);
 
   // ===== PARCEL DB SEARCH =====
   const runParcelSearch = useCallback(async () => {
@@ -562,8 +581,10 @@ export default function MapDrawPage() {
   const onShpSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
+    clearDraw();
     setShpFile(f);
     setShpStatus({ msg: `✓ เลือกไฟล์: ${f.name}`, ok: true });
+    e.target.value = "";
   };
 
   const loadShp = async () => {
@@ -608,31 +629,37 @@ export default function MapDrawPage() {
       const projLabel = utm ? ` (UTM Zone ${utm.zone}${utm.isNorth ? "N" : "S"} → WGS84)` : " (WGS84)";
       const feats = rawFeats.map((f) => validateAndFixGeoJSON(f, utm));
 
-      const poly = feats.find(
+      // Collect ALL polygon features (not just the first one)
+      const polyFeats = feats.filter(
         (f) => f.geometry?.type === "Polygon" || f.geometry?.type === "MultiPolygon",
       );
-      if (!poly || !poly.geometry) throw new Error("ไม่พบ Polygon");
-      const final: GeoJSON.Feature =
-        poly.geometry.type === "MultiPolygon"
-          ? {
-            type: "Feature",
-            geometry: {
-              type: "Polygon",
-              coordinates: poly.geometry.coordinates[0] as GeoJSON.Position[][],
-            },
-            properties: poly.properties ?? {},
-          }
-          : (poly as GeoJSON.Feature);
-      finalGJRef.current = final;
+      if (!polyFeats.length) throw new Error("ไม่พบ Polygon");
+
+      // Merge all rings into one MultiPolygon for the search query
+      const allRings: GeoJSON.Position[][][] = [];
+      for (const f of polyFeats) {
+        if (f.geometry.type === "Polygon") {
+          allRings.push(f.geometry.coordinates as GeoJSON.Position[][]);
+        } else if (f.geometry.type === "MultiPolygon") {
+          allRings.push(...(f.geometry.coordinates as GeoJSON.Position[][][]));
+        }
+      }
+      const searchGeom: GeoJSON.MultiPolygon = { type: "MultiPolygon", coordinates: allRings };
+      finalGJRef.current = { type: "Feature", geometry: searchGeom, properties: {} };
+
       setHasGeom(true);
       const map = mapRef.current;
       if (map && mapLoadedRef.current) {
-        (map.getSource("plot") as maplibregl.GeoJSONSource).setData(final);
+        // Show all uploaded parcels on the map
+        (map.getSource("plot") as maplibregl.GeoJSONSource).setData({
+          type: "FeatureCollection",
+          features: polyFeats,
+        });
       }
       fitPlot();
       void runParcelSearch();
       setShpStatus({
-        msg: `✓ โหลดสำเร็จ — ${feats.length} feature${projLabel}`,
+        msg: `✓ โหลดสำเร็จ — ${polyFeats.length} แปลง${projLabel}`,
         ok: true,
       });
     } catch (err) {
@@ -1003,6 +1030,7 @@ export default function MapDrawPage() {
                 userDisplayName={user?.fullname ?? ""}
                 onFlyTo={flyToFeature}
                 onReset={clearDraw}
+                onBack={backToStep1}
                 currentStep={currentStep}
                 onStepChange={setCurrentStep}
               />
