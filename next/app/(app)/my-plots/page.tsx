@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useEffect, useId, useMemo, useState } from "react";
 
 const HERO_BG =
-  "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)," +
-  "radial-gradient(900px 450px at 110% 0%, rgba(13,148,136,0.12) 0%, rgba(13,148,136,0) 58%)," +
-  "radial-gradient(700px 360px at 30% 120%, rgba(22,163,74,0.1) 0%, rgba(22,163,74,0) 55%)," +
-  "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)";
+    "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
+    "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
+    "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
+    "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
 
 function carbonCo2(age: number, trees: number): number {
   const H = Math.min(2.0 + 1.8 * age, 28);
@@ -380,8 +380,7 @@ function ForecastSection({
   );
 }
 
-function PlotCard({ plot, onDelete }: { plot: SavedPlot; onDelete: () => void }) {
-  const [expanded, setExpanded] = useState(false);
+function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
@@ -392,7 +391,8 @@ function PlotCard({ plot, onDelete }: { plot: SavedPlot; onDelete: () => void })
         border: "1px solid rgba(16,185,129,0.12)",
         boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
         overflow: "hidden",
-        height: "100%",
+        height: "fit-content",
+        alignSelf: "flex-start",
         display: "flex",
         flexDirection: "column",
         transition: "box-shadow 0.2s ease",
@@ -463,17 +463,9 @@ function PlotCard({ plot, onDelete }: { plot: SavedPlot; onDelete: () => void })
           </div>
         )}
 
-        {/* Forecast with chart */}
-        <ForecastSection
-          rubberAge={plot.rubberAge}
-          trees={plot.trees ?? 0}
-          carbonTotal={plot.carbonTotal}
-          forecast={plot.forecast}
-        />
-
-        {/* Expand raw details */}
+        {/* Expand details button */}
         <button
-          onClick={() => setExpanded(p => !p)}
+          onClick={onToggle}
           style={{
             marginTop: 12, width: "100%", padding: "7px 0",
             background: "none", border: "none", borderTop: "1px dashed rgba(0,0,0,0.07)",
@@ -487,7 +479,15 @@ function PlotCard({ plot, onDelete }: { plot: SavedPlot; onDelete: () => void })
 
         {expanded && (
           <div style={{ paddingTop: 8 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5 }}>
+            {/* Forecast with chart (now inside expanded area) */}
+            <ForecastSection
+              rubberAge={plot.rubberAge}
+              trees={plot.trees ?? 0}
+              carbonTotal={plot.carbonTotal}
+              forecast={plot.forecast}
+            />
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginTop: 12 }}>
               {[
                 { k: "ID", v: plot.id },
                 { k: "วันที่บันทึก", v: new Date(plot.date).toLocaleString("th-TH") },
@@ -542,6 +542,7 @@ export default function MyPlotsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [expandedPlotId, setExpandedPlotId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -731,7 +732,12 @@ export default function MyPlotsPage() {
               <div className="row g-3">
                 {filteredPlots.map(plot => (
                   <div key={plot.id} className="col-12 col-md-6">
-                    <PlotCard plot={plot} onDelete={() => handleDelete(plot.id)} />
+                    <PlotCard 
+                      plot={plot} 
+                      onDelete={() => handleDelete(plot.id)} 
+                      expanded={expandedPlotId === plot.id}
+                      onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                    />
                   </div>
                 ))}
               </div>

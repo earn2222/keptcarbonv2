@@ -71,7 +71,7 @@ export default function ProfilePage() {
     const saveDisabled = loading || !firstname || !lastname;
 
     return (
-        <div className="container py-5" style={{ marginTop: "40px", maxWidth: 820 }}>
+        <div className="container py-5" style={{ marginTop: "120px", maxWidth: 820 }}>
 
             {/* ── Hero card ── */}
             <Card className="border-0 shadow-sm mb-4 overflow-hidden">
