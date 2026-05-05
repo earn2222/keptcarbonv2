@@ -2,6 +2,20 @@
    Dashboard v3 — Clean White & Green Design
    ========================================================================== */
 
+/* ── Global Header — force solid white on dashboard/app pages ── */
+/* The default .header is transparent until scrollY > 100px which looks broken
+   on short/fixed pages like dashboard, my-plots etc.
+   We scope this to .db-layout so the landing page's transparent navbar is unaffected. */
+body:has(.db-layout) .header {
+  --background-color: rgba(255, 255, 255, 0.97) !important;
+  background-color: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 1px 20px rgba(45, 158, 95, 0.08) !important;
+  border-bottom: 1px solid rgba(45, 158, 95, 0.08) !important;
+  width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
 /* ── Root ── */
 .dv2-root {
   min-height: 100vh;

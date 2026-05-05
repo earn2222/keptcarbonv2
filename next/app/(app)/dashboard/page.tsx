@@ -225,7 +225,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f3faf6", fontFamily: "'Noto Sans Thai','Inter',sans-serif", paddingBottom: 60 }}>
+    <div style={{ minHeight: "100vh", background: "#f3faf6", paddingTop: 100, fontFamily: "'Noto Sans Thai','Inter',sans-serif", paddingBottom: 60 }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }} className="db-container">
 
         {/* ══ Hero header ══ */}

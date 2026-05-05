@@ -7,7 +7,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <main className="db-layout" style={{ paddingTop: 64, minHeight: "100vh" }}>
+      <main className="db-layout">
         {children}
       </main>
     </AuthGuard>
