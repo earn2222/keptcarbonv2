@@ -31,10 +31,10 @@ type SavedPlot = {
 };
 
 const BUCKETS = [
-  { key: "1-5",   label: "1–5 ปี",   min: 1,  max: 5,  emoji: "🌱", color: "#4ade80", dark: "#15803d" },
-  { key: "6-12",  label: "6–12 ปี",  min: 6,  max: 12, emoji: "🌿", color: "#22c55e", dark: "#166534" },
-  { key: "13-18", label: "13–18 ปี", min: 13, max: 18, emoji: "🌳", color: "#2d9e5f", dark: "#1a5c38" },
-  { key: "19+",   label: "19+ ปี",   min: 19, max: 99, emoji: "🌲", color: "#1e7a47", dark: "#14532d" },
+  { key: "1-5",   label: "1–5 ปี",   min: 1,  max: 5,  color: "#4ade80", dark: "#15803d" },
+  { key: "6-12",  label: "6–12 ปี",  min: 6,  max: 12, color: "#22c55e", dark: "#166534" },
+  { key: "13-18", label: "13–18 ปี", min: 13, max: 18, color: "#2d9e5f", dark: "#1a5c38" },
+  { key: "19+",   label: "19+ ปี",   min: 19, max: 99, color: "#1e7a47", dark: "#14532d" },
 ];
 
 /* ── animated counter ── */
@@ -55,8 +55,8 @@ function useCounter(target: number, ms = 1400) {
 }
 
 /* ── Stat card ── */
-function StatCard({ icon, label, value, unit, color }: {
-  icon: string; label: string; value: number; unit: string; color: string;
+function StatCard({ label, value, unit, color }: {
+  label: string; value: number; unit: string; color: string;
 }) {
   const a = useCounter(value);
   const disp = value >= 10
@@ -65,35 +65,22 @@ function StatCard({ icon, label, value, unit, color }: {
   return (
     <div style={{
       background: "#fff",
-      borderRadius: 16,
-      border: "1px solid rgba(45,158,95,0.13)",
-      boxShadow: "0 2px 12px rgba(45,158,95,0.07)",
-      padding: "20px 22px 18px",
-      display: "flex", flexDirection: "column", gap: 6,
+      borderRadius: 12,
+      border: "1px solid rgba(0,0,0,0.06)",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+      padding: "20px 24px",
+      display: "flex", flexDirection: "column", gap: 4,
       position: "relative", overflow: "hidden",
-      transition: "box-shadow .22s, transform .22s",
+      borderLeft: `4px solid ${color}`,
     }}
-      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 24px rgba(45,158,95,0.13)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = ""; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 12px rgba(45,158,95,0.07)"; }}
     >
-      <div style={{
-        width: 44, height: 44, borderRadius: 12,
-        background: `${color}18`, display: "flex",
-        alignItems: "center", justifyContent: "center",
-        fontSize: 20, color, marginBottom: 4,
-      }}>
-        <i className={`bi ${icon}`} />
+      <div style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>{label}</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+        <div style={{ fontSize: 32, fontWeight: 800, color: "#1a3d2b", letterSpacing: -0.5, lineHeight: 1 }}>
+          {disp}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8" }}>{unit}</div>
       </div>
-      <div style={{ fontSize: 30, fontWeight: 900, color: "#1a3d2b", letterSpacing: -1, lineHeight: 1 }}>
-        {disp}
-      </div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: "#94a3b8" }}>{unit}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginTop: 4 }}>{label}</div>
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0,
-        height: 3, background: color, opacity: 0.6,
-        borderRadius: "0 0 16px 16px",
-      }} />
     </div>
   );
 }
@@ -244,55 +231,37 @@ export default function DashboardPage() {
         {/* ══ Hero header ══ */}
         <div className="db-hero" style={{
           background: HERO_BG,
-          border: "1px solid rgba(45,158,95,0.12)",
-          borderRadius: 22,
-          marginBottom: 22,
+          border: "1px solid rgba(0,0,0,0.06)",
+          borderRadius: 16,
+          marginBottom: 24,
           display: "flex", alignItems: "center",
           justifyContent: "space-between", gap: 24, flexWrap: "wrap",
         }}>
           <div>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 7,
-              background: "rgba(45,158,95,0.10)", border: "1px solid rgba(45,158,95,0.2)",
-              color: "#2d9e5f", fontSize: 11.5, fontWeight: 800,
-              padding: "4px 13px", borderRadius: 50, marginBottom: 12,
-              letterSpacing: 0.4, textTransform: "uppercase",
-            }}>
-              <span style={{
-                width: 7, height: 7, borderRadius: "50%",
-                background: "#2d9e5f",
-                boxShadow: "0 0 0 3px rgba(45,158,95,0.25)",
-                animation: "db-pulse 2s ease-in-out infinite",
-                display: "inline-block",
-              }} />
-              แดชบอร์ดแปลงยางพารา
-            </div>
-            <h1 style={{ fontSize: 26, fontWeight: 900, color: "#1a3d2b", margin: "0 0 8px", letterSpacing: -0.5, lineHeight: 1.3 }}>
-              ภาพรวมแปลงที่วาด{" "}
-              <span style={{ color: "#2d9e5f" }}>นำเข้า และตรวจจับ</span>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1a3d2b", margin: "0 0 6px", letterSpacing: -0.5, lineHeight: 1.2 }}>
+              รายงานภาพรวมแปลงยางพารา
             </h1>
-            <p style={{ fontSize: 13.5, color: "#64748b", margin: 0, fontWeight: 500 }}>
-              แสดงผลแปลงขอบเขตที่วาด / นำเข้า SHP และแปลงยางพาราที่ตรวจจับได้
+            <p style={{ fontSize: 14, color: "#64748b", margin: 0, fontWeight: 500 }}>
+              ข้อมูลสรุปพื้นที่ขอบเขตที่วาด นำเข้าไฟล์ SHP และแปลงที่ตรวจจับด้วยระบบอัตโนมัติ
             </p>
           </div>
           <Link href="/map-draw" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
-            background: "linear-gradient(135deg,#2d9e5f,#1e7a47)",
-            color: "#fff", padding: "12px 22px", borderRadius: 50,
-            fontWeight: 800, fontSize: 14, textDecoration: "none",
-            boxShadow: "0 4px 16px rgba(45,158,95,0.30)",
+            background: "#1a3d2b",
+            color: "#fff", padding: "12px 24px", borderRadius: 8,
+            fontWeight: 700, fontSize: 14, textDecoration: "none",
             transition: "all .2s", flexShrink: 0,
             fontFamily: "'Noto Sans Thai','Inter',sans-serif",
           }}>
-            <i className="bi bi-plus-circle-fill" /> วาดแปลงใหม่
+            วาดแปลงใหม่
           </Link>
         </div>
 
         {/* ══ 3 Stat cards ══ */}
         <div className="db-stat-grid" style={{ gap: 16, marginBottom: 20 }}>
-          <StatCard icon="bi-layers-fill"        label="แปลงที่บันทึกทั้งหมด" value={plots.length}  unit="แปลง"  color="#2d9e5f" />
-          <StatCard icon="bi-grid-fill"           label="พื้นที่ยางพารารวม"   value={totalAreaRai}  unit="ไร่"    color="#0d9488" />
-          <StatCard icon="bi-cloud-arrow-up-fill" label="คาร์บอนที่กักเก็บ"  value={totalCarbon}   unit="tCO₂"  color="#059669" />
+          <StatCard label="แปลงที่บันทึกทั้งหมด" value={plots.length}  unit="แปลง"  color="#2d9e5f" />
+          <StatCard label="พื้นที่ยางพารารวม"   value={totalAreaRai}  unit="ไร่"    color="#0d9488" />
+          <StatCard label="คาร์บอนที่กักเก็บ"  value={totalCarbon}   unit="tCO₂"  color="#059669" />
         </div>
 
         {/* ══ Map ══ */}
@@ -436,24 +405,16 @@ export default function DashboardPage() {
                     >
                       {/* Card top */}
                       <div style={{ padding:"16px 18px 10px", display:"flex", alignItems:"center", gap:10 }}>
-                        <div style={{
-                          width:40, height:40, borderRadius:12,
-                          background:`${b.color}18`,
-                          display:"flex", alignItems:"center", justifyContent:"center",
-                          fontSize:20, flexShrink:0,
-                        }}>
-                          {b.emoji}
-                        </div>
                         <div style={{ flex:1 }}>
-                          <div style={{ fontSize:14, fontWeight:900, color:"#1a3d2b" }}>{b.label}</div>
-                          <div style={{ fontSize:10.5, color:"#9ca3af", fontWeight:600, marginTop:1 }}>
+                          <div style={{ fontSize:15, fontWeight:800, color:"#1a3d2b" }}>{b.label}</div>
+                          <div style={{ fontSize:11, color:"#64748b", fontWeight:500, marginTop:1 }}>
                             {b.key === "1-5" ? "ระยะเริ่มต้น" : b.key === "6-12" ? "ระยะเปิดกรีด" : b.key === "13-18" ? "ระยะสูงสุด" : "ระยะคงที่"}
                           </div>
                         </div>
                         <span style={{
-                          fontSize:10, fontWeight:800, padding:"3px 8px",
-                          background:`${b.color}15`, color:b.dark, borderRadius:50,
-                          border:`1px solid ${b.color}40`,
+                          fontSize:11, fontWeight:700, padding:"3px 10px",
+                          background:"#f8fafc", color:"#64748b", borderRadius:4,
+                          border:`1px solid #e2e8f0`,
                         }}>
                           {pct}%
                         </span>
@@ -480,19 +441,20 @@ export default function DashboardPage() {
                       {/* Footer */}
                       <div style={{
                         marginTop: "auto",
-                        padding:"10px 18px",
-                        borderTop:"1px solid rgba(45,158,95,0.07)",
-                        background:"#fafcfa",
-                        display:"flex", alignItems:"center", justifyContent:"space-around",
+                        padding:"12px 18px",
+                        borderTop:"1px solid rgba(0,0,0,0.04)",
+                        background:"#f8fafc",
+                        display:"flex", alignItems:"center", justifyContent:"space-between",
                       }}>
                         {[
-                          { icon:"bi-layers-fill", val:b.plotCount.toLocaleString("th-TH"), unit:"แปลง" },
-                          { icon:"bi-grid-fill", val:b.areaRai.toLocaleString("th-TH",{maximumFractionDigits:1}), unit:"ไร่" },
-                        ].map(({ icon, val, unit }) => (
-                          <div key={unit} style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:700, color:"#374151" }}>
-                            <i className={`bi ${icon}`} style={{ fontSize:11, color:"#94a3b8" }} />
-                            {val}
-                            <span style={{ fontSize:10.5, color:"#9ca3af", fontWeight:500 }}>{unit}</span>
+                          { label:"จำนวนแปลง", val:b.plotCount.toLocaleString("th-TH"), unit:"แปลง" },
+                          { label:"พื้นที่", val:b.areaRai.toLocaleString("th-TH",{maximumFractionDigits:1}), unit:"ไร่" },
+                        ].map(({ label, val, unit }) => (
+                          <div key={unit} style={{ display:"flex", flexDirection:"column", gap:1 }}>
+                            <div style={{ fontSize:10, color:"#94a3b8", fontWeight:600 }}>{label}</div>
+                            <div style={{ fontSize:13, fontWeight:700, color:"#1a3d2b" }}>
+                              {val} <span style={{ fontSize:11, color:"#64748b", fontWeight:500 }}>{unit}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -507,10 +469,6 @@ export default function DashboardPage() {
       </div>
 
       <style>{`
-        @keyframes db-pulse {
-          0%,100% { box-shadow: 0 0 0 3px rgba(45,158,95,0.25); }
-          50%      { box-shadow: 0 0 0 8px rgba(45,158,95,0.08); }
-        }
         .db-container { padding: 28px 24px; }
         .db-hero { padding: 32px 36px; }
         .db-stat-grid { display: grid; grid-template-columns: repeat(3,1fr); }
