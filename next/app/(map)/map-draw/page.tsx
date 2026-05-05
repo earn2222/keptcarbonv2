@@ -86,6 +86,8 @@ export default function MapDrawPage() {
   // Drawn boundary geometry (set when search is confirmed)
   const [drawnGeometry, setDrawnGeometry] = useState<GeoJSON.Geometry | null>(null);
 
+  const runParcelSearchRef = useRef<() => void>(() => {});
+
 
   // ===== MAP INIT =====
   useEffect(() => {
@@ -335,6 +337,9 @@ export default function MapDrawPage() {
     setHasGeom(true);
     setStatus(`✓ วาดแปลงเสร็จ — ลากจุดเพื่อแก้ไข หรือคลิกเส้นเพื่อเพิ่มจุด`);
     if (!skipFit) fitPlot();
+    
+    // Auto process
+    runParcelSearchRef.current();
   }, [fitPlot]);
 
   // Map click / dblclick / Escape handlers — keep refs in sync
@@ -343,9 +348,23 @@ export default function MapDrawPage() {
     if (!map) return;
     const onClick = (e: maplibregl.MapMouseEvent) => {
       if (!drawingRef.current) return;
-      vertsRef.current.push([e.lngLat.lng, e.lngLat.lat]);
+      const pts = vertsRef.current;
+      
+      // Auto-close polygon if clicking near the first point
+      if (pts.length >= 3) {
+        const firstPt = map.project(pts[0] as [number, number]);
+        const clickedPt = e.point;
+        const dist = Math.hypot(firstPt.x - clickedPt.x, firstPt.y - clickedPt.y);
+        if (dist < 20) {
+          e.preventDefault();
+          finishDraw();
+          return;
+        }
+      }
+      
+      pts.push([e.lngLat.lng, e.lngLat.lat]);
       previewDraw();
-      setStatus(`จุดที่ ${vertsRef.current.length} — Double-click หรือกดเสร็จสิ้น เพื่อปิดแปลง`);
+      setStatus(`จุดที่ ${pts.length} — คลิกบรรจบจุดแรกเพื่อปิดแปลง`);
     };
     const onDbl = (e: maplibregl.MapMouseEvent) => {
       if (!drawingRef.current || vertsRef.current.length < 3) return;
@@ -602,6 +621,10 @@ export default function MapDrawPage() {
       setSearchRunning(false);
     }
   }, []);
+
+  useEffect(() => {
+    runParcelSearchRef.current = runParcelSearch;
+  }, [runParcelSearch]);
 
   // Search is triggered manually via "ยืนยันแปลงที่วาด" button (draw) or inside loadShp (SHP)
 
@@ -867,10 +890,28 @@ export default function MapDrawPage() {
         {/* Drag handle for mobile toggle */}
         <div className="mds-mobile-drag-handle" onClick={() => setIsPanelOpen(false)} />
 
+        {/* ── Panel Mini Header ── */}
+        <div className="mds-panel-topbar">
+          <div className="mds-panel-topbar-left">
+            <div className="mds-panel-topbar-icon">
+              <i className="bi bi-geo-alt-fill" />
+            </div>
+            <div>
+              <div className="mds-panel-topbar-title">วิเคราะห์แปลงยาง</div>
+              <div className="mds-panel-topbar-sub">KeptCarbon · ระบบกำหนดขอบเขต</div>
+            </div>
+          </div>
+          <button
+            className="mds-panel-topbar-close"
+            onClick={() => setIsPanelOpen(false)}
+            title="ซ่อนแผง"
+          >
+            <i className="bi bi-x-lg" />
+          </button>
+        </div>
 
         {/* ── Step Tracker ── */}
         <div className="mds-stepper">
-          {/* Steps row — track is positioned inside this wrapper */}
           <div className="mds-steps-row">
             <div className="mds-stepper-track">
               <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
@@ -892,14 +933,6 @@ export default function MapDrawPage() {
               );
             })}
           </div>
-          {/* Close Panel Button */}
-          <button
-            className="mds-panel-close-btn mds-panel-close-inline"
-            onClick={() => setIsPanelOpen(false)}
-            title="ซ่อนแผงเครื่องมือ"
-          >
-            <i className="bi bi-x-lg" />
-          </button>
         </div>
 
         {/* ── Scrollable Content ── */}
@@ -941,41 +974,16 @@ export default function MapDrawPage() {
               {/* ── Draw tab ── */}
               {tab === "draw" && (
                 <div className="mds-action-content">
-                  {drawDone ? (
-                    /* ── Draw done: confirm or redo ── */
-                    <>
-                      <div className="mds-success-box">
-                        <div className="mds-success-icon">
-                          <i className="bi bi-check-lg" />
-                        </div>
-                        <div className="mds-success-text">
-                          <strong>วาดแปลงเรียบร้อย ✓</strong>
-                          <span>{drawPreview}</span>
-                        </div>
-                      </div>
-                      <button className="mds-btn mds-btn-solid" onClick={runParcelSearch}>
-                        <i className="bi bi-search" /> ตกลงเพื่อประมวลผล
-                      </button>
-                      <button className="mds-btn mds-btn-soft" onClick={() => { clearDraw(); startDrawFlow(); }}>
-                        <i className="bi bi-arrow-repeat" /> เริ่มวาดแปลงใหม่
-                      </button>
-                      <button className="mds-btn-link-danger" onClick={clearDraw}>
-                        <i className="bi bi-trash" /> ล้างแปลง
-                      </button>
-                    </>
-                  ) : drawing ? (
+                  {drawing ? (
                     /* ── Drawing in progress ── */
                     <>
                       <div className="mds-draw-hint">
                         <div className="mds-dot-pulse" />
-                        คลิกบนแผนที่เพื่อเพิ่มจุด · Double-click หรือกด <strong>เสร็จสิ้น</strong> เพื่อปิดแปลง
+                        คลิกบนแผนที่เพื่อวาดจุด · <strong>คลิกบรรจบจุดแรก</strong> หรือ Double-click เพื่อจบการวาด
                       </div>
-                      <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
-                        <button className="mds-btn mds-btn-solid" onClick={() => finishDraw(false)} style={{ flex: 1 }}>
-                          <i className="bi bi-check-circle" /> เสร็จสิ้น
-                        </button>
-                        <button className="mds-btn mds-btn-danger" onClick={clearDraw} style={{ flex: 1 }}>
-                          <i className="bi bi-x-circle" /> ยกเลิก
+                      <div style={{ marginTop: "10px" }}>
+                        <button className="mds-btn mds-btn-danger" onClick={clearDraw}>
+                          <i className="bi bi-x-circle" /> ยกเลิกการวาด
                         </button>
                       </div>
                     </>
