@@ -586,7 +586,7 @@ export default function MyPlotsPage() {
   if (!user) return null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f4fcf8", paddingTop: 100, paddingBottom: "60px", fontFamily: "'Inter','Noto Sans Thai',sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#f4fcf8", paddingTop: 140, paddingBottom: "60px", fontFamily: "'Inter','Noto Sans Thai',sans-serif" }}>
       <div className="container" style={{ maxWidth: "1100px" }}>
 
         {/* Hero */}
