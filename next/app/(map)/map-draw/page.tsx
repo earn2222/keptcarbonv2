@@ -83,6 +83,9 @@ export default function MapDrawPage() {
   // Panel toggle state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+  // Drawn boundary geometry (set when search is confirmed)
+  const [drawnGeometry, setDrawnGeometry] = useState<GeoJSON.Geometry | null>(null);
+
 
   // ===== MAP INIT =====
   useEffect(() => {
@@ -450,6 +453,7 @@ export default function MapDrawPage() {
     setDrawDone(false);
     setDrawPreview("—");
     setHasGeom(false);
+    setDrawnGeometry(null);
     setSearchCount(null);
     setSearchErr(null);
     setSearchTruncated(false);
@@ -506,6 +510,7 @@ export default function MapDrawPage() {
     const abort = new AbortController();
     searchAbortRef.current = abort;
 
+    setDrawnGeometry(final.geometry);
     setSearchRunning(true);
     setCurrentStep(2);
     setSearchErr(null);
@@ -865,26 +870,29 @@ export default function MapDrawPage() {
 
         {/* ── Step Tracker ── */}
         <div className="mds-stepper">
-          <div className="mds-stepper-track">
-            <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
-          </div>
-          {([
-            { n: 1 as const, label: "กำหนดพื้นที่" },
-            { n: 2 as const, label: "ผลวิเคราะห์" },
-            { n: 3 as const, label: "บันทึก" },
-          ]).map(({ n, label }) => {
-            const isActive = currentStep === n;
-            const isDone = currentStep > n;
-            return (
-              <div key={n} className={`mds-step${isActive ? " active" : isDone ? " done" : ""}`}>
-                <div className="mds-step-circle">
-                  {isDone ? <i className="bi bi-check-lg" /> : n}
+          {/* Steps row — track is positioned inside this wrapper */}
+          <div className="mds-steps-row">
+            <div className="mds-stepper-track">
+              <div className="mds-stepper-fill" style={{ width: `${(currentStep - 1) * 50}%` }} />
+            </div>
+            {([
+              { n: 1 as const, label: "กำหนดพื้นที่" },
+              { n: 2 as const, label: "ผลวิเคราะห์" },
+              { n: 3 as const, label: "บันทึก" },
+            ]).map(({ n, label }) => {
+              const isActive = currentStep === n;
+              const isDone = currentStep > n;
+              return (
+                <div key={n} className={`mds-step${isActive ? " active" : isDone ? " done" : ""}`}>
+                  <div className="mds-step-circle">
+                    {isDone ? <i className="bi bi-check-lg" /> : n}
+                  </div>
+                  <span className="mds-step-label">{label}</span>
                 </div>
-                <span className="mds-step-label">{label}</span>
-              </div>
-            );
-          })}
-          {/* Close Panel Button — green, right side only */}
+              );
+            })}
+          </div>
+          {/* Close Panel Button */}
           <button
             className="mds-panel-close-btn mds-panel-close-inline"
             onClick={() => setIsPanelOpen(false)}
@@ -1052,6 +1060,7 @@ export default function MapDrawPage() {
                 searchTruncated={searchTruncated}
                 parcelFeatures={parcelFeatures}
                 userDisplayName={user?.fullname ?? ""}
+                drawnGeometry={drawnGeometry}
                 onFlyTo={flyToFeature}
                 onReset={clearDraw}
                 onBack={backToStep1}

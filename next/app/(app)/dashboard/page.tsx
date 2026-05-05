@@ -1,228 +1,509 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { PlotDB, type Plot } from "@/lib/auth";
-import { useAuth } from "@/lib/auth-context";
-import { Card, Eyebrow } from "@/app/components";
 import DashboardMap from "./DashboardMap";
-import CarbonChart from "./CarbonChart";
+import {
+  Chart, DoughnutController,
+  ArcElement,
+  Tooltip, Legend,
+  type ChartItem,
+} from "chart.js";
 
+Chart.register(
+  DoughnutController,
+  ArcElement,
+  Tooltip, Legend,
+);
+
+/* ── Site hero background (matches my-plots page) ── */
 const HERO_BG =
-    "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
-    "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
-    "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
-    "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
+  "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.13) 0%, rgba(16,185,129,0) 60%)," +
+  "radial-gradient(900px 450px at 110% 0%, rgba(13,148,136,0.10) 0%, rgba(13,148,136,0) 58%)," +
+  "radial-gradient(700px 360px at 30% 120%, rgba(45,158,95,0.09) 0%, rgba(45,158,95,0) 55%)," +
+  "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.93) 100%)";
 
-function formatDate(iso: string | undefined): string {
-  if (!iso) return "-";
-  return new Date(iso).toLocaleDateString("th-TH", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
+type SavedPlot = {
+  id: string; name: string;
+  areaRai: number; carbonTotal: number; rubberAge: number;
+  geojson?: GeoJSON.GeoJSON | null;
+  boundaryGeojson?: GeoJSON.GeoJSON | null;
+};
 
-function num(value: unknown): number {
-  return typeof value === "number" ? value : 0;
-}
-
-const statCards = [
-  { icon: "bi-collection", label: "จำนวนแปลงทั้งหมด", unit: "แปลง", key: "count" as const },
-  { icon: "bi-wind", label: "คาร์บอนรวม", unit: "tCO₂", key: "carbon" as const },
-  { icon: "bi-rulers", label: "พื้นที่รวม", unit: "ไร่", key: "area" as const },
-  { icon: "bi-tree-fill", label: "ต้นยางโดยประมาณ", unit: "ต้น", key: "trees" as const },
+const BUCKETS = [
+  { key: "1-5",   label: "1–5 ปี",   min: 1,  max: 5,  color: "#4ade80", dark: "#15803d" },
+  { key: "6-12",  label: "6–12 ปี",  min: 6,  max: 12, color: "#22c55e", dark: "#166534" },
+  { key: "13-18", label: "13–18 ปี", min: 13, max: 18, color: "#2d9e5f", dark: "#1a5c38" },
+  { key: "19+",   label: "19+ ปี",   min: 19, max: 99, color: "#1e7a47", dark: "#14532d" },
 ];
 
-export default function DashboardPage() {
-  const { user } = useAuth();
-  const [plots, setPlots] = useState<Plot[]>([]);
+/* ── animated counter ── */
+function useCounter(target: number, ms = 1400) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (target === 0) { setV(0); return; }
+    let cur = 0;
+    const step = target / (ms / 16);
+    const t = setInterval(() => {
+      cur += step;
+      if (cur >= target) { setV(target); clearInterval(t); }
+      else setV(cur);
+    }, 16);
+    return () => clearInterval(t);
+  }, [target, ms]);
+  return v;
+}
+
+/* ── Stat card ── */
+function StatCard({ label, value, unit, color }: {
+  label: string; value: number; unit: string; color: string;
+}) {
+  const a = useCounter(value);
+  const disp = value >= 10
+    ? Math.round(a).toLocaleString("th-TH")
+    : a.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (
+    <div style={{
+      background: "#fff",
+      borderRadius: 12,
+      border: "1px solid rgba(0,0,0,0.06)",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+      padding: "20px 24px",
+      display: "flex", flexDirection: "column", gap: 4,
+      position: "relative", overflow: "hidden",
+      borderLeft: `4px solid ${color}`,
+    }}
+    >
+      <div style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>{label}</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+        <div style={{ fontSize: 32, fontWeight: 800, color: "#1a3d2b", letterSpacing: -0.5, lineHeight: 1 }}>
+          {disp}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8" }}>{unit}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Donut chart (age distribution) ── */
+function DonutChart({ bucketData, total }: {
+  bucketData: { key: string; label: string; color: string; plotCount: number }[];
+  total: number;
+}) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const chartRef = useRef<Chart | null>(null);
+  const nonEmpty = bucketData.filter(b => b.plotCount > 0);
 
   useEffect(() => {
-    if (user) setPlots(PlotDB.getPlots(user.id));
-  }, [user]);
+    if (!ref.current || !nonEmpty.length) return;
+    chartRef.current?.destroy();
+    chartRef.current = new Chart(ref.current.getContext("2d") as ChartItem, {
+      type: "doughnut",
+      data: {
+        labels: nonEmpty.map(b => b.label),
+        datasets: [{
+          data: nonEmpty.map(b => b.plotCount),
+          backgroundColor: nonEmpty.map(b => b.color),
+          borderWidth: 3, borderColor: "#fff", hoverOffset: 6,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: "68%",
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(26,61,43,0.92)",
+            titleColor: "#4ade80", bodyColor: "#d1fae5",
+            padding: 12, cornerRadius: 10,
+            callbacks: {
+              label: ctx => {
+                const v = ctx.parsed as number;
+                const pct = total > 0 ? ((v / total) * 100).toFixed(1) : "0";
+                return ` ${v.toLocaleString("th-TH")} แปลง (${pct}%)`;
+              },
+            },
+          },
+        },
+      },
+    });
+    return () => { chartRef.current?.destroy(); chartRef.current = null; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bucketData, total]);
 
-  const totalCarbon = plots.reduce((s, p) => s + num(p.carbonTotal), 0);
-  const totalArea = plots.reduce((s, p) => s + num(p.areaRai), 0);
-  const totalTrees = plots.reduce((s, p) => s + num(p.treeCount), 0);
+  if (!nonEmpty.length) return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 8, color: "#94a3b8" }}>
+      <i className="bi bi-pie-chart" style={{ fontSize: 36 }} />
+      <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>ยังไม่มีข้อมูล</p>
+    </div>
+  );
 
-  const values: Record<"count" | "carbon" | "area" | "trees", string> = {
-    count: plots.length.toString(),
-    carbon: totalCarbon.toFixed(1),
-    area: totalArea.toFixed(2),
-    trees: totalTrees.toLocaleString(),
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%" }}>
+      <div style={{ position: "relative", height: 180, flexShrink: 0 }}>
+        <canvas ref={ref} />
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          pointerEvents: "none",
+        }}>
+          <span style={{ fontSize: 26, fontWeight: 900, color: "#1a3d2b", letterSpacing: -1, lineHeight: 1 }}>
+            {total.toLocaleString("th-TH")}
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", marginTop: 3 }}>แปลงทั้งหมด</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+        {nonEmpty.map(b => (
+          <div key={b.key} style={{
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "7px 12px", background: "#f8fdf9",
+            borderRadius: 10, border: "1px solid rgba(45,158,95,0.08)",
+          }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: b.color, flexShrink: 0 }} />
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: "#374151", flex: 1 }}>{b.label}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: "#1a3d2b" }}>
+              {b.plotCount.toLocaleString("th-TH")}
+            </span>
+            <span style={{
+              fontSize: 11, fontWeight: 700, color: "#6b7280",
+              background: "#f0f0f0", padding: "2px 7px", borderRadius: 50,
+            }}>
+              {total > 0 ? ((b.plotCount / total) * 100).toFixed(0) : 0}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════ PAGE ══════════════════════ */
+export default function DashboardPage() {
+  const [plots, setPlots] = useState<SavedPlot[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("user_saved_plots");
+      if (raw) setPlots(JSON.parse(raw) as SavedPlot[]);
+    } catch { /* ignore */ }
+    setMounted(true);
+  }, []);
+
+  const totalAreaRai = useMemo(() => plots.reduce((s, p) => s + (p.areaRai || 0), 0), [plots]);
+  const totalCarbon  = useMemo(() => plots.reduce((s, p) => s + (p.carbonTotal || 0), 0), [plots]);
+
+  const bucketData = useMemo(() =>
+    BUCKETS.map(b => {
+      const grp = plots.filter(p => { const a = p.rubberAge || 0; return a >= b.min && a <= b.max; });
+      return { ...b, plotCount: grp.length, carbon: grp.reduce((s, p) => s + (p.carbonTotal || 0), 0), areaRai: grp.reduce((s, p) => s + (p.areaRai || 0), 0) };
+    }), [plots]);
+
+  const maxCarbon = useMemo(() => Math.max(...bucketData.map(b => b.carbon), 1), [bucketData]);
+
+  const mapPlots = useMemo(() =>
+    plots.filter(p => p.geojson || p.boundaryGeojson).map(p => ({
+      id: p.id, name: p.name,
+      areaRai: p.areaRai, carbonTotal: p.carbonTotal, age: p.rubberAge,
+      geojson: p.geojson as GeoJSON.GeoJSON,
+      boundaryGeojson: (p.boundaryGeojson as GeoJSON.GeoJSON) ?? null,
+    })), [plots]);
+
+  if (!mounted) return (
+    <div className="dv2-root dv2-loading">
+      <div className="dv2-spinner" /><p>กำลังโหลดข้อมูล...</p>
+    </div>
+  );
+
+  const S = { /* shared card style */
+    background: "#fff",
+    borderRadius: 18,
+    border: "1px solid rgba(45,158,95,0.13)",
+    boxShadow: "0 2px 12px rgba(45,158,95,0.07)",
+    overflow: "hidden" as const,
   };
 
   return (
-    <>
-      {/* === Welcome hero === */}
-      <section style={{ paddingTop: 8, paddingBottom: 0 }}>
-        <div className="container">
-          <Card className="border-0 shadow-sm mb-2 overflow-hidden">
-            <div className="p-4 p-md-5" style={{ background: HERO_BG, borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-              <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
-                <div style={{ maxWidth: 640 }}>
-                  <Eyebrow icon="bi-stars" className="mb-2">ภาพรวมประจำวัน</Eyebrow>
-                  <h1 className="fw-bold mb-2" style={{ letterSpacing: "-0.02em" }}>
-                    {user ? user.fullname : "ยินดีต้อนรับ"}
-                    {", "}
-                    <span className="kc-grad-text">เริ่มต้นวันที่ดี</span>
-                  </h1>
-                  <p className="text-muted mb-0">
-                    ติดตามแปลงยางพารา การกักเก็บคาร์บอน และความเปลี่ยนแปลงในระบบนิเวศของคุณในมุมมองเดียว
-                  </p>
-                </div>
-                <Link
-                  href="/map-draw"
-                  className="btn"
-                  style={{
-                    background: "linear-gradient(135deg, #065f46 0%, #059669 100%)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: 10,
-                    padding: "10px 20px",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    boxShadow: "none",
-                    textDecoration: "none",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <i className="bi bi-plus-circle me-2"></i>วาดแปลงใหม่
-                </Link>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </section>
+    <div style={{ minHeight: "100vh", background: "#f3faf6", paddingTop: 140, fontFamily: "'Noto Sans Thai','Inter',sans-serif", paddingBottom: 60 }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto" }} className="db-container">
 
-      {/* === Stats === */}
-      <section className="kc-section" style={{ paddingTop: 36, paddingBottom: 12 }}>
-        <div className="container">
-          <div className="kc-section-head">
-            <h2 className="kc-section-title">
-              <i className="bi bi-bar-chart-fill"></i> ตัวเลขสำคัญ
-            </h2>
-            <span className="kc-section-aside">อัปเดตจากแปลงทั้งหมด</span>
+        {/* ══ Hero header ══ */}
+        <div className="db-hero" style={{
+          background: HERO_BG,
+          border: "1px solid rgba(0,0,0,0.06)",
+          borderRadius: 16,
+          marginBottom: 24,
+          display: "flex", alignItems: "center",
+          justifyContent: "space-between", gap: 24, flexWrap: "wrap",
+        }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1a3d2b", margin: "0 0 6px", letterSpacing: -0.5, lineHeight: 1.2 }}>
+              รายงานภาพรวมแปลงยางพารา
+            </h1>
+            <p style={{ fontSize: 14, color: "#64748b", margin: 0, fontWeight: 500 }}>
+              ข้อมูลสรุปพื้นที่ขอบเขตที่วาด นำเข้าไฟล์ SHP และแปลงที่ตรวจจับด้วยระบบอัตโนมัติ
+            </p>
           </div>
-          <div className="row g-3">
-            {statCards.map((c) => (
-              <div className="col-6 col-lg-3" key={c.key}>
-                <div className="kc-stat">
-                  <div className="kc-stat-icon">
-                    <i className={`bi ${c.icon}`}></i>
-                  </div>
-                  <div className="kc-stat-value">
-                    <span>{values[c.key]}</span>
-                    <span className="unit">{c.unit}</span>
-                  </div>
-                  <div className="kc-stat-label">{c.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Link href="/map-draw" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "#1a3d2b",
+            color: "#fff", padding: "12px 24px", borderRadius: 8,
+            fontWeight: 700, fontSize: 14, textDecoration: "none",
+            transition: "all .2s", flexShrink: 0,
+            fontFamily: "'Noto Sans Thai','Inter',sans-serif",
+          }}>
+            วาดแปลงใหม่
+          </Link>
         </div>
-      </section>
 
-      {/* === Map + Chart === */}
-      <section className="kc-section" style={{ paddingTop: 24 }}>
-        <div className="container">
-          <div className="row g-4">
-            <div className="col-lg-8">
-              <div className="kc-panel">
-                <div className="kc-panel-header">
-                  <div className="title">
-                    <i className="bi bi-map-fill"></i>
-                    <span>แผนที่ภาพรวมแปลง</span>
-                  </div>
-                  <span className="meta">{plots.length} แปลง · ภาคตะวันออก</span>
-                </div>
-                <div className="kc-panel-body no-pad">
-                  <DashboardMap plots={plots} />
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4">
-              <div className="kc-panel">
-                <div className="kc-panel-header">
-                  <div className="title">
-                    <i className="bi bi-pie-chart-fill"></i>
-                    <span>การกระจายคาร์บอน</span>
-                  </div>
-                  <span className="meta">tCO₂</span>
-                </div>
-                <div className="kc-panel-body">
-                  <div className="kc-chart-wrap">
-                    {plots.length === 0 ? (
-                      <div className="kc-chart-empty">
-                        <i className="bi bi-pie-chart"></i>
-                        ยังไม่มีข้อมูลแปลง
-                      </div>
-                    ) : (
-                      <CarbonChart plots={plots} />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* ══ 3 Stat cards ══ */}
+        <div className="db-stat-grid" style={{ gap: 16, marginBottom: 20 }}>
+          <StatCard label="แปลงที่บันทึกทั้งหมด" value={plots.length}  unit="แปลง"  color="#2d9e5f" />
+          <StatCard label="พื้นที่ยางพารารวม"   value={totalAreaRai}  unit="ไร่"    color="#0d9488" />
+          <StatCard label="คาร์บอนที่กักเก็บ"  value={totalCarbon}   unit="tCO₂"  color="#059669" />
         </div>
-      </section>
 
-      {/* === Recent plots === */}
-      <section className="kc-section" style={{ paddingTop: 24, paddingBottom: 80 }}>
-        <div className="container">
-          <div className="kc-section-head">
-            <h2 className="kc-section-title">
-              <i className="bi bi-clock-history"></i> แปลงล่าสุด
-            </h2>
-            {plots.length > 0 && (
-              <Link href="/my-plots" className="kc-section-aside" style={{ textDecoration: "none" }}>
-                ดูทั้งหมด <i className="bi bi-arrow-right"></i>
-              </Link>
-            )}
-          </div>
-          {plots.length === 0 ? (
-            <div className="kc-empty">
-              <div className="icon-circle">
-                <i className="bi bi-map"></i>
-              </div>
-              <h3>ยังไม่มีแปลงยาง</h3>
-              <p>เริ่มต้นด้วยการวาดแปลงแรกของคุณบนแผนที่ดาวเทียม</p>
-              <Link href="/map-draw" className="kc-welcome-cta">
-                <i className="bi bi-plus-circle"></i> วาดแปลงใหม่
-              </Link>
+        {/* ══ Map ══ */}
+        <div style={{ ...S, marginBottom: 20 }}>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "14px 20px", borderBottom: "1px solid rgba(45,158,95,0.08)",
+            flexWrap: "wrap", gap: 10,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+              <span style={{
+                width: 9, height: 9, borderRadius: "50%",
+                background: "#2d9e5f", boxShadow: "0 0 0 3px rgba(45,158,95,0.2)",
+              }} />
+              <span style={{ fontSize: 14, fontWeight: 800, color: "#1a3d2b" }}>แผนที่แปลงยางพารา</span>
+              {mapPlots.length > 0 && (
+                <span style={{
+                  padding: "2px 10px", background: "rgba(45,158,95,0.10)",
+                  border: "1px solid rgba(45,158,95,0.2)", borderRadius: 50,
+                  fontSize: 11, fontWeight: 700, color: "#2d9e5f",
+                }}>
+                  {mapPlots.length} แปลง
+                </span>
+              )}
             </div>
-          ) : (
-            <div className="row g-3">
-              {plots.slice(0, 3).map((plot) => (
-                <div className="col-md-4" key={plot.id}>
-                  <div className="kc-plot">
-                    <div className="kc-plot-name">{(plot.name as string) ?? "แปลงไม่มีชื่อ"}</div>
-                    <div className="kc-plot-meta">
-                      <i className="bi bi-person"></i>
-                      <span>{(plot.ownerName as string) ?? "ไม่ระบุ"}</span>
-                    </div>
-                    <div className="kc-plot-meta">
-                      <i className="bi bi-calendar3"></i>
-                      <span>{formatDate(plot.createdAt as string | undefined)}</span>
-                    </div>
-                    <div className="kc-plot-foot">
-                      <span className="kc-plot-area">
-                        <strong>{num(plot.areaRai).toFixed(2)}</strong>ไร่
-                      </span>
-                      <span className="kc-plot-badge">
-                        <i className="bi bi-wind"></i>
-                        {num(plot.carbonTotal).toFixed(1)} tCO₂
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            <div className="db-map-legend" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              {[
+                { el: <span style={{ display:"inline-block", width:24, height:3, background:"#ea580c", borderRadius:2 }} />, text: "ขอบเขตที่วาด / SHP" },
+                { el: <span style={{ display:"inline-block", width:16, height:11, borderRadius:3, background:"rgba(34,197,94,0.5)", border:"2px solid #2d9e5f" }} />, text: "แปลงที่ตรวจจับ" },
+              ].map(({ el, text }) => (
+                <span key={text} style={{ display:"inline-flex", alignItems:"center", gap:7, fontSize:12, fontWeight:700, color:"#374151" }}>
+                  {el}{text}
+                </span>
               ))}
             </div>
-          )}
+          </div>
+          <div className="db-map-box" style={{ position: "relative", height: 600 }}>
+            <DashboardMap plots={mapPlots} bbox={null} />
+            {mapPlots.length === 0 && (
+              <div style={{
+                position:"absolute", inset:0,
+                background:"rgba(243,250,246,0.93)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                backdropFilter:"blur(4px)",
+              }}>
+                <div style={{ textAlign:"center", padding:32 }}>
+                  <i className="bi bi-map" style={{ fontSize:44, color:"#2d9e5f", display:"block", marginBottom:12, opacity:0.5 }} />
+                  <p style={{ fontSize:15, color:"#64748b", fontWeight:600, marginBottom:18 }}>ยังไม่มีแปลงที่วาดและบันทึก</p>
+                  <Link href="/map-draw" style={{
+                    display:"inline-flex", alignItems:"center", gap:7,
+                    background:"linear-gradient(135deg,#2d9e5f,#1e7a47)",
+                    color:"#fff", padding:"10px 22px", borderRadius:50,
+                    fontWeight:700, fontSize:13.5, textDecoration:"none",
+                    fontFamily:"'Noto Sans Thai','Inter',sans-serif",
+                  }}>
+                    <i className="bi bi-plus-circle" /> วาดแปลง
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </section>
-    </>
+
+        {/* ══ Charts row ══ */}
+        <div className="db-charts-row" style={{ gap:16, marginBottom:20 }}>
+
+          {/* Donut */}
+          <div style={S}>
+            <div style={{ padding:"14px 20px", borderBottom:"1px solid rgba(45,158,95,0.08)", display:"flex", alignItems:"center", gap:8 }}>
+              <i className="bi bi-pie-chart-fill" style={{ color:"#2d9e5f", fontSize:15 }} />
+              <span style={{ fontSize:14, fontWeight:800, color:"#1a3d2b" }}>สัดส่วนแปลงตามช่วงอายุ</span>
+            </div>
+            <div style={{ padding:"20px 20px 22px", height:340 }}>
+              <DonutChart bucketData={bucketData} total={plots.length} />
+            </div>
+          </div>
+
+          {/* Age info cards (replaces Area chart to balance layout) */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:16, flexWrap:"wrap", gap:12 }}>
+              <div>
+                <h2 style={{ fontSize:17, fontWeight:900, color:"#1a3d2b", margin:"0 0 4px", display:"flex", alignItems:"center", gap:8 }}>
+                  <i className="bi bi-tree-fill" style={{ color:"#2d9e5f" }} />
+                  คาร์บอนแต่ละช่วงอายุยาง
+                </h2>
+                <p style={{ fontSize:13, color:"#64748b", margin:0 }}>ข้อมูลแสดงแยกตามกลุ่มอายุยางพารา</p>
+              </div>
+              {totalCarbon > 0 && (
+                <div style={{
+                  display:"inline-flex", alignItems:"center", gap:7,
+                  background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",
+                  border:"1px solid rgba(45,158,95,0.2)",
+                  color:"#166534", padding:"9px 16px", borderRadius:50,
+                  fontSize:13, fontWeight:800,
+                  boxShadow:"0 2px 8px rgba(45,158,95,0.10)",
+                }}>
+                  <i className="bi bi-cloud-arrow-up-fill" />
+                  รวม {totalCarbon.toLocaleString("th-TH",{maximumFractionDigits:1})} tCO₂
+                </div>
+              )}
+            </div>
+
+            {plots.length === 0 ? (
+              <div style={{
+                textAlign:"center", padding:"52px 20px",
+                background:"#fff", borderRadius:18,
+                border:"1px dashed rgba(45,158,95,0.25)",
+                flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"
+              }}>
+                <i className="bi bi-layers-half" style={{ fontSize:38, color:"#2d9e5f", display:"block", marginBottom:10, opacity:.6 }} />
+                <p style={{ color:"#64748b", marginBottom:20, fontSize:15, fontWeight:500 }}>
+                  เริ่มวาดแปลงบนแผนที่เพื่อดูข้อมูลแต่ละช่วงอายุ
+                </p>
+                <Link href="/map-draw" style={{
+                  display:"inline-flex", alignItems:"center", gap:7,
+                  background:"linear-gradient(135deg,#2d9e5f,#1e7a47)",
+                  color:"#fff", padding:"11px 24px", borderRadius:50,
+                  fontWeight:700, fontSize:14, textDecoration:"none",
+                  fontFamily:"'Noto Sans Thai','Inter',sans-serif",
+                }}>
+                  <i className="bi bi-pencil-square" /> เริ่มวาดแปลง
+                </Link>
+              </div>
+            ) : (
+              <div className="db-age-grid" style={{ gap:14, flex: 1 }}>
+                {bucketData.map(b => {
+                  const pct = maxCarbon > 0 ? Math.round((b.carbon / maxCarbon) * 100) : 0;
+                  return (
+                    <div key={b.key} style={{
+                      background:"#fff",
+                      borderRadius:18,
+                      border:`1px solid rgba(45,158,95,0.12)`,
+                      borderTop:`4px solid ${b.color}`,
+                      boxShadow:"0 2px 12px rgba(45,158,95,0.07)",
+                      overflow:"hidden",
+                      display: "flex", flexDirection: "column",
+                      transition:"transform .25s, box-shadow .25s",
+                    }}
+                      onMouseEnter={e=>{(e.currentTarget as HTMLDivElement).style.transform="translateY(-3px)";(e.currentTarget as HTMLDivElement).style.boxShadow="0 10px 28px rgba(45,158,95,0.13)";}}
+                      onMouseLeave={e=>{(e.currentTarget as HTMLDivElement).style.transform="";(e.currentTarget as HTMLDivElement).style.boxShadow="0 2px 12px rgba(45,158,95,0.07)";}}
+                    >
+                      {/* Card top */}
+                      <div style={{ padding:"16px 18px 10px", display:"flex", alignItems:"center", gap:10 }}>
+                        <div style={{ flex:1 }}>
+                          <div style={{ fontSize:15, fontWeight:800, color:"#1a3d2b" }}>{b.label}</div>
+                          <div style={{ fontSize:11, color:"#64748b", fontWeight:500, marginTop:1 }}>
+                            {b.key === "1-5" ? "ระยะเริ่มต้น" : b.key === "6-12" ? "ระยะเปิดกรีด" : b.key === "13-18" ? "ระยะสูงสุด" : "ระยะคงที่"}
+                          </div>
+                        </div>
+                        <span style={{
+                          fontSize:11, fontWeight:700, padding:"3px 10px",
+                          background:"#f8fafc", color:"#64748b", borderRadius:4,
+                          border:`1px solid #e2e8f0`,
+                        }}>
+                          {pct}%
+                        </span>
+                      </div>
+
+                      {/* Carbon number */}
+                      <div style={{ padding:"4px 18px 8px" }}>
+                        <div style={{ display:"flex", alignItems:"baseline", gap:5 }}>
+                          <span style={{ fontSize:28, fontWeight:900, color:b.dark, letterSpacing:-1.5, lineHeight:1 }}>
+                            {b.carbon.toLocaleString("th-TH",{maximumFractionDigits:1})}
+                          </span>
+                          <span style={{ fontSize:12, fontWeight:700, color:"#6b7280" }}>tCO₂</span>
+                        </div>
+                        <div style={{ fontSize:10.5, color:"#9ca3af", fontWeight:600, marginTop:2 }}>ปริมาณคาร์บอน</div>
+                      </div>
+
+                      {/* Progress */}
+                      <div style={{ padding:"4px 18px 12px", display:"flex", alignItems:"center", gap:8 }}>
+                        <div style={{ flex:1, height:6, background:"#f0f0f0", borderRadius:4, overflow:"hidden" }}>
+                          <div style={{ height:"100%", width:`${pct}%`, background:`linear-gradient(90deg,${b.color}99,${b.color})`, borderRadius:4, minWidth:4, transition:"width 1.2s cubic-bezier(.16,1,.3,1)" }} />
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div style={{
+                        marginTop: "auto",
+                        padding:"12px 18px",
+                        borderTop:"1px solid rgba(0,0,0,0.04)",
+                        background:"#f8fafc",
+                        display:"flex", alignItems:"center", justifyContent:"space-between",
+                      }}>
+                        {[
+                          { label:"จำนวนแปลง", val:b.plotCount.toLocaleString("th-TH"), unit:"แปลง" },
+                          { label:"พื้นที่", val:b.areaRai.toLocaleString("th-TH",{maximumFractionDigits:1}), unit:"ไร่" },
+                        ].map(({ label, val, unit }) => (
+                          <div key={unit} style={{ display:"flex", flexDirection:"column", gap:1 }}>
+                            <div style={{ fontSize:10, color:"#94a3b8", fontWeight:600 }}>{label}</div>
+                            <div style={{ fontSize:13, fontWeight:700, color:"#1a3d2b" }}>
+                              {val} <span style={{ fontSize:11, color:"#64748b", fontWeight:500 }}>{unit}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      <style>{`
+        .db-container { padding: 28px 24px; }
+        .db-hero { padding: 32px 36px; }
+        .db-stat-grid { display: grid; grid-template-columns: repeat(3,1fr); }
+        .db-charts-row { display: grid; grid-template-columns: 1fr 1.6fr; }
+        .db-age-grid { display: grid; grid-template-columns: repeat(2,1fr); }
+
+        @media (max-width: 1024px) {
+          .db-charts-row { grid-template-columns: 1fr; }
+          .db-age-grid { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 768px) {
+          .db-container { padding: 16px 14px; }
+          .db-hero { padding: 22px 18px; }
+          .db-stat-grid { grid-template-columns: repeat(3,1fr); }
+          .db-charts-row { grid-template-columns: 1fr; }
+          .db-age-grid { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 640px) {
+          .db-container { padding: 12px 10px; }
+          .db-hero { padding: 18px 14px; border-radius: 16px; }
+          .db-hero h1 { font-size: 18px !important; }
+          .db-hero p { font-size: 12px !important; }
+          .db-stat-grid { grid-template-columns: 1fr 1fr; }
+          .db-stat-grid > div:last-child { grid-column: 1 / -1; }
+          .db-charts-row { grid-template-columns: 1fr; }
+          .db-age-grid { grid-template-columns: 1fr 1fr; }
+          .db-map-legend { display: none !important; }
+          .db-map-box { height: 400px !important; }
+        }
+        @media (max-width: 400px) {
+          .db-stat-grid { grid-template-columns: 1fr; }
+          .db-stat-grid > div:last-child { grid-column: auto; }
+          .db-age-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+    </div>
   );
 }

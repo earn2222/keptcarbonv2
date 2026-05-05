@@ -3,40 +3,33 @@
 import { useEffect, useRef } from "react";
 import maplibregl, { type Map as MLMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Plot } from "@/lib/auth";
 
-const RAYONG_BOUNDARY: GeoJSON.FeatureCollection = {
-  type: "FeatureCollection",
-  features: [
-    {
-      type: "Feature",
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [101.0, 12.4],
-            [101.8, 12.4],
-            [102.0, 12.6],
-            [101.9, 13.0],
-            [101.5, 13.1],
-            [101.0, 13.0],
-            [100.8, 12.8],
-            [100.9, 12.5],
-            [101.0, 12.4],
-          ],
-        ],
-      },
-      properties: { name: "ระยอง" },
-    },
-  ],
+export type MapPlot = {
+  id: number | string;
+  name: string;
+  amphoe?: string;
+  areaRai: number;
+  carbonTotal: number;
+  age?: number;
+  geojson: GeoJSON.GeoJSON;
+  boundaryGeojson?: GeoJSON.GeoJSON | null;
 };
 
-export default function DashboardMap({ plots }: { plots: Plot[] }) {
+type Bbox = { minLng: number; minLat: number; maxLng: number; maxLat: number };
+
+export default function DashboardMap({
+  plots,
+  bbox,
+}: {
+  plots: MapPlot[];
+  bbox?: Bbox | null;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: {
@@ -49,56 +42,144 @@ export default function DashboardMap({ plots }: { plots: Plot[] }) {
             ],
             tileSize: 256,
             attribution: "© Esri",
+            maxzoom: 18,
           },
         },
         layers: [{ id: "satellite", type: "raster", source: "satellite" }],
       },
       center: [101.2587, 12.6819],
-      zoom: 9,
+      zoom: 8,
       attributionControl: false,
     });
     mapRef.current = map;
 
+    map.addControl(
+      new maplibregl.NavigationControl({ visualizePitch: false }),
+      "bottom-right",
+    );
+
     map.on("load", () => {
-      map.addSource("rayong", { type: "geojson", data: RAYONG_BOUNDARY });
-      map.addLayer({
-        id: "rayong-outline",
-        type: "line",
-        source: "rayong",
-        paint: { "line-color": "#84a98c", "line-width": 2, "line-dasharray": [4, 2] },
+      const detectedFeatures: GeoJSON.Feature[] = [];
+      const boundaryFeatures: GeoJSON.Feature[] = [];
+      const seenBoundaries = new Set<string>();
+
+      for (const plot of plots) {
+        const geo = plot.geojson;
+        if (geo) {
+          detectedFeatures.push({
+            type: "Feature",
+            geometry: geo as GeoJSON.Geometry,
+            properties: {
+              name: plot.name ?? "แปลงไม่มีชื่อ",
+              amphoe: plot.amphoe ?? "",
+              area: plot.areaRai ?? 0,
+              carbon: plot.carbonTotal ?? 0,
+              age: plot.age ?? 0,
+            },
+          });
+        }
+        const bnd = plot.boundaryGeojson as GeoJSON.Geometry | null | undefined;
+        if (bnd) {
+          const key = JSON.stringify(bnd);
+          if (!seenBoundaries.has(key)) {
+            seenBoundaries.add(key);
+            boundaryFeatures.push({
+              type: "Feature",
+              geometry: bnd,
+              properties: { name: plot.name },
+            });
+          }
+        }
+      }
+
+      /* ── Boundary layer (drawn / SHP imported) ── */
+      map.addSource("plots-boundary", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: boundaryFeatures },
       });
       map.addLayer({
-        id: "rayong-fill",
+        id: "plots-boundary-fill",
         type: "fill",
-        source: "rayong",
-        paint: { "fill-color": "#84a98c", "fill-opacity": 0.05 },
+        source: "plots-boundary",
+        paint: { "fill-color": "#f97316", "fill-opacity": 0.12 },
+      });
+      map.addLayer({
+        id: "plots-boundary-line",
+        type: "line",
+        source: "plots-boundary",
+        paint: {
+          "line-color": "#ea580c",
+          "line-width": 2.5,
+        },
       });
 
-      plots.forEach((plot, idx) => {
-        const geo = plot.geojson as GeoJSON.GeoJSON | undefined;
-        if (!geo) return;
-        const sourceId = `plot-${idx}`;
-        map.addSource(sourceId, { type: "geojson", data: geo });
-        map.addLayer({
-          id: `plot-fill-${idx}`,
-          type: "fill",
-          source: sourceId,
-          paint: { "fill-color": "#84a98c", "fill-opacity": 0.3 },
-        });
-        map.addLayer({
-          id: `plot-line-${idx}`,
-          type: "line",
-          source: sourceId,
-          paint: { "line-color": "#84a98c", "line-width": 2 },
-        });
+      /* ── Detected plots — gradient by carbon level ── */
+      map.addSource("plots-detected", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: detectedFeatures },
       });
+      map.addLayer({
+        id: "plots-detected-fill",
+        type: "fill",
+        source: "plots-detected",
+        paint: {
+          "fill-color": "#2d9e5f",
+          "fill-opacity": 0.55,
+        },
+      });
+      map.addLayer({
+        id: "plots-detected-line",
+        type: "line",
+        source: "plots-detected",
+        paint: { "line-color": "#15803d", "line-width": 1.2, "line-opacity": 0.7 },
+      });
+
+
+
+      /* ── Fit bounds ── */
+      if (bbox) {
+        map.fitBounds(
+          [[bbox.minLng, bbox.minLat], [bbox.maxLng, bbox.maxLat]],
+          { padding: 60, duration: 1000, maxZoom: 16 },
+        );
+      } else if (detectedFeatures.length > 0) {
+        // Fallback: walk a sample of coords
+        const sample = detectedFeatures.slice(0, 50);
+        const allCoords: [number, number][] = [];
+        const walk = (c: unknown): void => {
+          if (!Array.isArray(c)) return;
+          if (typeof c[0] === "number" && typeof c[1] === "number") {
+            allCoords.push([c[0] as number, c[1] as number]);
+            return;
+          }
+          for (const child of c) walk(child);
+        };
+        sample.forEach((f) => {
+          if ("coordinates" in f.geometry)
+            walk((f.geometry as GeoJSON.Geometry & { coordinates?: unknown }).coordinates);
+        });
+        if (allCoords.length > 0) {
+          const lngs = allCoords.map(([x]) => x);
+          const lats = allCoords.map(([, y]) => y);
+          map.fitBounds(
+            [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+            { padding: 60, duration: 1000, maxZoom: 16 },
+          );
+        }
+      }
     });
 
     return () => {
       map.remove();
       mapRef.current = null;
     };
-  }, [plots]);
+  }, [plots, bbox]);
 
-  return <div id="dashboard-map" ref={containerRef} />;
+  return (
+    <div style={{ position: "relative", height: "100%" }}>
+      <div id="dashboard-map" ref={containerRef} style={{ height: "100%" }} />
+
+
+    </div>
+  );
 }
