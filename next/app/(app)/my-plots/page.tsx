@@ -541,6 +541,7 @@ export default function MyPlotsPage() {
   const [plots, setPlots] = useState<SavedPlot[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -556,6 +557,14 @@ export default function MyPlotsPage() {
     try {
       localStorage.setItem("user_saved_plots", JSON.stringify(updated));
     } catch {}
+  };
+
+  const handleDeleteAll = () => {
+    setPlots([]);
+    try {
+      localStorage.removeItem("user_saved_plots");
+    } catch {}
+    setConfirmDeleteAll(false);
   };
 
   const totalArea = plots.reduce((s, p) => s + (p.areaRai || 0), 0);
@@ -697,6 +706,36 @@ export default function MyPlotsPage() {
                   {searchTerm ? `พบ ${filteredPlots.length} จาก ${plots.length} แปลง` : `(${plots.length})`}
                 </span>
               </h2>
+              {plots.length > 0 && (
+                <div>
+                  {confirmDeleteAll ? (
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>ลบข้อมูลทั้งหมด?</span>
+                      <button
+                        onClick={handleDeleteAll}
+                        style={{ padding: "6px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}
+                      >
+                        ยืนยัน
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteAll(false)}
+                        style={{ padding: "6px 14px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+                      >
+                        ยกเลิก
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteAll(true)}
+                      style={{ padding: "6px 14px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.15)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+                    >
+                      <i className="bi bi-trash3-fill" /> ลบแปลงทั้งหมด
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {filteredPlots.length === 0 ? (
