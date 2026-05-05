@@ -678,27 +678,7 @@ export default function MyPlotsPage() {
         )}
 
         {/* Content */}
-        {plots.length === 0 ? (
-          <div style={{
-            background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)",
-            borderRadius: 24, padding: "60px 40px", textAlign: "center",
-            border: "1px solid rgba(45,158,95,0.1)", boxShadow: "0 10px 30px rgba(0,0,0,0.02)",
-            display: "flex", flexDirection: "column", alignItems: "center", minHeight: 320, justifyContent: "center",
-          }}>
-            <div style={{ width: 84, height: 84, borderRadius: "50%", background: "linear-gradient(135deg,rgba(16,185,129,0.1),rgba(13,148,136,0.1))", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18, position: "relative", border: "1px solid rgba(16,185,129,0.2)" }}>
-              <div style={{ position: "absolute", inset: -10, border: "1px dashed rgba(16,185,129,0.3)", borderRadius: "50%" }} />
-              <i className="bi bi-map" style={{ fontSize: 36, color: "#059669" }} />
-            </div>
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: "#064e3b", marginBottom: 8 }}>ยังไม่มีข้อมูลแปลงยาง</h3>
-            <p style={{ fontSize: 13, color: "#64748b", maxWidth: 400, lineHeight: 1.6, marginBottom: 24 }}>
-              เริ่มวาดแปลงบนแผนที่เพื่อตรวจจับและบันทึกข้อมูลพร้อมการพยากรณ์คาร์บอนปีที่ 1–7
-            </p>
-            <Link href="/map-draw" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#fff", color: "#059669", padding: "11px 22px", borderRadius: 12, fontWeight: 700, fontSize: 13, textDecoration: "none", border: "2px solid #10b981", boxShadow: "0 4px 12px rgba(16,185,129,0.1)" }}>
-              <i className="bi bi-pencil-square" /> ไปหน้าวาดแปลงยาง
-            </Link>
-          </div>
-        ) : (
-          <div>
+        <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 2px" }}>
               <h2 style={{ fontSize: 17, fontWeight: 800, color: "#064e3b", margin: 0 }}>
                 รายการแปลงที่บันทึกแล้ว
@@ -757,7 +737,6 @@ export default function MyPlotsPage() {
               </div>
             )}
           </div>
-        )}
       </div>
     </div>
   );
