@@ -302,14 +302,13 @@ export default function DashboardPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f3faf6", fontFamily: "'Noto Sans Thai','Inter',sans-serif", paddingBottom: 60 }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "28px 24px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto" }} className="db-container">
 
         {/* ══ Hero header ══ */}
-        <div style={{
+        <div className="db-hero" style={{
           background: HERO_BG,
           border: "1px solid rgba(45,158,95,0.12)",
           borderRadius: 22,
-          padding: "32px 36px",
           marginBottom: 22,
           display: "flex", alignItems: "center",
           justifyContent: "space-between", gap: 24, flexWrap: "wrap",
@@ -353,7 +352,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ══ 3 Stat cards ══ */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 20 }}>
+        <div className="db-stat-grid" style={{ gap: 16, marginBottom: 20 }}>
           <StatCard icon="bi-layers-fill"        label="แปลงที่บันทึกทั้งหมด" value={plots.length}  unit="แปลง"  color="#2d9e5f" />
           <StatCard icon="bi-grid-fill"           label="พื้นที่ยางพารารวม"   value={totalAreaRai}  unit="ไร่"    color="#0d9488" />
           <StatCard icon="bi-cloud-arrow-up-fill" label="คาร์บอนที่กักเก็บ"  value={totalCarbon}   unit="tCO₂"  color="#059669" />
@@ -382,7 +381,7 @@ export default function DashboardPage() {
                 </span>
               )}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div className="db-map-legend" style={{ display: "flex", alignItems: "center", gap: 14 }}>
               {[
                 { el: <span style={{ display:"inline-block", width:24, height:3, background:"repeating-linear-gradient(90deg,#0284c7 0,#0284c7 5px,transparent 5px,transparent 9px)", borderRadius:2 }} />, text: "ขอบเขตที่วาด / SHP" },
                 { el: <span style={{ display:"inline-block", width:16, height:11, borderRadius:3, background:"rgba(34,197,94,0.5)", border:"2px solid #2d9e5f" }} />, text: "แปลงที่ตรวจจับ" },
@@ -393,7 +392,7 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
-          <div style={{ position: "relative", height: 460 }}>
+          <div className="db-map-box" style={{ position: "relative", height: 460 }}>
             <DashboardMap plots={mapPlots} bbox={null} />
             {mapPlots.length === 0 && (
               <div style={{
@@ -421,7 +420,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ══ Charts row ══ */}
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1.6fr", gap:16, marginBottom:20 }}>
+        <div className="db-charts-row" style={{ gap:16, marginBottom:20 }}>
 
           {/* Donut */}
           <div style={S}>
@@ -504,7 +503,7 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14 }}>
+            <div className="db-age-grid" style={{ gap:14 }}>
               {bucketData.map(b => {
                 const pct = maxCarbon > 0 ? Math.round((b.carbon / maxCarbon) * 100) : 0;
                 return (
@@ -595,8 +594,39 @@ export default function DashboardPage() {
           0%,100% { box-shadow: 0 0 0 3px rgba(45,158,95,0.25); }
           50%      { box-shadow: 0 0 0 8px rgba(45,158,95,0.08); }
         }
+        .db-container { padding: 28px 24px; }
+        .db-hero { padding: 32px 36px; }
+        .db-stat-grid { display: grid; grid-template-columns: repeat(3,1fr); }
+        .db-charts-row { display: grid; grid-template-columns: 1fr 1.6fr; }
+        .db-age-grid { display: grid; grid-template-columns: repeat(4,1fr); }
+
         @media (max-width: 1024px) {
-          .db-charts-row { grid-template-columns: 1fr !important; }
+          .db-charts-row { grid-template-columns: 1fr; }
+          .db-age-grid { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 768px) {
+          .db-container { padding: 16px 14px; }
+          .db-hero { padding: 22px 18px; }
+          .db-stat-grid { grid-template-columns: repeat(3,1fr); }
+          .db-charts-row { grid-template-columns: 1fr; }
+          .db-age-grid { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 640px) {
+          .db-container { padding: 12px 10px; }
+          .db-hero { padding: 18px 14px; border-radius: 16px; }
+          .db-hero h1 { font-size: 18px !important; }
+          .db-hero p { font-size: 12px !important; }
+          .db-stat-grid { grid-template-columns: 1fr 1fr; }
+          .db-stat-grid > div:last-child { grid-column: 1 / -1; }
+          .db-charts-row { grid-template-columns: 1fr; }
+          .db-age-grid { grid-template-columns: 1fr 1fr; }
+          .db-map-legend { display: none !important; }
+          .db-map-box { height: 280px !important; }
+        }
+        @media (max-width: 400px) {
+          .db-stat-grid { grid-template-columns: 1fr; }
+          .db-stat-grid > div:last-child { grid-column: auto; }
+          .db-age-grid { grid-template-columns: 1fr; }
         }
       `}</style>
     </div>
