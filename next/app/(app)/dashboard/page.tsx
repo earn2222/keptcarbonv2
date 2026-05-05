@@ -289,7 +289,7 @@ export default function DashboardPage() {
             </div>
             <div className="db-map-legend" style={{ display: "flex", alignItems: "center", gap: 14 }}>
               {[
-                { el: <span style={{ display:"inline-block", width:24, height:3, background:"repeating-linear-gradient(90deg,#0284c7 0,#0284c7 5px,transparent 5px,transparent 9px)", borderRadius:2 }} />, text: "ขอบเขตที่วาด / SHP" },
+                { el: <span style={{ display:"inline-block", width:24, height:3, background:"#ea580c", borderRadius:2 }} />, text: "ขอบเขตที่วาด / SHP" },
                 { el: <span style={{ display:"inline-block", width:16, height:11, borderRadius:3, background:"rgba(34,197,94,0.5)", border:"2px solid #2d9e5f" }} />, text: "แปลงที่ตรวจจับ" },
               ].map(({ el, text }) => (
                 <span key={text} style={{ display:"inline-flex", alignItems:"center", gap:7, fontSize:12, fontWeight:700, color:"#374151" }}>
@@ -298,7 +298,7 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
-          <div className="db-map-box" style={{ position: "relative", height: 460 }}>
+          <div className="db-map-box" style={{ position: "relative", height: 600 }}>
             <DashboardMap plots={mapPlots} bbox={null} />
             {mapPlots.length === 0 && (
               <div style={{
@@ -496,7 +496,7 @@ export default function DashboardPage() {
           .db-charts-row { grid-template-columns: 1fr; }
           .db-age-grid { grid-template-columns: 1fr 1fr; }
           .db-map-legend { display: none !important; }
-          .db-map-box { height: 280px !important; }
+          .db-map-box { height: 400px !important; }
         }
         @media (max-width: 400px) {
           .db-stat-grid { grid-template-columns: 1fr; }

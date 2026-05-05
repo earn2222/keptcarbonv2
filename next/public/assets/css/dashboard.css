@@ -1757,41 +1757,7 @@
   font-weight: 600;
 }
 
-/* Map legend bottom-left overlay */
-.dv3-map-legend {
-  position: absolute;
-  bottom: 42px;
-  left: 12px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 10px;
-  padding: 8px 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
-  font-size: 11px;
-  z-index: 10;
-  min-width: 120px;
-}
 
-.dv3-legend-title {
-  font-weight: 700;
-  color: #374151;
-  margin-bottom: 6px;
-  font-size: 11px;
-}
-
-.dv3-legend-gradient {
-  height: 10px;
-  border-radius: 5px;
-  background: linear-gradient(90deg, #bbf7d0, #4ade80, #16a34a, #166534);
-  margin-bottom: 4px;
-}
-
-.dv3-legend-scale {
-  display: flex;
-  justify-content: space-between;
-  color: #6b7280;
-  font-size: 10px;
-  font-weight: 600;
-}
 
 /* ── Charts Row (2 columns) ── */
 .dv3-charts-row {

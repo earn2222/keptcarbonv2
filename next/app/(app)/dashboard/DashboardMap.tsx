@@ -42,6 +42,7 @@ export default function DashboardMap({
             ],
             tileSize: 256,
             attribution: "© Esri",
+            maxzoom: 18,
           },
         },
         layers: [{ id: "satellite", type: "raster", source: "satellite" }],
@@ -100,16 +101,15 @@ export default function DashboardMap({
         id: "plots-boundary-fill",
         type: "fill",
         source: "plots-boundary",
-        paint: { "fill-color": "#0ea5e9", "fill-opacity": 0.10 },
+        paint: { "fill-color": "#f97316", "fill-opacity": 0.12 },
       });
       map.addLayer({
         id: "plots-boundary-line",
         type: "line",
         source: "plots-boundary",
         paint: {
-          "line-color": "#0284c7",
-          "line-width": 2,
-          "line-dasharray": [6, 3],
+          "line-color": "#ea580c",
+          "line-width": 2.5,
         },
       });
 
@@ -123,15 +123,7 @@ export default function DashboardMap({
         type: "fill",
         source: "plots-detected",
         paint: {
-          "fill-color": [
-            "interpolate",
-            ["linear"],
-            ["coalesce", ["get", "carbon"], 0],
-            0,   "#bbf7d0",
-            50,  "#4ade80",
-            200, "#16a34a",
-            600, "#166534",
-          ],
+          "fill-color": "#2d9e5f",
           "fill-opacity": 0.55,
         },
       });
@@ -142,40 +134,13 @@ export default function DashboardMap({
         paint: { "line-color": "#15803d", "line-width": 1.2, "line-opacity": 0.7 },
       });
 
-      /* ── Popup ── */
-      map.on("click", "plots-detected-fill", (e) => {
-        if (!e.features?.length) return;
-        const p = e.features[0].properties ?? {};
-        new maplibregl.Popup({ closeButton: true, maxWidth: "280px" })
-          .setLngLat(e.lngLat)
-          .setHTML(`
-            <div style="font-family:inherit;font-size:13px;line-height:1.6">
-              <div style="font-weight:800;font-size:14px;color:#15803d;margin-bottom:6px">
-                🌿 ${p.name ?? "แปลงไม่มีชื่อ"}
-              </div>
-              ${p.amphoe ? `<div style="color:#6b7280;font-size:11px;margin-bottom:4px">อ.${p.amphoe}</div>` : ""}
-              <div style="display:flex;flex-direction:column;gap:3px">
-                <div>พื้นที่: <b>${Number(p.area).toFixed(2)} ไร่</b></div>
-                <div>คาร์บอน: <b>${Number(p.carbon).toFixed(1)} tCO₂</b></div>
-                ${Number(p.age) > 0 ? `<div>อายุยาง: <b>${p.age} ปี</b></div>` : ""}
-              </div>
-            </div>
-          `)
-          .addTo(map);
-      });
 
-      map.on("mouseenter", "plots-detected-fill", () => {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", "plots-detected-fill", () => {
-        map.getCanvas().style.cursor = "";
-      });
 
       /* ── Fit bounds ── */
       if (bbox) {
         map.fitBounds(
           [[bbox.minLng, bbox.minLat], [bbox.maxLng, bbox.maxLat]],
-          { padding: 60, duration: 1000, maxZoom: 13 },
+          { padding: 60, duration: 1000, maxZoom: 16 },
         );
       } else if (detectedFeatures.length > 0) {
         // Fallback: walk a sample of coords
@@ -198,7 +163,7 @@ export default function DashboardMap({
           const lats = allCoords.map(([, y]) => y);
           map.fitBounds(
             [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-            { padding: 60, duration: 1000, maxZoom: 13 },
+            { padding: 60, duration: 1000, maxZoom: 16 },
           );
         }
       }
@@ -214,16 +179,7 @@ export default function DashboardMap({
     <div style={{ position: "relative", height: "100%" }}>
       <div id="dashboard-map" ref={containerRef} style={{ height: "100%" }} />
 
-      {/* Carbon gradient legend */}
-      <div className="dv3-map-legend">
-        <div className="dv3-legend-title">ระดับคาร์บอน (tCO₂)</div>
-        <div className="dv3-legend-gradient" />
-        <div className="dv3-legend-scale">
-          <span>ต่ำ</span>
-          <span>กลาง</span>
-          <span>สูง</span>
-        </div>
-      </div>
+
     </div>
   );
 }
