@@ -46,6 +46,7 @@ export default function MapDrawPage() {
   const [drawing, setDrawing] = useState(false);
   const drawingRef = useRef(false);
   const vertsRef = useRef<LngLat[]>([]);
+  const [vertCount, setVertCount] = useState(0);
   const finalGJRef = useRef<GeoJSON.Feature | null>(null);
   const [drawDone, setDrawDone] = useState(false);
   const [drawPreview, setDrawPreview] = useState("—");
@@ -363,8 +364,9 @@ export default function MapDrawPage() {
       }
       
       pts.push([e.lngLat.lng, e.lngLat.lat]);
+      setVertCount(pts.length);
       previewDraw();
-      setStatus(`จุดที่ ${pts.length} — คลิกบรรจบจุดแรกเพื่อปิดแปลง`);
+      setStatus(`จุดที่ ${pts.length}${pts.length >= 3 ? " — กดปุ่ม \"เสร็จสิ้น\" หรือ Double-click เพื่อจบการวาด" : " — คลิกต่อไปเพื่อเพิ่มจุด"}`);
     };
     const onDbl = (e: maplibregl.MapMouseEvent) => {
       if (!drawingRef.current || vertsRef.current.length < 3) return;
@@ -470,6 +472,7 @@ export default function MapDrawPage() {
     drawingRef.current = false;
     setDrawing(false);
     setDrawDone(false);
+    setVertCount(0);
     setDrawPreview("—");
     setHasGeom(false);
     setDrawnGeometry(null);
@@ -979,11 +982,19 @@ export default function MapDrawPage() {
                     <>
                       <div className="mds-draw-hint">
                         <div className="mds-dot-pulse" />
-                        คลิกบนแผนที่เพื่อวาดจุด · <strong>คลิกบรรจบจุดแรก</strong> หรือ Double-click เพื่อจบการวาด
+                        คลิกบนแผนที่เพื่อเพิ่มจุด · <strong>Double-click</strong> หรือกดปุ่ม <strong>"เสร็จสิ้น"</strong> เพื่อจบการวาด
                       </div>
-                      <div style={{ marginTop: "10px" }}>
+                      <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
+                        <button
+                          className="mds-btn mds-btn-solid mds-finish-btn-mobile"
+                          style={{ flex: 1 }}
+                          onClick={() => finishDraw()}
+                          disabled={vertCount < 3}
+                        >
+                          <i className="bi bi-check-circle" /> เสร็จสิ้น วาดแปลง
+                        </button>
                         <button className="mds-btn mds-btn-danger" onClick={clearDraw}>
-                          <i className="bi bi-x-circle" /> ยกเลิกการวาด
+                          <i className="bi bi-x-circle" /> ยกเลิก
                         </button>
                       </div>
                     </>
@@ -996,8 +1007,8 @@ export default function MapDrawPage() {
                       </div>
                       <ol className="mds-instr-list">
                         <li>คลิกปุ่ม <strong>&ldquo;เริ่มวาดแปลง&rdquo;</strong> ด้านล่าง</li>
-                        <li>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต</li>
-                        <li>Double-click หรือคลิกจุดแรกเพื่อปิดแปลง</li>
+                        <li>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต (อย่างน้อย 3 จุด)</li>
+                        <li>กดปุ่ม <strong>&ldquo;เสร็จสิ้น วาดแปลง&rdquo;</strong> หรือ Double-click เพื่อจบการวาด</li>
                         <li>แก้ไข: ลากจุดเพื่อย้ายตำแหน่ง</li>
                       </ol>
                       <button className="mds-btn mds-btn-solid" onClick={startDrawFlow}>

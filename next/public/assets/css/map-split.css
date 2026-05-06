@@ -3034,3 +3034,10 @@ nextjs-portal,
   .mds-panel-topbar-title { font-size: 13px; }
   .mds-panel-topbar-sub { font-size: 10px; }
 }
+
+/* Desktop: hide the "finish draw" button — users can double-click or click first point */
+@media (min-width: 769px) {
+  .mds-finish-btn-mobile {
+    display: none !important;
+  }
+}
