@@ -59,11 +59,11 @@ export function LoginModal() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setAlert({ type: "success", msg: "✓ เข้าสู่ระบบสำเร็จ! กำลังนำไปยังแดชบอร์ด..." });
+        setAlert({ type: "success", msg: "✓ เข้าสู่ระบบสำเร็จ! กำลังนำไปยังหน้าหลัก..." });
         await refresh();
         setTimeout(() => {
           closeModal();
-          router.push("/dashboard");
+          router.push("/");
         }, 800);
       } else {
         setAlert({ type: "error", msg: "✗ " + (data.error || "เข้าสู่ระบบไม่สำเร็จ") });
@@ -197,10 +197,10 @@ export function RegisterModal() {
 
       if (res.ok && data.success) {
         await refresh();
-        setAlert({ type: "success", msg: "✓ สมัครสมาชิกสำเร็จ! กำลังนำไปยังแดชบอร์ด..." });
+        setAlert({ type: "success", msg: "✓ สมัครสมาชิกสำเร็จ! กำลังนำไปยังหน้าหลัก..." });
         setTimeout(() => {
           closeModal();
-          router.push("/dashboard");
+          router.push("/");
         }, 900);
       } else {
         setAlert({ type: "error", msg: "✗ " + (data.error || "สมัครสมาชิกไม่สำเร็จ") });

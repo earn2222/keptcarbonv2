@@ -61,7 +61,7 @@ export default function UserManagementPage() {
     useEffect(() => {
         if (ready) {
             if (!user || user.role !== "admin") {
-                router.replace("/dashboard");
+                router.replace("/");
             } else {
                 fetchUsers();
             }

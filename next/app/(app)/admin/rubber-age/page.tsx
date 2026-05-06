@@ -144,7 +144,7 @@ export default function AdminRubberAgePage() {
     // Guard: admin only
     useEffect(() => {
         if (ready && (!user || user.role !== "admin")) {
-            router.replace("/dashboard");
+            router.replace("/");
         }
     }, [ready, user, router]);
 

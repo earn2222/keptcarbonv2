@@ -117,8 +117,8 @@ export async function GET(request: NextRequest) {
       provider: dbUser.provider,
     });
 
-    // Redirect to dashboard
-    const response = NextResponse.redirect(new URL("/dashboard", request.url));
+    // Redirect to home page
+    const response = NextResponse.redirect(new URL("/", request.url));
 
     response.cookies.set(AUTH_COOKIE, token, {
       httpOnly: true,

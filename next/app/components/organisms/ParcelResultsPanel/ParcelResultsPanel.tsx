@@ -422,9 +422,9 @@ export function ParcelResultsPanel({
 
         setSaveState("done");
         
-        // Redirect to dashboard after a short delay
+        // Redirect to home page after a short delay
         setTimeout(() => {
-            router.push("/dashboard");
+            router.push("/");
         }, 1500);
     };
 
