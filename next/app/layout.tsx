@@ -12,17 +12,17 @@ const notoSansThai = Noto_Sans_Thai({
 });
 
 export const metadata: Metadata = {
-  title: "KeptCarbon - สวนยางพารายั่งยืน",
+  title: "KeptCarbon",
   description: "แพลตฟอร์มจัดการและประเมินคาร์บอนเครดิตสำหรับสวนยางพารา",
   keywords: ["สวนยางพารา", "คาร์บอนเครดิต", "ยางพารา", "KeptCarbon"],
   icons: {
     icon: [
-      { url: "/assets/img/favicon.png", type: "image/png" },
+      { url: "/assets/img/keptcarbon-logo.png", type: "image/png" },
     ],
     apple: [
-      { url: "/assets/img/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/assets/img/keptcarbon-logo.png", sizes: "180x180", type: "image/png" },
     ],
-    shortcut: "/assets/img/favicon.png",
+    shortcut: "/assets/img/keptcarbon-logo.png",
   },
   manifest: "/site.webmanifest",
 };
