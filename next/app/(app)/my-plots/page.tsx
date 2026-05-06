@@ -558,27 +558,38 @@ export default function MyPlotsPage() {
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const stored = localStorage.getItem("user_saved_plots");
-      if (stored) setPlots(JSON.parse(stored));
-    } catch {}
-  }, []);
+    if (ready && user) {
+      try {
+        const key = `user_saved_plots_${user.id}`;
+        const stored = localStorage.getItem(key);
+        if (stored) setPlots(JSON.parse(stored));
+        else setPlots([]); // Clear if no plots for this user
+      } catch {}
+    }
+  }, [ready, user]);
+
 
   const handleDelete = (id: string) => {
+    if (!user) return;
     const updated = plots.filter(p => p.id !== id);
     setPlots(updated);
     try {
-      localStorage.setItem("user_saved_plots", JSON.stringify(updated));
+      const key = `user_saved_plots_${user.id}`;
+      localStorage.setItem(key, JSON.stringify(updated));
     } catch {}
   };
 
+
   const handleDeleteAll = () => {
+    if (!user) return;
     setPlots([]);
     try {
-      localStorage.removeItem("user_saved_plots");
+      const key = `user_saved_plots_${user.id}`;
+      localStorage.removeItem(key);
     } catch {}
     setConfirmDeleteAll(false);
   };
+
 
   const totalArea = plots.reduce((s, p) => s + (p.areaRai || 0), 0);
   const totalCarbon = plots.reduce((s, p) => s + (p.carbonTotal || 0), 0);
