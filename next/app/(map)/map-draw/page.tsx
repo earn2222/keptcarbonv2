@@ -159,14 +159,14 @@ export default function MapDrawPage() {
         id: "draw-line-l",
         type: "line",
         source: "draw-line",
-        paint: { "line-color": "#2d9e5f", "line-width": 2, "line-dasharray": [3, 2] },
+        paint: { "line-color": "#3b82f6", "line-width": 2, "line-dasharray": [3, 2] },
       });
       map.addSource("draw-fill", { type: "geojson", data: emptyFC() });
       map.addLayer({
         id: "draw-fill-l",
         type: "fill",
         source: "draw-fill",
-        paint: { "fill-color": "#2d9e5f", "fill-opacity": 0.05 },
+        paint: { "fill-color": "#3b82f6", "fill-opacity": 0.05 },
       });
       map.addSource("draw-verts", { type: "geojson", data: emptyFC() });
       map.addLayer({
@@ -174,7 +174,7 @@ export default function MapDrawPage() {
         type: "circle",
         source: "draw-verts",
         paint: {
-          "circle-color": "#2d9e5f",
+          "circle-color": "#3b82f6",
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 4, 14, 6],
           "circle-stroke-color": "rgba(255,255,255,0.95)",
           "circle-stroke-width": 2,
@@ -185,13 +185,13 @@ export default function MapDrawPage() {
         id: "plot-fill",
         type: "fill",
         source: "plot",
-        paint: { "fill-color": "#2d9e5f", "fill-opacity": 0.05 },
+        paint: { "fill-color": "#3b82f6", "fill-opacity": 0.05 },
       });
       map.addLayer({
         id: "plot-line",
         type: "line",
         source: "plot",
-        paint: { "line-color": "#2d9e5f", "line-width": 2.5 },
+        paint: { "line-color": "#3b82f6", "line-width": 2.5 },
       });
 
       map.addSource("matched-parcels", { type: "geojson", data: emptyFC() });
