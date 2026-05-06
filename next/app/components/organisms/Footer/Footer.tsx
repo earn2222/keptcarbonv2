@@ -18,7 +18,7 @@ export default function Footer() {
           <strong className="px-1 sitename">KeptCarbon</strong>
         </div>
         <div className="credits">
-          Designed by <a href="https://engrids.co.th/">EnGRIDs</a>
+          Designed by <a href="https://engrids.soc.cmu.ac.th/">EnGRIDs</a>
         </div>
       </div>
     </footer>
