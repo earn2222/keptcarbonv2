@@ -214,8 +214,8 @@ export default function MapDrawPage() {
         if (!e.features?.length) return;
         const p = (e.features[0].properties ?? {}) as Record<string, unknown>;
         const html = `
-          <div style="font-family:var(--font,inherit); font-size:12px; line-height:1.55; color:#222; min-width:200px;">
-            <div style="font-weight:700; font-size:13px; margin-bottom:5px; color:#1e7a47;">${fmt(p.farm_name)}</div>
+          <div style="font-family:var(--font,inherit); font-size:14px; line-height:1.6; color:#222; min-width:240px;">
+            <div style="font-weight:700; font-size:16px; margin-bottom:6px; color:#1e7a47;">${fmt(p.farm_name)}</div>
             <div><b>เลขประจำตัว:</b> ${fmt(p.farm_idc)}</div>
             <div><b>เลขคำขอ:</b> ${fmt(p.app_no)} (แปลงที่ ${fmt(p.land_seq)})</div>
             <div><b>หมู่ ${fmt(p.land_moo)}</b> ต.${fmt(p.tambon)} อ.${fmt(p.amphoe_t)} จ.${fmt(p.province)}</div>
