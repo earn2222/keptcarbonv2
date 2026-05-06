@@ -18,10 +18,10 @@ Chart.register(
 
 /* ── Site hero background (matches my-plots page) ── */
 const HERO_BG =
-    "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
-    "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
-    "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
-    "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
+  "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
+  "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
+  "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
+  "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
 
 type SavedPlot = {
   id: string; name: string;
@@ -31,10 +31,10 @@ type SavedPlot = {
 };
 
 const BUCKETS = [
-  { key: "1-5",   label: "1–5 ปี",   min: 1,  max: 5,  color: "#4ade80", dark: "#15803d" },
-  { key: "6-12",  label: "6–12 ปี",  min: 6,  max: 12, color: "#22c55e", dark: "#166534" },
+  { key: "1-5", label: "1–5 ปี", min: 1, max: 5, color: "#4ade80", dark: "#15803d" },
+  { key: "6-12", label: "6–12 ปี", min: 6, max: 12, color: "#22c55e", dark: "#166534" },
   { key: "13-18", label: "13–18 ปี", min: 13, max: 18, color: "#2d9e5f", dark: "#1a5c38" },
-  { key: "19+",   label: "19+ ปี",   min: 19, max: 99, color: "#1e7a47", dark: "#14532d" },
+  { key: "19+", label: "19+ ปี", min: 19, max: 99, color: "#1e7a47", dark: "#14532d" },
 ];
 
 /* ── animated counter ── */
@@ -127,7 +127,7 @@ function DonutChart({ bucketData, total }: {
       },
     });
     return () => { chartRef.current?.destroy(); chartRef.current = null; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bucketData, total]);
 
   if (!nonEmpty.length) return (
@@ -192,7 +192,7 @@ export default function DashboardPage() {
   }, []);
 
   const totalAreaRai = useMemo(() => plots.reduce((s, p) => s + (p.areaRai || 0), 0), [plots]);
-  const totalCarbon  = useMemo(() => plots.reduce((s, p) => s + (p.carbonTotal || 0), 0), [plots]);
+  const totalCarbon = useMemo(() => plots.reduce((s, p) => s + (p.carbonTotal || 0), 0), [plots]);
 
   const bucketData = useMemo(() =>
     BUCKETS.map(b => {
@@ -259,9 +259,9 @@ export default function DashboardPage() {
 
         {/* ══ 3 Stat cards ══ */}
         <div className="db-stat-grid" style={{ gap: 16, marginBottom: 20 }}>
-          <StatCard label="แปลงที่บันทึกทั้งหมด" value={plots.length}  unit="แปลง"  color="#2d9e5f" />
-          <StatCard label="พื้นที่ยางพารารวม"   value={totalAreaRai}  unit="ไร่"    color="#0d9488" />
-          <StatCard label="คาร์บอนที่กักเก็บ"  value={totalCarbon}   unit="tCO₂"  color="#059669" />
+          <StatCard label="แปลงที่บันทึกทั้งหมด" value={plots.length} unit="แปลง" color="#2d9e5f" />
+          <StatCard label="พื้นที่ยางพารารวม" value={totalAreaRai} unit="ไร่" color="#0d9488" />
+          <StatCard label="คาร์บอนที่กักเก็บ" value={totalCarbon} unit="tCO₂" color="#059669" />
         </div>
 
         {/* ══ Map ══ */}
@@ -289,10 +289,10 @@ export default function DashboardPage() {
             </div>
             <div className="db-map-legend" style={{ display: "flex", alignItems: "center", gap: 14 }}>
               {[
-                { el: <span style={{ display:"inline-block", width:24, height:3, background:"#ea580c", borderRadius:2 }} />, text: "ขอบเขตที่วาด / SHP" },
-                { el: <span style={{ display:"inline-block", width:16, height:11, borderRadius:3, background:"rgba(34,197,94,0.5)", border:"2px solid #2d9e5f" }} />, text: "แปลงที่ตรวจจับ" },
+                { el: <span style={{ display: "inline-block", width: 24, height: 3, background: "#d75a28ff", borderRadius: 2 }} />, text: "ขอบเขตที่วาด / SHP" },
+                { el: <span style={{ display: "inline-block", width: 16, height: 11, borderRadius: 3, background: "#087804ff", border: "2px solid #087804ff" }} />, text: "แปลงที่ตรวจจับ" },
               ].map(({ el, text }) => (
-                <span key={text} style={{ display:"inline-flex", alignItems:"center", gap:7, fontSize:12, fontWeight:700, color:"#374151" }}>
+                <span key={text} style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 700, color: "#374151" }}>
                   {el}{text}
                 </span>
               ))}
@@ -304,112 +304,112 @@ export default function DashboardPage() {
         </div>
 
         {/* ══ Charts row ══ */}
-        <div className="db-charts-row" style={{ gap:16, marginBottom:20 }}>
+        <div className="db-charts-row" style={{ gap: 16, marginBottom: 20 }}>
 
           {/* Donut */}
           <div style={S}>
-            <div style={{ padding:"14px 20px", borderBottom:"1px solid rgba(45,158,95,0.08)", display:"flex", alignItems:"center", gap:8 }}>
-              <i className="bi bi-pie-chart-fill" style={{ color:"#2d9e5f", fontSize:15 }} />
-              <span style={{ fontSize:14, fontWeight:800, color:"#1a3d2b" }}>สัดส่วนแปลงตามช่วงอายุ</span>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(45,158,95,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+              <i className="bi bi-pie-chart-fill" style={{ color: "#2d9e5f", fontSize: 15 }} />
+              <span style={{ fontSize: 14, fontWeight: 800, color: "#1a3d2b" }}>สัดส่วนแปลงตามช่วงอายุ</span>
             </div>
-            <div style={{ padding:"20px 20px 22px", height:340 }}>
+            <div style={{ padding: "20px 20px 22px", height: 340 }}>
               <DonutChart bucketData={bucketData} total={plots.length} />
             </div>
           </div>
 
           {/* Age info cards (replaces Area chart to balance layout) */}
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:16, flexWrap:"wrap", gap:12 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
               <div>
-                <h2 style={{ fontSize:17, fontWeight:900, color:"#1a3d2b", margin:"0 0 4px", display:"flex", alignItems:"center", gap:8 }}>
-                  <i className="bi bi-tree-fill" style={{ color:"#2d9e5f" }} />
+                <h2 style={{ fontSize: 17, fontWeight: 900, color: "#1a3d2b", margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <i className="bi bi-tree-fill" style={{ color: "#2d9e5f" }} />
                   คาร์บอนแต่ละช่วงอายุยาง
                 </h2>
-                <p style={{ fontSize:13, color:"#64748b", margin:0 }}>ข้อมูลแสดงแยกตามกลุ่มอายุยางพารา</p>
+                <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>ข้อมูลแสดงแยกตามกลุ่มอายุยางพารา</p>
               </div>
               {totalCarbon > 0 && (
                 <div style={{
-                  display:"inline-flex", alignItems:"center", gap:7,
-                  background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",
-                  border:"1px solid rgba(45,158,95,0.2)",
-                  color:"#166534", padding:"9px 16px", borderRadius:50,
-                  fontSize:13, fontWeight:800,
-                  boxShadow:"0 2px 8px rgba(45,158,95,0.10)",
+                  display: "inline-flex", alignItems: "center", gap: 7,
+                  background: "linear-gradient(135deg,#f0fdf4,#dcfce7)",
+                  border: "1px solid rgba(45,158,95,0.2)",
+                  color: "#166534", padding: "9px 16px", borderRadius: 50,
+                  fontSize: 13, fontWeight: 800,
+                  boxShadow: "0 2px 8px rgba(45,158,95,0.10)",
                 }}>
                   <i className="bi bi-cloud-arrow-up-fill" />
-                  รวม {totalCarbon.toLocaleString("th-TH",{maximumFractionDigits:1})} tCO₂
+                  รวม {totalCarbon.toLocaleString("th-TH", { maximumFractionDigits: 1 })} tCO₂
                 </div>
               )}
             </div>
 
-            <div className="db-age-grid" style={{ gap:14, flex: 1 }}>
+            <div className="db-age-grid" style={{ gap: 14, flex: 1 }}>
               {bucketData.map(b => {
                 const pct = maxCarbon > 0 ? Math.round((b.carbon / maxCarbon) * 100) : 0;
                 return (
                   <div key={b.key} style={{
-                    background:"#fff",
-                    borderRadius:18,
-                    border:`1px solid rgba(45,158,95,0.12)`,
-                    borderTop:`4px solid ${b.color}`,
-                    boxShadow:"0 2px 12px rgba(45,158,95,0.07)",
-                    overflow:"hidden",
+                    background: "#fff",
+                    borderRadius: 18,
+                    border: `1px solid rgba(45,158,95,0.12)`,
+                    borderTop: `4px solid ${b.color}`,
+                    boxShadow: "0 2px 12px rgba(45,158,95,0.07)",
+                    overflow: "hidden",
                     display: "flex", flexDirection: "column",
-                    transition:"transform .25s, box-shadow .25s",
+                    transition: "transform .25s, box-shadow .25s",
                   }}
-                    onMouseEnter={e=>{(e.currentTarget as HTMLDivElement).style.transform="translateY(-3px)";(e.currentTarget as HTMLDivElement).style.boxShadow="0 10px 28px rgba(45,158,95,0.13)";}}
-                    onMouseLeave={e=>{(e.currentTarget as HTMLDivElement).style.transform="";(e.currentTarget as HTMLDivElement).style.boxShadow="0 2px 12px rgba(45,158,95,0.07)";}}
+                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 10px 28px rgba(45,158,95,0.13)"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = ""; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 12px rgba(45,158,95,0.07)"; }}
                   >
                     {/* Card top */}
-                    <div style={{ padding:"16px 18px 10px", display:"flex", alignItems:"center", gap:10 }}>
-                      <div style={{ flex:1 }}>
-                        <div style={{ fontSize:15, fontWeight:800, color:"#1a3d2b" }}>{b.label}</div>
-                        <div style={{ fontSize:11, color:"#64748b", fontWeight:500, marginTop:1 }}>
+                    <div style={{ padding: "16px 18px 10px", display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#1a3d2b" }}>{b.label}</div>
+                        <div style={{ fontSize: 11, color: "#64748b", fontWeight: 500, marginTop: 1 }}>
                           {b.key === "1-5" ? "ระยะเริ่มต้น" : b.key === "6-12" ? "ระยะเปิดกรีด" : b.key === "13-18" ? "ระยะสูงสุด" : "ระยะคงที่"}
                         </div>
                       </div>
                       <span style={{
-                        fontSize:11, fontWeight:700, padding:"3px 10px",
-                        background:"#f8fafc", color:"#64748b", borderRadius:4,
-                        border:`1px solid #e2e8f0`,
+                        fontSize: 11, fontWeight: 700, padding: "3px 10px",
+                        background: "#f8fafc", color: "#64748b", borderRadius: 4,
+                        border: `1px solid #e2e8f0`,
                       }}>
                         {pct}%
                       </span>
                     </div>
 
                     {/* Carbon number */}
-                    <div style={{ padding:"4px 18px 8px" }}>
-                      <div style={{ display:"flex", alignItems:"baseline", gap:5 }}>
-                        <span style={{ fontSize:28, fontWeight:900, color:b.dark, letterSpacing:-1.5, lineHeight:1 }}>
-                          {b.carbon.toLocaleString("th-TH",{maximumFractionDigits:1})}
+                    <div style={{ padding: "4px 18px 8px" }}>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                        <span style={{ fontSize: 28, fontWeight: 900, color: b.dark, letterSpacing: -1.5, lineHeight: 1 }}>
+                          {b.carbon.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                         </span>
-                        <span style={{ fontSize:12, fontWeight:700, color:"#6b7280" }}>tCO₂</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#6b7280" }}>tCO₂</span>
                       </div>
-                      <div style={{ fontSize:10.5, color:"#9ca3af", fontWeight:600, marginTop:2 }}>ปริมาณคาร์บอน</div>
+                      <div style={{ fontSize: 10.5, color: "#9ca3af", fontWeight: 600, marginTop: 2 }}>ปริมาณคาร์บอน</div>
                     </div>
 
                     {/* Progress */}
-                    <div style={{ padding:"4px 18px 12px", display:"flex", alignItems:"center", gap:8 }}>
-                      <div style={{ flex:1, height:6, background:"#f0f0f0", borderRadius:4, overflow:"hidden" }}>
-                        <div style={{ height:"100%", width:`${pct}%`, background:`linear-gradient(90deg,${b.color}99,${b.color})`, borderRadius:4, minWidth:4, transition:"width 1.2s cubic-bezier(.16,1,.3,1)" }} />
+                    <div style={{ padding: "4px 18px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ flex: 1, height: 6, background: "#f0f0f0", borderRadius: 4, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg,${b.color}99,${b.color})`, borderRadius: 4, minWidth: 4, transition: "width 1.2s cubic-bezier(.16,1,.3,1)" }} />
                       </div>
                     </div>
 
                     {/* Footer */}
                     <div style={{
                       marginTop: "auto",
-                      padding:"12px 18px",
-                      borderTop:"1px solid rgba(0,0,0,0.04)",
-                      background:"#f8fafc",
-                      display:"flex", alignItems:"center", justifyContent:"space-between",
+                      padding: "12px 18px",
+                      borderTop: "1px solid rgba(0,0,0,0.04)",
+                      background: "#f8fafc",
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
                     }}>
                       {[
-                        { label:"จำนวนแปลง", val:b.plotCount.toLocaleString("th-TH"), unit:"แปลง" },
-                        { label:"พื้นที่", val:b.areaRai.toLocaleString("th-TH",{maximumFractionDigits:1}), unit:"ไร่" },
+                        { label: "จำนวนแปลง", val: b.plotCount.toLocaleString("th-TH"), unit: "แปลง" },
+                        { label: "พื้นที่", val: b.areaRai.toLocaleString("th-TH", { maximumFractionDigits: 1 }), unit: "ไร่" },
                       ].map(({ label, val, unit }) => (
-                        <div key={unit} style={{ display:"flex", flexDirection:"column", gap:1 }}>
-                          <div style={{ fontSize:10, color:"#94a3b8", fontWeight:600 }}>{label}</div>
-                          <div style={{ fontSize:13, fontWeight:700, color:"#1a3d2b" }}>
-                            {val} <span style={{ fontSize:11, color:"#64748b", fontWeight:500 }}>{unit}</span>
+                        <div key={unit} style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                          <div style={{ fontSize: 10, color: "#94a3b8", fontWeight: 600 }}>{label}</div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#1a3d2b" }}>
+                            {val} <span style={{ fontSize: 11, color: "#64748b", fontWeight: 500 }}>{unit}</span>
                           </div>
                         </div>
                       ))}
