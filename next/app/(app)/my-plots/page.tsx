@@ -133,11 +133,11 @@ function ForecastBody({
                 <div style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, background: isFirst ? dotColor : "#fff", border: `2.5px solid ${dotColor}`, boxShadow: isFirst ? "0 0 0 4px rgba(5,150,105,0.12)" : "none", zIndex: 1, marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {isFirst && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
                 </div>
-                <div style={{ fontSize: 9.5, fontWeight: isFirst ? 700 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 3, textAlign: "center" }}>{m.label}</div>
-                <div style={{ fontSize: isFirst ? 13 : 12, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
-                <div style={{ fontSize: 8, color: "#94a3b8", marginTop: 1, textAlign: "center" }}>tCO₂</div>
+                <div style={{ fontSize: 11.5, fontWeight: isFirst ? 700 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 3, textAlign: "center" }}>{m.label}</div>
+                <div style={{ fontSize: isFirst ? 15 : 14, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
+                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1, textAlign: "center" }}>tCO₂</div>
                 {!isFirst && changeFromBase !== 0 && (
-                  <div style={{ marginTop: 4, fontSize: 8.5, fontWeight: 700, color: changeFromBase > 0 ? "#16a34a" : "#dc2626", background: changeFromBase > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", padding: "1px 5px", borderRadius: 6, textAlign: "center" }}>
+                  <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: changeFromBase > 0 ? "#16a34a" : "#dc2626", background: changeFromBase > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", padding: "1px 5px", borderRadius: 6, textAlign: "center" }}>
                     {changeFromBase > 0 ? "+" : ""}{changePct.toFixed(1)}%
                   </div>
                 )}
@@ -254,8 +254,8 @@ function ForecastBody({
 
             {/* Year labels along x-axis */}
             {svgPts.map((p, i) => (
-              <text key={i} x={p.x} y={H - 6}
-                textAnchor="middle" fontSize={8}
+              <text key={i} x={p.x} y={H - 10}
+                textAnchor="middle" fontSize={11}
                 fontWeight={i === 0 ? 700 : 400}
                 fill={i === 0 ? "#059669" : "#94a3b8"}
               >
@@ -274,22 +274,22 @@ function ForecastBody({
               return (
                 <g pointerEvents="none">
                   {/* Backdrop blur effect via rect */}
-                  <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={9}
+                  <rect x={ttX} y={ttY} width={ttW + 10} height={ttH + 10} rx={9}
                     fill="#064e3b" opacity={0.95}
                   />
-                  <text x={ttX + ttW / 2} y={ttY + 13}
-                    textAnchor="middle" fontSize={8.5} fill="#6ee7b7" fontWeight={600}
+                  <text x={ttX + (ttW + 10) / 2} y={ttY + 16}
+                    textAnchor="middle" fontSize={11} fill="#6ee7b7" fontWeight={600}
                   >
                     {isFirst ? "ณ ปัจจุบัน" : `อีก ${hp.yr} ปีข้างหน้า`}
                   </text>
-                  <text x={ttX + ttW / 2} y={ttY + 27}
-                    textAnchor="middle" fontSize={11} fill="#ffffff" fontWeight={800}
+                  <text x={ttX + (ttW + 10) / 2} y={ttY + 34}
+                    textAnchor="middle" fontSize={13} fill="#ffffff" fontWeight={800}
                   >
                     {hp.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })} tCO₂
                   </text>
                   {!isFirst && (
-                    <text x={ttX + ttW / 2} y={ttY + 42}
-                      textAnchor="middle" fontSize={8.5}
+                    <text x={ttX + (ttW + 10) / 2} y={ttY + 50}
+                      textAnchor="middle" fontSize={11}
                       fill={changePct >= 0 ? "#34d399" : "#f87171"} fontWeight={700}
                     >
                       {changePct >= 0 ? "▲" : "▼"} {Math.abs(changePct).toFixed(1)}% จากปัจจุบัน

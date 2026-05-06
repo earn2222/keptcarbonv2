@@ -164,29 +164,29 @@ function AgeBarChart({ age, conf, trees }: { age: number; conf: number; trees: n
                                 filter={isMain ? "url(#barShadow)" : undefined}
                                 style={{ transition: "fill 0.15s" }} />
                             {/* % label above bar */}
-                            <text x={cx} y={BASE_Y - bh - 8} textAnchor="middle"
-                                fontSize={isMain ? 12 : isHov ? 11 : 10}
+                            <text x={cx} y={BASE_Y - bh - 10} textAnchor="middle"
+                                fontSize={isMain ? 15 : isHov ? 14 : 13}
                                 fontWeight={isMain ? "900" : isHov ? "700" : "500"}
                                 fill={isMain ? "#065f46" : isHov ? "#059669" : "#94a3b8"}>
                                 {pct}%
                             </text>
                             {/* age label below */}
-                            <text x={cx} y={BASE_Y + 18} textAnchor="middle" fontSize={11}
+                            <text x={cx} y={BASE_Y + 22} textAnchor="middle" fontSize={13}
                                 fontWeight={isMain ? "800" : "500"}
                                 fill={isMain ? "#059669" : isHov ? "#10b981" : "#94a3b8"}>
                                 {a}.0
                             </text>
                             {/* age unit */}
-                            <text x={cx} y={BASE_Y + 30} textAnchor="middle" fontSize={8.5} fill="#cbd5e1" fontWeight="400">ปี</text>
+                            <text x={cx} y={BASE_Y + 36} textAnchor="middle" fontSize={10} fill="#cbd5e1" fontWeight="400">ปี</text>
 
                             {/* tooltip */}
                             {isHov && (
                                 <g pointerEvents="none">
-                                    <rect x={ttLeft} y={ttTop} width={ttW} height={ttH} rx={9} fill="#064e3b" opacity={0.95} />
-                                    <text x={ttLeft + ttW / 2} y={ttTop + 16} textAnchor="middle" fontSize={10} fill="#6ee7b7" fontWeight="600">
+                                    <rect x={ttLeft} y={ttTop} width={ttW} height={ttH + 10} rx={9} fill="#064e3b" opacity={0.95} />
+                                    <text x={ttLeft + ttW / 2} y={ttTop + 18} textAnchor="middle" fontSize={12} fill="#6ee7b7" fontWeight="600">
                                         อายุ {a} ปี · {pct}%
                                     </text>
-                                    <text x={ttLeft + ttW / 2} y={ttTop + 33} textAnchor="middle" fontSize={12} fill="#fff" fontWeight="800">
+                                    <text x={ttLeft + ttW / 2} y={ttTop + 38} textAnchor="middle" fontSize={15} fill="#fff" fontWeight="800">
                                         {co2Val > 0 ? `${co2Val.toLocaleString("th-TH", { maximumFractionDigits: 0 })} tCO₂` : "—"}
                                     </text>
                                     <polygon points={`${cx - 5},${ttTop + ttH} ${cx + 5},${ttTop + ttH} ${cx},${ttTop + ttH + 6}`} fill="#064e3b" opacity={0.95} />
@@ -279,16 +279,16 @@ function ForecastChart({ pts }: { pts: Array<{ yearBE: number; co2: number }> })
 
             {/* Year labels */}
             {svgPts.map(p => (
-                <text key={p.yearBE} x={p.x} y={H - 6} textAnchor="middle" fontSize={8} fill="#94a3b8">
+                <text key={p.yearBE} x={p.x} y={H - 8} textAnchor="middle" fontSize={11} fill="#94a3b8">
                     {p.yearBE}
                 </text>
             ))}
 
             {/* Y axis labels */}
-            <text x={PL + iW + 5} y={PT + 4} fontSize={7.5} fill="#6b9e7e" textAnchor="start">
+            <text x={PL + iW + 8} y={PT + 4} fontSize={10} fill="#6b9e7e" textAnchor="start">
                 {Math.round(maxV).toLocaleString()}
             </text>
-            <text x={PL + iW + 5} y={PT + iH + 4} fontSize={7.5} fill="#6b9e7e" textAnchor="start">
+            <text x={PL + iW + 8} y={PT + iH + 4} fontSize={10} fill="#6b9e7e" textAnchor="start">
                 {Math.round(minV).toLocaleString()}
             </text>
 
@@ -299,11 +299,11 @@ function ForecastChart({ pts }: { pts: Array<{ yearBE: number; co2: number }> })
                 const ttY = hp.y - ttH - 10;
                 return (
                     <g pointerEvents="none">
-                        <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={7} fill="#0f1f17" opacity={0.93} />
-                        <text x={ttX + ttW / 2} y={ttY + 14} textAnchor="middle" fontSize={8.5} fill="#6ee7b7" fontWeight="600">
+                        <rect x={ttX} y={ttY} width={ttW + 10} height={ttH + 10} rx={7} fill="#0f1f17" opacity={0.93} />
+                        <text x={ttX + (ttW + 10) / 2} y={ttY + 16} textAnchor="middle" fontSize={11} fill="#6ee7b7" fontWeight="600">
                             พ.ศ. {hp.yearBE}
                         </text>
-                        <text x={ttX + ttW / 2} y={ttY + 30} textAnchor="middle" fontSize={10.5} fill="#ffffff" fontWeight="700">
+                        <text x={ttX + (ttW + 10) / 2} y={ttY + 34} textAnchor="middle" fontSize={13} fill="#ffffff" fontWeight="700">
                             {hp.co2.toLocaleString("th-TH", { maximumFractionDigits: 0 })} tCO₂
                         </text>
                         <polygon
