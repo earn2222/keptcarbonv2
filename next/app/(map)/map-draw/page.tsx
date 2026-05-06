@@ -87,7 +87,7 @@ export default function MapDrawPage() {
   // Drawn boundary geometry (set when search is confirmed)
   const [drawnGeometry, setDrawnGeometry] = useState<GeoJSON.Geometry | null>(null);
 
-  const runParcelSearchRef = useRef<() => void>(() => {});
+  const runParcelSearchRef = useRef<() => void>(() => { });
 
 
   // ===== MAP INIT =====
@@ -207,6 +207,21 @@ export default function MapDrawPage() {
         source: "matched-parcels",
         paint: { "line-color": "#ff6a00", "line-width": 2.4 },
       });
+      map.addLayer({
+        id: "matched-parcels-label",
+        type: "symbol",
+        source: "matched-parcels",
+        layout: {
+          "text-field": "{plot_index}",
+          "text-size": 16,
+          "text-allow-overlap": false,
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": "#fa0303ff",
+          "text-halo-width": 3,
+        },
+      });
 
       const fmt = (v: unknown) => (v == null || v === "" ? "—" : String(v));
       map.on("click", "matched-parcels-fill", (e) => {
@@ -323,14 +338,14 @@ export default function MapDrawPage() {
       properties: {},
     };
     finalGJRef.current = final;
-    
+
     // We keep draw-line and draw-verts visible so the user can edit them
     // Clear plot so it doesn't double-render
     const map = mapRef.current;
     if (map && mapLoadedRef.current) {
       (map.getSource("plot") as maplibregl.GeoJSONSource).setData(emptyFC());
     }
-    
+
     const sqm = polygonAreaM2(ring);
     const rai = sqm / 1600;
     setDrawPreview(`${rai.toFixed(2)} ไร่ · ${verts.length} จุด`);
@@ -338,7 +353,7 @@ export default function MapDrawPage() {
     setHasGeom(true);
     setStatus(`✓ วาดแปลงเสร็จ — ลากจุดเพื่อแก้ไข หรือคลิกเส้นเพื่อเพิ่มจุด`);
     if (!skipFit) fitPlot();
-    
+
     // Auto process
     runParcelSearchRef.current();
   }, [fitPlot]);
@@ -350,7 +365,7 @@ export default function MapDrawPage() {
     const onClick = (e: maplibregl.MapMouseEvent) => {
       if (!drawingRef.current) return;
       const pts = vertsRef.current;
-      
+
       // Auto-close polygon if clicking near the first point
       if (pts.length >= 3) {
         const firstPt = map.project(pts[0] as [number, number]);
@@ -362,7 +377,7 @@ export default function MapDrawPage() {
           return;
         }
       }
-      
+
       pts.push([e.lngLat.lng, e.lngLat.lat]);
       setVertCount(pts.length);
       previewDraw();
@@ -373,7 +388,7 @@ export default function MapDrawPage() {
       e.preventDefault();
       finishDraw();
     };
-    
+
     // Custom edit logic
     const onLineClick = (e: maplibregl.MapMouseEvent) => {
       if (drawingRef.current || vertsRef.current.length < 3) return;
@@ -426,7 +441,7 @@ export default function MapDrawPage() {
 
     map.on("click", onClick);
     map.on("dblclick", onDbl);
-    
+
     // Attach edit handlers
     map.on('click', 'draw-line-l', onLineClick);
     map.on('mouseenter', 'draw-verts-l', () => { map.getCanvas().style.cursor = 'grab'; });
@@ -557,6 +572,13 @@ export default function MapDrawPage() {
       }
       const map = mapRef.current;
       const features = data.features ?? [];
+
+      // Inject plot_index so the map label can display it
+      features.forEach((f, i) => {
+        if (!f.properties) f.properties = {};
+        f.properties.plot_index = String(i + 1);
+      });
+
       console.log("[parcel-search]", {
         count: data.count,
         relation: "intersects",
@@ -889,7 +911,7 @@ export default function MapDrawPage() {
 
       {/* ══ RIGHT: Data Panel ══ */}
       <div className={`mds-panel-side ${isPanelOpen ? "open" : "closed"}`}>
-        
+
         {/* Drag handle for mobile toggle */}
         <div className="mds-mobile-drag-handle" onClick={() => setIsPanelOpen(false)} />
 
@@ -958,112 +980,112 @@ export default function MapDrawPage() {
                   <div className="mds-s1-num">01</div>
                 </div>
 
-              {/* Method selector */}
-              <div className="mds-method-toggle">
-                <button
-                  className={`mds-mtab${tab === "draw" ? " active" : ""}`}
-                  onClick={() => setTab("draw")}
-                >
-                  <i className="bi bi-pencil-square" /> วาดแปลง
-                </button>
-                <button
-                  className={`mds-mtab${tab === "shp" ? " active" : ""}`}
-                  onClick={() => setTab("shp")}
-                >
-                  <i className="bi bi-file-earmark-zip" /> นำเข้า SHP
-                </button>
-              </div>
-
-              {/* ── Draw tab ── */}
-              {tab === "draw" && (
-                <div className="mds-action-content">
-                  {drawing ? (
-                    /* ── Drawing in progress ── */
-                    <>
-                      <div className="mds-draw-hint">
-                        <div className="mds-dot-pulse" />
-                        คลิกบนแผนที่เพื่อเพิ่มจุด · <strong>Double-click</strong> หรือกดปุ่ม <strong>"เสร็จสิ้น"</strong> เพื่อจบการวาด
-                      </div>
-                      <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
-                        <button
-                          className="mds-btn mds-btn-solid mds-finish-btn-mobile"
-                          style={{ flex: 1 }}
-                          onClick={() => finishDraw()}
-                          disabled={vertCount < 3}
-                        >
-                          <i className="bi bi-check-circle" /> เสร็จสิ้น วาดแปลง
-                        </button>
-                        <button className="mds-btn mds-btn-danger" onClick={clearDraw}>
-                          <i className="bi bi-x-circle" /> ยกเลิก
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    /* ── Default: show instructions + start button ── */
-                    <>
-                      <div className="mds-instr-note">
-                        <i className="bi bi-info-circle" />
-                        ขนาดแปลงต้องไม่น้อยกว่า 1 ไร่ / 40×40 เมตร
-                      </div>
-                      <ol className="mds-instr-list">
-                        <li>คลิกปุ่ม <strong>&ldquo;เริ่มวาดแปลง&rdquo;</strong> ด้านล่าง</li>
-                        <li>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต (อย่างน้อย 3 จุด)</li>
-                        <li>กดปุ่ม <strong>&ldquo;เสร็จสิ้น วาดแปลง&rdquo;</strong> หรือ Double-click เพื่อจบการวาด</li>
-                        <li>แก้ไข: ลากจุดเพื่อย้ายตำแหน่ง</li>
-                      </ol>
-                      <button className="mds-btn mds-btn-solid" onClick={startDrawFlow}>
-                        <i className="bi bi-pencil" /> เริ่มวาดแปลง
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* ── SHP tab ── */}
-              {tab === "shp" && (
-                <div className="mds-action-content">
-                  <div
-                    className={`mds-dropzone${dragOver ? " drag-over" : ""}${shpFile ? " has-file" : ""}`}
-                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setDragOver(false);
-                      const f = e.dataTransfer.files[0];
-                      if (f) { setShpFile(f); setShpStatus({ msg: `✓ เลือกไฟล์: ${f.name}`, ok: true }); }
-                    }}
-                    onClick={() => document.getElementById("shp-file-input-split")?.click()}
-                  >
-                    <i className={`bi ${shpFile ? "bi-file-zip-fill" : "bi-cloud-upload"}`} />
-                    <p>{shpFile ? shpFile.name : "ลาก .zip มาวาง หรือคลิกเลือก"}</p>
-                    <span>ต้องมี .shp .shx .dbf ใน ZIP · WGS84 (EPSG:4326)</span>
-                  </div>
-                  <input
-                    id="shp-file-input-split"
-                    type="file"
-                    accept=".zip"
-                    style={{ display: "none" }}
-                    onChange={onShpSelected}
-                  />
-                  {shpStatus && (
-                    <div className={`mds-shp-msg${shpStatus.ok ? " ok" : ""}`}>
-                      {shpStatus.msg}
-                    </div>
-                  )}
+                {/* Method selector */}
+                <div className="mds-method-toggle">
                   <button
-                    className="mds-btn mds-btn-solid"
-                    onClick={loadShp}
-                    disabled={!shpFile}
+                    className={`mds-mtab${tab === "draw" ? " active" : ""}`}
+                    onClick={() => setTab("draw")}
                   >
-                    <i className="bi bi-upload" /> โหลดและแสดงบนแผนที่
+                    <i className="bi bi-pencil-square" /> วาดแปลง
                   </button>
-                  {hasGeom && !drawing && (
-                    <button className="mds-btn mds-btn-soft" onClick={clearDraw}>
-                      <i className="bi bi-trash" /> ล้างแปลง
-                    </button>
-                  )}
+                  <button
+                    className={`mds-mtab${tab === "shp" ? " active" : ""}`}
+                    onClick={() => setTab("shp")}
+                  >
+                    <i className="bi bi-file-earmark-zip" /> นำเข้า SHP
+                  </button>
                 </div>
-              )}
+
+                {/* ── Draw tab ── */}
+                {tab === "draw" && (
+                  <div className="mds-action-content">
+                    {drawing ? (
+                      /* ── Drawing in progress ── */
+                      <>
+                        <div className="mds-draw-hint">
+                          <div className="mds-dot-pulse" />
+                          คลิกบนแผนที่เพื่อเพิ่มจุด · <strong>Double-click</strong> หรือกดปุ่ม <strong>"เสร็จสิ้น"</strong> เพื่อจบการวาด
+                        </div>
+                        <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
+                          <button
+                            className="mds-btn mds-btn-solid mds-finish-btn-mobile"
+                            style={{ flex: 1 }}
+                            onClick={() => finishDraw()}
+                            disabled={vertCount < 3}
+                          >
+                            <i className="bi bi-check-circle" /> เสร็จสิ้น วาดแปลง
+                          </button>
+                          <button className="mds-btn mds-btn-danger" onClick={clearDraw}>
+                            <i className="bi bi-x-circle" /> ยกเลิก
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      /* ── Default: show instructions + start button ── */
+                      <>
+                        <div className="mds-instr-note">
+                          <i className="bi bi-info-circle" />
+                          ขนาดแปลงต้องไม่น้อยกว่า 1 ไร่ / 40×40 เมตร
+                        </div>
+                        <ol className="mds-instr-list">
+                          <li>คลิกปุ่ม <strong>&ldquo;เริ่มวาดแปลง&rdquo;</strong> ด้านล่าง</li>
+                          <li>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต (อย่างน้อย 3 จุด)</li>
+                          <li>กดปุ่ม <strong>&ldquo;เสร็จสิ้น วาดแปลง&rdquo;</strong> หรือ Double-click เพื่อจบการวาด</li>
+                          <li>แก้ไข: ลากจุดเพื่อย้ายตำแหน่ง</li>
+                        </ol>
+                        <button className="mds-btn mds-btn-solid" onClick={startDrawFlow}>
+                          <i className="bi bi-pencil" /> เริ่มวาดแปลง
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* ── SHP tab ── */}
+                {tab === "shp" && (
+                  <div className="mds-action-content">
+                    <div
+                      className={`mds-dropzone${dragOver ? " drag-over" : ""}${shpFile ? " has-file" : ""}`}
+                      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOver(false);
+                        const f = e.dataTransfer.files[0];
+                        if (f) { setShpFile(f); setShpStatus({ msg: `✓ เลือกไฟล์: ${f.name}`, ok: true }); }
+                      }}
+                      onClick={() => document.getElementById("shp-file-input-split")?.click()}
+                    >
+                      <i className={`bi ${shpFile ? "bi-file-zip-fill" : "bi-cloud-upload"}`} />
+                      <p>{shpFile ? shpFile.name : "ลาก .zip มาวาง หรือคลิกเลือก"}</p>
+                      <span>ต้องมี .shp .shx .dbf ใน ZIP · WGS84 (EPSG:4326)</span>
+                    </div>
+                    <input
+                      id="shp-file-input-split"
+                      type="file"
+                      accept=".zip"
+                      style={{ display: "none" }}
+                      onChange={onShpSelected}
+                    />
+                    {shpStatus && (
+                      <div className={`mds-shp-msg${shpStatus.ok ? " ok" : ""}`}>
+                        {shpStatus.msg}
+                      </div>
+                    )}
+                    <button
+                      className="mds-btn mds-btn-solid"
+                      onClick={loadShp}
+                      disabled={!shpFile}
+                    >
+                      <i className="bi bi-upload" /> โหลดและแสดงบนแผนที่
+                    </button>
+                    {hasGeom && !drawing && (
+                      <button className="mds-btn mds-btn-soft" onClick={clearDraw}>
+                        <i className="bi bi-trash" /> ล้างแปลง
+                      </button>
+                    )}
+                  </div>
+                )}
 
               </div>{/* /mds-s1-card */}
             </div>
