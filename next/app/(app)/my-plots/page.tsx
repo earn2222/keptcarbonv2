@@ -74,8 +74,8 @@ function ForecastBody({
   const rawId = useId();
   const uid = rawId.replace(/:/g, "-");
 
-  // SVG dimensions
-  const W = 340, H = 110, PL = 8, PT = 18, PB = 28;
+  // SVG dimensions - Enlarged for better desktop visibility
+  const W = 600, H = 220, PL = 12, PT = 24, PB = 36;
   const iW = W - PL * 2, iH = H - PT - PB;
   const n = chartPts.length;
 

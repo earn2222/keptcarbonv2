@@ -113,10 +113,10 @@ function AgeBarChart({ age, conf, trees }: { age: number; conf: number; trees: n
     const dist = ageDistribution(age, conf);
     const maxPct = Math.max(...dist.map(d => d.pct));
 
-    const W = 300, BAR_W = 46, GAP = 14;
+    const W = 500, BAR_W = 60, GAP = 18;
     const totalW = dist.length * BAR_W + (dist.length - 1) * GAP;
     const sx = (W - totalW) / 2;
-    const BASE_Y = 110, MAX_BH = 72, H = 148;
+    const BASE_Y = 160, MAX_BH = 110, H = 220;
 
     return (
         <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)", borderRadius: 14, padding: "12px 8px 8px", marginBottom: 12 }}>
@@ -203,7 +203,7 @@ function AgeBarChart({ age, conf, trees }: { age: number; conf: number; trees: n
 // ── SVG: Carbon forecast line chart with hover ────────────────────────────
 function ForecastChart({ pts }: { pts: Array<{ yearBE: number; co2: number }> }) {
     const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-    const W = 260, H = 130, PL = 8, PR = 52, PT = 22, PB = 26;
+    const W = 500, H = 220, PL = 12, PR = 60, PT = 24, PB = 34;
     const iW = W - PL - PR, iH = H - PT - PB;
     const vals = pts.map(p => p.co2);
     const minV = Math.min(...vals), maxV = Math.max(...vals);
