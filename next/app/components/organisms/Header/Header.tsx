@@ -52,7 +52,7 @@ export default function Header() {
       <header id="header" className="header d-flex align-items-center fixed-top">
         <div className="container-fluid container-xl position-relative d-flex align-items-center">
           <Link href="/" className="logo d-flex align-items-center me-auto">
-            <img src="/assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo" />
+            <img src="/assets/img/keptcarbon-logo.png" alt="Kept Carbon Logo" style={{ height: "52px", width: "auto" }} />
           </Link>
 
           <nav id="navmenu" className="navmenu">

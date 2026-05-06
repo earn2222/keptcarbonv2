@@ -2,6 +2,8 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { carbonForAge } from "@/lib/map-utils";
+import { useAuth } from "@/lib/auth-context";
+
 
 // ── Types ─────────────────────────────────────────────────────────────────
 type Props = {
@@ -337,6 +339,8 @@ export function ParcelResultsPanel({
     const [plotTabs, setPlotTabs] = useState<Record<number, PlotTab>>({});
     const [forecastYrs, setForecastYrs] = useState<Record<number, ForecastYr>>({});
     const [summaryFcYrs, setSummaryFcYrs] = useState<ForecastYr>(7);
+    const { user } = useAuth();
+
 
     // Step 3 form
     const [projectName, setProjectName] = useState("");
@@ -367,13 +371,19 @@ export function ParcelResultsPanel({
         await new Promise(r => setTimeout(r, 900));
 
         try {
-            const existingStr = localStorage.getItem("user_saved_plots");
+            if (!user) {
+                console.error("No user found, cannot save plots");
+                return;
+            }
+            const key = `user_saved_plots_${user.id}`;
+            const existingStr = localStorage.getItem(key);
             const existing = existingStr ? JSON.parse(existingStr) : [];
             const newPlots = plots.map((p, i) => {
                 const feat = parcelFeatures[i];
                 const props = (feat?.properties || {}) as any;
                 return {
                     id: props.id || Math.random().toString(36).substring(7),
+                    userId: user.id, // Add userId to the plot record
                     name: projectName || props.farm_name || "แปลงยางใหม่",
                     areaRai: p.areaRai,
                     carbonTotal: p.co2,
@@ -393,16 +403,28 @@ export function ParcelResultsPanel({
                     },
                 };
             });
-            localStorage.setItem("user_saved_plots", JSON.stringify([...newPlots, ...existing]));
+            localStorage.setItem(key, JSON.stringify([...newPlots, ...existing]));
+
+            // Save to global anonymous list for dashboard
+            const globalKey = 'global_saved_plots';
+            const globalExistingStr = localStorage.getItem(globalKey);
+            const globalExisting = globalExistingStr ? JSON.parse(globalExistingStr) : [];
+            const anonymousPlots = newPlots.map(p => ({
+                ...p,
+                name: "แปลงยางพารา (นิรนาม)", // Generic name
+                ownerName: "",               // Remove personal info
+            }));
+            localStorage.setItem(globalKey, JSON.stringify([...anonymousPlots, ...globalExisting]));
+
         } catch (e) {
             console.error("Failed to save plots to localStorage", e);
         }
 
         setSaveState("done");
         
-        // Redirect to dashboard after a short delay
+        // Redirect to home page after a short delay
         setTimeout(() => {
-            router.push("/dashboard");
+            router.push("/");
         }, 1500);
     };
 

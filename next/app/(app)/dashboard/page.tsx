@@ -9,6 +9,8 @@ import {
   Tooltip, Legend,
   type ChartItem,
 } from "chart.js";
+import { useAuth } from "@/lib/auth-context";
+
 
 Chart.register(
   DoughnutController,
@@ -181,15 +183,20 @@ function DonutChart({ bucketData, total }: {
 /* ══════════════════════ PAGE ══════════════════════ */
 export default function DashboardPage() {
   const [plots, setPlots] = useState<SavedPlot[]>([]);
+
+  const { user, ready } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("user_saved_plots");
+      const key = "global_saved_plots";
+      const raw = localStorage.getItem(key);
       if (raw) setPlots(JSON.parse(raw) as SavedPlot[]);
+      else setPlots([]);
     } catch { /* ignore */ }
     setMounted(true);
   }, []);
+
 
   const totalAreaRai = useMemo(() => plots.reduce((s, p) => s + (p.areaRai || 0), 0), [plots]);
   const totalCarbon = useMemo(() => plots.reduce((s, p) => s + (p.carbonTotal || 0), 0), [plots]);
