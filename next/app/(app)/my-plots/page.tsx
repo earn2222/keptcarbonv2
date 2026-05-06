@@ -383,154 +383,166 @@ function ForecastSection({
 function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const statItems = [
+    { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.08)", icon: "bi-grid-fill" },
+    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.08)", icon: "bi-hourglass-split" },
+    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? (plot.trees >= 1000 ? (plot.trees / 1000).toFixed(1) + "k" : String(plot.trees)) : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)", icon: "bi-tree-fill" },
+    { label: "คาร์บอน", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.08)", icon: "bi-cloud-arrow-up-fill" },
+  ];
+
   return (
     <div
       style={{
         background: "#fff",
-        borderRadius: 20,
-        border: "1px solid rgba(16,185,129,0.12)",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+        borderRadius: 22,
+        border: "1px solid rgba(16,185,129,0.13)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
         overflow: "hidden",
-        height: "fit-content",
-        alignSelf: "flex-start",
         display: "flex",
         flexDirection: "column",
-        transition: "box-shadow 0.2s ease",
+        transition: "box-shadow 0.25s ease, transform 0.2s ease",
       }}
-      onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 28px rgba(16,185,129,0.13)")}
-      onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.04)")}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 12px 36px rgba(16,185,129,0.16)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.05)"; e.currentTarget.style.transform = ""; }}
     >
-      {/* Accent bar */}
-      <div style={{ height: 4, background: "linear-gradient(90deg,#059669 0%,#10b981 50%,#34d399 100%)", flexShrink: 0 }} />
+      {/* Gradient top accent */}
+      <div style={{ height: 5, background: "linear-gradient(90deg,#059669 0%,#10b981 45%,#34d399 80%,#6ee7b7 100%)", flexShrink: 0 }} />
 
-      <div style={{ padding: "18px 20px", flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-          <div style={{ display: "flex", gap: 10, alignItems: "flex-start", minWidth: 0, flex: 1 }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: 11, flexShrink: 0,
-              background: "linear-gradient(135deg,rgba(16,185,129,0.15),rgba(5,150,105,0.1))",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <i className="bi bi-geo-alt-fill" style={{ color: "#059669", fontSize: 17 }} />
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {plot.name}
-              </div>
-              <div style={{ fontSize: 11, color: "#64748b", marginTop: 2, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {plot.ownerName && <span><i className="bi bi-person me-1" />{plot.ownerName}</span>}
-                {plot.province && <span><i className="bi bi-pin-map me-1" />{plot.province}</span>}
-              </div>
-            </div>
-          </div>
-          <div style={{ fontSize: 10, color: "#94a3b8", flexShrink: 0, marginLeft: 8, textAlign: "right", lineHeight: 1.4 }}>
-            {new Date(plot.date).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
-          </div>
+      {/* Header row */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "20px 24px 14px" }}>
+        {/* Pin icon */}
+        <div style={{
+          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+          background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
+          border: "1.5px solid rgba(16,185,129,0.2)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: "0 4px 12px rgba(16,185,129,0.12)",
+        }}>
+          <i className="bi bi-geo-alt-fill" style={{ color: "#059669", fontSize: 22 }} />
         </div>
 
-        {/* Stats grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6 }}>
-          {[
-            { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.07)" },
-            { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.07)" },
-            { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? (plot.trees >= 1000 ? Math.round(plot.trees / 1000) + "k" : String(plot.trees)) : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.07)" },
-            { label: "คาร์บอน", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.07)" },
-          ].map(({ label, val, unit, color, bg }) => (
-            <div key={label} style={{ borderRadius: 10, padding: "8px 4px", textAlign: "center", background: bg }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color }}>{val}</div>
-              <div style={{ fontSize: 9, color: color + "99" }}>{unit}</div>
-              <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 1 }}>{label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Extra info */}
-        {(plot.plantYearBE || plot.confidence) && (
-          <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 12 }}>
-            {plot.plantYearBE && plot.plantYearBE > 0 && (
-              <div style={{ fontSize: 11, color: "#64748b" }}>
-                <i className="bi bi-calendar-event me-1" style={{ color: "#0891b2" }} />
-                ปีปลูก <strong style={{ color: "#0f172a" }}>พ.ศ. {plot.plantYearBE}</strong>
-              </div>
-            )}
-            {plot.confidence && plot.confidence > 0 && (
-              <div style={{ fontSize: 11, color: "#64748b" }}>
-                <i className="bi bi-shield-check me-1" style={{ color: "#7c3aed" }} />
-                ความมั่นใจ <strong style={{ color: "#0f172a" }}>{Math.round(plot.confidence * 100)}%</strong>
-              </div>
-            )}
+        {/* Name + meta */}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color: "#0f172a", lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
+            {plot.name}
           </div>
-        )}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center" }}>
+            {plot.ownerName && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#475569", background: "#f1f5f9", padding: "3px 10px", borderRadius: 20, border: "1px solid #e2e8f0" }}>
+                <i className="bi bi-person-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.ownerName}
+              </span>
+            )}
+            {plot.province && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#475569", background: "#f1f5f9", padding: "3px 10px", borderRadius: 20, border: "1px solid #e2e8f0" }}>
+                <i className="bi bi-pin-map-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.province}
+              </span>
+            )}
+            <span style={{ fontSize: 10.5, color: "#94a3b8" }}>
+              {new Date(plot.date).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
+            </span>
+          </div>
+        </div>
+      </div>
 
-        {/* Expand details button */}
+      {/* Stats row — 4 pill cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, padding: "0 24px 14px" }}>
+        {statItems.map(({ label, val, unit, color, bg, icon }) => (
+          <div key={label} style={{
+            borderRadius: 14, padding: "12px 6px", textAlign: "center",
+            background: bg, border: `1px solid ${color}22`,
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+          }}>
+            <i className={`bi ${icon}`} style={{ color, fontSize: 13, opacity: 0.7, marginBottom: 2 }} />
+            <div style={{ fontSize: 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
+            <div style={{ fontSize: 9.5, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
+            <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 1 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Extra badges */}
+      {(plot.plantYearBE || plot.confidence) && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 9, padding: "0 24px 14px" }}>
+          {plot.plantYearBE && plot.plantYearBE > 0 && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "#0369a1", background: "rgba(14,165,233,0.08)", padding: "4px 13px", borderRadius: 20, border: "1px solid rgba(14,165,233,0.2)", fontWeight: 600 }}>
+              <i className="bi bi-calendar-event" />
+              ปีปลูก พ.ศ. <strong style={{ color: "#0284c7" }}>{plot.plantYearBE}</strong>
+            </span>
+          )}
+          {plot.confidence && plot.confidence > 0 && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "#7c3aed", background: "rgba(124,58,237,0.07)", padding: "4px 13px", borderRadius: 20, border: "1px solid rgba(124,58,237,0.2)", fontWeight: 600 }}>
+              <i className="bi bi-shield-check" />
+              ความมั่นใจ <strong>{Math.round(plot.confidence * 100)}%</strong>
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Divider */}
+      <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(16,185,129,0.15),transparent)", margin: "0 24px" }} />
+
+      {/* Footer: expand + delete */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 20px 15px" }}>
         <button
           onClick={onToggle}
           style={{
-            marginTop: 12, width: "100%", padding: "7px 0",
-            background: "none", border: "none", borderTop: "1px dashed rgba(0,0,0,0.07)",
-            cursor: "pointer", fontSize: 11, color: "#94a3b8",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            display: "flex", alignItems: "center", gap: 6, padding: "6px 15px",
+            background: expanded ? "rgba(16,185,129,0.09)" : "transparent",
+            border: "1.5px solid rgba(16,185,129,0.28)",
+            borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700,
+            color: "#059669", transition: "all 0.15s",
           }}
         >
           <i className={`bi bi-chevron-${expanded ? "up" : "down"}`} />
           {expanded ? "ซ่อนรายละเอียด" : "ดูรายละเอียดเพิ่มเติม"}
         </button>
 
-        {expanded && (
-          <div style={{ paddingTop: 8 }}>
-            {/* Forecast with chart (now inside expanded area) */}
-            <ForecastSection
-              rubberAge={plot.rubberAge}
-              trees={plot.trees ?? 0}
-              carbonTotal={plot.carbonTotal}
-              forecast={plot.forecast}
-            />
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginTop: 12 }}>
-              {[
-                { k: "ID", v: plot.id },
-                { k: "วันที่บันทึก", v: new Date(plot.date).toLocaleString("th-TH") },
-                { k: "พื้นที่ (ไร่)", v: plot.areaRai.toFixed(4) },
-                { k: "อายุยาง", v: `${plot.rubberAge} ปี` },
-                { k: "จำนวนต้น", v: plot.trees?.toLocaleString("th-TH") ?? "—" },
-                { k: "ปีปลูก (พ.ศ.)", v: plot.plantYearBE ? String(plot.plantYearBE) : "—" },
-                { k: "คาร์บอนปัจจุบัน", v: `${plot.carbonTotal.toFixed(2)} tCO₂` },
-                { k: "ความมั่นใจ", v: plot.confidence ? `${Math.round(plot.confidence * 100)}%` : "—" },
-              ].map(({ k, v }) => (
-                <div key={k} style={{ padding: "5px 8px", background: "rgba(0,0,0,0.02)", borderRadius: 7 }}>
-                  <div style={{ color: "#94a3b8", fontSize: 9 }}>{k}</div>
-                  <div style={{ color: "#0f172a", fontWeight: 600, marginTop: 1, fontSize: 11, wordBreak: "break-all" }}>{v}</div>
-                </div>
-              ))}
-            </div>
+        {confirmDelete ? (
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <span style={{ fontSize: 12, color: "#ef4444", fontWeight: 600 }}>ยืนยันลบ?</span>
+            <button onClick={onDelete} style={{ padding: "5px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}>ลบ</button>
+            <button onClick={() => setConfirmDelete(false)} style={{ padding: "5px 12px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12 }}>ยกเลิก</button>
           </div>
+        ) : (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 14px", background: "rgba(239,68,68,0.07)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.13)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.07)"; }}
+          >
+            <i className="bi bi-trash3" /> ลบแปลงนี้
+          </button>
         )}
-
-        {/* Delete */}
-        <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
-          {confirmDelete ? (
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <span style={{ fontSize: 12, color: "#ef4444" }}>ยืนยันลบ?</span>
-              <button
-                onClick={onDelete}
-                style={{ padding: "4px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 7, cursor: "pointer", fontWeight: 700, fontSize: 11 }}
-              >ลบ</button>
-              <button
-                onClick={() => setConfirmDelete(false)}
-                style={{ padding: "4px 12px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 7, cursor: "pointer", fontSize: 11 }}
-              >ยกเลิก</button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setConfirmDelete(true)}
-              style={{ fontSize: 11, color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 3 }}
-            >
-              <i className="bi bi-trash3" /> ลบแปลงนี้
-            </button>
-          )}
-        </div>
       </div>
+
+      {/* Expanded details */}
+      {expanded && (
+        <div style={{ padding: "4px 24px 22px", borderTop: "1px dashed rgba(16,185,129,0.15)" }}>
+          <ForecastSection
+            rubberAge={plot.rubberAge}
+            trees={plot.trees ?? 0}
+            carbonTotal={plot.carbonTotal}
+            forecast={plot.forecast}
+          />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 8, marginTop: 14 }}>
+            {[
+              { k: "ID", v: plot.id },
+              { k: "วันที่บันทึก", v: new Date(plot.date).toLocaleString("th-TH") },
+              { k: "พื้นที่ (ไร่)", v: plot.areaRai.toFixed(4) },
+              { k: "อายุยาง", v: `${plot.rubberAge} ปี` },
+              { k: "จำนวนต้น", v: plot.trees?.toLocaleString("th-TH") ?? "—" },
+              { k: "ปีปลูก (พ.ศ.)", v: plot.plantYearBE ? String(plot.plantYearBE) : "—" },
+              { k: "คาร์บอนปัจจุบัน", v: `${plot.carbonTotal.toFixed(2)} tCO₂` },
+              { k: "ความมั่นใจ", v: plot.confidence ? `${Math.round(plot.confidence * 100)}%` : "—" },
+            ].map(({ k, v }) => (
+              <div key={k} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.025)", borderRadius: 10, border: "1px solid rgba(0,0,0,0.04)" }}>
+                <div style={{ color: "#94a3b8", fontSize: 9.5, fontWeight: 600, letterSpacing: 0.3 }}>{k}</div>
+                <div style={{ color: "#0f172a", fontWeight: 700, marginTop: 2, fontSize: 12, wordBreak: "break-all" }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -729,16 +741,15 @@ export default function MyPlotsPage() {
                 </button>
               </div>
             ) : (
-              <div className="row g-3">
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {filteredPlots.map(plot => (
-                  <div key={plot.id} className="col-12 col-md-6">
-                    <PlotCard 
-                      plot={plot} 
-                      onDelete={() => handleDelete(plot.id)} 
-                      expanded={expandedPlotId === plot.id}
-                      onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
-                    />
-                  </div>
+                  <PlotCard
+                    key={plot.id}
+                    plot={plot}
+                    onDelete={() => handleDelete(plot.id)}
+                    expanded={expandedPlotId === plot.id}
+                    onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                  />
                 ))}
               </div>
             )}
