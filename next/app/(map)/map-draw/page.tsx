@@ -153,6 +153,36 @@ export default function MapDrawPage() {
       map.setProjection({ type: "globe" });
       mapLoadedRef.current = true;
 
+      // ── Rayong Province Boundary ──────────────────────────────────────────
+      map.addSource("rayong-boundary", {
+        type: "geojson",
+        data: "/assets/rayong-boundary.geojson",
+      });
+      // Glow / halo layer (wider, semi-transparent)
+      map.addLayer({
+        id: "rayong-boundary-glow",
+        type: "line",
+        source: "rayong-boundary",
+        paint: {
+          "line-color": "#0a43ffff",
+          "line-width": 8,
+          "line-opacity": 0.25,
+          "line-blur": 4,
+        },
+      });
+      // Main deep-pink line
+      map.addLayer({
+        id: "rayong-boundary-line",
+        type: "line",
+        source: "rayong-boundary",
+        paint: {
+          "line-color": "#1845c2ff",
+          "line-width": 2.5,
+          "line-opacity": 0.95,
+          "line-dasharray": [6, 3],
+        },
+      });
+      // ─────────────────────────────────────────────────────────────────────
 
       map.addSource("draw-line", { type: "geojson", data: emptyFC() });
       map.addLayer({
