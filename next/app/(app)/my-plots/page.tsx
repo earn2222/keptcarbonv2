@@ -560,10 +560,19 @@ export default function MyPlotsPage() {
     setMounted(true);
     if (ready && user) {
       try {
+        // Cleanup: Remove old shared key to prevent "mixing" if it exists
+        localStorage.removeItem("user_saved_plots");
+
         const key = `user_saved_plots_${user.id}`;
         const stored = localStorage.getItem(key);
-        if (stored) setPlots(JSON.parse(stored));
-        else setPlots([]); // Clear if no plots for this user
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Extra safety: ensure we only show plots belonging to this user
+          const myOnly = Array.isArray(parsed) ? parsed.filter((p: any) => p.userId === user.id || !p.userId) : [];
+          setPlots(myOnly);
+        } else {
+          setPlots([]); 
+        }
       } catch {}
     }
   }, [ready, user]);
@@ -576,19 +585,40 @@ export default function MyPlotsPage() {
     try {
       const key = `user_saved_plots_${user.id}`;
       localStorage.setItem(key, JSON.stringify(updated));
+
+      // Also remove from global list
+      const globalKey = 'global_saved_plots';
+      const globalRaw = localStorage.getItem(globalKey);
+      if (globalRaw) {
+        const globalPlots = JSON.parse(globalRaw);
+        const filteredGlobal = globalPlots.filter((p: any) => p.id !== id);
+        localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
+      }
     } catch {}
   };
+
 
 
   const handleDeleteAll = () => {
     if (!user) return;
+    const idsToDelete = plots.map(p => p.id);
     setPlots([]);
     try {
       const key = `user_saved_plots_${user.id}`;
       localStorage.removeItem(key);
+
+      // Also remove from global list
+      const globalKey = 'global_saved_plots';
+      const globalRaw = localStorage.getItem(globalKey);
+      if (globalRaw) {
+        const globalPlots = JSON.parse(globalRaw);
+        const filteredGlobal = globalPlots.filter((p: any) => !idsToDelete.includes(p.id));
+        localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
+      }
     } catch {}
     setConfirmDeleteAll(false);
   };
+
 
 
   const totalArea = plots.reduce((s, p) => s + (p.areaRai || 0), 0);
