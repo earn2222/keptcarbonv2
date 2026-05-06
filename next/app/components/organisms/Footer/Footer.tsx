@@ -3,9 +3,9 @@ export default function Footer() {
     <footer id="footer" className="footer light-background">
       <div className="container">
         <h3 className="sitename">KeptCarbon</h3>
-        <p>
-          แพลตฟอร์มเทคโนโลยีภูมิสารสนเทศและปัญญาประดิษฐ์
-          สำหรับการจัดการสวนยางพาราที่ยืดหยุนต่อการเปลี่ยนแปลงสภาพภูมิอากาศ
+        <p className="text-center">
+          แพลตฟอร์มภูมิสารสนเทศและปัญญาประดิษฐ์
+          เพื่อการจัดการสวนยางพาราอย่างยืดหยุ่นต่อการเปลี่ยนแปลงสภาพภูมิอากาศ
         </p>
         <div className="social-links d-flex justify-content-center">
           <a href=""><i className="bi bi-twitter-x"></i></a>
