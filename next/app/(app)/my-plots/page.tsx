@@ -661,6 +661,11 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
                 <i className="bi bi-pin-map-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.province}
               </span>
             )}
+            {plot.plantYearBE && plot.plantYearBE > 0 && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#0369a1", background: "rgba(14,165,233,0.08)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(14,165,233,0.2)" }}>
+                <i className="bi bi-calendar-event" style={{ color: "#0284c7", fontSize: 10 }} />ปีปลูก พ.ศ. {plot.plantYearBE}
+              </span>
+            )}
             <span style={{ fontSize: 10.5, color: "#94a3b8" }}>
               {new Date(plot.date).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
             </span>
@@ -684,23 +689,7 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
         ))}
       </div>
 
-      {/* Extra badges */}
-      {(plot.plantYearBE || plot.confidence) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 9, padding: "0 24px 14px" }}>
-          {plot.plantYearBE && plot.plantYearBE > 0 && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "#0369a1", background: "rgba(14,165,233,0.08)", padding: "4px 13px", borderRadius: 20, border: "1px solid rgba(14,165,233,0.2)", fontWeight: 600 }}>
-              <i className="bi bi-calendar-event" />
-              ปีปลูก พ.ศ. <strong style={{ color: "#0284c7" }}>{plot.plantYearBE}</strong>
-            </span>
-          )}
-          {plot.confidence && plot.confidence > 0 && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "#7c3aed", background: "rgba(124,58,237,0.07)", padding: "4px 13px", borderRadius: 20, border: "1px solid rgba(124,58,237,0.2)", fontWeight: 600 }}>
-              <i className="bi bi-shield-check" />
-              ความมั่นใจ <strong>{Math.round(plot.confidence * 100)}%</strong>
-            </span>
-          )}
-        </div>
-      )}
+
 
       {/* Divider */}
       <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(16,185,129,0.15),transparent)", margin: "0 24px" }} />
@@ -758,7 +747,6 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
               { k: "จำนวนต้น", v: plot.trees?.toLocaleString("th-TH") ?? "—" },
               { k: "ปีปลูก (พ.ศ.)", v: plot.plantYearBE ? String(plot.plantYearBE) : "—" },
               { k: "คาร์บอนปัจจุบัน", v: `${plot.carbonTotal.toFixed(2)} tCO₂` },
-              { k: "ความมั่นใจ", v: plot.confidence ? `${Math.round(plot.confidence * 100)}%` : "—" },
             ].map(({ k, v }) => (
               <div key={k} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.025)", borderRadius: 10, border: "1px solid rgba(0,0,0,0.04)" }}>
                 <div style={{ color: "#94a3b8", fontSize: 9.5, fontWeight: 600, letterSpacing: 0.3 }}>{k}</div>
