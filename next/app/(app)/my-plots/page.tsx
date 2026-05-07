@@ -20,8 +20,6 @@ function carbonCo2(age: number, trees: number): number {
 }
 
 function fmtCompact(v: number): string {
-  if (v >= 10000) return Math.round(v / 1000) + "k";
-  if (v >= 1000) return (v / 1000).toFixed(1) + "k";
   return v.toLocaleString("th-TH", { maximumFractionDigits: 0 });
 }
 
@@ -80,7 +78,7 @@ function ForecastBody({
   const uid = rawId.replace(/:/g, "-");
 
   // SVG dimensions - Enlarged for better desktop visibility
-  const W = isMobile ? 400 : 600, H = isMobile ? 240 : 220, PL = 12, PT = 24, PB = 36;
+  const W = isMobile ? 400 : 800, H = isMobile ? 240 : 300, PL = 12, PT = 24, PB = 36;
   const iW = W - PL * 2, iH = H - PT - PB;
   const n = chartPts.length;
 
@@ -260,7 +258,7 @@ function ForecastBody({
             {/* Year labels along x-axis */}
             {svgPts.map((p, i) => (
               <text key={i} x={p.x} y={H - 10}
-                textAnchor="middle" fontSize={isMobile ? 12 : 11}
+                textAnchor="middle" fontSize={isMobile ? 12 : 13}
                 fontWeight={i === 0 ? 700 : 400}
                 fill={i === 0 ? "#059669" : "#94a3b8"}
               >
@@ -273,7 +271,7 @@ function ForecastBody({
               const isFirst = hoveredPt === 0;
               const changeAbs = hp.co2 - base;
               const changePct = base > 0 ? (changeAbs / base) * 100 : 0;
-              const ttW = 112, ttH = isFirst ? 38 : 52;
+              const ttW = isMobile ? 112 : 130, ttH = isFirst ? (isMobile ? 38 : 42) : (isMobile ? 52 : 60);
               const ttX = Math.min(Math.max(hp.x - ttW / 2, PL), PL + iW - ttW);
               const ttY = hp.y - ttH - 12;
               return (
@@ -282,19 +280,19 @@ function ForecastBody({
                   <rect x={ttX} y={ttY} width={ttW + 10} height={ttH + 10} rx={9}
                     fill="#064e3b" opacity={0.95}
                   />
-                  <text x={ttX + (ttW + 10) / 2} y={ttY + 16}
-                    textAnchor="middle" fontSize={11} fill="#6ee7b7" fontWeight={600}
+                  <text x={ttX + (ttW + 10) / 2} y={ttY + (isMobile ? 16 : 18)}
+                    textAnchor="middle" fontSize={isMobile ? 11 : 12} fill="#6ee7b7" fontWeight={600}
                   >
                     {isFirst ? "ณ ปัจจุบัน" : `อีก ${hp.yr} ปีข้างหน้า`}
                   </text>
-                  <text x={ttX + (ttW + 10) / 2} y={ttY + 34}
-                    textAnchor="middle" fontSize={13} fill="#ffffff" fontWeight={800}
+                  <text x={ttX + (ttW + 10) / 2} y={ttY + (isMobile ? 34 : 38)}
+                    textAnchor="middle" fontSize={isMobile ? 13 : 15} fill="#ffffff" fontWeight={800}
                   >
                     {hp.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })} tCO₂
                   </text>
                   {!isFirst && (
-                    <text x={ttX + (ttW + 10) / 2} y={ttY + 50}
-                      textAnchor="middle" fontSize={11}
+                    <text x={ttX + (ttW + 10) / 2} y={ttY + (isMobile ? 50 : 54)}
+                      textAnchor="middle" fontSize={isMobile ? 11 : 11.5}
                       fill={changePct >= 0 ? "#34d399" : "#f87171"} fontWeight={700}
                     >
                       {changePct >= 0 ? "▲" : "▼"} {Math.abs(changePct).toFixed(1)}% จากปัจจุบัน
@@ -372,13 +370,13 @@ function ForecastSection({
     <div style={{ marginTop: 14, borderRadius: 14, border: "1px solid rgba(16,185,129,0.18)", overflow: "hidden", background: "#fff" }}>
       {/* Header */}
       <div style={{ padding: "10px 16px", background: "linear-gradient(135deg,rgba(16,185,129,0.07) 0%,rgba(5,150,105,0.04) 100%)", borderBottom: "1px solid rgba(16,185,129,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#059669", display: "flex", alignItems: "center", gap: 6 }}>
-          <i className="bi bi-graph-up-arrow" style={{ fontSize: 13 }} />
+        <span style={{ fontSize: isMobile ? 12 : 13, fontWeight: 700, color: "#059669", display: "flex", alignItems: "center", gap: 6 }}>
+          <i className="bi bi-graph-up-arrow" style={{ fontSize: isMobile ? 13 : 14 }} />
           พยากรณ์การกักเก็บคาร์บอน (tCO₂)
         </span>
         {growthPct > 0 && (
-          <span style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", background: "rgba(22,163,74,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(22,163,74,0.25)", display: "flex", alignItems: "center", gap: 3 }}>
-            <span style={{ fontSize: 9 }}>▲</span> {growthPct.toFixed(1)}% ใน {milestones[milestones.length - 1].yr} ปี
+          <span style={{ fontSize: isMobile ? 10 : 11, fontWeight: 700, color: "#16a34a", background: "rgba(22,163,74,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(22,163,74,0.25)", display: "flex", alignItems: "center", gap: 3 }}>
+            <span style={{ fontSize: isMobile ? 9 : 10 }}>▲</span> {growthPct.toFixed(1)}% ใน {milestones[milestones.length - 1].yr} ปี
           </span>
         )}
       </div>
@@ -405,7 +403,7 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
             tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
             tileSize: 256,
             minzoom: 1,
-            maxzoom: 19,
+            maxzoom: 18,
             attribution: "",
           },
           street: {
@@ -413,7 +411,7 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
             tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
             minzoom: 1,
-            maxzoom: 19,
+            maxzoom: 18,
             attribution: "",
           },
         },
@@ -428,18 +426,25 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
     });
 
     mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+    const nav = new maplibregl.NavigationControl();
+    map.addControl(nav, "bottom-right");
 
-    map.on("load", () => {
+    const onMapLoad = () => {
+      if (!mapRef.current) return;
+      const m = mapRef.current;
       const boundaryFeatures: any[] = [];
       const parcelFeatures: any[] = [];
 
       plots.forEach((p, i) => {
+        const carbonPerTree = (p.trees && p.trees > 0)
+          ? (p.carbonTotal / p.trees).toFixed(3)
+          : null;
         const props = {
           id: p.id,
           name: p.name,
           area: p.areaRai.toFixed(2),
           carbon: p.carbonTotal.toFixed(2),
+          carbonPerTree: carbonPerTree ?? "—",
           province: p.province || "—",
           index: String(i + 1)
         };
@@ -509,7 +514,6 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         source: "my-parcels",
         layout: {
           "text-field": ["get", "index"],
-          "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
           "text-size": 16,
           "text-allow-overlap": false,
         },
@@ -524,29 +528,75 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         if (!e.features?.length) return;
         const p = e.features[0].properties;
         const isBoundary = p.type === 'boundary';
+        if (isBoundary) return;  // ไม่แสดง popup สำหรับขอบเขตที่วาด
+        const dot = isBoundary ? '#6366f1' : '#10b981';
         const html = `
-          <div style="font-family: sans-serif; padding: 10px; min-width: 160px;">
-            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 800; margin-bottom: 4px;">
-              ${isBoundary ? 'ขอบเขตที่วาด' : 'แปลงที่ตรวจพบ'}
+          <div style="
+            font-family: 'Noto Sans Thai', 'Noto Sans', system-ui, sans-serif;
+            width: 220px;
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+            overflow: hidden;
+          ">
+            <!-- Accent top bar -->
+            <div style="height: 3px; background: ${dot};"></div>
+
+            <!-- Content -->
+            <div style="padding: 14px 16px 12px;">
+              <!-- Type + Index -->
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <span style="
+                  font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px;
+                  color: ${dot}; text-transform: uppercase;
+                ">${isBoundary ? 'ขอบเขตที่วาด' : 'แปลงที่ตรวจพบ'}</span>
+                <span style="font-size: 10px; color: #cbd5e1; font-weight: 600;">#${p.index}</span>
+              </div>
+
+              <!-- Name -->
+              <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px; line-height: 1.2;">${p.name}</div>
+
+              <!-- Province -->
+              <div style="display:flex; align-items:center; gap:5px; color:#94a3b8; font-size:11.5px; margin-bottom:14px;">
+                <i class="bi bi-geo-alt-fill" style="font-size:10px; color:${dot};"></i>
+                <span>${p.province}</span>
+              </div>
+
+              <!-- Divider -->
+              <div style="height:1px; background:#f1f5f9; margin-bottom:12px;"></div>
+
+              <!-- Stats row -->
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div>
+                  <div style="font-size:15px; font-weight:800; color:#0f172a;">${p.area}</div>
+                  <div style="font-size:9.5px; color:#94a3b8; margin-top:1px;">ไร่</div>
+                </div>
+                <div style="width:1px; background:#f1f5f9; align-self:stretch;"></div>
+                <div>
+                  <div style="font-size:15px; font-weight:800; color:#059669;">${p.carbon}</div>
+                  <div style="font-size:9.5px; color:#94a3b8; margin-top:1px;">tCO₂</div>
+                </div>
+                ${p.carbonPerTree !== '—' ? `
+                <div style="width:1px; background:#f1f5f9; align-self:stretch;"></div>
+                <div>
+                  <div style="font-size:13px; font-weight:800; color:#0891b2;">${p.carbonPerTree}</div>
+                  <div style="font-size:9px; color:#94a3b8; margin-top:1px; line-height:1.3;">tCO₂<br>/ต้น</div>
+                </div>
+                ` : ''}
+              </div>
             </div>
-            <div style="font-weight: 800; color: #064e3b; margin-bottom: 5px; font-size: 14px;">${p.name}</div>
-            <div style="font-size: 12px; color: #475569; margin-bottom: 3px;">📍 ${p.province}</div>
-            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">📏 ${p.area} ไร่</div>
-            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">☁️ ${p.carbon} tCO₂</div>
           </div>
         `;
-        new maplibregl.Popup({ closeButton: false })
+        new maplibregl.Popup({ closeButton: false, maxWidth: 'none', className: 'kc-custom-popup' })
           .setLngLat(e.lngLat)
           .setHTML(html)
           .addTo(map);
       };
 
-      map.on("click", "boundary-fill", handlePlotClick);
       map.on("click", "parcel-fill", handlePlotClick);
       map.on("mouseenter", "parcel-fill", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "parcel-fill", () => { map.getCanvas().style.cursor = ""; });
-      map.on("mouseenter", "boundary-fill", () => { map.getCanvas().style.cursor = "pointer"; });
-      map.on("mouseleave", "boundary-fill", () => { map.getCanvas().style.cursor = ""; });
 
       if (boundaryFeatures.length > 0 || parcelFeatures.length > 0) {
         const bounds = new maplibregl.LngLatBounds();
@@ -560,12 +610,79 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         });
         map.fitBounds(bounds, { padding: isMobile ? 40 : 80, duration: 1200 });
       }
-    });
+    };
+
+    map.on("load", onMapLoad);
 
     return () => {
       map.remove();
       mapRef.current = null;
     };
+  }, [isMobile]); // Only recreate map if isMobile changes (rare)
+
+  // Separate effect to update data when plots change
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const boundaryFeatures: any[] = [];
+    const parcelFeatures: any[] = [];
+
+    plots.forEach((p, i) => {
+      const carbonPerTree = (p.trees && p.trees > 0)
+        ? (p.carbonTotal / p.trees).toFixed(3)
+        : null;
+      const props = {
+        id: p.id,
+        name: p.name,
+        area: p.areaRai.toFixed(2),
+        carbon: p.carbonTotal.toFixed(2),
+        carbonPerTree: carbonPerTree ?? "—",
+        province: p.province || "—",
+        index: String(i + 1)
+      };
+
+      if (p.boundaryGeojson) {
+        boundaryFeatures.push({
+          type: "Feature",
+          geometry: p.boundaryGeojson,
+          properties: { ...props, type: 'boundary' }
+        });
+      }
+      if (p.geojson) {
+        parcelFeatures.push({
+          type: "Feature",
+          geometry: p.geojson,
+          properties: { ...props, type: 'parcel' }
+        });
+      }
+    });
+
+    const bSrc = map.getSource("my-boundaries") as maplibregl.GeoJSONSource;
+    const pSrc = map.getSource("my-parcels") as maplibregl.GeoJSONSource;
+
+    if (bSrc) bSrc.setData({ type: "FeatureCollection", features: boundaryFeatures });
+    if (pSrc) pSrc.setData({ type: "FeatureCollection", features: parcelFeatures });
+
+    if (boundaryFeatures.length > 0 || parcelFeatures.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      [...boundaryFeatures, ...parcelFeatures].forEach(f => {
+        const geom = f.geometry as any;
+        const processCoords = (coords: any) => {
+          if (typeof coords[0] === "number") bounds.extend(coords as [number, number]);
+          else if (Array.isArray(coords)) coords.forEach(processCoords);
+        };
+        processCoords(geom.coordinates);
+      });
+      if (!bounds.isEmpty()) {
+        // Only fit bounds if the number of plots has changed to avoid fighting manual zoom
+        const prevCount = map.getContainer().getAttribute('data-plot-count');
+        if (prevCount !== String(plots.length)) {
+          map.fitBounds(bounds, { padding: isMobile ? 40 : 80, duration: 1200 });
+          map.getContainer().setAttribute('data-plot-count', String(plots.length));
+        }
+      }
+    }
   }, [plots, isMobile]);
 
   return (
@@ -607,11 +724,17 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
 function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; index: number; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const carbonPerTree = plot.trees && plot.trees > 0
+    ? (plot.carbonTotal / plot.trees)
+    : null;
+
   const statItems = [
-    { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.08)", icon: "bi-grid-fill" },
-    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.08)", icon: "bi-hourglass-split" },
-    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? (plot.trees >= 1000 ? (plot.trees / 1000).toFixed(1) + "k" : String(plot.trees)) : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)", icon: "bi-tree-fill" },
-    { label: "คาร์บอน", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.08)", icon: "bi-cloud-arrow-up-fill" },
+    { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
+    { label: "ปีที่ปลูก", val: plot.plantYearBE && plot.plantYearBE > 0 ? String(plot.plantYearBE) : "—", unit: "พ.ศ.", color: "#0369a1", bg: "rgba(3,105,161,0.08)" },
+    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.08)" },
+    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? plot.trees.toLocaleString("th-TH") : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" },
+    { label: "คาร์บอน/ต้น", val: carbonPerTree !== null ? carbonPerTree < 0.001 ? carbonPerTree.toExponential(2) : carbonPerTree.toFixed(4) : "—", unit: "tCO₂/ต้น", color: "#0e7490", bg: "rgba(14,116,144,0.08)" },
+    { label: "คาร์บอนทั้งแปลง", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.08)" },
   ];
 
   return (
@@ -661,11 +784,6 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
                 <i className="bi bi-pin-map-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.province}
               </span>
             )}
-            {plot.plantYearBE && plot.plantYearBE > 0 && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#0369a1", background: "rgba(14,165,233,0.08)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(14,165,233,0.2)" }}>
-                <i className="bi bi-calendar-event" style={{ color: "#0284c7", fontSize: 10 }} />ปีปลูก พ.ศ. {plot.plantYearBE}
-              </span>
-            )}
             <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#64748b", background: "rgba(148,163,184,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(148,163,184,0.2)" }}>
               <i className="bi bi-clock-history" style={{ color: "#94a3b8", fontSize: 10 }} />
               <span style={{ opacity: 0.7, fontSize: 10 }}>บันทึกเมื่อ:</span>
@@ -676,17 +794,16 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
       </div>
 
       {/* Stats row — Responsive grid */}
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: isMobile ? 8 : 10, padding: isMobile ? "0 18px 12px" : "0 24px 14px" }}>
-        {statItems.map(({ label, val, unit, color, bg, icon }) => (
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(6,1fr)", gap: isMobile ? 8 : 10, padding: isMobile ? "0 18px 12px" : "0 24px 14px" }}>
+        {statItems.map(({ label, val, unit, color, bg }) => (
           <div key={label} style={{
             borderRadius: 14, padding: isMobile ? "10px 4px" : "12px 6px", textAlign: "center",
             background: bg, border: `1px solid ${color}22`,
             display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
           }}>
-            <i className={`bi ${icon}`} style={{ color, fontSize: isMobile ? 11 : 13, opacity: 0.7, marginBottom: 1 }} />
+            <div style={{ fontSize: 8.5, color: "#94a3b8", marginBottom: 1 }}>{label}</div>
             <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
             <div style={{ fontSize: 9, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
-            <div style={{ fontSize: 8.5, color: "#94a3b8", marginTop: 1 }}>{label}</div>
           </div>
         ))}
       </div>
@@ -749,6 +866,7 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
               { k: "จำนวนต้น", v: plot.trees?.toLocaleString("th-TH") ?? "—" },
               { k: "ปีปลูก (พ.ศ.)", v: plot.plantYearBE ? String(plot.plantYearBE) : "—" },
               { k: "คาร์บอนปัจจุบัน", v: `${plot.carbonTotal.toFixed(2)} tCO₂` },
+              { k: "คาร์บอน/ต้น", v: plot.trees && plot.trees > 0 ? `${(plot.carbonTotal / plot.trees).toFixed(4)} tCO₂` : "—" },
             ].map(({ k, v }) => (
               <div key={k} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.025)", borderRadius: 10, border: "1px solid rgba(0,0,0,0.04)" }}>
                 <div style={{ color: "#94a3b8", fontSize: 9.5, fontWeight: 600, letterSpacing: 0.3 }}>{k}</div>
