@@ -435,11 +435,15 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
       const parcelFeatures: any[] = [];
 
       plots.forEach((p, i) => {
+        const carbonPerTree = (p.trees && p.trees > 0)
+          ? (p.carbonTotal / p.trees).toFixed(3)
+          : null;
         const props = {
           id: p.id,
           name: p.name,
           area: p.areaRai.toFixed(2),
           carbon: p.carbonTotal.toFixed(2),
+          carbonPerTree: carbonPerTree ?? "—",
           province: p.province || "—",
           index: String(i + 1)
         };
@@ -524,6 +528,7 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         if (!e.features?.length) return;
         const p = e.features[0].properties;
         const isBoundary = p.type === 'boundary';
+        if (isBoundary) return;  // ไม่แสดง popup สำหรับขอบเขตที่วาด
         const dot = isBoundary ? '#6366f1' : '#10b981';
         const html = `
           <div style="
@@ -562,16 +567,23 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
               <div style="height:1px; background:#f1f5f9; margin-bottom:12px;"></div>
 
               <!-- Stats row -->
-              <div style="display:flex; gap:16px;">
+              <div style="display:flex; gap:12px; align-items:flex-start;">
                 <div>
                   <div style="font-size:15px; font-weight:800; color:#0f172a;">${p.area}</div>
                   <div style="font-size:9.5px; color:#94a3b8; margin-top:1px;">ไร่</div>
                 </div>
-                <div style="width:1px; background:#f1f5f9;"></div>
+                <div style="width:1px; background:#f1f5f9; align-self:stretch;"></div>
                 <div>
                   <div style="font-size:15px; font-weight:800; color:#059669;">${p.carbon}</div>
                   <div style="font-size:9.5px; color:#94a3b8; margin-top:1px;">tCO₂</div>
                 </div>
+                ${p.carbonPerTree !== '—' ? `
+                <div style="width:1px; background:#f1f5f9; align-self:stretch;"></div>
+                <div>
+                  <div style="font-size:13px; font-weight:800; color:#0891b2;">${p.carbonPerTree}</div>
+                  <div style="font-size:9px; color:#94a3b8; margin-top:1px; line-height:1.3;">tCO₂<br>/ต้น</div>
+                </div>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -582,12 +594,9 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
           .addTo(map);
       };
 
-      map.on("click", "boundary-fill", handlePlotClick);
       map.on("click", "parcel-fill", handlePlotClick);
       map.on("mouseenter", "parcel-fill", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "parcel-fill", () => { map.getCanvas().style.cursor = ""; });
-      map.on("mouseenter", "boundary-fill", () => { map.getCanvas().style.cursor = "pointer"; });
-      map.on("mouseleave", "boundary-fill", () => { map.getCanvas().style.cursor = ""; });
 
       if (boundaryFeatures.length > 0 || parcelFeatures.length > 0) {
         const bounds = new maplibregl.LngLatBounds();
