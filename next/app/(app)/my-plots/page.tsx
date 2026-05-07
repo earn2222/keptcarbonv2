@@ -7,10 +7,10 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 const HERO_BG =
-    "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
-    "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
-    "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
-    "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
+  "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
+  "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
+  "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
+  "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
 
 function carbonCo2(age: number, trees: number): number {
   const H = Math.min(2.0 + 1.8 * age, 28);
@@ -221,8 +221,8 @@ function ForecastBody({
                   i === 0
                     ? (svgPts[1] ? (svgPts[1].x + p.x) / 2 - PL : iW)
                     : i === n - 1
-                    ? PL + iW - (svgPts[i - 1].x + p.x) / 2
-                    : p.x - svgPts[i - 1].x
+                      ? PL + iW - (svgPts[i - 1].x + p.x) / 2
+                      : p.x - svgPts[i - 1].x
                 }
                 height={iH}
                 fill="transparent"
@@ -362,10 +362,10 @@ function ForecastSection({
 
   const chartPts = canCompute
     ? Array.from({ length: 8 }, (_, i) => ({
-        yr: i,
-        label: i === 0 ? "ปัจจุบัน" : `+${i}`,
-        co2: i === 0 ? carbonTotal : carbonCo2(rubberAge + i, trees),
-      }))
+      yr: i,
+      label: i === 0 ? "ปัจจุบัน" : `+${i}`,
+      co2: i === 0 ? carbonTotal : carbonCo2(rubberAge + i, trees),
+    }))
     : milestones.map(m => ({ yr: m.yr, label: m.label, co2: m.co2 }));
 
   return (
@@ -435,7 +435,7 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
       const parcelFeatures: any[] = [];
 
       plots.forEach((p, i) => {
-        const props = { 
+        const props = {
           id: p.id,
           name: p.name,
           area: p.areaRai.toFixed(2),
@@ -479,8 +479,8 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         id: "boundary-outline",
         type: "line",
         source: "my-boundaries",
-        paint: { 
-          "line-color": "#3b82f6", 
+        paint: {
+          "line-color": "#3b82f6",
           "line-width": 1.5,
           "line-dasharray": [4, 2]
         }
@@ -490,8 +490,8 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         id: "parcel-fill",
         type: "fill",
         source: "my-parcels",
-        paint: { 
-          "fill-color": "#ea580c", 
+        paint: {
+          "fill-color": "#ea580c",
           "fill-opacity": 0.35
         }
       });
@@ -570,20 +570,20 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
 
   return (
     <div style={{ position: "relative", marginBottom: 24 }}>
-      <div 
-        ref={mapContainerRef} 
-        style={{ 
-          width: "100%", 
-          height: isMobile ? "450px" : "600px", 
-          borderRadius: 24, 
-          overflow: "hidden", 
+      <div
+        ref={mapContainerRef}
+        style={{
+          width: "100%",
+          height: isMobile ? "450px" : "600px",
+          borderRadius: 24,
+          overflow: "hidden",
           border: "1px solid rgba(16,185,129,0.15)",
           boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
-        }} 
+        }}
       />
       {/* Basemap toggle */}
       <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, background: "rgba(255,255,255,0.9)", padding: 4, borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 1 }}>
-        <button 
+        <button
           onClick={() => {
             if (!mapRef.current) return;
             mapRef.current.setLayoutProperty("sat", "visibility", "visible");
@@ -591,7 +591,7 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
           }}
           style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: "transparent" }}
         >ดาวเทียม</button>
-        <button 
+        <button
           onClick={() => {
             if (!mapRef.current) return;
             mapRef.current.setLayoutProperty("sat", "visibility", "none");
@@ -812,7 +812,7 @@ export default function MyPlotsPage() {
           const usersRaw = localStorage.getItem("kc_users");
           const allUsers = usersRaw ? JSON.parse(usersRaw) : [];
           let allPlots: SavedPlot[] = [];
-          
+
           allUsers.forEach((u: any) => {
             const userKey = `user_saved_plots_${u.id}`;
             const userPlotsRaw = localStorage.getItem(userKey);
@@ -848,7 +848,7 @@ export default function MyPlotsPage() {
           allPlots.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
           setPlots(allPlots);
         }
-      } catch {}
+      } catch { }
     }
   }, [ready, user, viewMode]);
 
@@ -880,7 +880,7 @@ export default function MyPlotsPage() {
         const filteredGlobal = globalPlots.filter((p: any) => p.id !== id);
         localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
       }
-    } catch {}
+    } catch { }
   };
 
 
@@ -905,7 +905,7 @@ export default function MyPlotsPage() {
           const filteredGlobal = globalPlots.filter((p: any) => !idsToDelete.includes(p.id));
           localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
         }
-      } catch {}
+      } catch { }
     }
     setConfirmDeleteAll(false);
   };
@@ -932,10 +932,10 @@ export default function MyPlotsPage() {
 
   const groupedByUser = useMemo(() => {
     if (viewMode !== "all") return null;
-    
+
     // Group filtered plots by userId
     const groups: { [key: string]: { userId: string; ownerName: string; plots: SavedPlot[] } } = {};
-    
+
     filteredPlots.forEach(plot => {
       const uId = plot.userId || 'unknown';
       const oName = plot.ownerName || 'ผู้ใช้งานทั่วไป';
@@ -944,7 +944,7 @@ export default function MyPlotsPage() {
       }
       groups[uId].plots.push(plot);
     });
-    
+
     // Convert to array and sort groups (e.g., by name or by total plots)
     return Object.values(groups).sort((a, b) => a.ownerName.localeCompare(b.ownerName, 'th'));
   }, [filteredPlots, viewMode]);
@@ -970,7 +970,7 @@ export default function MyPlotsPage() {
         }}>
           <div style={{ position: "absolute", top: -50, left: -50, width: isMobile ? 150 : 200, height: isMobile ? 150 : 200, background: "rgba(16,185,129,0.2)", filter: "blur(60px)", borderRadius: "50%", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -50, right: -50, width: isMobile ? 200 : 250, height: isMobile ? 200 : 250, background: "rgba(13,148,136,0.15)", filter: "blur(70px)", borderRadius: "50%", pointerEvents: "none" }} />
-          
+
           <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 20 }}>
             <div style={{ width: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
@@ -982,8 +982,8 @@ export default function MyPlotsPage() {
                 {viewMode === "all" ? "การจัดการแปลงยางพาราทั้งหมด" : "แปลงยางพาราของฉัน"}
               </h1>
               <p style={{ fontSize: isMobile ? 13 : 14, color: "#475569", margin: "0 0 18px", lineHeight: 1.6 }}>
-                {viewMode === "all" 
-                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ" 
+                {viewMode === "all"
+                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ"
                   : "จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปี"}
               </p>
               {/* Search */}
@@ -1015,26 +1015,26 @@ export default function MyPlotsPage() {
 
             <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flexWrap: "wrap", alignItems: "center", justifyContent: isMobile ? "flex-start" : "flex-end", gap: isMobile ? 12 : 16, width: isMobile ? "100%" : "auto" }}>
               {isAdmin && (
-                <div style={{ 
-                  background: "rgba(255,255,255,0.9)", 
-                  padding: 4, 
-                  borderRadius: isMobile ? 12 : 14, 
-                  display: "flex", 
-                  gap: isMobile ? 3 : 4, 
+                <div style={{
+                  background: "rgba(255,255,255,0.9)",
+                  padding: 4,
+                  borderRadius: isMobile ? 12 : 14,
+                  display: "flex",
+                  gap: isMobile ? 3 : 4,
                   border: "1px solid rgba(16,185,129,0.15)",
                   width: isMobile ? "100%" : "auto",
                   boxShadow: isMobile ? "none" : "0 4px 15px rgba(0,0,0,0.05)"
                 }}>
-                  <button 
+                  <button
                     onClick={() => setViewMode("mine")}
                     style={{
                       flex: isMobile ? 1 : "initial",
-                      padding: isMobile ? "7px 12px" : "8px 16px", 
-                      borderRadius: isMobile ? 9 : 10, 
-                      border: "none", 
-                      fontSize: isMobile ? 12 : 13, 
-                      fontWeight: 700, 
-                      cursor: "pointer", 
+                      padding: isMobile ? "7px 12px" : "8px 16px",
+                      borderRadius: isMobile ? 9 : 10,
+                      border: "none",
+                      fontSize: isMobile ? 12 : 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
                       transition: "all 0.2s",
                       background: viewMode === "mine" ? "#10b981" : "transparent",
                       color: viewMode === "mine" ? "#fff" : "#64748b",
@@ -1044,16 +1044,16 @@ export default function MyPlotsPage() {
                   >
                     <i className="bi bi-person-circle" /> {isMobile ? "ของฉัน" : "เฉพาะของฉัน"}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setViewMode("all")}
                     style={{
                       flex: isMobile ? 1 : "initial",
-                      padding: isMobile ? "7px 12px" : "8px 16px", 
-                      borderRadius: isMobile ? 9 : 10, 
-                      border: "none", 
-                      fontSize: isMobile ? 12 : 13, 
-                      fontWeight: 700, 
-                      cursor: "pointer", 
+                      padding: isMobile ? "7px 12px" : "8px 16px",
+                      borderRadius: isMobile ? 9 : 10,
+                      border: "none",
+                      fontSize: isMobile ? 12 : 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
                       transition: "all 0.2s",
                       background: viewMode === "all" ? "#0f172a" : "transparent",
                       color: viewMode === "all" ? "#fff" : "#64748b",
@@ -1067,7 +1067,7 @@ export default function MyPlotsPage() {
               )}
               <Link
                 href="/map-draw"
-                style={{ 
+                style={{
                   display: "inline-flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 8 : 10, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: isMobile ? "12px 24px" : "14px 28px", borderRadius: isMobile ? 12 : 14, fontWeight: 700, fontSize: isMobile ? 13 : 15, textDecoration: "none", boxShadow: isMobile ? "0 6px 15px rgba(16,185,129,0.25)" : "0 10px 25px rgba(16,185,129,0.3)",
                   width: isMobile ? "100%" : "auto",
                   whiteSpace: "nowrap",
@@ -1105,180 +1105,180 @@ export default function MyPlotsPage() {
 
         {/* Content */}
         <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 2px" }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: "#064e3b", margin: 0 }}>
-                {viewMode === "all" ? "รายการแปลงทั้งหมดในระบบ" : "รายการแปลงที่บันทึกแล้ว"}
-                <span style={{ fontSize: 12, fontWeight: 400, color: "#64748b", marginLeft: 8 }}>
-                  {searchTerm ? `พบ ${filteredPlots.length} จาก ${plots.length} แปลง` : `(${plots.length})`}
-                </span>
-              </h2>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                {plots.length > 0 && (
-                  <div style={{ 
-                    display: "flex", 
-                    background: "rgba(255,255,255,0.8)", 
-                    padding: 4, 
-                    borderRadius: 12, 
-                    border: "1px solid rgba(16,185,129,0.15)",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
-                  }}>
-                    <button 
-                      onClick={() => setDisplayMode("list")}
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: 8,
-                        border: "none",
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        background: displayMode === "list" ? "#10b981" : "transparent",
-                        color: displayMode === "list" ? "#fff" : "#64748b",
-                        transition: "all 0.2s"
-                      }}
-                    >
-                      <i className="bi bi-list-ul me-1" /> รายการ
-                    </button>
-                    <button 
-                      onClick={() => setDisplayMode("map")}
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: 8,
-                        border: "none",
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        background: displayMode === "map" ? "#10b981" : "transparent",
-                        color: displayMode === "map" ? "#fff" : "#64748b",
-                        transition: "all 0.2s"
-                      }}
-                    >
-                      <i className="bi bi-map-fill me-1" /> แผนที่
-                    </button>
-                  </div>
-                )}
-                {plots.length > 0 && (
-                  <div>
-                    {confirmDeleteAll ? (
-                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>ลบทั้งหมด?</span>
-                        <button
-                          onClick={handleDeleteAll}
-                          style={{ padding: "6px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}
-                        >
-                          ยืนยัน
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteAll(false)}
-                          style={{ padding: "6px 14px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
-                        >
-                          ยกเลิก
-                        </button>
-                      </div>
-                    ) : (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 2px", gap: 10 }}>
+            <h2 style={{ fontSize: isMobile ? 14 : 17, fontWeight: 800, color: "#064e3b", margin: 0, whiteSpace: "nowrap", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+              {viewMode === "all" ? (isMobile ? "แปลงทั้งหมด" : "รายการแปลงทั้งหมด") : (isMobile ? "แปลงที่บันทึก" : "รายการแปลงที่บันทึกแล้ว")}
+              <span style={{ fontSize: isMobile ? 10 : 12, fontWeight: 400, color: "#64748b", marginLeft: isMobile ? 4 : 8 }}>
+                {searchTerm ? `พบ ${filteredPlots.length}` : `(${plots.length})`}
+              </span>
+            </h2>
+            <div style={{ display: "flex", gap: isMobile ? 6 : 10, alignItems: "center", flexShrink: 0 }}>
+              {plots.length > 0 && (
+                <div style={{
+                  display: "flex",
+                  background: "rgba(255,255,255,0.8)",
+                  padding: 4,
+                  borderRadius: 12,
+                  border: "1px solid rgba(16,185,129,0.15)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+                }}>
+                  <button
+                    onClick={() => setDisplayMode("list")}
+                    style={{
+                      padding: isMobile ? "5px 8px" : "6px 12px",
+                      borderRadius: 8,
+                      border: "none",
+                      fontSize: isMobile ? 10.5 : 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      background: displayMode === "list" ? "#10b981" : "transparent",
+                      color: displayMode === "list" ? "#fff" : "#64748b",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <i className="bi bi-list-ul" style={{ marginRight: isMobile ? 2 : 5 }} /> รายการ
+                  </button>
+                  <button
+                    onClick={() => setDisplayMode("map")}
+                    style={{
+                      padding: isMobile ? "5px 8px" : "6px 12px",
+                      borderRadius: 8,
+                      border: "none",
+                      fontSize: isMobile ? 10.5 : 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      background: displayMode === "map" ? "#10b981" : "transparent",
+                      color: displayMode === "map" ? "#fff" : "#64748b",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <i className="bi bi-map-fill" style={{ marginRight: isMobile ? 2 : 5 }} /> แผนที่
+                  </button>
+                </div>
+              )}
+              {plots.length > 0 && (
+                <div>
+                  {confirmDeleteAll ? (
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>ลบทั้งหมด?</span>
                       <button
-                        onClick={() => setConfirmDeleteAll(true)}
-                        style={{ padding: "8px 12px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                        onClick={handleDeleteAll}
+                        style={{ padding: "6px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}
                       >
-                        <i className="bi bi-trash3-fill" /> {isMobile ? "" : "ลบทั้งหมด"}
+                        ยืนยัน
                       </button>
-                    )}
-                  </div>
-                )}
-              </div>
+                      <button
+                        onClick={() => setConfirmDeleteAll(false)}
+                        style={{ padding: "6px 14px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+                      >
+                        ยกเลิก
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteAll(true)}
+                      style={{ padding: isMobile ? "6px 10px" : "8px 12px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, cursor: "pointer", fontSize: isMobile ? 13 : 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                    >
+                      <i className="bi bi-trash3-fill" style={{ fontSize: isMobile ? 14 : 12 }} /> {isMobile ? "" : "ลบทั้งหมด"}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+          </div>
 
-            {displayMode === "map" && filteredPlots.length > 0 ? (
-              <PlotsMapView plots={filteredPlots} isMobile={isMobile} />
-            ) : filteredPlots.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "44px 24px", background: "#fff", borderRadius: 20, color: "#94a3b8", fontSize: 13 }}>
-                <i className="bi bi-search" style={{ fontSize: 30, display: "block", marginBottom: 8 }} />
-                ไม่พบแปลงที่ตรงกับ &ldquo;<strong style={{ color: "#64748b" }}>{searchTerm}</strong>&rdquo;
-                <br />
-                <button onClick={() => setSearchTerm("")} style={{ marginTop: 12, padding: "5px 16px", background: "rgba(16,185,129,0.08)", color: "#059669", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
-                  ล้างการค้นหา
-                </button>
-              </div>
-            ) : viewMode === "all" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 24 : 32 }}>
-                {groupedByUser?.map(group => (
-                  <div key={group.userId} style={{ position: 'relative' }}>
-                    {/* User Header */}
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: isMobile ? 10 : 12, 
-                      marginBottom: 16, 
-                      padding: isMobile ? '10px 14px' : '12px 20px', 
-                      background: 'rgba(255,255,255,0.7)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: 18,
-                      border: '1.5px solid rgba(16,185,129,0.15)',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-                      position: 'sticky',
-                      top: isMobile ? 80 : 100,
-                      zIndex: 10
+          {displayMode === "map" && filteredPlots.length > 0 ? (
+            <PlotsMapView plots={filteredPlots} isMobile={isMobile} />
+          ) : filteredPlots.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "44px 24px", background: "#fff", borderRadius: 20, color: "#94a3b8", fontSize: 13 }}>
+              <i className="bi bi-search" style={{ fontSize: 30, display: "block", marginBottom: 8 }} />
+              ไม่พบแปลงที่ตรงกับ &ldquo;<strong style={{ color: "#64748b" }}>{searchTerm}</strong>&rdquo;
+              <br />
+              <button onClick={() => setSearchTerm("")} style={{ marginTop: 12, padding: "5px 16px", background: "rgba(16,185,129,0.08)", color: "#059669", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
+                ล้างการค้นหา
+              </button>
+            </div>
+          ) : viewMode === "all" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 24 : 32 }}>
+              {groupedByUser?.map(group => (
+                <div key={group.userId} style={{ position: 'relative' }}>
+                  {/* User Header */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? 10 : 12,
+                    marginBottom: 16,
+                    padding: isMobile ? '10px 14px' : '12px 20px',
+                    background: 'rgba(255,255,255,0.7)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: 18,
+                    border: '1.5px solid rgba(16,185,129,0.15)',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                    position: 'sticky',
+                    top: isMobile ? 80 : 100,
+                    zIndex: 10
+                  }}>
+                    <div style={{
+                      width: isMobile ? 34 : 40,
+                      height: isMobile ? 34 : 40,
+                      borderRadius: 10,
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: isMobile ? 15 : 18,
+                      fontWeight: 800,
+                      boxShadow: '0 4px 10px rgba(16,185,129,0.25)'
                     }}>
-                      <div style={{ 
-                        width: isMobile ? 34 : 40, 
-                        height: isMobile ? 34 : 40, 
-                        borderRadius: 10, 
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-                        color: '#fff', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        fontSize: isMobile ? 15 : 18, 
-                        fontWeight: 800,
-                        boxShadow: '0 4px 10px rgba(16,185,129,0.25)'
-                      }}>
-                        {group.ownerName.charAt(0).toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          {group.ownerName}
-                          <span style={{ fontSize: 9, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '1px 6px', borderRadius: 20 }}>
-                            ผู้ใช้
-                          </span>
-                        </div>
-                        <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
-                          ทั้งหมด {group.plots.length} แปลง
-                        </div>
-                      </div>
+                      {group.ownerName.charAt(0).toUpperCase()}
                     </div>
-
-                    {/* Plots in this group */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: isMobile ? 8 : 12, borderLeft: isMobile ? '1.5px dashed rgba(16,185,129,0.12)' : '2px dashed rgba(16,185,129,0.1)', marginLeft: isMobile ? 16 : 20 }}>
-                      {group.plots.map((plot, i) => (
-                        <PlotCard
-                          key={plot.id}
-                          plot={plot}
-                          index={i + 1}
-                          onDelete={() => handleDelete(plot.id)}
-                          expanded={expandedPlotId === plot.id}
-                          onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
-                          isMobile={isMobile}
-                        />
-                      ))}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {group.ownerName}
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '1px 6px', borderRadius: 20 }}>
+                          ผู้ใช้
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
+                        ทั้งหมด {group.plots.length} แปลง
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {filteredPlots.map((plot, i) => (
-                  <PlotCard
-                    key={plot.id}
-                    plot={plot}
-                    index={i + 1}
-                    onDelete={() => handleDelete(plot.id)}
-                    expanded={expandedPlotId === plot.id}
-                    onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
-                    isMobile={isMobile}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+
+                  {/* Plots in this group */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: isMobile ? 8 : 12, borderLeft: isMobile ? '1.5px dashed rgba(16,185,129,0.12)' : '2px dashed rgba(16,185,129,0.1)', marginLeft: isMobile ? 16 : 20 }}>
+                    {group.plots.map((plot, i) => (
+                      <PlotCard
+                        key={plot.id}
+                        plot={plot}
+                        index={i + 1}
+                        onDelete={() => handleDelete(plot.id)}
+                        expanded={expandedPlotId === plot.id}
+                        onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                        isMobile={isMobile}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {filteredPlots.map((plot, i) => (
+                <PlotCard
+                  key={plot.id}
+                  plot={plot}
+                  index={i + 1}
+                  onDelete={() => handleDelete(plot.id)}
+                  expanded={expandedPlotId === plot.id}
+                  onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                  isMobile={isMobile}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
