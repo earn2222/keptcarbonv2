@@ -84,6 +84,9 @@ export default function MapDrawPage() {
   // Panel toggle state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+  // Area Validation State
+  const [areaError, setAreaError] = useState<{ rai: number; sqm: number } | null>(null);
+
   // Drawn boundary geometry (set when search is confirmed)
   const [drawnGeometry, setDrawnGeometry] = useState<GeoJSON.Geometry | null>(null);
 
@@ -378,14 +381,27 @@ export default function MapDrawPage() {
 
     const sqm = polygonAreaM2(ring);
     const rai = sqm / 1600;
+
+    // Validation: 1 Rai minimum
+    if (rai < 1) {
+      setAreaError({ rai, sqm });
+    } else {
+      setAreaError(null);
+    }
+
     setDrawPreview(`${rai.toFixed(2)} ไร่ · ${verts.length} จุด`);
     setDrawDone(true);
     setHasGeom(true);
     setStatus(`✓ วาดแปลงเสร็จ — ลากจุดเพื่อแก้ไข หรือคลิกเส้นเพื่อเพิ่มจุด`);
     if (!skipFit) fitPlot();
 
-    // Auto process
-    runParcelSearchRef.current();
+    // Auto process - ONLY if area is >= 1 Rai
+    if (rai >= 1) {
+      runParcelSearchRef.current();
+    } else {
+      // If area too small, ensure we stay on step 1 and don't process
+      setCurrentStep(1);
+    }
   }, [fitPlot]);
 
   // Map click / dblclick / Escape handlers — keep refs in sync
@@ -519,6 +535,7 @@ export default function MapDrawPage() {
     setDrawDone(false);
     setVertCount(0);
     setDrawPreview("—");
+    setAreaError(null);
     setHasGeom(false);
     setDrawnGeometry(null);
     setSearchCount(null);
@@ -754,6 +771,24 @@ export default function MapDrawPage() {
       const searchGeom: GeoJSON.MultiPolygon = { type: "MultiPolygon", coordinates: allRings };
       finalGJRef.current = { type: "Feature", geometry: searchGeom, properties: {} };
 
+      // Calculate total area for validation
+      let totalSqm = 0;
+      for (const f of polyFeats) {
+        if (f.geometry.type === "Polygon") {
+          totalSqm += polygonAreaM2(f.geometry.coordinates[0] as LngLat[]);
+        } else if (f.geometry.type === "MultiPolygon") {
+          for (const poly of f.geometry.coordinates) {
+            totalSqm += polygonAreaM2(poly[0] as LngLat[]);
+          }
+        }
+      }
+      const totalRai = totalSqm / 1600;
+      if (totalRai < 1) {
+        setAreaError({ rai: totalRai, sqm: totalSqm });
+      } else {
+        setAreaError(null);
+      }
+
       setHasGeom(true);
       const map = mapRef.current;
       if (map && mapLoadedRef.current) {
@@ -764,10 +799,17 @@ export default function MapDrawPage() {
         });
       }
       fitPlot();
-      void runParcelSearch();
+      
+      // Auto process - ONLY if total area is >= 1 Rai
+      if (totalRai >= 1) {
+        void runParcelSearch();
+      } else {
+        setCurrentStep(1);
+      }
+
       setShpStatus({
-        msg: `✓ โหลดสำเร็จ — ${polyFeats.length} แปลง${projLabel}`,
-        ok: true,
+        msg: `✓ โหลดสำเร็จ — ${polyFeats.length} แปลง${projLabel}${totalRai < 1 ? " (พื้นที่น้อยกว่า 1 ไร่)" : ""}`,
+        ok: totalRai >= 1,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -1150,6 +1192,30 @@ export default function MapDrawPage() {
         <div className="mds-toast">
           <i className="bi bi-check-circle me-2" />
           {toast}
+        </div>
+      )}
+
+      {/* Area Validation Popup */}
+      {areaError && (
+        <div className="mds-area-popup-overlay" onClick={() => setAreaError(null)}>
+          <div className="mds-area-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="mds-area-popup-icon">
+              <i className="bi bi-exclamation-triangle-fill" />
+            </div>
+            <div className="mds-area-popup-content">
+              <h3>พื้นที่แปลงเล็กเกินไป</h3>
+              <p>
+                ขนาดแปลงที่วาดคือ <strong>{areaError.rai.toFixed(2)} ไร่</strong> ({Math.round(areaError.sqm).toLocaleString()} ตร.ม.)
+                ซึ่งน้อยกว่าเกณฑ์ขั้นต่ำ <strong>1 ไร่</strong> (40×40 เมตร)
+              </p>
+              <div className="mds-area-popup-hint">
+                กรุณาปรับขยายขอบเขตแปลงให้ครอบคลุมพื้นที่มากขึ้น
+              </div>
+            </div>
+            <button className="mds-area-popup-close" onClick={() => setAreaError(null)}>
+              ตกลง
+            </button>
+          </div>
         </div>
       )}
     </div>

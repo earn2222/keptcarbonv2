@@ -2,13 +2,15 @@
 
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 const HERO_BG =
-    "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
-    "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
-    "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
-    "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
+  "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
+  "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
+  "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
+  "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
 
 function carbonCo2(age: number, trees: number): number {
   const H = Math.min(2.0 + 1.8 * age, 28);
@@ -219,8 +221,8 @@ function ForecastBody({
                   i === 0
                     ? (svgPts[1] ? (svgPts[1].x + p.x) / 2 - PL : iW)
                     : i === n - 1
-                    ? PL + iW - (svgPts[i - 1].x + p.x) / 2
-                    : p.x - svgPts[i - 1].x
+                      ? PL + iW - (svgPts[i - 1].x + p.x) / 2
+                      : p.x - svgPts[i - 1].x
                 }
                 height={iH}
                 fill="transparent"
@@ -360,10 +362,10 @@ function ForecastSection({
 
   const chartPts = canCompute
     ? Array.from({ length: 8 }, (_, i) => ({
-        yr: i,
-        label: i === 0 ? "ปัจจุบัน" : `+${i}`,
-        co2: i === 0 ? carbonTotal : carbonCo2(rubberAge + i, trees),
-      }))
+      yr: i,
+      label: i === 0 ? "ปัจจุบัน" : `+${i}`,
+      co2: i === 0 ? carbonTotal : carbonCo2(rubberAge + i, trees),
+    }))
     : milestones.map(m => ({ yr: m.yr, label: m.label, co2: m.co2 }));
 
   return (
@@ -385,7 +387,224 @@ function ForecastSection({
   );
 }
 
-function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
+function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boolean }) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: {
+        version: 8,
+        glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+        sources: {
+          sat: {
+            type: "raster",
+            tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+            tileSize: 256,
+            minzoom: 1,
+            maxzoom: 19,
+            attribution: "",
+          },
+          street: {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            minzoom: 1,
+            maxzoom: 19,
+            attribution: "",
+          },
+        },
+        layers: [
+          { id: "sat", type: "raster", source: "sat", layout: { visibility: "visible" } },
+          { id: "street", type: "raster", source: "street", layout: { visibility: "none" } },
+        ],
+      },
+      center: [101.258, 13.5],
+      zoom: 5,
+      attributionControl: false,
+    });
+
+    mapRef.current = map;
+    map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+
+    map.on("load", () => {
+      const boundaryFeatures: any[] = [];
+      const parcelFeatures: any[] = [];
+
+      plots.forEach((p, i) => {
+        const props = {
+          id: p.id,
+          name: p.name,
+          area: p.areaRai.toFixed(2),
+          carbon: p.carbonTotal.toFixed(2),
+          province: p.province || "—",
+          index: String(i + 1)
+        };
+
+        if (p.boundaryGeojson) {
+          boundaryFeatures.push({
+            type: "Feature",
+            geometry: p.boundaryGeojson,
+            properties: { ...props, type: 'boundary' }
+          });
+        }
+        if (p.geojson) {
+          parcelFeatures.push({
+            type: "Feature",
+            geometry: p.geojson,
+            properties: { ...props, type: 'parcel' }
+          });
+        }
+      });
+
+      map.addSource("my-boundaries", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: boundaryFeatures }
+      });
+      map.addSource("my-parcels", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: parcelFeatures }
+      });
+
+      map.addLayer({
+        id: "boundary-fill",
+        type: "fill",
+        source: "my-boundaries",
+        paint: { "fill-color": "#3b82f6", "fill-opacity": 0.05 }
+      });
+      map.addLayer({
+        id: "boundary-outline",
+        type: "line",
+        source: "my-boundaries",
+        paint: {
+          "line-color": "#3b82f6",
+          "line-width": 1.5,
+          "line-dasharray": [4, 2]
+        }
+      });
+
+      map.addLayer({
+        id: "parcel-fill",
+        type: "fill",
+        source: "my-parcels",
+        paint: {
+          "fill-color": "#ea580c",
+          "fill-opacity": 0.35
+        }
+      });
+      map.addLayer({
+        id: "parcel-outline",
+        type: "line",
+        source: "my-parcels",
+        paint: { "line-color": "#9a3412", "line-width": 2 }
+      });
+
+      // Index Labels
+      map.addLayer({
+        id: "parcel-label",
+        type: "symbol",
+        source: "my-parcels",
+        layout: {
+          "text-field": ["get", "index"],
+          "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+          "text-size": 16,
+          "text-allow-overlap": false,
+        },
+        paint: {
+          "text-color": "#dc2626",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 3,
+        }
+      });
+
+      const handlePlotClick = (e: any) => {
+        if (!e.features?.length) return;
+        const p = e.features[0].properties;
+        const isBoundary = p.type === 'boundary';
+        const html = `
+          <div style="font-family: sans-serif; padding: 10px; min-width: 160px;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 800; margin-bottom: 4px;">
+              ${isBoundary ? 'ขอบเขตที่วาด' : 'แปลงที่ตรวจพบ'}
+            </div>
+            <div style="font-weight: 800; color: #064e3b; margin-bottom: 5px; font-size: 14px;">${p.name}</div>
+            <div style="font-size: 12px; color: #475569; margin-bottom: 3px;">📍 ${p.province}</div>
+            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">📏 ${p.area} ไร่</div>
+            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">☁️ ${p.carbon} tCO₂</div>
+          </div>
+        `;
+        new maplibregl.Popup({ closeButton: false })
+          .setLngLat(e.lngLat)
+          .setHTML(html)
+          .addTo(map);
+      };
+
+      map.on("click", "boundary-fill", handlePlotClick);
+      map.on("click", "parcel-fill", handlePlotClick);
+      map.on("mouseenter", "parcel-fill", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "parcel-fill", () => { map.getCanvas().style.cursor = ""; });
+      map.on("mouseenter", "boundary-fill", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "boundary-fill", () => { map.getCanvas().style.cursor = ""; });
+
+      if (boundaryFeatures.length > 0 || parcelFeatures.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        [...boundaryFeatures, ...parcelFeatures].forEach(f => {
+          const geom = f.geometry as any;
+          const processCoords = (coords: any) => {
+            if (typeof coords[0] === "number") bounds.extend(coords as [number, number]);
+            else coords.forEach(processCoords);
+          };
+          processCoords(geom.coordinates);
+        });
+        map.fitBounds(bounds, { padding: isMobile ? 40 : 80, duration: 1200 });
+      }
+    });
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [plots, isMobile]);
+
+  return (
+    <div style={{ position: "relative", marginBottom: 24 }}>
+      <div
+        ref={mapContainerRef}
+        style={{
+          width: "100%",
+          height: isMobile ? "450px" : "600px",
+          borderRadius: 24,
+          overflow: "hidden",
+          border: "1px solid rgba(16,185,129,0.15)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
+        }}
+      />
+      {/* Basemap toggle */}
+      <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, background: "rgba(255,255,255,0.9)", padding: 4, borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 1 }}>
+        <button
+          onClick={() => {
+            if (!mapRef.current) return;
+            mapRef.current.setLayoutProperty("sat", "visibility", "visible");
+            mapRef.current.setLayoutProperty("street", "visibility", "none");
+          }}
+          style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: "transparent" }}
+        >ดาวเทียม</button>
+        <button
+          onClick={() => {
+            if (!mapRef.current) return;
+            mapRef.current.setLayoutProperty("sat", "visibility", "none");
+            mapRef.current.setLayoutProperty("street", "visibility", "visible");
+          }}
+          style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: "transparent" }}
+        >ลายเส้น</button>
+      </div>
+    </div>
+  );
+}
+
+function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; index: number; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const statItems = [
@@ -414,15 +633,16 @@ function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: Save
 
       {/* Header row */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 12 : 14, padding: isMobile ? "16px 18px 12px" : "20px 24px 14px" }}>
-        {/* Pin icon */}
+        {/* Plot Index Number */}
         <div style={{
-          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
-          border: "1.5px solid rgba(16,185,129,0.2)",
+          width: isMobile ? 38 : 42, height: isMobile ? 38 : 42, borderRadius: isMobile ? 10 : 12, flexShrink: 0,
+          background: "rgba(16,185,129,0.1)",
+          border: "2px solid #10b981",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(16,185,129,0.12)",
+          boxShadow: "0 4px 12px rgba(16,185,129,0.08)",
+          fontSize: isMobile ? 18 : 20, fontWeight: 900, color: "#059669",
         }}>
-          <i className="bi bi-geo-alt-fill" style={{ color: "#059669", fontSize: 22 }} />
+          {index}
         </div>
 
         {/* Name + meta */}
@@ -441,7 +661,14 @@ function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: Save
                 <i className="bi bi-pin-map-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.province}
               </span>
             )}
-            <span style={{ fontSize: 10.5, color: "#94a3b8" }}>
+            {plot.plantYearBE && plot.plantYearBE > 0 && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#0369a1", background: "rgba(14,165,233,0.08)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(14,165,233,0.2)" }}>
+                <i className="bi bi-calendar-event" style={{ color: "#0284c7", fontSize: 10 }} />ปีปลูก พ.ศ. {plot.plantYearBE}
+              </span>
+            )}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#64748b", background: "rgba(148,163,184,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(148,163,184,0.2)" }}>
+              <i className="bi bi-clock-history" style={{ color: "#94a3b8", fontSize: 10 }} />
+              <span style={{ opacity: 0.7, fontSize: 10 }}>บันทึกเมื่อ:</span>
               {new Date(plot.date).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
             </span>
           </div>
@@ -464,23 +691,7 @@ function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: Save
         ))}
       </div>
 
-      {/* Extra badges */}
-      {(plot.plantYearBE || plot.confidence) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 9, padding: "0 24px 14px" }}>
-          {plot.plantYearBE && plot.plantYearBE > 0 && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "#0369a1", background: "rgba(14,165,233,0.08)", padding: "4px 13px", borderRadius: 20, border: "1px solid rgba(14,165,233,0.2)", fontWeight: 600 }}>
-              <i className="bi bi-calendar-event" />
-              ปีปลูก พ.ศ. <strong style={{ color: "#0284c7" }}>{plot.plantYearBE}</strong>
-            </span>
-          )}
-          {plot.confidence && plot.confidence > 0 && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "#7c3aed", background: "rgba(124,58,237,0.07)", padding: "4px 13px", borderRadius: 20, border: "1px solid rgba(124,58,237,0.2)", fontWeight: 600 }}>
-              <i className="bi bi-shield-check" />
-              ความมั่นใจ <strong>{Math.round(plot.confidence * 100)}%</strong>
-            </span>
-          )}
-        </div>
-      )}
+
 
       {/* Divider */}
       <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(16,185,129,0.15),transparent)", margin: "0 24px" }} />
@@ -538,7 +749,6 @@ function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: Save
               { k: "จำนวนต้น", v: plot.trees?.toLocaleString("th-TH") ?? "—" },
               { k: "ปีปลูก (พ.ศ.)", v: plot.plantYearBE ? String(plot.plantYearBE) : "—" },
               { k: "คาร์บอนปัจจุบัน", v: `${plot.carbonTotal.toFixed(2)} tCO₂` },
-              { k: "ความมั่นใจ", v: plot.confidence ? `${Math.round(plot.confidence * 100)}%` : "—" },
             ].map(({ k, v }) => (
               <div key={k} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.025)", borderRadius: 10, border: "1px solid rgba(0,0,0,0.04)" }}>
                 <div style={{ color: "#94a3b8", fontSize: 9.5, fontWeight: 600, letterSpacing: 0.3 }}>{k}</div>
@@ -561,6 +771,7 @@ export default function MyPlotsPage() {
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [expandedPlotId, setExpandedPlotId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"mine" | "all">("mine");
+  const [displayMode, setDisplayMode] = useState<"list" | "map">("list");
   const [isMobile, setIsMobile] = useState(false);
 
   const isAdmin = user?.role === "admin";
@@ -591,7 +802,7 @@ export default function MyPlotsPage() {
           const usersRaw = localStorage.getItem("kc_users");
           const allUsers = usersRaw ? JSON.parse(usersRaw) : [];
           let allPlots: SavedPlot[] = [];
-          
+
           allUsers.forEach((u: any) => {
             const userKey = `user_saved_plots_${u.id}`;
             const userPlotsRaw = localStorage.getItem(userKey);
@@ -627,7 +838,7 @@ export default function MyPlotsPage() {
           allPlots.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
           setPlots(allPlots);
         }
-      } catch {}
+      } catch { }
     }
   }, [ready, user, viewMode]);
 
@@ -659,7 +870,7 @@ export default function MyPlotsPage() {
         const filteredGlobal = globalPlots.filter((p: any) => p.id !== id);
         localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
       }
-    } catch {}
+    } catch { }
   };
 
 
@@ -684,7 +895,7 @@ export default function MyPlotsPage() {
           const filteredGlobal = globalPlots.filter((p: any) => !idsToDelete.includes(p.id));
           localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
         }
-      } catch {}
+      } catch { }
     }
     setConfirmDeleteAll(false);
   };
@@ -711,10 +922,10 @@ export default function MyPlotsPage() {
 
   const groupedByUser = useMemo(() => {
     if (viewMode !== "all") return null;
-    
+
     // Group filtered plots by userId
     const groups: { [key: string]: { userId: string; ownerName: string; plots: SavedPlot[] } } = {};
-    
+
     filteredPlots.forEach(plot => {
       const uId = plot.userId || 'unknown';
       const oName = plot.ownerName || 'ผู้ใช้งานทั่วไป';
@@ -723,7 +934,7 @@ export default function MyPlotsPage() {
       }
       groups[uId].plots.push(plot);
     });
-    
+
     // Convert to array and sort groups (e.g., by name or by total plots)
     return Object.values(groups).sort((a, b) => a.ownerName.localeCompare(b.ownerName, 'th'));
   }, [filteredPlots, viewMode]);
@@ -749,7 +960,7 @@ export default function MyPlotsPage() {
         }}>
           <div style={{ position: "absolute", top: -50, left: -50, width: isMobile ? 150 : 200, height: isMobile ? 150 : 200, background: "rgba(16,185,129,0.2)", filter: "blur(60px)", borderRadius: "50%", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -50, right: -50, width: isMobile ? 200 : 250, height: isMobile ? 200 : 250, background: "rgba(13,148,136,0.15)", filter: "blur(70px)", borderRadius: "50%", pointerEvents: "none" }} />
-          
+
           <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 20 }}>
             <div style={{ width: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
@@ -761,8 +972,8 @@ export default function MyPlotsPage() {
                 {viewMode === "all" ? "การจัดการแปลงยางพาราทั้งหมด" : "แปลงยางพาราของฉัน"}
               </h1>
               <p style={{ fontSize: isMobile ? 13 : 14, color: "#475569", margin: "0 0 18px", lineHeight: 1.6 }}>
-                {viewMode === "all" 
-                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ" 
+                {viewMode === "all"
+                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ"
                   : "จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปี"}
               </p>
               {/* Search */}
@@ -792,28 +1003,28 @@ export default function MyPlotsPage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", flexWrap: "wrap", alignItems: isMobile ? "center" : "flex-end", gap: isMobile ? 10 : 12, width: isMobile ? "100%" : "auto" }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flexWrap: "wrap", alignItems: "center", justifyContent: isMobile ? "flex-start" : "flex-end", gap: isMobile ? 12 : 16, width: isMobile ? "100%" : "auto" }}>
               {isAdmin && (
-                <div style={{ 
-                  background: "rgba(255,255,255,0.9)", 
-                  padding: 4, 
-                  borderRadius: isMobile ? 12 : 14, 
-                  display: "flex", 
-                  gap: isMobile ? 3 : 4, 
+                <div style={{
+                  background: "rgba(255,255,255,0.9)",
+                  padding: 4,
+                  borderRadius: isMobile ? 12 : 14,
+                  display: "flex",
+                  gap: isMobile ? 3 : 4,
                   border: "1px solid rgba(16,185,129,0.15)",
                   width: isMobile ? "100%" : "auto",
                   boxShadow: isMobile ? "none" : "0 4px 15px rgba(0,0,0,0.05)"
                 }}>
-                  <button 
+                  <button
                     onClick={() => setViewMode("mine")}
                     style={{
                       flex: isMobile ? 1 : "initial",
-                      padding: isMobile ? "7px 12px" : "8px 16px", 
-                      borderRadius: isMobile ? 9 : 10, 
-                      border: "none", 
-                      fontSize: isMobile ? 12 : 13, 
-                      fontWeight: 700, 
-                      cursor: "pointer", 
+                      padding: isMobile ? "7px 12px" : "8px 16px",
+                      borderRadius: isMobile ? 9 : 10,
+                      border: "none",
+                      fontSize: isMobile ? 12 : 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
                       transition: "all 0.2s",
                       background: viewMode === "mine" ? "#10b981" : "transparent",
                       color: viewMode === "mine" ? "#fff" : "#64748b",
@@ -823,16 +1034,16 @@ export default function MyPlotsPage() {
                   >
                     <i className="bi bi-person-circle" /> {isMobile ? "ของฉัน" : "เฉพาะของฉัน"}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setViewMode("all")}
                     style={{
                       flex: isMobile ? 1 : "initial",
-                      padding: isMobile ? "7px 12px" : "8px 16px", 
-                      borderRadius: isMobile ? 9 : 10, 
-                      border: "none", 
-                      fontSize: isMobile ? 12 : 13, 
-                      fontWeight: 700, 
-                      cursor: "pointer", 
+                      padding: isMobile ? "7px 12px" : "8px 16px",
+                      borderRadius: isMobile ? 9 : 10,
+                      border: "none",
+                      fontSize: isMobile ? 12 : 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
                       transition: "all 0.2s",
                       background: viewMode === "all" ? "#0f172a" : "transparent",
                       color: viewMode === "all" ? "#fff" : "#64748b",
@@ -846,9 +1057,11 @@ export default function MyPlotsPage() {
               )}
               <Link
                 href="/map-draw"
-                style={{ 
-                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 8 : 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: isMobile ? "10px 20px" : "13px 26px", borderRadius: isMobile ? 12 : 13, fontWeight: 700, fontSize: isMobile ? 13 : 14, textDecoration: "none", boxShadow: isMobile ? "0 6px 15px rgba(16,185,129,0.25)" : "0 8px 20px rgba(16,185,129,0.3)",
-                  width: isMobile ? "100%" : "auto"
+                style={{
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 8 : 10, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: isMobile ? "12px 24px" : "14px 28px", borderRadius: isMobile ? 12 : 14, fontWeight: 700, fontSize: isMobile ? 13 : 15, textDecoration: "none", boxShadow: isMobile ? "0 6px 15px rgba(16,185,129,0.25)" : "0 10px 25px rgba(16,185,129,0.3)",
+                  width: isMobile ? "100%" : "auto",
+                  whiteSpace: "nowrap",
+                  transition: "all 0.2s ease"
                 }}
               >
                 <i className="bi bi-plus-circle" style={{ fontSize: isMobile ? 15 : 17 }} /> วาดแปลงใหม่
@@ -882,18 +1095,62 @@ export default function MyPlotsPage() {
 
         {/* Content */}
         <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 2px" }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: "#064e3b", margin: 0 }}>
-                {viewMode === "all" ? "รายการแปลงทั้งหมดในระบบ" : "รายการแปลงที่บันทึกแล้ว"}
-                <span style={{ fontSize: 12, fontWeight: 400, color: "#64748b", marginLeft: 8 }}>
-                  {searchTerm ? `พบ ${filteredPlots.length} จาก ${plots.length} แปลง` : `(${plots.length})`}
-                </span>
-              </h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 2px", gap: 10 }}>
+            <h2 style={{ fontSize: isMobile ? 14 : 17, fontWeight: 800, color: "#064e3b", margin: 0, whiteSpace: "nowrap", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+              {viewMode === "all" ? (isMobile ? "แปลงทั้งหมด" : "รายการแปลงทั้งหมด") : (isMobile ? "แปลงที่บันทึก" : "รายการแปลงที่บันทึกแล้ว")}
+              <span style={{ fontSize: isMobile ? 10 : 12, fontWeight: 400, color: "#64748b", marginLeft: isMobile ? 4 : 8 }}>
+                {searchTerm ? `พบ ${filteredPlots.length}` : `(${plots.length})`}
+              </span>
+            </h2>
+            <div style={{ display: "flex", gap: isMobile ? 6 : 10, alignItems: "center", flexShrink: 0 }}>
+              {plots.length > 0 && (
+                <div style={{
+                  display: "flex",
+                  background: "rgba(255,255,255,0.8)",
+                  padding: 4,
+                  borderRadius: 12,
+                  border: "1px solid rgba(16,185,129,0.15)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+                }}>
+                  <button
+                    onClick={() => setDisplayMode("list")}
+                    style={{
+                      padding: isMobile ? "5px 8px" : "6px 12px",
+                      borderRadius: 8,
+                      border: "none",
+                      fontSize: isMobile ? 10.5 : 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      background: displayMode === "list" ? "#10b981" : "transparent",
+                      color: displayMode === "list" ? "#fff" : "#64748b",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <i className="bi bi-list-ul" style={{ marginRight: isMobile ? 2 : 5 }} /> รายการ
+                  </button>
+                  <button
+                    onClick={() => setDisplayMode("map")}
+                    style={{
+                      padding: isMobile ? "5px 8px" : "6px 12px",
+                      borderRadius: 8,
+                      border: "none",
+                      fontSize: isMobile ? 10.5 : 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      background: displayMode === "map" ? "#10b981" : "transparent",
+                      color: displayMode === "map" ? "#fff" : "#64748b",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <i className="bi bi-map-fill" style={{ marginRight: isMobile ? 2 : 5 }} /> แผนที่
+                  </button>
+                </div>
+              )}
               {plots.length > 0 && (
                 <div>
                   {confirmDeleteAll ? (
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                      <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>ลบข้อมูลทั้งหมด?</span>
+                      <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>ลบทั้งหมด?</span>
                       <button
                         onClick={handleDeleteAll}
                         style={{ padding: "6px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}
@@ -910,105 +1167,108 @@ export default function MyPlotsPage() {
                   ) : (
                     <button
                       onClick={() => setConfirmDeleteAll(true)}
-                      style={{ padding: "6px 14px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.15)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+                      style={{ padding: isMobile ? "6px 10px" : "8px 12px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, cursor: "pointer", fontSize: isMobile ? 13 : 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
                     >
-                      <i className="bi bi-trash3-fill" /> ลบแปลงทั้งหมด
+                      <i className="bi bi-trash3-fill" style={{ fontSize: isMobile ? 14 : 12 }} /> {isMobile ? "" : "ลบทั้งหมด"}
                     </button>
                   )}
                 </div>
               )}
             </div>
+          </div>
 
-            {filteredPlots.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "44px 24px", background: "#fff", borderRadius: 20, color: "#94a3b8", fontSize: 13 }}>
-                <i className="bi bi-search" style={{ fontSize: 30, display: "block", marginBottom: 8 }} />
-                ไม่พบแปลงที่ตรงกับ &ldquo;<strong style={{ color: "#64748b" }}>{searchTerm}</strong>&rdquo;
-                <br />
-                <button onClick={() => setSearchTerm("")} style={{ marginTop: 12, padding: "5px 16px", background: "rgba(16,185,129,0.08)", color: "#059669", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
-                  ล้างการค้นหา
-                </button>
-              </div>
-            ) : viewMode === "all" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 24 : 32 }}>
-                {groupedByUser?.map(group => (
-                  <div key={group.userId} style={{ position: 'relative' }}>
-                    {/* User Header */}
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: isMobile ? 10 : 12, 
-                      marginBottom: 16, 
-                      padding: isMobile ? '10px 14px' : '12px 20px', 
-                      background: 'rgba(255,255,255,0.7)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: 18,
-                      border: '1.5px solid rgba(16,185,129,0.15)',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-                      position: 'sticky',
-                      top: isMobile ? 80 : 100,
-                      zIndex: 10
+          {displayMode === "map" && filteredPlots.length > 0 ? (
+            <PlotsMapView plots={filteredPlots} isMobile={isMobile} />
+          ) : filteredPlots.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "44px 24px", background: "#fff", borderRadius: 20, color: "#94a3b8", fontSize: 13 }}>
+              <i className="bi bi-search" style={{ fontSize: 30, display: "block", marginBottom: 8 }} />
+              ไม่พบแปลงที่ตรงกับ &ldquo;<strong style={{ color: "#64748b" }}>{searchTerm}</strong>&rdquo;
+              <br />
+              <button onClick={() => setSearchTerm("")} style={{ marginTop: 12, padding: "5px 16px", background: "rgba(16,185,129,0.08)", color: "#059669", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
+                ล้างการค้นหา
+              </button>
+            </div>
+          ) : viewMode === "all" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 24 : 32 }}>
+              {groupedByUser?.map(group => (
+                <div key={group.userId} style={{ position: 'relative' }}>
+                  {/* User Header */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? 10 : 12,
+                    marginBottom: 16,
+                    padding: isMobile ? '10px 14px' : '12px 20px',
+                    background: 'rgba(255,255,255,0.7)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: 18,
+                    border: '1.5px solid rgba(16,185,129,0.15)',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                    position: 'sticky',
+                    top: isMobile ? 80 : 100,
+                    zIndex: 10
+                  }}>
+                    <div style={{
+                      width: isMobile ? 34 : 40,
+                      height: isMobile ? 34 : 40,
+                      borderRadius: 10,
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: isMobile ? 15 : 18,
+                      fontWeight: 800,
+                      boxShadow: '0 4px 10px rgba(16,185,129,0.25)'
                     }}>
-                      <div style={{ 
-                        width: isMobile ? 34 : 40, 
-                        height: isMobile ? 34 : 40, 
-                        borderRadius: 10, 
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-                        color: '#fff', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        fontSize: isMobile ? 15 : 18, 
-                        fontWeight: 800,
-                        boxShadow: '0 4px 10px rgba(16,185,129,0.25)'
-                      }}>
-                        {group.ownerName.charAt(0).toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          {group.ownerName}
-                          <span style={{ fontSize: 9, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '1px 6px', borderRadius: 20 }}>
-                            ผู้ใช้
-                          </span>
-                        </div>
-                        <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
-                          ทั้งหมด {group.plots.length} แปลง
-                        </div>
-                      </div>
+                      {group.ownerName.charAt(0).toUpperCase()}
                     </div>
-
-                    {/* Plots in this group */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: isMobile ? 8 : 12, borderLeft: isMobile ? '1.5px dashed rgba(16,185,129,0.12)' : '2px dashed rgba(16,185,129,0.1)', marginLeft: isMobile ? 16 : 20 }}>
-                      {group.plots.map(plot => (
-                        <PlotCard
-                          key={plot.id}
-                          plot={plot}
-                          onDelete={() => handleDelete(plot.id)}
-                          expanded={expandedPlotId === plot.id}
-                          onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
-                          isMobile={isMobile}
-                        />
-                      ))}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {group.ownerName}
+                        <span style={{ fontSize: 9, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '1px 6px', borderRadius: 20 }}>
+                          ผู้ใช้
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
+                        ทั้งหมด {group.plots.length} แปลง
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {filteredPlots.map(plot => (
-                  <PlotCard
-                    key={plot.id}
-                    plot={plot}
-                    onDelete={() => handleDelete(plot.id)}
-                    expanded={expandedPlotId === plot.id}
-                    onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
-                    isMobile={isMobile}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+
+                  {/* Plots in this group */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: isMobile ? 8 : 12, borderLeft: isMobile ? '1.5px dashed rgba(16,185,129,0.12)' : '2px dashed rgba(16,185,129,0.1)', marginLeft: isMobile ? 16 : 20 }}>
+                    {group.plots.map((plot, i) => (
+                      <PlotCard
+                        key={plot.id}
+                        plot={plot}
+                        index={i + 1}
+                        onDelete={() => handleDelete(plot.id)}
+                        expanded={expandedPlotId === plot.id}
+                        onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                        isMobile={isMobile}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {filteredPlots.map((plot, i) => (
+                <PlotCard
+                  key={plot.id}
+                  plot={plot}
+                  index={i + 1}
+                  onDelete={() => handleDelete(plot.id)}
+                  expanded={expandedPlotId === plot.id}
+                  onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                  isMobile={isMobile}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
