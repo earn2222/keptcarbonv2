@@ -803,9 +803,9 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
             background: bg, border: `1px solid ${color}22`,
             display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
           }}>
+            <div style={{ fontSize: 8.5, color: "#94a3b8", marginBottom: 1 }}>{label}</div>
             <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
             <div style={{ fontSize: 9, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
-            <div style={{ fontSize: 8.5, color: "#94a3b8", marginTop: 1 }}>{label}</div>
           </div>
         ))}
       </div>
