@@ -115,10 +115,10 @@ function AgeBarChart({ age, conf, trees, isMobile }: { age: number; conf: number
     const dist = ageDistribution(age, conf);
     const maxPct = Math.max(...dist.map(d => d.pct));
 
-    const W = isMobile ? 500 : 450, BAR_W = isMobile ? 60 : 72, GAP = isMobile ? 18 : 14;
+    const W = isMobile ? 500 : 550, BAR_W = isMobile ? 60 : 64, GAP = isMobile ? 18 : 22;
     const totalW = dist.length * BAR_W + (dist.length - 1) * GAP;
     const sx = (W - totalW) / 2;
-    const BASE_Y = isMobile ? 160 : 230, MAX_BH = isMobile ? 110 : 170, H = isMobile ? 220 : 300;
+    const BASE_Y = isMobile ? 160 : 200, MAX_BH = isMobile ? 110 : 140, H = isMobile ? 220 : 260;
 
     return (
         <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)", borderRadius: 14, padding: "12px 8px 8px", marginBottom: 12 }}>
@@ -166,20 +166,20 @@ function AgeBarChart({ age, conf, trees, isMobile }: { age: number; conf: number
                                 filter={isMain ? "url(#barShadow)" : undefined}
                                 style={{ transition: "fill 0.15s" }} />
                             {/* % label above bar */}
-                            <text x={cx} y={BASE_Y - bh - 10} textAnchor="middle"
-                                fontSize={isMain ? (isMobile ? 18 : 24) : (isMobile ? 15 : 18)}
+                            <text x={cx} y={BASE_Y - bh - 8} textAnchor="middle"
+                                fontSize={isMain ? (isMobile ? 18 : 21) : (isMobile ? 15 : 16)}
                                 fontWeight={isMain ? "900" : isHov ? "700" : "500"}
                                 fill={isMain ? "#065f46" : isHov ? "#059669" : "#94a3b8"}>
                                 {pct}%
                             </text>
                             {/* age label below */}
-                            <text x={cx} y={BASE_Y + 24} textAnchor="middle" fontSize={isMobile ? 14 : 18}
+                            <text x={cx} y={BASE_Y + 22} textAnchor="middle" fontSize={isMobile ? 14 : 16}
                                 fontWeight={isMain ? "800" : "500"}
                                 fill={isMain ? "#059669" : isHov ? "#10b981" : "#94a3b8"}>
                                 {a}
                             </text>
                             {/* age unit */}
-                            <text x={cx} y={BASE_Y + 44} textAnchor="middle" fontSize={isMobile ? 11 : 14} fill="#cbd5e1" fontWeight="400">ปี</text>
+                            <text x={cx} y={BASE_Y + 40} textAnchor="middle" fontSize={isMobile ? 11 : 12} fill="#cbd5e1" fontWeight="400">ปี</text>
 
                             {/* tooltip */}
                             {isHov && (
@@ -205,7 +205,7 @@ function AgeBarChart({ age, conf, trees, isMobile }: { age: number; conf: number
 // ── SVG: Carbon forecast line chart with hover ────────────────────────────
 function ForecastChart({ pts, isMobile }: { pts: Array<{ yearBE: number; co2: number }>; isMobile?: boolean }) {
     const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-    const W = isMobile ? 400 : 450, H = isMobile ? 220 : 260, PL = 12, PR = isMobile ? 60 : 70, PT = isMobile ? 24 : 30, PB = isMobile ? 34 : 44;
+    const W = isMobile ? 400 : 550, H = isMobile ? 220 : 250, PL = 12, PR = isMobile ? 60 : 75, PT = isMobile ? 24 : 30, PB = isMobile ? 34 : 42;
     const iW = W - PL - PR, iH = H - PT - PB;
     const vals = pts.map(p => p.co2);
     const minV = Math.min(...vals), maxV = Math.max(...vals);
@@ -281,16 +281,16 @@ function ForecastChart({ pts, isMobile }: { pts: Array<{ yearBE: number; co2: nu
 
             {/* Year labels */}
             {svgPts.map(p => (
-                <text key={p.yearBE} x={p.x} y={H - 12} textAnchor="middle" fontSize={isMobile ? 12 : 14} fill="#94a3b8">
+                <text key={p.yearBE} x={p.x} y={H - 12} textAnchor="middle" fontSize={isMobile ? 12 : 13} fill="#94a3b8">
                     {p.yearBE}
                 </text>
             ))}
 
             {/* Y axis labels */}
-            <text x={PL + iW + 8} y={PT + 4} fontSize={isMobile ? 10 : 12} fill="#6b9e7e" textAnchor="start">
+            <text x={PL + iW + 8} y={PT + 4} fontSize={isMobile ? 10 : 11} fill="#6b9e7e" textAnchor="start">
                 {Math.round(maxV).toLocaleString()}
             </text>
-            <text x={PL + iW + 8} y={PT + iH + 4} fontSize={isMobile ? 10 : 12} fill="#6b9e7e" textAnchor="start">
+            <text x={PL + iW + 8} y={PT + iH + 4} fontSize={isMobile ? 10 : 11} fill="#6b9e7e" textAnchor="start">
                 {Math.round(minV).toLocaleString()}
             </text>
 
