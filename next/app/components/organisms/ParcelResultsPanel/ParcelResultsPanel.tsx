@@ -405,16 +405,11 @@ export function ParcelResultsPanel({
             });
             localStorage.setItem(key, JSON.stringify([...newPlots, ...existing]));
 
-            // Save to global anonymous list for dashboard
+            // Save to global list for dashboard (Admin will see real names)
             const globalKey = 'global_saved_plots';
             const globalExistingStr = localStorage.getItem(globalKey);
             const globalExisting = globalExistingStr ? JSON.parse(globalExistingStr) : [];
-            const anonymousPlots = newPlots.map(p => ({
-                ...p,
-                name: "แปลงยางพารา (นิรนาม)", // Generic name
-                ownerName: "",               // Remove personal info
-            }));
-            localStorage.setItem(globalKey, JSON.stringify([...anonymousPlots, ...globalExisting]));
+            localStorage.setItem(globalKey, JSON.stringify([...newPlots, ...globalExisting]));
 
         } catch (e) {
             console.error("Failed to save plots to localStorage", e);

@@ -34,6 +34,7 @@ type SavedPlot = {
   plantYearBE?: number;
   trees?: number;
   confidence?: number;
+  userId?: string;
   ownerName?: string;
   province?: string;
   date: string;
@@ -555,38 +556,90 @@ export default function MyPlotsPage() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [expandedPlotId, setExpandedPlotId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"mine" | "all">("mine");
+
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     setMounted(true);
     if (ready && user) {
       try {
-        // Cleanup: Remove old shared key to prevent "mixing" if it exists
-        localStorage.removeItem("user_saved_plots");
+        if (viewMode === "mine") {
+          const key = `user_saved_plots_${user.id}`;
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            const myOnly = Array.isArray(parsed) ? parsed.filter((p: any) => p.userId === user.id || !p.userId) : [];
+            setPlots(myOnly);
+          } else {
+            setPlots([]);
+          }
+        } else if (isAdmin) {
+          // Admin view: fetch plots from ALL users
+          const usersRaw = localStorage.getItem("kc_users");
+          const allUsers = usersRaw ? JSON.parse(usersRaw) : [];
+          let allPlots: SavedPlot[] = [];
+          
+          allUsers.forEach((u: any) => {
+            const userKey = `user_saved_plots_${u.id}`;
+            const userPlotsRaw = localStorage.getItem(userKey);
+            if (userPlotsRaw) {
+              const parsed = JSON.parse(userPlotsRaw);
+              if (Array.isArray(parsed)) {
+                // Decorate plots with owner info if missing
+                const decorated = parsed.map(p => ({
+                  ...p,
+                  userId: u.id,
+                  ownerName: p.ownerName || u.fullname
+                }));
+                allPlots = [...allPlots, ...decorated];
+              }
+            }
+          });
 
-        const key = `user_saved_plots_${user.id}`;
-        const stored = localStorage.getItem(key);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          // Extra safety: ensure we only show plots belonging to this user
-          const myOnly = Array.isArray(parsed) ? parsed.filter((p: any) => p.userId === user.id || !p.userId) : [];
-          setPlots(myOnly);
-        } else {
-          setPlots([]); 
+          // Also check the global_saved_plots for any legacy/anonymous ones
+          const globalKey = 'global_saved_plots';
+          const globalRaw = localStorage.getItem(globalKey);
+          if (globalRaw) {
+            const globalPlots = JSON.parse(globalRaw);
+            // Only add global plots that aren't already in the list (by ID)
+            const existingIds = new Set(allPlots.map(p => p.id));
+            globalPlots.forEach((gp: any) => {
+              if (!existingIds.has(gp.id)) {
+                allPlots.push(gp);
+              }
+            });
+          }
+
+          // Sort by date desc
+          allPlots.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setPlots(allPlots);
         }
       } catch {}
     }
-  }, [ready, user]);
+  }, [ready, user, viewMode]);
 
 
   const handleDelete = (id: string) => {
     if (!user) return;
+    const plotToDelete = plots.find(p => p.id === id);
+    if (!plotToDelete) return;
+
     const updated = plots.filter(p => p.id !== id);
     setPlots(updated);
-    try {
-      const key = `user_saved_plots_${user.id}`;
-      localStorage.setItem(key, JSON.stringify(updated));
 
-      // Also remove from global list
+    try {
+      // 1. Update the owner's specific storage
+      const ownerId = plotToDelete.userId || user.id;
+      const key = `user_saved_plots_${ownerId}`;
+      const ownerStoredRaw = localStorage.getItem(key);
+      if (ownerStoredRaw) {
+        const ownerPlots = JSON.parse(ownerStoredRaw);
+        const filtered = ownerPlots.filter((p: any) => p.id !== id);
+        localStorage.setItem(key, JSON.stringify(filtered));
+      }
+
+      // 2. Also remove from global list
       const globalKey = 'global_saved_plots';
       const globalRaw = localStorage.getItem(globalKey);
       if (globalRaw) {
@@ -601,21 +654,26 @@ export default function MyPlotsPage() {
 
   const handleDeleteAll = () => {
     if (!user) return;
-    const idsToDelete = plots.map(p => p.id);
-    setPlots([]);
-    try {
-      const key = `user_saved_plots_${user.id}`;
-      localStorage.removeItem(key);
+    if (viewMode === "all") {
+      // Admin deleting everything? Let's limit this to current view for safety
+      // Actually, standard behavior: delete what is shown
+      plots.forEach(p => handleDelete(p.id));
+    } else {
+      const idsToDelete = plots.map(p => p.id);
+      setPlots([]);
+      try {
+        const key = `user_saved_plots_${user.id}`;
+        localStorage.removeItem(key);
 
-      // Also remove from global list
-      const globalKey = 'global_saved_plots';
-      const globalRaw = localStorage.getItem(globalKey);
-      if (globalRaw) {
-        const globalPlots = JSON.parse(globalRaw);
-        const filteredGlobal = globalPlots.filter((p: any) => !idsToDelete.includes(p.id));
-        localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
-      }
-    } catch {}
+        const globalKey = 'global_saved_plots';
+        const globalRaw = localStorage.getItem(globalKey);
+        if (globalRaw) {
+          const globalPlots = JSON.parse(globalRaw);
+          const filteredGlobal = globalPlots.filter((p: any) => !idsToDelete.includes(p.id));
+          localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
+        }
+      } catch {}
+    }
     setConfirmDeleteAll(false);
   };
 
@@ -638,6 +696,25 @@ export default function MyPlotsPage() {
       (p.ownerName ?? "").toLowerCase().includes(term)
     );
   }, [plots, searchTerm]);
+
+  const groupedByUser = useMemo(() => {
+    if (viewMode !== "all") return null;
+    
+    // Group filtered plots by userId
+    const groups: { [key: string]: { userId: string; ownerName: string; plots: SavedPlot[] } } = {};
+    
+    filteredPlots.forEach(plot => {
+      const uId = plot.userId || 'unknown';
+      const oName = plot.ownerName || 'ผู้ใช้งานทั่วไป';
+      if (!groups[uId]) {
+        groups[uId] = { userId: uId, ownerName: oName, plots: [] };
+      }
+      groups[uId].plots.push(plot);
+    });
+    
+    // Convert to array and sort groups (e.g., by name or by total plots)
+    return Object.values(groups).sort((a, b) => a.ownerName.localeCompare(b.ownerName, 'th'));
+  }, [filteredPlots, viewMode]);
 
   if (!ready || !mounted)
     return (
@@ -663,14 +740,18 @@ export default function MyPlotsPage() {
 
           <div style={{ position: "relative", zIndex: 1, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
             <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", background: "rgba(16,185,129,0.1)", color: "#059669", borderRadius: 50, fontSize: 12, fontWeight: 700, marginBottom: 10, border: "1px solid rgba(16,185,129,0.2)" }}>
-                <i className="bi bi-folder-fill" /> ข้อมูลของฉัน
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", background: "rgba(16,185,129,0.1)", color: "#059669", borderRadius: 50, fontSize: 12, fontWeight: 700, border: "1px solid rgba(16,185,129,0.2)" }}>
+                  <i className="bi bi-folder-fill" /> {viewMode === "all" ? "ข้อมูลทั้งหมดในระบบ" : "ข้อมูลของฉัน"}
+                </div>
               </div>
               <h1 style={{ fontSize: 30, fontWeight: 800, color: "#064e3b", marginBottom: 8, lineHeight: 1.2 }}>
-                แปลงยางพาราของฉัน
+                {viewMode === "all" ? "การจัดการแปลงยางพาราทั้งหมด" : "แปลงยางพาราของฉัน"}
               </h1>
               <p style={{ fontSize: 14, color: "#475569", margin: "0 0 18px", lineHeight: 1.6 }}>
-                จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปีที่ 1–7
+                {viewMode === "all" 
+                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ พร้อมพยากรณ์ข้อมูล" 
+                  : "จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปีที่ 1–7"}
               </p>
               {/* Search */}
               <div style={{ position: "relative", maxWidth: 440 }}>
@@ -699,12 +780,64 @@ export default function MyPlotsPage() {
               </div>
             </div>
 
-            <Link
-              href="/map-draw"
-              style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: "13px 26px", borderRadius: 13, fontWeight: 700, fontSize: 14, textDecoration: "none", boxShadow: "0 8px 20px rgba(16,185,129,0.3)", flexShrink: 0 }}
-            >
-              <i className="bi bi-plus-circle" style={{ fontSize: 17 }} /> วาดแปลงใหม่
-            </Link>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12 }}>
+              {isAdmin && (
+                <div style={{ 
+                  background: "rgba(255,255,255,0.8)", 
+                  padding: 4, 
+                  borderRadius: 14, 
+                  display: "flex", 
+                  gap: 4, 
+                  border: "1px solid rgba(16,185,129,0.2)",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.05)"
+                }}>
+                  <button 
+                    onClick={() => setViewMode("mine")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 10,
+                      border: "none",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      background: viewMode === "mine" ? "#10b981" : "transparent",
+                      color: viewMode === "mine" ? "#fff" : "#64748b",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6
+                    }}
+                  >
+                    <i className="bi bi-person-circle" /> เฉพาะของฉัน
+                  </button>
+                  <button 
+                    onClick={() => setViewMode("all")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 10,
+                      border: "none",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      background: viewMode === "all" ? "#0f172a" : "transparent",
+                      color: viewMode === "all" ? "#fff" : "#64748b",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6
+                    }}
+                  >
+                    <i className="bi bi-people-fill" /> ดูทั้งหมด
+                  </button>
+                </div>
+              )}
+              <Link
+                href="/map-draw"
+                style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: "13px 26px", borderRadius: 13, fontWeight: 700, fontSize: 14, textDecoration: "none", boxShadow: "0 8px 20px rgba(16,185,129,0.3)", flexShrink: 0 }}
+              >
+                <i className="bi bi-plus-circle" style={{ fontSize: 17 }} /> วาดแปลงใหม่
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -735,7 +868,7 @@ export default function MyPlotsPage() {
         <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 2px" }}>
               <h2 style={{ fontSize: 17, fontWeight: 800, color: "#064e3b", margin: 0 }}>
-                รายการแปลงที่บันทึกแล้ว
+                {viewMode === "all" ? "รายการแปลงทั้งหมดในระบบ" : "รายการแปลงที่บันทึกแล้ว"}
                 <span style={{ fontSize: 12, fontWeight: 400, color: "#64748b", marginLeft: 8 }}>
                   {searchTerm ? `พบ ${filteredPlots.length} จาก ${plots.length} แปลง` : `(${plots.length})`}
                 </span>
@@ -780,6 +913,72 @@ export default function MyPlotsPage() {
                 <button onClick={() => setSearchTerm("")} style={{ marginTop: 12, padding: "5px 16px", background: "rgba(16,185,129,0.08)", color: "#059669", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
                   ล้างการค้นหา
                 </button>
+              </div>
+            ) : viewMode === "all" ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+                {groupedByUser?.map(group => (
+                  <div key={group.userId} style={{ position: 'relative' }}>
+                    {/* User Header */}
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 12, 
+                      marginBottom: 16, 
+                      padding: '12px 20px', 
+                      background: 'rgba(255,255,255,0.7)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: 18,
+                      border: '1.5px solid rgba(16,185,129,0.15)',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                      position: 'sticky',
+                      top: 100, // Adjust based on navbar height
+                      zIndex: 10
+                    }}>
+                      <div style={{ 
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: 12, 
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                        color: '#fff', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: 18, 
+                        fontWeight: 800,
+                        boxShadow: '0 4px 10px rgba(16,185,129,0.3)'
+                      }}>
+                        {group.ownerName.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {group.ownerName}
+                          <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: 20 }}>
+                            ผู้ใช้งาน
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>
+                          <i className="bi bi-stack me-1" /> รายการแปลงทั้งหมด {group.plots.length} แปลง
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>
+                        กลุ่มข้อมูล
+                      </div>
+                    </div>
+
+                    {/* Plots in this group */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: 12, borderLeft: '2px dashed rgba(16,185,129,0.1)', marginLeft: 20 }}>
+                      {group.plots.map(plot => (
+                        <PlotCard
+                          key={plot.id}
+                          plot={plot}
+                          onDelete={() => handleDelete(plot.id)}
+                          expanded={expandedPlotId === plot.id}
+                          onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

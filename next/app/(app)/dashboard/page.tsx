@@ -209,13 +209,16 @@ export default function DashboardPage() {
 
   const maxCarbon = useMemo(() => Math.max(...bucketData.map(b => b.carbon), 1), [bucketData]);
 
+  const isAdmin = user?.role === "admin";
+
   const mapPlots = useMemo(() =>
     plots.filter(p => p.geojson || p.boundaryGeojson).map(p => ({
-      id: p.id, name: p.name,
+      id: p.id, 
+      name: isAdmin ? p.name : "แปลงยางพารา (นิรนาม)", // Show real name only to admin
       areaRai: p.areaRai, carbonTotal: p.carbonTotal, age: p.rubberAge,
       geojson: p.geojson as GeoJSON.GeoJSON,
       boundaryGeojson: (p.boundaryGeojson as GeoJSON.GeoJSON) ?? null,
-    })), [plots]);
+    })), [plots, isAdmin]);
 
   if (!mounted) return (
     <div className="dv2-root dv2-loading">
