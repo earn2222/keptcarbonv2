@@ -110,15 +110,15 @@ function summaryForecast(plots: PlotInfo[], years: ForecastYr) {
 }
 
 // ── SVG: Age distribution bar chart with hover tooltip ────────────────────
-function AgeBarChart({ age, conf, trees }: { age: number; conf: number; trees: number }) {
+function AgeBarChart({ age, conf, trees, isMobile }: { age: number; conf: number; trees: number; isMobile?: boolean }) {
     const [hoverIdx, setHoverIdx] = useState<number | null>(null);
     const dist = ageDistribution(age, conf);
     const maxPct = Math.max(...dist.map(d => d.pct));
 
-    const W = 500, BAR_W = 60, GAP = 18;
+    const W = isMobile ? 400 : 550, BAR_W = isMobile ? 58 : 64, GAP = isMobile ? 10 : 22;
     const totalW = dist.length * BAR_W + (dist.length - 1) * GAP;
     const sx = (W - totalW) / 2;
-    const BASE_Y = 160, MAX_BH = 110, H = 220;
+    const BASE_Y = isMobile ? 180 : 200, MAX_BH = isMobile ? 120 : 140, H = isMobile ? 240 : 260;
 
     return (
         <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)", borderRadius: 14, padding: "12px 8px 8px", marginBottom: 12 }}>
@@ -166,20 +166,20 @@ function AgeBarChart({ age, conf, trees }: { age: number; conf: number; trees: n
                                 filter={isMain ? "url(#barShadow)" : undefined}
                                 style={{ transition: "fill 0.15s" }} />
                             {/* % label above bar */}
-                            <text x={cx} y={BASE_Y - bh - 10} textAnchor="middle"
-                                fontSize={isMain ? 15 : isHov ? 14 : 13}
+                            <text x={cx} y={BASE_Y - bh - 8} textAnchor="middle"
+                                fontSize={isMain ? (isMobile ? 22 : 21) : (isMobile ? 18 : 16)}
                                 fontWeight={isMain ? "900" : isHov ? "700" : "500"}
                                 fill={isMain ? "#065f46" : isHov ? "#059669" : "#94a3b8"}>
                                 {pct}%
                             </text>
                             {/* age label below */}
-                            <text x={cx} y={BASE_Y + 22} textAnchor="middle" fontSize={13}
+                            <text x={cx} y={BASE_Y + 22} textAnchor="middle" fontSize={isMobile ? 16 : 16}
                                 fontWeight={isMain ? "800" : "500"}
                                 fill={isMain ? "#059669" : isHov ? "#10b981" : "#94a3b8"}>
-                                {a}.0
+                                {a}
                             </text>
                             {/* age unit */}
-                            <text x={cx} y={BASE_Y + 36} textAnchor="middle" fontSize={10} fill="#cbd5e1" fontWeight="400">ปี</text>
+                            <text x={cx} y={BASE_Y + 40} textAnchor="middle" fontSize={isMobile ? 13 : 12} fill="#cbd5e1" fontWeight="400">ปี</text>
 
                             {/* tooltip */}
                             {isHov && (
@@ -203,9 +203,9 @@ function AgeBarChart({ age, conf, trees }: { age: number; conf: number; trees: n
 }
 
 // ── SVG: Carbon forecast line chart with hover ────────────────────────────
-function ForecastChart({ pts }: { pts: Array<{ yearBE: number; co2: number }> }) {
+function ForecastChart({ pts, isMobile }: { pts: Array<{ yearBE: number; co2: number }>; isMobile?: boolean }) {
     const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-    const W = 500, H = 220, PL = 12, PR = 60, PT = 24, PB = 34;
+    const W = isMobile ? 360 : 550, H = isMobile ? 230 : 250, PL = 12, PR = isMobile ? 55 : 75, PT = isMobile ? 24 : 30, PB = isMobile ? 38 : 42;
     const iW = W - PL - PR, iH = H - PT - PB;
     const vals = pts.map(p => p.co2);
     const minV = Math.min(...vals), maxV = Math.max(...vals);
@@ -281,16 +281,16 @@ function ForecastChart({ pts }: { pts: Array<{ yearBE: number; co2: number }> })
 
             {/* Year labels */}
             {svgPts.map(p => (
-                <text key={p.yearBE} x={p.x} y={H - 8} textAnchor="middle" fontSize={11} fill="#94a3b8">
+                <text key={p.yearBE} x={p.x} y={H - 12} textAnchor="middle" fontSize={isMobile ? 14 : 13} fill="#94a3b8">
                     {p.yearBE}
                 </text>
             ))}
 
             {/* Y axis labels */}
-            <text x={PL + iW + 8} y={PT + 4} fontSize={10} fill="#6b9e7e" textAnchor="start">
+            <text x={PL + iW + 8} y={PT + 4} fontSize={isMobile ? 12 : 11} fill="#6b9e7e" textAnchor="start">
                 {Math.round(maxV).toLocaleString()}
             </text>
-            <text x={PL + iW + 8} y={PT + iH + 4} fontSize={10} fill="#6b9e7e" textAnchor="start">
+            <text x={PL + iW + 8} y={PT + iH + 4} fontSize={isMobile ? 12 : 11} fill="#6b9e7e" textAnchor="start">
                 {Math.round(minV).toLocaleString()}
             </text>
 
@@ -340,6 +340,15 @@ export function ParcelResultsPanel({
     const [forecastYrs, setForecastYrs] = useState<Record<number, ForecastYr>>({});
     const [summaryFcYrs, setSummaryFcYrs] = useState<ForecastYr>(7);
     const { user } = useAuth();
+
+    // Responsive detection
+    const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
+    useMemo(() => {
+        if (typeof window === "undefined") return;
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
 
     // Step 3 form
@@ -405,16 +414,11 @@ export function ParcelResultsPanel({
             });
             localStorage.setItem(key, JSON.stringify([...newPlots, ...existing]));
 
-            // Save to global anonymous list for dashboard
+            // Save to global list for dashboard (Admin will see real names)
             const globalKey = 'global_saved_plots';
             const globalExistingStr = localStorage.getItem(globalKey);
             const globalExisting = globalExistingStr ? JSON.parse(globalExistingStr) : [];
-            const anonymousPlots = newPlots.map(p => ({
-                ...p,
-                name: "แปลงยางพารา (นิรนาม)", // Generic name
-                ownerName: "",               // Remove personal info
-            }));
-            localStorage.setItem(globalKey, JSON.stringify([...anonymousPlots, ...globalExisting]));
+            localStorage.setItem(globalKey, JSON.stringify([...newPlots, ...globalExisting]));
 
         } catch (e) {
             console.error("Failed to save plots to localStorage", e);
@@ -537,14 +541,14 @@ export function ParcelResultsPanel({
                     <div className="prp-kpi-row">
                         <div className="prp-kpi-card">
                             <div className="prp-kpi-icon"><i className="bi bi-map" /></div>
-                            <div className="prp-kpi-num">{searchCount.toLocaleString()}</div>
+                            <div className="prp-kpi-num" style={{ fontSize: isMobile ? 22 : 36 }}>{searchCount.toLocaleString()}</div>
                             <div className="prp-kpi-label">แปลงที่ตรวจพบ</div>
                             <div className="prp-kpi-unit">แปลง</div>
                             {searchTruncated && <div className="prp-trunc-badge">สูงสุด 2,000</div>}
                         </div>
                         <div className="prp-kpi-card">
                             <div className="prp-kpi-icon"><i className="bi bi-rulers" /></div>
-                            <div className="prp-kpi-num">{totalArea.toFixed(1)}</div>
+                            <div className="prp-kpi-num" style={{ fontSize: isMobile ? 22 : 36 }}>{totalArea.toFixed(1)}</div>
                             <div className="prp-kpi-label">พื้นที่รวม</div>
                             <div className="prp-kpi-unit">ไร่</div>
                         </div>
@@ -598,56 +602,112 @@ export function ParcelResultsPanel({
                                             </div>
 
                                             {tab === "analyze" && (
-                                                <div className="prp-tab-content">
+                                                <div className="prp-tab-analyze">
                                                     <div className="prp-chart-label">
                                                         <i className="bi bi-bar-chart-fill me-1" style={{ color: "#10b981" }} />
                                                         การกระจายอายุยาง
-                                                        <span style={{ fontSize: 10, color: "#94a3b8", marginLeft: 6 }}>(hover เพื่อดูคาร์บอน)</span>
+                                                        <span style={{ fontSize: isMobile ? 12 : 10, color: "#94a3b8", marginLeft: 6 }}>(hover เพื่อดูคาร์บอน)</span>
                                                     </div>
-                                                    <AgeBarChart age={pl.age} conf={pl.confidence} trees={pl.trees} />
+                                                    <AgeBarChart age={pl.age} conf={pl.confidence} trees={pl.trees} isMobile={isMobile} />
 
-                                                    <div className="prp-stat-row">
-                                                        <div className="prp-stat">
-                                                            <div className="prp-stat-val">{pl.plantYearBE || "—"}</div>
-                                                            <div className="prp-stat-key">ปีปลูก</div>
-                                                            <div className="prp-stat-unit">พ.ศ.</div>
+                                                    <div className="prp-stat-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 12 }}>
+                                                        <div className="prp-stat" style={{ margin: 0, padding: isMobile ? "14px 6px" : "8px 4px 6px" }}>
+                                                            <div className="prp-stat-val" style={{ fontSize: isMobile ? 22 : 18 }}>{pl.plantYearBE || "—"}</div>
+                                                            <div className="prp-stat-key" style={{ fontSize: isMobile ? 14 : 12, marginTop: 2 }}>ปีปลูก</div>
+                                                            <div className="prp-stat-unit" style={{ fontSize: isMobile ? 11 : 10 }}>พ.ศ.</div>
                                                         </div>
-                                                        <div className="prp-stat">
-                                                            <div className="prp-stat-val">{pl.age || "—"}</div>
-                                                            <div className="prp-stat-key">อายุ</div>
-                                                            <div className="prp-stat-unit">ปี</div>
+                                                        <div className="prp-stat" style={{ margin: 0, padding: isMobile ? "14px 6px" : "8px 4px 6px" }}>
+                                                            <div className="prp-stat-val" style={{ fontSize: isMobile ? 22 : 18 }}>{pl.age || "—"}</div>
+                                                            <div className="prp-stat-key" style={{ fontSize: isMobile ? 14 : 12, marginTop: 2 }}>อายุ</div>
+                                                            <div className="prp-stat-unit" style={{ fontSize: isMobile ? 11 : 10 }}>ปี</div>
                                                         </div>
-                                                        <div className="prp-stat">
-                                                            <div className="prp-stat-val">{pl.areaRai.toFixed(2)}</div>
-                                                            <div className="prp-stat-key">เนื้อที่</div>
-                                                            <div className="prp-stat-unit">ไร่</div>
+                                                        <div className="prp-stat" style={{ margin: 0, padding: isMobile ? "14px 6px" : "8px 4px 6px" }}>
+                                                            <div className="prp-stat-val" style={{ fontSize: isMobile ? 22 : 18 }}>{pl.areaRai.toFixed(2)}</div>
+                                                            <div className="prp-stat-key" style={{ fontSize: isMobile ? 14 : 12, marginTop: 2 }}>เนื้อที่</div>
+                                                            <div className="prp-stat-unit" style={{ fontSize: isMobile ? 11 : 10 }}>ไร่</div>
+                                                        </div>
+                                                        <div className="prp-stat" style={{ margin: 0, padding: isMobile ? "14px 6px" : "8px 4px 6px" }}>
+                                                            <div className="prp-stat-val" style={{ fontSize: isMobile ? 22 : 18 }}>{pl.trees.toLocaleString()}</div>
+                                                            <div className="prp-stat-key" style={{ fontSize: isMobile ? 14 : 12, marginTop: 2 }}>จำนวนต้น</div>
+                                                            <div className="prp-stat-unit" style={{ fontSize: isMobile ? 11 : 10 }}>ต้น</div>
                                                         </div>
                                                     </div>
 
                                                     {pl.co2 > 0 && (
-                                                        <div className="prp-co2-display">
-                                                            <div className="prp-co2-display-left">
-                                                                <div className="prp-co2-icon-wrap">
-                                                                    <i className="bi bi-tree-fill" />
+                                                        <div style={{
+                                                            display: "grid",
+                                                            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                                                            gap: 12,
+                                                            marginTop: 16
+                                                        }}>
+                                                            {/* Card 1: Per Tree */}
+                                                            <div className="prp-co2-display" style={{
+                                                                margin: 0,
+                                                                padding: isMobile ? "14px 18px" : "10px 14px",
+                                                                background: "linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%)",
+                                                                borderLeft: "4px solid #0d9488",
+                                                                boxShadow: "0 4px 15px rgba(13, 148, 136, 0.08)"
+                                                            }}>
+                                                                <div className="prp-co2-display-left" style={{ gap: 10 }}>
+                                                                    <div className="prp-co2-icon-wrap" style={{
+                                                                        width: isMobile ? 40 : 32,
+                                                                        height: isMobile ? 40 : 32,
+                                                                        background: "#f0fdfa",
+                                                                        color: "#0d9488",
+                                                                        borderColor: "rgba(13, 148, 136, 0.15)",
+                                                                        borderRadius: "10px"
+                                                                    }}>
+                                                                        <i className="bi bi-tree" style={{ fontSize: isMobile ? 18 : 15 }} />
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="prp-co2-display-label" style={{ fontSize: isMobile ? 14 : 13, color: "#0f172a" }}>ต่อต้น</div>
+                                                                        <div className="prp-co2-display-sub" style={{ fontSize: isMobile ? 11 : 10, color: "#64748b" }}>tCO₂ eq.</div>
+                                                                    </div>
                                                                 </div>
-                                                                <div>
-                                                                    <div className="prp-co2-display-label">คาร์บอนสะสม</div>
-                                                                    <div className="prp-co2-display-sub">ณ ปัจจุบัน · tCO₂ eq.</div>
+                                                                <div className="prp-co2-display-right">
+                                                                    <span className="prp-co2-display-num" style={{ color: "#0d9488", fontSize: isMobile ? 24 : 18, fontWeight: 900 }}>
+                                                                        {(pl.co2 / pl.trees).toFixed(3)}
+                                                                    </span>
                                                                 </div>
                                                             </div>
-                                                            <div className="prp-co2-display-right">
-                                                                <span className="prp-co2-display-num">
-                                                                    {pl.co2.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                                </span>
+
+                                                            {/* Card 2: Total Plot */}
+                                                            <div className="prp-co2-display" style={{
+                                                                margin: 0,
+                                                                padding: isMobile ? "14px 18px" : "10px 14px",
+                                                                background: "linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)",
+                                                                borderLeft: "4px solid #10b981",
+                                                                boxShadow: "0 4px 15px rgba(16, 185, 129, 0.08)"
+                                                            }}>
+                                                                <div className="prp-co2-display-left" style={{ gap: 10 }}>
+                                                                    <div className="prp-co2-icon-wrap" style={{
+                                                                        width: isMobile ? 40 : 32,
+                                                                        height: isMobile ? 40 : 32,
+                                                                        background: "#f0fdf4",
+                                                                        color: "#10b981",
+                                                                        borderColor: "rgba(16, 185, 129, 0.15)",
+                                                                        borderRadius: "10px"
+                                                                    }}>
+                                                                        <i className="bi bi-tree-fill" style={{ fontSize: isMobile ? 18 : 15 }} />
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="prp-co2-display-label" style={{ fontSize: isMobile ? 14 : 13, color: "#0f172a" }}>ทั้งแปลง</div>
+                                                                        <div className="prp-co2-display-sub" style={{ fontSize: isMobile ? 11 : 10, color: "#64748b" }}>tCO₂ eq.</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="prp-co2-display-right">
+                                                                    <span className="prp-co2-display-num" style={{ color: "#10b981", fontSize: isMobile ? 24 : 18, fontWeight: 900 }}>
+                                                                        {pl.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
+                                                                    </span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}
-
                                                 </div>
                                             )}
 
                                             {tab === "forecast" && (
-                                                <div className="prp-tab-content">
+                                                <div className="prp-tab-forecast">
                                                     <div className="prp-fc-yr-row">
                                                         {([3, 5, 7] as ForecastYr[]).map(yr => (
                                                             <button key={yr}
@@ -660,9 +720,9 @@ export function ParcelResultsPanel({
                                                     <div className="prp-chart-label">
                                                         <i className="bi bi-graph-up-arrow me-1" style={{ color: "#10b981" }} />
                                                         พยากรณ์คาร์บอน — แปลงที่ {i + 1}
-                                                        <span style={{ fontSize: 10, color: "#94a3b8", marginLeft: 6 }}>(hover เพื่อดูค่า)</span>
+                                                        <span style={{ fontSize: isMobile ? 12 : 10, color: "#94a3b8", marginLeft: 6 }}>(hover เพื่อดูค่า)</span>
                                                     </div>
-                                                    <ForecastChart pts={fcPts} />
+                                                    <ForecastChart pts={fcPts} isMobile={isMobile} />
                                                 </div>
                                             )}
                                         </div>
@@ -683,10 +743,10 @@ export function ParcelResultsPanel({
                             <i className="bi bi-bar-chart-line-fill me-2" />ภาพรวมของเขตที่พบ
                         </div>
                         <div className="prp-summary-sub">คาร์บอนรวมสะสมที่ขอบเขต</div>
-                        <div className="prp-summary-num">
+                        <div className="prp-summary-num" style={{ fontSize: isMobile ? 28 : 32 }}>
                             {totalCO2.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
-                        <div className="prp-summary-unit">tCO₂ eq.</div>
+                        <div className="prp-summary-unit" style={{ fontSize: isMobile ? 15 : 14 }}>tCO₂ eq.</div>
                         <div className="prp-fc-yr-row" style={{ marginTop: 10 }}>
                             {([3, 5, 7] as ForecastYr[]).map(yr => (
                                 <button key={yr} className={`prp-fc-yr-btn${summaryFcYrs === yr ? " active" : ""}`}
@@ -698,7 +758,7 @@ export function ParcelResultsPanel({
                         <div className="prp-chart-label" style={{ marginTop: 8 }}>
                             <span style={{ fontSize: 10, color: "#94a3b8" }}>(hover บนกราฟเพื่อดูค่าคาร์บอนรายปี)</span>
                         </div>
-                        <ForecastChart pts={summaryPts} />
+                        <ForecastChart pts={summaryPts} isMobile={isMobile} />
                         <div className="prp-summary-note">พยากรณ์รวมทั้งหมด ({plots.length} แปลง)</div>
                     </div>
 

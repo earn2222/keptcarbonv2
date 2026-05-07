@@ -78,7 +78,7 @@ function StatCard({ label, value, unit, color }: {
     >
       <div style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>{label}</div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-        <div style={{ fontSize: 32, fontWeight: 800, color: "#1a3d2b", letterSpacing: -0.5, lineHeight: 1 }}>
+        <div className="db-stat-num">
           {disp}
         </div>
         <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8" }}>{unit}</div>
@@ -88,9 +88,10 @@ function StatCard({ label, value, unit, color }: {
 }
 
 /* ── Donut chart (age distribution) ── */
-function DonutChart({ bucketData, total }: {
+function DonutChart({ bucketData, total, isMobile }: {
   bucketData: { key: string; label: string; color: string; plotCount: number }[];
   total: number;
+  isMobile: boolean;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -140,8 +141,8 @@ function DonutChart({ bucketData, total }: {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%" }}>
-      <div style={{ position: "relative", height: 180, flexShrink: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 16 : 20, height: "100%" }}>
+      <div style={{ position: "relative", height: isMobile ? 180 : 210, flexShrink: 0 }}>
         <canvas ref={ref} />
         <div style={{
           position: "absolute", inset: 0,
@@ -149,10 +150,10 @@ function DonutChart({ bucketData, total }: {
           alignItems: "center", justifyContent: "center",
           pointerEvents: "none",
         }}>
-          <span style={{ fontSize: 26, fontWeight: 900, color: "#1a3d2b", letterSpacing: -1, lineHeight: 1 }}>
+          <span style={{ fontSize: isMobile ? 30 : 32, fontWeight: 900, color: "#1a3d2b", letterSpacing: -1, lineHeight: 1 }}>
             {total.toLocaleString("th-TH")}
           </span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", marginTop: 3 }}>แปลงทั้งหมด</span>
+          <span style={{ fontSize: isMobile ? 13 : 12, fontWeight: 700, color: "#94a3b8", marginTop: 4 }}>แปลงทั้งหมด</span>
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -163,8 +164,8 @@ function DonutChart({ bucketData, total }: {
             borderRadius: 10, border: "1px solid rgba(45,158,95,0.08)",
           }}>
             <span style={{ width: 10, height: 10, borderRadius: "50%", background: b.color, flexShrink: 0 }} />
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: "#374151", flex: 1 }}>{b.label}</span>
-            <span style={{ fontSize: 12.5, fontWeight: 800, color: "#1a3d2b" }}>
+            <span style={{ fontSize: isMobile ? 14 : 14, fontWeight: 700, color: "#374151", flex: 1 }}>{b.label}</span>
+            <span style={{ fontSize: isMobile ? 14 : 14, fontWeight: 800, color: "#1a3d2b" }}>
               {b.plotCount.toLocaleString("th-TH")}
             </span>
             <span style={{
@@ -186,6 +187,16 @@ export default function DashboardPage() {
 
   const { user, ready } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMobile(window.innerWidth < 768);
+      const h = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener("resize", h);
+      return () => window.removeEventListener("resize", h);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -209,13 +220,16 @@ export default function DashboardPage() {
 
   const maxCarbon = useMemo(() => Math.max(...bucketData.map(b => b.carbon), 1), [bucketData]);
 
+  const isAdmin = user?.role === "admin";
+
   const mapPlots = useMemo(() =>
     plots.filter(p => p.geojson || p.boundaryGeojson).map(p => ({
-      id: p.id, name: p.name,
+      id: p.id, 
+      name: isAdmin ? p.name : "แปลงยางพารา (นิรนาม)", // Show real name only to admin
       areaRai: p.areaRai, carbonTotal: p.carbonTotal, age: p.rubberAge,
       geojson: p.geojson as GeoJSON.GeoJSON,
       boundaryGeojson: (p.boundaryGeojson as GeoJSON.GeoJSON) ?? null,
-    })), [plots]);
+    })), [plots, isAdmin]);
 
   if (!mounted) return (
     <div className="dv2-root dv2-loading">
@@ -319,8 +333,8 @@ export default function DashboardPage() {
               <i className="bi bi-pie-chart-fill" style={{ color: "#2d9e5f", fontSize: 15 }} />
               <span style={{ fontSize: 14, fontWeight: 800, color: "#1a3d2b" }}>สัดส่วนแปลงตามช่วงอายุ</span>
             </div>
-            <div style={{ padding: "20px 20px 22px", height: 340 }}>
-              <DonutChart bucketData={bucketData} total={plots.length} />
+            <div style={{ padding: "20px 20px 22px", height: isMobile ? 340 : 420 }}>
+              <DonutChart bucketData={bucketData} total={plots.length} isMobile={isMobile} />
             </div>
           </div>
 
@@ -386,7 +400,7 @@ export default function DashboardPage() {
                     {/* Carbon number */}
                     <div style={{ padding: "4px 18px 8px" }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
-                        <span style={{ fontSize: 28, fontWeight: 900, color: b.dark, letterSpacing: -1.5, lineHeight: 1 }}>
+                        <span className="db-age-num" style={{ color: b.dark }}>
                           {b.carbon.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                         </span>
                         <span style={{ fontSize: 12, fontWeight: 700, color: "#6b7280" }}>tCO₂</span>
@@ -437,6 +451,9 @@ export default function DashboardPage() {
         .db-charts-row { display: grid; grid-template-columns: 1fr 1.6fr; }
         .db-age-grid { display: grid; grid-template-columns: repeat(2,1fr); }
 
+        .db-stat-num { font-size: 32px; font-weight: 800; color: #1a3d2b; letter-spacing: -0.5px; line-height: 1; }
+        .db-age-num { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; line-height: 1; }
+
         @media (max-width: 1024px) {
           .db-charts-row { grid-template-columns: 1fr; }
           .db-age-grid { grid-template-columns: repeat(2,1fr); }
@@ -459,6 +476,8 @@ export default function DashboardPage() {
           .db-age-grid { grid-template-columns: 1fr 1fr; }
           .db-map-legend { display: none !important; }
           .db-map-box { height: 400px !important; }
+          .db-stat-num { font-size: 24px !important; }
+          .db-age-num { font-size: 22px !important; }
         }
         @media (max-width: 400px) {
           .db-stat-grid { grid-template-columns: 1fr; }

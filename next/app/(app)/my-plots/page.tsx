@@ -34,6 +34,7 @@ type SavedPlot = {
   plantYearBE?: number;
   trees?: number;
   confidence?: number;
+  userId?: string;
   ownerName?: string;
   province?: string;
   date: string;
@@ -61,11 +62,13 @@ function ForecastBody({
   chartPts,
   base,
   maxCo2,
+  isMobile,
 }: {
-  milestones: { label: string; co2: number; yr: number }[];
-  chartPts: { yr: number; label: string; co2: number }[];
+  milestones: any[];
+  chartPts: any[];
   base: number;
   maxCo2: number;
+  isMobile?: boolean;
 }) {
   const [view, setView] = useState<"timeline" | "chart">("timeline");
   const [hoveredPt, setHoveredPt] = useState<number | null>(null);
@@ -75,7 +78,7 @@ function ForecastBody({
   const uid = rawId.replace(/:/g, "-");
 
   // SVG dimensions - Enlarged for better desktop visibility
-  const W = 600, H = 220, PL = 12, PT = 24, PB = 36;
+  const W = isMobile ? 400 : 600, H = isMobile ? 240 : 220, PL = 12, PT = 24, PB = 36;
   const iW = W - PL * 2, iH = H - PT - PB;
   const n = chartPts.length;
 
@@ -117,7 +120,7 @@ function ForecastBody({
 
       {/* Timeline view */}
       {view === "timeline" && (
-        <div style={{ padding: "12px 16px 12px", display: "flex", gap: 0, alignItems: "stretch" }}>
+        <div style={{ padding: isMobile ? "14px 10px" : "12px 16px 12px", display: "flex", gap: 0, alignItems: "stretch" }}>
           {milestones.map((m, i) => {
             const isFirst = i === 0;
             const isLast = i === milestones.length - 1;
@@ -128,20 +131,20 @@ function ForecastBody({
             return (
               <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
                 {!isLast && (
-                  <div style={{ position: "absolute", top: 10, left: "50%", right: "-50%", height: 2, background: "linear-gradient(90deg,rgba(16,185,129,0.35),rgba(16,185,129,0.1))", zIndex: 0 }} />
+                  <div style={{ position: "absolute", top: isMobile ? 12 : 10, left: "50%", right: "-50%", height: 2, background: "linear-gradient(90deg,rgba(16,185,129,0.35),rgba(16,185,129,0.1))", zIndex: 0 }} />
                 )}
-                <div style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, background: isFirst ? dotColor : "#fff", border: `2.5px solid ${dotColor}`, boxShadow: isFirst ? "0 0 0 4px rgba(5,150,105,0.12)" : "none", zIndex: 1, marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {isFirst && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
+                <div style={{ width: isMobile ? 24 : 20, height: isMobile ? 24 : 20, borderRadius: "50%", flexShrink: 0, background: isFirst ? dotColor : "#fff", border: `2.5px solid ${dotColor}`, boxShadow: isFirst ? "0 0 0 4px rgba(5,150,105,0.12)" : "none", zIndex: 1, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {isFirst && <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#fff" }} />}
                 </div>
-                <div style={{ fontSize: 11.5, fontWeight: isFirst ? 700 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 3, textAlign: "center" }}>{m.label}</div>
-                <div style={{ fontSize: isFirst ? 15 : 14, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
-                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1, textAlign: "center" }}>tCO₂</div>
+                <div style={{ fontSize: isMobile ? 11 : 11.5, fontWeight: isFirst ? 800 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 3, textAlign: "center" }}>{m.label}</div>
+                <div style={{ fontSize: isMobile ? 16 : 14, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
+                <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 1, textAlign: "center" }}>tCO₂</div>
                 {!isFirst && changeFromBase !== 0 && (
-                  <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: changeFromBase > 0 ? "#16a34a" : "#dc2626", background: changeFromBase > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", padding: "1px 5px", borderRadius: 6, textAlign: "center" }}>
+                  <div style={{ marginTop: 5, fontSize: isMobile ? 10.5 : 10, fontWeight: 700, color: changeFromBase > 0 ? "#16a34a" : "#dc2626", background: changeFromBase > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", padding: isMobile ? "2px 6px" : "1px 5px", borderRadius: 6, textAlign: "center" }}>
                     {changeFromBase > 0 ? "+" : ""}{changePct.toFixed(1)}%
                   </div>
                 )}
-                <div style={{ marginTop: 6, width: "70%", height: 3, borderRadius: 3, background: "rgba(16,185,129,0.1)", overflow: "hidden" }}>
+                <div style={{ marginTop: 8, width: "80%", height: 3.5, borderRadius: 3, background: "rgba(16,185,129,0.1)", overflow: "hidden" }}>
                   <div style={{ height: "100%", borderRadius: 3, width: `${barFill}%`, background: isFirst ? "linear-gradient(90deg,#059669,#10b981)" : isLast ? "linear-gradient(90deg,#10b981,#34d399)" : "rgba(16,185,129,0.5)", transition: "width 0.4s ease" }} />
                 </div>
               </div>
@@ -255,7 +258,7 @@ function ForecastBody({
             {/* Year labels along x-axis */}
             {svgPts.map((p, i) => (
               <text key={i} x={p.x} y={H - 10}
-                textAnchor="middle" fontSize={11}
+                textAnchor="middle" fontSize={isMobile ? 12 : 11}
                 fontWeight={i === 0 ? 700 : 400}
                 fill={i === 0 ? "#059669" : "#94a3b8"}
               >
@@ -318,11 +321,13 @@ function ForecastSection({
   trees,
   carbonTotal,
   forecast,
+  isMobile,
 }: {
   rubberAge: number;
   trees: number;
   carbonTotal: number;
   forecast?: Forecast;
+  isMobile?: boolean;
 }) {
   const canCompute = trees > 0 && rubberAge > 0;
 
@@ -375,12 +380,12 @@ function ForecastSection({
           </span>
         )}
       </div>
-      <ForecastBody milestones={milestones} chartPts={chartPts} base={base} maxCo2={maxCo2} />
+      <ForecastBody milestones={milestones} chartPts={chartPts} base={base} maxCo2={maxCo2} isMobile={isMobile} />
     </div>
   );
 }
 
-function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void }) {
+function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const statItems = [
@@ -405,11 +410,10 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
       onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 12px 36px rgba(16,185,129,0.16)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.05)"; e.currentTarget.style.transform = ""; }}
     >
-      {/* Gradient top accent */}
-      <div style={{ height: 5, background: "linear-gradient(90deg,#059669 0%,#10b981 45%,#34d399 80%,#6ee7b7 100%)", flexShrink: 0 }} />
+      {/* Removed Gradient top accent */}
 
       {/* Header row */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "20px 24px 14px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 12 : 14, padding: isMobile ? "16px 18px 12px" : "20px 24px 14px" }}>
         {/* Pin icon */}
         <div style={{
           width: 52, height: 52, borderRadius: 16, flexShrink: 0,
@@ -423,10 +427,10 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
 
         {/* Name + meta */}
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 17, fontWeight: 800, color: "#0f172a", lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
+          <div style={{ fontSize: isMobile ? 15 : 17, fontWeight: 800, color: "#0f172a", lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
             {plot.name}
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? 6 : 7, alignItems: "center" }}>
             {plot.ownerName && (
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#475569", background: "#f1f5f9", padding: "3px 10px", borderRadius: 20, border: "1px solid #e2e8f0" }}>
                 <i className="bi bi-person-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.ownerName}
@@ -444,18 +448,18 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
         </div>
       </div>
 
-      {/* Stats row — 4 pill cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, padding: "0 24px 14px" }}>
+      {/* Stats row — Responsive grid */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: isMobile ? 8 : 10, padding: isMobile ? "0 18px 12px" : "0 24px 14px" }}>
         {statItems.map(({ label, val, unit, color, bg, icon }) => (
           <div key={label} style={{
-            borderRadius: 14, padding: "12px 6px", textAlign: "center",
+            borderRadius: 14, padding: isMobile ? "10px 4px" : "12px 6px", textAlign: "center",
             background: bg, border: `1px solid ${color}22`,
             display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
           }}>
-            <i className={`bi ${icon}`} style={{ color, fontSize: 13, opacity: 0.7, marginBottom: 2 }} />
-            <div style={{ fontSize: 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
-            <div style={{ fontSize: 9.5, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
-            <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 1 }}>{label}</div>
+            <i className={`bi ${icon}`} style={{ color, fontSize: isMobile ? 11 : 13, opacity: 0.7, marginBottom: 1 }} />
+            <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
+            <div style={{ fontSize: 8.5, color: "#94a3b8", marginTop: 1 }}>{label}</div>
           </div>
         ))}
       </div>
@@ -482,19 +486,19 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
       <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(16,185,129,0.15),transparent)", margin: "0 24px" }} />
 
       {/* Footer: expand + delete */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 20px 15px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "10px 16px 14px" : "11px 20px 15px" }}>
         <button
           onClick={onToggle}
           style={{
-            display: "flex", alignItems: "center", gap: 6, padding: "6px 15px",
+            display: "flex", alignItems: "center", gap: 5, padding: isMobile ? "5px 10px" : "6px 15px",
             background: expanded ? "rgba(16,185,129,0.09)" : "transparent",
             border: "1.5px solid rgba(16,185,129,0.28)",
-            borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700,
+            borderRadius: 10, cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700,
             color: "#059669", transition: "all 0.15s",
           }}
         >
           <i className={`bi bi-chevron-${expanded ? "up" : "down"}`} />
-          {expanded ? "ซ่อนรายละเอียด" : "ดูรายละเอียดเพิ่มเติม"}
+          {expanded ? (isMobile ? "ซ่อน" : "ซ่อนรายละเอียด") : (isMobile ? "ดูเพิ่ม" : "ดูรายละเอียดเพิ่มเติม")}
         </button>
 
         {confirmDelete ? (
@@ -517,12 +521,13 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
 
       {/* Expanded details */}
       {expanded && (
-        <div style={{ padding: "4px 24px 22px", borderTop: "1px dashed rgba(16,185,129,0.15)" }}>
+        <div style={{ padding: isMobile ? "4px 12px 22px" : "4px 24px 22px", borderTop: "1px dashed rgba(16,185,129,0.15)" }}>
           <ForecastSection
             rubberAge={plot.rubberAge}
             trees={plot.trees ?? 0}
             carbonTotal={plot.carbonTotal}
             forecast={plot.forecast}
+            isMobile={isMobile}
           />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 8, marginTop: 14 }}>
             {[
@@ -555,38 +560,98 @@ export default function MyPlotsPage() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [expandedPlotId, setExpandedPlotId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"mine" | "all">("mine");
+  const [isMobile, setIsMobile] = useState(false);
+
+  const isAdmin = user?.role === "admin";
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
     if (ready && user) {
       try {
-        // Cleanup: Remove old shared key to prevent "mixing" if it exists
-        localStorage.removeItem("user_saved_plots");
+        if (viewMode === "mine") {
+          const key = `user_saved_plots_${user.id}`;
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            const myOnly = Array.isArray(parsed) ? parsed.filter((p: any) => p.userId === user.id || !p.userId) : [];
+            setPlots(myOnly);
+          } else {
+            setPlots([]);
+          }
+        } else if (isAdmin) {
+          // Admin view: fetch plots from ALL users
+          const usersRaw = localStorage.getItem("kc_users");
+          const allUsers = usersRaw ? JSON.parse(usersRaw) : [];
+          let allPlots: SavedPlot[] = [];
+          
+          allUsers.forEach((u: any) => {
+            const userKey = `user_saved_plots_${u.id}`;
+            const userPlotsRaw = localStorage.getItem(userKey);
+            if (userPlotsRaw) {
+              const parsed = JSON.parse(userPlotsRaw);
+              if (Array.isArray(parsed)) {
+                // Decorate plots with owner info if missing
+                const decorated = parsed.map(p => ({
+                  ...p,
+                  userId: u.id,
+                  ownerName: p.ownerName || u.fullname
+                }));
+                allPlots = [...allPlots, ...decorated];
+              }
+            }
+          });
 
-        const key = `user_saved_plots_${user.id}`;
-        const stored = localStorage.getItem(key);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          // Extra safety: ensure we only show plots belonging to this user
-          const myOnly = Array.isArray(parsed) ? parsed.filter((p: any) => p.userId === user.id || !p.userId) : [];
-          setPlots(myOnly);
-        } else {
-          setPlots([]); 
+          // Also check the global_saved_plots for any legacy/anonymous ones
+          const globalKey = 'global_saved_plots';
+          const globalRaw = localStorage.getItem(globalKey);
+          if (globalRaw) {
+            const globalPlots = JSON.parse(globalRaw);
+            // Only add global plots that aren't already in the list (by ID)
+            const existingIds = new Set(allPlots.map(p => p.id));
+            globalPlots.forEach((gp: any) => {
+              if (!existingIds.has(gp.id)) {
+                allPlots.push(gp);
+              }
+            });
+          }
+
+          // Sort by date desc
+          allPlots.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setPlots(allPlots);
         }
       } catch {}
     }
-  }, [ready, user]);
+  }, [ready, user, viewMode]);
 
 
   const handleDelete = (id: string) => {
     if (!user) return;
+    const plotToDelete = plots.find(p => p.id === id);
+    if (!plotToDelete) return;
+
     const updated = plots.filter(p => p.id !== id);
     setPlots(updated);
-    try {
-      const key = `user_saved_plots_${user.id}`;
-      localStorage.setItem(key, JSON.stringify(updated));
 
-      // Also remove from global list
+    try {
+      // 1. Update the owner's specific storage
+      const ownerId = plotToDelete.userId || user.id;
+      const key = `user_saved_plots_${ownerId}`;
+      const ownerStoredRaw = localStorage.getItem(key);
+      if (ownerStoredRaw) {
+        const ownerPlots = JSON.parse(ownerStoredRaw);
+        const filtered = ownerPlots.filter((p: any) => p.id !== id);
+        localStorage.setItem(key, JSON.stringify(filtered));
+      }
+
+      // 2. Also remove from global list
       const globalKey = 'global_saved_plots';
       const globalRaw = localStorage.getItem(globalKey);
       if (globalRaw) {
@@ -601,21 +666,26 @@ export default function MyPlotsPage() {
 
   const handleDeleteAll = () => {
     if (!user) return;
-    const idsToDelete = plots.map(p => p.id);
-    setPlots([]);
-    try {
-      const key = `user_saved_plots_${user.id}`;
-      localStorage.removeItem(key);
+    if (viewMode === "all") {
+      // Admin deleting everything? Let's limit this to current view for safety
+      // Actually, standard behavior: delete what is shown
+      plots.forEach(p => handleDelete(p.id));
+    } else {
+      const idsToDelete = plots.map(p => p.id);
+      setPlots([]);
+      try {
+        const key = `user_saved_plots_${user.id}`;
+        localStorage.removeItem(key);
 
-      // Also remove from global list
-      const globalKey = 'global_saved_plots';
-      const globalRaw = localStorage.getItem(globalKey);
-      if (globalRaw) {
-        const globalPlots = JSON.parse(globalRaw);
-        const filteredGlobal = globalPlots.filter((p: any) => !idsToDelete.includes(p.id));
-        localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
-      }
-    } catch {}
+        const globalKey = 'global_saved_plots';
+        const globalRaw = localStorage.getItem(globalKey);
+        if (globalRaw) {
+          const globalPlots = JSON.parse(globalRaw);
+          const filteredGlobal = globalPlots.filter((p: any) => !idsToDelete.includes(p.id));
+          localStorage.setItem(globalKey, JSON.stringify(filteredGlobal));
+        }
+      } catch {}
+    }
     setConfirmDeleteAll(false);
   };
 
@@ -639,6 +709,25 @@ export default function MyPlotsPage() {
     );
   }, [plots, searchTerm]);
 
+  const groupedByUser = useMemo(() => {
+    if (viewMode !== "all") return null;
+    
+    // Group filtered plots by userId
+    const groups: { [key: string]: { userId: string; ownerName: string; plots: SavedPlot[] } } = {};
+    
+    filteredPlots.forEach(plot => {
+      const uId = plot.userId || 'unknown';
+      const oName = plot.ownerName || 'ผู้ใช้งานทั่วไป';
+      if (!groups[uId]) {
+        groups[uId] = { userId: uId, ownerName: oName, plots: [] };
+      }
+      groups[uId].plots.push(plot);
+    });
+    
+    // Convert to array and sort groups (e.g., by name or by total plots)
+    return Object.values(groups).sort((a, b) => a.ownerName.localeCompare(b.ownerName, 'th'));
+  }, [filteredPlots, viewMode]);
+
   if (!ready || !mounted)
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fdfb" }}>
@@ -654,27 +743,31 @@ export default function MyPlotsPage() {
 
         {/* Hero */}
         <div style={{
-          background: HERO_BG, borderRadius: 24, padding: "36px 48px", marginBottom: 24,
+          background: HERO_BG, borderRadius: isMobile ? 20 : 24, padding: isMobile ? "24px 20px" : "36px 48px", marginBottom: 24,
           border: "1px solid rgba(16,185,129,0.15)", boxShadow: "0 20px 40px rgba(0,0,0,0.03)",
           position: "relative", overflow: "hidden",
         }}>
-          <div style={{ position: "absolute", top: -50, left: -50, width: 200, height: 200, background: "rgba(16,185,129,0.2)", filter: "blur(60px)", borderRadius: "50%", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: -50, right: -50, width: 250, height: 250, background: "rgba(13,148,136,0.15)", filter: "blur(70px)", borderRadius: "50%", pointerEvents: "none" }} />
-
-          <div style={{ position: "relative", zIndex: 1, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
-            <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", background: "rgba(16,185,129,0.1)", color: "#059669", borderRadius: 50, fontSize: 12, fontWeight: 700, marginBottom: 10, border: "1px solid rgba(16,185,129,0.2)" }}>
-                <i className="bi bi-folder-fill" /> ข้อมูลของฉัน
+          <div style={{ position: "absolute", top: -50, left: -50, width: isMobile ? 150 : 200, height: isMobile ? 150 : 200, background: "rgba(16,185,129,0.2)", filter: "blur(60px)", borderRadius: "50%", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: -50, right: -50, width: isMobile ? 200 : 250, height: isMobile ? 200 : 250, background: "rgba(13,148,136,0.15)", filter: "blur(70px)", borderRadius: "50%", pointerEvents: "none" }} />
+          
+          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 20 }}>
+            <div style={{ width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "4px 12px", background: "rgba(16,185,129,0.1)", color: "#059669", borderRadius: 50, fontSize: 11, fontWeight: 700, border: "1px solid rgba(16,185,129,0.2)" }}>
+                  <i className="bi bi-folder-fill" /> {viewMode === "all" ? "ข้อมูลทั้งหมดในระบบ" : "ข้อมูลของฉัน"}
+                </div>
               </div>
-              <h1 style={{ fontSize: 30, fontWeight: 800, color: "#064e3b", marginBottom: 8, lineHeight: 1.2 }}>
-                แปลงยางพาราของฉัน
+              <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 800, color: "#064e3b", marginBottom: 8, lineHeight: 1.2 }}>
+                {viewMode === "all" ? "การจัดการแปลงยางพาราทั้งหมด" : "แปลงยางพาราของฉัน"}
               </h1>
-              <p style={{ fontSize: 14, color: "#475569", margin: "0 0 18px", lineHeight: 1.6 }}>
-                จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปีที่ 1–7
+              <p style={{ fontSize: isMobile ? 13 : 14, color: "#475569", margin: "0 0 18px", lineHeight: 1.6 }}>
+                {viewMode === "all" 
+                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ" 
+                  : "จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปี"}
               </p>
               {/* Search */}
-              <div style={{ position: "relative", maxWidth: 440 }}>
-                <i className="bi bi-search" style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: searchFocused ? "#059669" : "#94a3b8", fontSize: 14, pointerEvents: "none", transition: "color 0.15s" }} />
+              <div style={{ position: "relative", maxWidth: isMobile ? "100%" : 440 }}>
+                <i className="bi bi-search" style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: searchFocused ? "#059669" : "#94a3b8", fontSize: 14, pointerEvents: "none" }} />
                 <input
                   type="text"
                   placeholder="ค้นหาแปลง ชื่อเจ้าของ หรือจังหวัด..."
@@ -699,33 +792,89 @@ export default function MyPlotsPage() {
               </div>
             </div>
 
-            <Link
-              href="/map-draw"
-              style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: "13px 26px", borderRadius: 13, fontWeight: 700, fontSize: 14, textDecoration: "none", boxShadow: "0 8px 20px rgba(16,185,129,0.3)", flexShrink: 0 }}
-            >
-              <i className="bi bi-plus-circle" style={{ fontSize: 17 }} /> วาดแปลงใหม่
-            </Link>
+            <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", flexWrap: "wrap", alignItems: isMobile ? "center" : "flex-end", gap: isMobile ? 10 : 12, width: isMobile ? "100%" : "auto" }}>
+              {isAdmin && (
+                <div style={{ 
+                  background: "rgba(255,255,255,0.9)", 
+                  padding: 4, 
+                  borderRadius: isMobile ? 12 : 14, 
+                  display: "flex", 
+                  gap: isMobile ? 3 : 4, 
+                  border: "1px solid rgba(16,185,129,0.15)",
+                  width: isMobile ? "100%" : "auto",
+                  boxShadow: isMobile ? "none" : "0 4px 15px rgba(0,0,0,0.05)"
+                }}>
+                  <button 
+                    onClick={() => setViewMode("mine")}
+                    style={{
+                      flex: isMobile ? 1 : "initial",
+                      padding: isMobile ? "7px 12px" : "8px 16px", 
+                      borderRadius: isMobile ? 9 : 10, 
+                      border: "none", 
+                      fontSize: isMobile ? 12 : 13, 
+                      fontWeight: 700, 
+                      cursor: "pointer", 
+                      transition: "all 0.2s",
+                      background: viewMode === "mine" ? "#10b981" : "transparent",
+                      color: viewMode === "mine" ? "#fff" : "#64748b",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    <i className="bi bi-person-circle" /> {isMobile ? "ของฉัน" : "เฉพาะของฉัน"}
+                  </button>
+                  <button 
+                    onClick={() => setViewMode("all")}
+                    style={{
+                      flex: isMobile ? 1 : "initial",
+                      padding: isMobile ? "7px 12px" : "8px 16px", 
+                      borderRadius: isMobile ? 9 : 10, 
+                      border: "none", 
+                      fontSize: isMobile ? 12 : 13, 
+                      fontWeight: 700, 
+                      cursor: "pointer", 
+                      transition: "all 0.2s",
+                      background: viewMode === "all" ? "#0f172a" : "transparent",
+                      color: viewMode === "all" ? "#fff" : "#64748b",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    <i className="bi bi-people-fill" /> {isMobile ? "ทั้งหมด" : "ดูทั้งหมด"}
+                  </button>
+                </div>
+              )}
+              <Link
+                href="/map-draw"
+                style={{ 
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 8 : 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: isMobile ? "10px 20px" : "13px 26px", borderRadius: isMobile ? 12 : 13, fontWeight: 700, fontSize: isMobile ? 13 : 14, textDecoration: "none", boxShadow: isMobile ? "0 6px 15px rgba(16,185,129,0.25)" : "0 8px 20px rgba(16,185,129,0.3)",
+                  width: isMobile ? "100%" : "auto"
+                }}
+              >
+                <i className="bi bi-plus-circle" style={{ fontSize: isMobile ? 15 : 17 }} /> วาดแปลงใหม่
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* KPI Cards */}
         {plots.length > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(auto-fit, minmax(190px, 1fr))", gap: isMobile ? 10 : 14, marginBottom: 24 }}>
             {([
               { label: "แปลงทั้งหมด", val: plots.length.toLocaleString("th-TH"), unit: "แปลง", icon: "bi-map", color: "#16a34a", bg: "rgba(22,163,74,0.08)" },
               { label: "พื้นที่รวม", val: totalArea.toFixed(2), unit: "ไร่", icon: "bi-grid-fill", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
               { label: "คาร์บอนปัจจุบัน", val: fmtCompact(totalCarbon), unit: "tCO₂", icon: "bi-cloud-arrow-up-fill", color: "#059669", bg: "rgba(5,150,105,0.08)" },
               ...(totalForecast7 > 0 ? [{ label: "พยากรณ์ +7 ปี", val: fmtCompact(totalForecast7), unit: "tCO₂", icon: "bi-graph-up-arrow", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" }] : []),
             ] as { label: string; val: string; unit: string; icon: string; color: string; bg: string }[]).map(({ label, val, unit, icon, color, bg }) => (
-              <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "16px 18px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
+              <div key={label} style={{ background: "#fff", borderRadius: 16, padding: isMobile ? "12px 14px" : "16px 18px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, color: "#64748b" }}>{label}</span>
-                  <div style={{ width: 30, height: 30, borderRadius: 9, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <i className={`bi ${icon}`} style={{ color, fontSize: 14 }} />
+                  <span style={{ fontSize: isMobile ? 10 : 12, color: "#64748b" }}>{label}</span>
+                  <div style={{ width: 26, height: 26, borderRadius: 8, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <i className={`bi ${icon}`} style={{ color, fontSize: 12 }} />
                   </div>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 800, color }}>{val}</div>
-                <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>{unit}</div>
+                <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color }}>{val}</div>
+                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1 }}>{unit}</div>
               </div>
             ))}
           </div>
@@ -735,7 +884,7 @@ export default function MyPlotsPage() {
         <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 2px" }}>
               <h2 style={{ fontSize: 17, fontWeight: 800, color: "#064e3b", margin: 0 }}>
-                รายการแปลงที่บันทึกแล้ว
+                {viewMode === "all" ? "รายการแปลงทั้งหมดในระบบ" : "รายการแปลงที่บันทึกแล้ว"}
                 <span style={{ fontSize: 12, fontWeight: 400, color: "#64748b", marginLeft: 8 }}>
                   {searchTerm ? `พบ ${filteredPlots.length} จาก ${plots.length} แปลง` : `(${plots.length})`}
                 </span>
@@ -781,6 +930,70 @@ export default function MyPlotsPage() {
                   ล้างการค้นหา
                 </button>
               </div>
+            ) : viewMode === "all" ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 24 : 32 }}>
+                {groupedByUser?.map(group => (
+                  <div key={group.userId} style={{ position: 'relative' }}>
+                    {/* User Header */}
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: isMobile ? 10 : 12, 
+                      marginBottom: 16, 
+                      padding: isMobile ? '10px 14px' : '12px 20px', 
+                      background: 'rgba(255,255,255,0.7)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: 18,
+                      border: '1.5px solid rgba(16,185,129,0.15)',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                      position: 'sticky',
+                      top: isMobile ? 80 : 100,
+                      zIndex: 10
+                    }}>
+                      <div style={{ 
+                        width: isMobile ? 34 : 40, 
+                        height: isMobile ? 34 : 40, 
+                        borderRadius: 10, 
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                        color: '#fff', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: isMobile ? 15 : 18, 
+                        fontWeight: 800,
+                        boxShadow: '0 4px 10px rgba(16,185,129,0.25)'
+                      }}>
+                        {group.ownerName.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {group.ownerName}
+                          <span style={{ fontSize: 9, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '1px 6px', borderRadius: 20 }}>
+                            ผู้ใช้
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
+                          ทั้งหมด {group.plots.length} แปลง
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Plots in this group */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: isMobile ? 8 : 12, borderLeft: isMobile ? '1.5px dashed rgba(16,185,129,0.12)' : '2px dashed rgba(16,185,129,0.1)', marginLeft: isMobile ? 16 : 20 }}>
+                      {group.plots.map(plot => (
+                        <PlotCard
+                          key={plot.id}
+                          plot={plot}
+                          onDelete={() => handleDelete(plot.id)}
+                          expanded={expandedPlotId === plot.id}
+                          onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                          isMobile={isMobile}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {filteredPlots.map(plot => (
@@ -790,6 +1003,7 @@ export default function MyPlotsPage() {
                     onDelete={() => handleDelete(plot.id)}
                     expanded={expandedPlotId === plot.id}
                     onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                    isMobile={isMobile}
                   />
                 ))}
               </div>
