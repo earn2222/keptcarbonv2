@@ -2,7 +2,9 @@
 
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 const HERO_BG =
     "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
@@ -385,7 +387,224 @@ function ForecastSection({
   );
 }
 
-function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
+function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boolean }) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: {
+        version: 8,
+        glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+        sources: {
+          sat: {
+            type: "raster",
+            tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+            tileSize: 256,
+            minzoom: 1,
+            maxzoom: 19,
+            attribution: "",
+          },
+          street: {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            minzoom: 1,
+            maxzoom: 19,
+            attribution: "",
+          },
+        },
+        layers: [
+          { id: "sat", type: "raster", source: "sat", layout: { visibility: "visible" } },
+          { id: "street", type: "raster", source: "street", layout: { visibility: "none" } },
+        ],
+      },
+      center: [101.258, 13.5],
+      zoom: 5,
+      attributionControl: false,
+    });
+
+    mapRef.current = map;
+    map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+
+    map.on("load", () => {
+      const boundaryFeatures: any[] = [];
+      const parcelFeatures: any[] = [];
+
+      plots.forEach((p, i) => {
+        const props = { 
+          id: p.id,
+          name: p.name,
+          area: p.areaRai.toFixed(2),
+          carbon: p.carbonTotal.toFixed(2),
+          province: p.province || "—",
+          index: String(i + 1)
+        };
+
+        if (p.boundaryGeojson) {
+          boundaryFeatures.push({
+            type: "Feature",
+            geometry: p.boundaryGeojson,
+            properties: { ...props, type: 'boundary' }
+          });
+        }
+        if (p.geojson) {
+          parcelFeatures.push({
+            type: "Feature",
+            geometry: p.geojson,
+            properties: { ...props, type: 'parcel' }
+          });
+        }
+      });
+
+      map.addSource("my-boundaries", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: boundaryFeatures }
+      });
+      map.addSource("my-parcels", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: parcelFeatures }
+      });
+
+      map.addLayer({
+        id: "boundary-fill",
+        type: "fill",
+        source: "my-boundaries",
+        paint: { "fill-color": "#3b82f6", "fill-opacity": 0.05 }
+      });
+      map.addLayer({
+        id: "boundary-outline",
+        type: "line",
+        source: "my-boundaries",
+        paint: { 
+          "line-color": "#3b82f6", 
+          "line-width": 1.5,
+          "line-dasharray": [4, 2]
+        }
+      });
+
+      map.addLayer({
+        id: "parcel-fill",
+        type: "fill",
+        source: "my-parcels",
+        paint: { 
+          "fill-color": "#ea580c", 
+          "fill-opacity": 0.35
+        }
+      });
+      map.addLayer({
+        id: "parcel-outline",
+        type: "line",
+        source: "my-parcels",
+        paint: { "line-color": "#9a3412", "line-width": 2 }
+      });
+
+      // Index Labels
+      map.addLayer({
+        id: "parcel-label",
+        type: "symbol",
+        source: "my-parcels",
+        layout: {
+          "text-field": ["get", "index"],
+          "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+          "text-size": 16,
+          "text-allow-overlap": false,
+        },
+        paint: {
+          "text-color": "#dc2626",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 3,
+        }
+      });
+
+      const handlePlotClick = (e: any) => {
+        if (!e.features?.length) return;
+        const p = e.features[0].properties;
+        const isBoundary = p.type === 'boundary';
+        const html = `
+          <div style="font-family: sans-serif; padding: 10px; min-width: 160px;">
+            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 800; margin-bottom: 4px;">
+              ${isBoundary ? 'ขอบเขตที่วาด' : 'แปลงที่ตรวจพบ'}
+            </div>
+            <div style="font-weight: 800; color: #064e3b; margin-bottom: 5px; font-size: 14px;">${p.name}</div>
+            <div style="font-size: 12px; color: #475569; margin-bottom: 3px;">📍 ${p.province}</div>
+            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">📏 ${p.area} ไร่</div>
+            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">☁️ ${p.carbon} tCO₂</div>
+          </div>
+        `;
+        new maplibregl.Popup({ closeButton: false })
+          .setLngLat(e.lngLat)
+          .setHTML(html)
+          .addTo(map);
+      };
+
+      map.on("click", "boundary-fill", handlePlotClick);
+      map.on("click", "parcel-fill", handlePlotClick);
+      map.on("mouseenter", "parcel-fill", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "parcel-fill", () => { map.getCanvas().style.cursor = ""; });
+      map.on("mouseenter", "boundary-fill", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "boundary-fill", () => { map.getCanvas().style.cursor = ""; });
+
+      if (boundaryFeatures.length > 0 || parcelFeatures.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        [...boundaryFeatures, ...parcelFeatures].forEach(f => {
+          const geom = f.geometry as any;
+          const processCoords = (coords: any) => {
+            if (typeof coords[0] === "number") bounds.extend(coords as [number, number]);
+            else coords.forEach(processCoords);
+          };
+          processCoords(geom.coordinates);
+        });
+        map.fitBounds(bounds, { padding: isMobile ? 40 : 80, duration: 1200 });
+      }
+    });
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [plots, isMobile]);
+
+  return (
+    <div style={{ position: "relative", marginBottom: 24 }}>
+      <div 
+        ref={mapContainerRef} 
+        style={{ 
+          width: "100%", 
+          height: isMobile ? "450px" : "600px", 
+          borderRadius: 24, 
+          overflow: "hidden", 
+          border: "1px solid rgba(16,185,129,0.15)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
+        }} 
+      />
+      {/* Basemap toggle */}
+      <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, background: "rgba(255,255,255,0.9)", padding: 4, borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 1 }}>
+        <button 
+          onClick={() => {
+            if (!mapRef.current) return;
+            mapRef.current.setLayoutProperty("sat", "visibility", "visible");
+            mapRef.current.setLayoutProperty("street", "visibility", "none");
+          }}
+          style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: "transparent" }}
+        >ดาวเทียม</button>
+        <button 
+          onClick={() => {
+            if (!mapRef.current) return;
+            mapRef.current.setLayoutProperty("sat", "visibility", "none");
+            mapRef.current.setLayoutProperty("street", "visibility", "visible");
+          }}
+          style={{ padding: "6px 12px", borderRadius: 8, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: "transparent" }}
+        >ลายเส้น</button>
+      </div>
+    </div>
+  );
+}
+
+function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; index: number; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const statItems = [
@@ -414,15 +633,16 @@ function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: Save
 
       {/* Header row */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 12 : 14, padding: isMobile ? "16px 18px 12px" : "20px 24px 14px" }}>
-        {/* Pin icon */}
+        {/* Plot Index Number */}
         <div style={{
-          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)",
-          border: "1.5px solid rgba(16,185,129,0.2)",
+          width: isMobile ? 38 : 42, height: isMobile ? 38 : 42, borderRadius: isMobile ? 10 : 12, flexShrink: 0,
+          background: "rgba(16,185,129,0.1)",
+          border: "2px solid #10b981",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(16,185,129,0.12)",
+          boxShadow: "0 4px 12px rgba(16,185,129,0.08)",
+          fontSize: isMobile ? 18 : 20, fontWeight: 900, color: "#059669",
         }}>
-          <i className="bi bi-geo-alt-fill" style={{ color: "#059669", fontSize: 22 }} />
+          {index}
         </div>
 
         {/* Name + meta */}
@@ -561,6 +781,7 @@ export default function MyPlotsPage() {
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [expandedPlotId, setExpandedPlotId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"mine" | "all">("mine");
+  const [displayMode, setDisplayMode] = useState<"list" | "map">("list");
   const [isMobile, setIsMobile] = useState(false);
 
   const isAdmin = user?.role === "admin";
@@ -792,7 +1013,7 @@ export default function MyPlotsPage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", flexWrap: "wrap", alignItems: isMobile ? "center" : "flex-end", gap: isMobile ? 10 : 12, width: isMobile ? "100%" : "auto" }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", flexWrap: "wrap", alignItems: "center", justifyContent: isMobile ? "flex-start" : "flex-end", gap: isMobile ? 12 : 16, width: isMobile ? "100%" : "auto" }}>
               {isAdmin && (
                 <div style={{ 
                   background: "rgba(255,255,255,0.9)", 
@@ -847,8 +1068,10 @@ export default function MyPlotsPage() {
               <Link
                 href="/map-draw"
                 style={{ 
-                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 8 : 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: isMobile ? "10px 20px" : "13px 26px", borderRadius: isMobile ? 12 : 13, fontWeight: 700, fontSize: isMobile ? 13 : 14, textDecoration: "none", boxShadow: isMobile ? "0 6px 15px rgba(16,185,129,0.25)" : "0 8px 20px rgba(16,185,129,0.3)",
-                  width: isMobile ? "100%" : "auto"
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 8 : 10, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: isMobile ? "12px 24px" : "14px 28px", borderRadius: isMobile ? 12 : 14, fontWeight: 700, fontSize: isMobile ? 13 : 15, textDecoration: "none", boxShadow: isMobile ? "0 6px 15px rgba(16,185,129,0.25)" : "0 10px 25px rgba(16,185,129,0.3)",
+                  width: isMobile ? "100%" : "auto",
+                  whiteSpace: "nowrap",
+                  transition: "all 0.2s ease"
                 }}
               >
                 <i className="bi bi-plus-circle" style={{ fontSize: isMobile ? 15 : 17 }} /> วาดแปลงใหม่
@@ -889,39 +1112,84 @@ export default function MyPlotsPage() {
                   {searchTerm ? `พบ ${filteredPlots.length} จาก ${plots.length} แปลง` : `(${plots.length})`}
                 </span>
               </h2>
-              {plots.length > 0 && (
-                <div>
-                  {confirmDeleteAll ? (
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                      <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>ลบข้อมูลทั้งหมด?</span>
-                      <button
-                        onClick={handleDeleteAll}
-                        style={{ padding: "6px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}
-                      >
-                        ยืนยัน
-                      </button>
-                      <button
-                        onClick={() => setConfirmDeleteAll(false)}
-                        style={{ padding: "6px 14px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
-                      >
-                        ยกเลิก
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmDeleteAll(true)}
-                      style={{ padding: "6px 14px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.15)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                {plots.length > 0 && (
+                  <div style={{ 
+                    display: "flex", 
+                    background: "rgba(255,255,255,0.8)", 
+                    padding: 4, 
+                    borderRadius: 12, 
+                    border: "1px solid rgba(16,185,129,0.15)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+                  }}>
+                    <button 
+                      onClick={() => setDisplayMode("list")}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 8,
+                        border: "none",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        background: displayMode === "list" ? "#10b981" : "transparent",
+                        color: displayMode === "list" ? "#fff" : "#64748b",
+                        transition: "all 0.2s"
+                      }}
                     >
-                      <i className="bi bi-trash3-fill" /> ลบแปลงทั้งหมด
+                      <i className="bi bi-list-ul me-1" /> รายการ
                     </button>
-                  )}
-                </div>
-              )}
+                    <button 
+                      onClick={() => setDisplayMode("map")}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 8,
+                        border: "none",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        background: displayMode === "map" ? "#10b981" : "transparent",
+                        color: displayMode === "map" ? "#fff" : "#64748b",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      <i className="bi bi-map-fill me-1" /> แผนที่
+                    </button>
+                  </div>
+                )}
+                {plots.length > 0 && (
+                  <div>
+                    {confirmDeleteAll ? (
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>ลบทั้งหมด?</span>
+                        <button
+                          onClick={handleDeleteAll}
+                          style={{ padding: "6px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}
+                        >
+                          ยืนยัน
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteAll(false)}
+                          style={{ padding: "6px 14px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+                        >
+                          ยกเลิก
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteAll(true)}
+                        style={{ padding: "8px 12px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                      >
+                        <i className="bi bi-trash3-fill" /> {isMobile ? "" : "ลบทั้งหมด"}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {filteredPlots.length === 0 ? (
+            {displayMode === "map" && filteredPlots.length > 0 ? (
+              <PlotsMapView plots={filteredPlots} isMobile={isMobile} />
+            ) : filteredPlots.length === 0 ? (
               <div style={{ textAlign: "center", padding: "44px 24px", background: "#fff", borderRadius: 20, color: "#94a3b8", fontSize: 13 }}>
                 <i className="bi bi-search" style={{ fontSize: 30, display: "block", marginBottom: 8 }} />
                 ไม่พบแปลงที่ตรงกับ &ldquo;<strong style={{ color: "#64748b" }}>{searchTerm}</strong>&rdquo;
@@ -980,10 +1248,11 @@ export default function MyPlotsPage() {
 
                     {/* Plots in this group */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: isMobile ? 8 : 12, borderLeft: isMobile ? '1.5px dashed rgba(16,185,129,0.12)' : '2px dashed rgba(16,185,129,0.1)', marginLeft: isMobile ? 16 : 20 }}>
-                      {group.plots.map(plot => (
+                      {group.plots.map((plot, i) => (
                         <PlotCard
                           key={plot.id}
                           plot={plot}
+                          index={i + 1}
                           onDelete={() => handleDelete(plot.id)}
                           expanded={expandedPlotId === plot.id}
                           onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
@@ -996,10 +1265,11 @@ export default function MyPlotsPage() {
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {filteredPlots.map(plot => (
+                {filteredPlots.map((plot, i) => (
                   <PlotCard
                     key={plot.id}
                     plot={plot}
+                    index={i + 1}
                     onDelete={() => handleDelete(plot.id)}
                     expanded={expandedPlotId === plot.id}
                     onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
