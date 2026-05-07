@@ -405,7 +405,7 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
             tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
             tileSize: 256,
             minzoom: 1,
-            maxzoom: 19,
+            maxzoom: 18,
             attribution: "",
           },
           street: {
@@ -413,7 +413,7 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
             tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
             minzoom: 1,
-            maxzoom: 19,
+            maxzoom: 18,
             attribution: "",
           },
         },
@@ -428,9 +428,12 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
     });
 
     mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+    const nav = new maplibregl.NavigationControl();
+    map.addControl(nav, "bottom-right");
 
-    map.on("load", () => {
+    const onMapLoad = () => {
+      if (!mapRef.current) return;
+      const m = mapRef.current;
       const boundaryFeatures: any[] = [];
       const parcelFeatures: any[] = [];
 
@@ -513,7 +516,6 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         source: "my-parcels",
         layout: {
           "text-field": ["get", "index"],
-          "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
           "text-size": 16,
           "text-allow-overlap": false,
         },
@@ -610,12 +612,79 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         });
         map.fitBounds(bounds, { padding: isMobile ? 40 : 80, duration: 1200 });
       }
-    });
+    };
+
+    map.on("load", onMapLoad);
 
     return () => {
       map.remove();
       mapRef.current = null;
     };
+  }, [isMobile]); // Only recreate map if isMobile changes (rare)
+
+  // Separate effect to update data when plots change
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const boundaryFeatures: any[] = [];
+    const parcelFeatures: any[] = [];
+
+    plots.forEach((p, i) => {
+      const carbonPerTree = (p.trees && p.trees > 0)
+        ? (p.carbonTotal / p.trees).toFixed(3)
+        : null;
+      const props = {
+        id: p.id,
+        name: p.name,
+        area: p.areaRai.toFixed(2),
+        carbon: p.carbonTotal.toFixed(2),
+        carbonPerTree: carbonPerTree ?? "—",
+        province: p.province || "—",
+        index: String(i + 1)
+      };
+
+      if (p.boundaryGeojson) {
+        boundaryFeatures.push({
+          type: "Feature",
+          geometry: p.boundaryGeojson,
+          properties: { ...props, type: 'boundary' }
+        });
+      }
+      if (p.geojson) {
+        parcelFeatures.push({
+          type: "Feature",
+          geometry: p.geojson,
+          properties: { ...props, type: 'parcel' }
+        });
+      }
+    });
+
+    const bSrc = map.getSource("my-boundaries") as maplibregl.GeoJSONSource;
+    const pSrc = map.getSource("my-parcels") as maplibregl.GeoJSONSource;
+
+    if (bSrc) bSrc.setData({ type: "FeatureCollection", features: boundaryFeatures });
+    if (pSrc) pSrc.setData({ type: "FeatureCollection", features: parcelFeatures });
+
+    if (boundaryFeatures.length > 0 || parcelFeatures.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      [...boundaryFeatures, ...parcelFeatures].forEach(f => {
+        const geom = f.geometry as any;
+        const processCoords = (coords: any) => {
+          if (typeof coords[0] === "number") bounds.extend(coords as [number, number]);
+          else if (Array.isArray(coords)) coords.forEach(processCoords);
+        };
+        processCoords(geom.coordinates);
+      });
+      if (!bounds.isEmpty()) {
+        // Only fit bounds if the number of plots has changed to avoid fighting manual zoom
+        const prevCount = map.getContainer().getAttribute('data-plot-count');
+        if (prevCount !== String(plots.length)) {
+          map.fitBounds(bounds, { padding: isMobile ? 40 : 80, duration: 1200 });
+          map.getContainer().setAttribute('data-plot-count', String(plots.length));
+        }
+      }
+    }
   }, [plots, isMobile]);
 
   return (
@@ -657,11 +726,17 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
 function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; index: number; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const carbonPerTree = plot.trees && plot.trees > 0
+    ? (plot.carbonTotal / plot.trees)
+    : null;
+
   const statItems = [
-    { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.08)", icon: "bi-grid-fill" },
-    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.08)", icon: "bi-hourglass-split" },
-    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? (plot.trees >= 1000 ? (plot.trees / 1000).toFixed(1) + "k" : String(plot.trees)) : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)", icon: "bi-tree-fill" },
-    { label: "คาร์บอน", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.08)", icon: "bi-cloud-arrow-up-fill" },
+    { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
+    { label: "ปีที่ปลูก", val: plot.plantYearBE && plot.plantYearBE > 0 ? String(plot.plantYearBE) : "—", unit: "พ.ศ.", color: "#0369a1", bg: "rgba(3,105,161,0.08)" },
+    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.08)" },
+    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? (plot.trees >= 1000 ? (plot.trees / 1000).toFixed(1) + "k" : String(plot.trees)) : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" },
+    { label: "คาร์บอน/ต้น", val: carbonPerTree !== null ? carbonPerTree < 0.001 ? carbonPerTree.toExponential(2) : carbonPerTree.toFixed(4) : "—", unit: "tCO₂/ต้น", color: "#0e7490", bg: "rgba(14,116,144,0.08)" },
+    { label: "คาร์บอนทั้งแปลง", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.08)" },
   ];
 
   return (
@@ -711,11 +786,6 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
                 <i className="bi bi-pin-map-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.province}
               </span>
             )}
-            {plot.plantYearBE && plot.plantYearBE > 0 && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#0369a1", background: "rgba(14,165,233,0.08)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(14,165,233,0.2)" }}>
-                <i className="bi bi-calendar-event" style={{ color: "#0284c7", fontSize: 10 }} />ปีปลูก พ.ศ. {plot.plantYearBE}
-              </span>
-            )}
             <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#64748b", background: "rgba(148,163,184,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(148,163,184,0.2)" }}>
               <i className="bi bi-clock-history" style={{ color: "#94a3b8", fontSize: 10 }} />
               <span style={{ opacity: 0.7, fontSize: 10 }}>บันทึกเมื่อ:</span>
@@ -726,14 +796,13 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
       </div>
 
       {/* Stats row — Responsive grid */}
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: isMobile ? 8 : 10, padding: isMobile ? "0 18px 12px" : "0 24px 14px" }}>
-        {statItems.map(({ label, val, unit, color, bg, icon }) => (
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(6,1fr)", gap: isMobile ? 8 : 10, padding: isMobile ? "0 18px 12px" : "0 24px 14px" }}>
+        {statItems.map(({ label, val, unit, color, bg }) => (
           <div key={label} style={{
             borderRadius: 14, padding: isMobile ? "10px 4px" : "12px 6px", textAlign: "center",
             background: bg, border: `1px solid ${color}22`,
             display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
           }}>
-            <i className={`bi ${icon}`} style={{ color, fontSize: isMobile ? 11 : 13, opacity: 0.7, marginBottom: 1 }} />
             <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
             <div style={{ fontSize: 9, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
             <div style={{ fontSize: 8.5, color: "#94a3b8", marginTop: 1 }}>{label}</div>
@@ -799,6 +868,7 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
               { k: "จำนวนต้น", v: plot.trees?.toLocaleString("th-TH") ?? "—" },
               { k: "ปีปลูก (พ.ศ.)", v: plot.plantYearBE ? String(plot.plantYearBE) : "—" },
               { k: "คาร์บอนปัจจุบัน", v: `${plot.carbonTotal.toFixed(2)} tCO₂` },
+              { k: "คาร์บอน/ต้น", v: plot.trees && plot.trees > 0 ? `${(plot.carbonTotal / plot.trees).toFixed(4)} tCO₂` : "—" },
             ].map(({ k, v }) => (
               <div key={k} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.025)", borderRadius: 10, border: "1px solid rgba(0,0,0,0.04)" }}>
                 <div style={{ color: "#94a3b8", fontSize: 9.5, fontWeight: 600, letterSpacing: 0.3 }}>{k}</div>
