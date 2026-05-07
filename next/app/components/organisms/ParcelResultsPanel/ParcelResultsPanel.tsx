@@ -582,8 +582,10 @@ export function ParcelResultsPanel({
                                             </div>
                                         </div>
                                         <button className="prp-analyze-btn" onClick={e => { e.stopPropagation(); onFlyTo(feat); }}>
-                                            <i className="bi bi-check-circle-fill" /> วิเคราะห์แล้ว
+                                            <i className="bi bi-check-circle-fill" />
+                                            <span className="d-none d-md-inline ms-1">วิเคราะห์แล้ว</span>
                                         </button>
+
                                         <i className={`bi bi-chevron-${isOpen ? "up" : "down"} prp-chevron`} />
                                     </div>
 
