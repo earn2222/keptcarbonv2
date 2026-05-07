@@ -20,8 +20,6 @@ function carbonCo2(age: number, trees: number): number {
 }
 
 function fmtCompact(v: number): string {
-  if (v >= 10000) return Math.round(v / 1000) + "k";
-  if (v >= 1000) return (v / 1000).toFixed(1) + "k";
   return v.toLocaleString("th-TH", { maximumFractionDigits: 0 });
 }
 
@@ -734,7 +732,7 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
     { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
     { label: "ปีที่ปลูก", val: plot.plantYearBE && plot.plantYearBE > 0 ? String(plot.plantYearBE) : "—", unit: "พ.ศ.", color: "#0369a1", bg: "rgba(3,105,161,0.08)" },
     { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.08)" },
-    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? (plot.trees >= 1000 ? (plot.trees / 1000).toFixed(1) + "k" : String(plot.trees)) : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" },
+    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? plot.trees.toLocaleString("th-TH") : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" },
     { label: "คาร์บอน/ต้น", val: carbonPerTree !== null ? carbonPerTree < 0.001 ? carbonPerTree.toExponential(2) : carbonPerTree.toFixed(4) : "—", unit: "tCO₂/ต้น", color: "#0e7490", bg: "rgba(14,116,144,0.08)" },
     { label: "คาร์บอนทั้งแปลง", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.08)" },
   ];
