@@ -62,11 +62,13 @@ function ForecastBody({
   chartPts,
   base,
   maxCo2,
+  isMobile,
 }: {
-  milestones: { label: string; co2: number; yr: number }[];
-  chartPts: { yr: number; label: string; co2: number }[];
+  milestones: any[];
+  chartPts: any[];
   base: number;
   maxCo2: number;
+  isMobile?: boolean;
 }) {
   const [view, setView] = useState<"timeline" | "chart">("timeline");
   const [hoveredPt, setHoveredPt] = useState<number | null>(null);
@@ -76,7 +78,7 @@ function ForecastBody({
   const uid = rawId.replace(/:/g, "-");
 
   // SVG dimensions - Enlarged for better desktop visibility
-  const W = 600, H = 220, PL = 12, PT = 24, PB = 36;
+  const W = isMobile ? 400 : 600, H = isMobile ? 240 : 220, PL = 12, PT = 24, PB = 36;
   const iW = W - PL * 2, iH = H - PT - PB;
   const n = chartPts.length;
 
@@ -118,7 +120,7 @@ function ForecastBody({
 
       {/* Timeline view */}
       {view === "timeline" && (
-        <div style={{ padding: "12px 16px 12px", display: "flex", gap: 0, alignItems: "stretch" }}>
+        <div style={{ padding: isMobile ? "14px 10px" : "12px 16px 12px", display: "flex", gap: 0, alignItems: "stretch" }}>
           {milestones.map((m, i) => {
             const isFirst = i === 0;
             const isLast = i === milestones.length - 1;
@@ -129,20 +131,20 @@ function ForecastBody({
             return (
               <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
                 {!isLast && (
-                  <div style={{ position: "absolute", top: 10, left: "50%", right: "-50%", height: 2, background: "linear-gradient(90deg,rgba(16,185,129,0.35),rgba(16,185,129,0.1))", zIndex: 0 }} />
+                  <div style={{ position: "absolute", top: isMobile ? 12 : 10, left: "50%", right: "-50%", height: 2, background: "linear-gradient(90deg,rgba(16,185,129,0.35),rgba(16,185,129,0.1))", zIndex: 0 }} />
                 )}
-                <div style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, background: isFirst ? dotColor : "#fff", border: `2.5px solid ${dotColor}`, boxShadow: isFirst ? "0 0 0 4px rgba(5,150,105,0.12)" : "none", zIndex: 1, marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {isFirst && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
+                <div style={{ width: isMobile ? 24 : 20, height: isMobile ? 24 : 20, borderRadius: "50%", flexShrink: 0, background: isFirst ? dotColor : "#fff", border: `2.5px solid ${dotColor}`, boxShadow: isFirst ? "0 0 0 4px rgba(5,150,105,0.12)" : "none", zIndex: 1, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {isFirst && <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#fff" }} />}
                 </div>
-                <div style={{ fontSize: 11.5, fontWeight: isFirst ? 700 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 3, textAlign: "center" }}>{m.label}</div>
-                <div style={{ fontSize: isFirst ? 15 : 14, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
-                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1, textAlign: "center" }}>tCO₂</div>
+                <div style={{ fontSize: isMobile ? 11 : 11.5, fontWeight: isFirst ? 800 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 3, textAlign: "center" }}>{m.label}</div>
+                <div style={{ fontSize: isMobile ? 16 : 14, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
+                <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 1, textAlign: "center" }}>tCO₂</div>
                 {!isFirst && changeFromBase !== 0 && (
-                  <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: changeFromBase > 0 ? "#16a34a" : "#dc2626", background: changeFromBase > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", padding: "1px 5px", borderRadius: 6, textAlign: "center" }}>
+                  <div style={{ marginTop: 5, fontSize: isMobile ? 10.5 : 10, fontWeight: 700, color: changeFromBase > 0 ? "#16a34a" : "#dc2626", background: changeFromBase > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", padding: isMobile ? "2px 6px" : "1px 5px", borderRadius: 6, textAlign: "center" }}>
                     {changeFromBase > 0 ? "+" : ""}{changePct.toFixed(1)}%
                   </div>
                 )}
-                <div style={{ marginTop: 6, width: "70%", height: 3, borderRadius: 3, background: "rgba(16,185,129,0.1)", overflow: "hidden" }}>
+                <div style={{ marginTop: 8, width: "80%", height: 3.5, borderRadius: 3, background: "rgba(16,185,129,0.1)", overflow: "hidden" }}>
                   <div style={{ height: "100%", borderRadius: 3, width: `${barFill}%`, background: isFirst ? "linear-gradient(90deg,#059669,#10b981)" : isLast ? "linear-gradient(90deg,#10b981,#34d399)" : "rgba(16,185,129,0.5)", transition: "width 0.4s ease" }} />
                 </div>
               </div>
@@ -256,7 +258,7 @@ function ForecastBody({
             {/* Year labels along x-axis */}
             {svgPts.map((p, i) => (
               <text key={i} x={p.x} y={H - 10}
-                textAnchor="middle" fontSize={11}
+                textAnchor="middle" fontSize={isMobile ? 12 : 11}
                 fontWeight={i === 0 ? 700 : 400}
                 fill={i === 0 ? "#059669" : "#94a3b8"}
               >
@@ -319,11 +321,13 @@ function ForecastSection({
   trees,
   carbonTotal,
   forecast,
+  isMobile,
 }: {
   rubberAge: number;
   trees: number;
   carbonTotal: number;
   forecast?: Forecast;
+  isMobile?: boolean;
 }) {
   const canCompute = trees > 0 && rubberAge > 0;
 
@@ -376,7 +380,7 @@ function ForecastSection({
           </span>
         )}
       </div>
-      <ForecastBody milestones={milestones} chartPts={chartPts} base={base} maxCo2={maxCo2} />
+      <ForecastBody milestones={milestones} chartPts={chartPts} base={base} maxCo2={maxCo2} isMobile={isMobile} />
     </div>
   );
 }
@@ -517,12 +521,13 @@ function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: Save
 
       {/* Expanded details */}
       {expanded && (
-        <div style={{ padding: "4px 24px 22px", borderTop: "1px dashed rgba(16,185,129,0.15)" }}>
+        <div style={{ padding: isMobile ? "4px 12px 22px" : "4px 24px 22px", borderTop: "1px dashed rgba(16,185,129,0.15)" }}>
           <ForecastSection
             rubberAge={plot.rubberAge}
             trees={plot.trees ?? 0}
             carbonTotal={plot.carbonTotal}
             forecast={plot.forecast}
+            isMobile={isMobile}
           />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 8, marginTop: 14 }}>
             {[
