@@ -381,7 +381,7 @@ function ForecastSection({
   );
 }
 
-function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void }) {
+function PlotCard({ plot, onDelete, expanded, onToggle, isMobile }: { plot: SavedPlot; onDelete: () => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const statItems = [
@@ -409,7 +409,7 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
       {/* Removed Gradient top accent */}
 
       {/* Header row */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "20px 24px 14px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 12 : 14, padding: isMobile ? "16px 18px 12px" : "20px 24px 14px" }}>
         {/* Pin icon */}
         <div style={{
           width: 52, height: 52, borderRadius: 16, flexShrink: 0,
@@ -423,10 +423,10 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
 
         {/* Name + meta */}
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 17, fontWeight: 800, color: "#0f172a", lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
+          <div style={{ fontSize: isMobile ? 15 : 17, fontWeight: 800, color: "#0f172a", lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
             {plot.name}
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? 6 : 7, alignItems: "center" }}>
             {plot.ownerName && (
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#475569", background: "#f1f5f9", padding: "3px 10px", borderRadius: 20, border: "1px solid #e2e8f0" }}>
                 <i className="bi bi-person-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.ownerName}
@@ -444,18 +444,18 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
         </div>
       </div>
 
-      {/* Stats row — 4 pill cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, padding: "0 24px 14px" }}>
+      {/* Stats row — Responsive grid */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: isMobile ? 8 : 10, padding: isMobile ? "0 18px 12px" : "0 24px 14px" }}>
         {statItems.map(({ label, val, unit, color, bg, icon }) => (
           <div key={label} style={{
-            borderRadius: 14, padding: "12px 6px", textAlign: "center",
+            borderRadius: 14, padding: isMobile ? "10px 4px" : "12px 6px", textAlign: "center",
             background: bg, border: `1px solid ${color}22`,
             display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
           }}>
-            <i className={`bi ${icon}`} style={{ color, fontSize: 13, opacity: 0.7, marginBottom: 2 }} />
-            <div style={{ fontSize: 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
-            <div style={{ fontSize: 9.5, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
-            <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 1 }}>{label}</div>
+            <i className={`bi ${icon}`} style={{ color, fontSize: isMobile ? 11 : 13, opacity: 0.7, marginBottom: 1 }} />
+            <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
+            <div style={{ fontSize: 8.5, color: "#94a3b8", marginTop: 1 }}>{label}</div>
           </div>
         ))}
       </div>
@@ -482,19 +482,19 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
       <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(16,185,129,0.15),transparent)", margin: "0 24px" }} />
 
       {/* Footer: expand + delete */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 20px 15px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "10px 16px 14px" : "11px 20px 15px" }}>
         <button
           onClick={onToggle}
           style={{
-            display: "flex", alignItems: "center", gap: 6, padding: "6px 15px",
+            display: "flex", alignItems: "center", gap: 5, padding: isMobile ? "5px 10px" : "6px 15px",
             background: expanded ? "rgba(16,185,129,0.09)" : "transparent",
             border: "1.5px solid rgba(16,185,129,0.28)",
-            borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700,
+            borderRadius: 10, cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700,
             color: "#059669", transition: "all 0.15s",
           }}
         >
           <i className={`bi bi-chevron-${expanded ? "up" : "down"}`} />
-          {expanded ? "ซ่อนรายละเอียด" : "ดูรายละเอียดเพิ่มเติม"}
+          {expanded ? (isMobile ? "ซ่อน" : "ซ่อนรายละเอียด") : (isMobile ? "ดูเพิ่ม" : "ดูรายละเอียดเพิ่มเติม")}
         </button>
 
         {confirmDelete ? (
@@ -556,8 +556,16 @@ export default function MyPlotsPage() {
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [expandedPlotId, setExpandedPlotId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"mine" | "all">("mine");
+  const [isMobile, setIsMobile] = useState(false);
 
   const isAdmin = user?.role === "admin";
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -730,31 +738,31 @@ export default function MyPlotsPage() {
 
         {/* Hero */}
         <div style={{
-          background: HERO_BG, borderRadius: 24, padding: "36px 48px", marginBottom: 24,
+          background: HERO_BG, borderRadius: isMobile ? 20 : 24, padding: isMobile ? "24px 20px" : "36px 48px", marginBottom: 24,
           border: "1px solid rgba(16,185,129,0.15)", boxShadow: "0 20px 40px rgba(0,0,0,0.03)",
           position: "relative", overflow: "hidden",
         }}>
-          <div style={{ position: "absolute", top: -50, left: -50, width: 200, height: 200, background: "rgba(16,185,129,0.2)", filter: "blur(60px)", borderRadius: "50%", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: -50, right: -50, width: 250, height: 250, background: "rgba(13,148,136,0.15)", filter: "blur(70px)", borderRadius: "50%", pointerEvents: "none" }} />
-
-          <div style={{ position: "relative", zIndex: 1, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
-            <div>
+          <div style={{ position: "absolute", top: -50, left: -50, width: isMobile ? 150 : 200, height: isMobile ? 150 : 200, background: "rgba(16,185,129,0.2)", filter: "blur(60px)", borderRadius: "50%", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: -50, right: -50, width: isMobile ? 200 : 250, height: isMobile ? 200 : 250, background: "rgba(13,148,136,0.15)", filter: "blur(70px)", borderRadius: "50%", pointerEvents: "none" }} />
+          
+          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 20 }}>
+            <div style={{ width: "100%" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", background: "rgba(16,185,129,0.1)", color: "#059669", borderRadius: 50, fontSize: 12, fontWeight: 700, border: "1px solid rgba(16,185,129,0.2)" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "4px 12px", background: "rgba(16,185,129,0.1)", color: "#059669", borderRadius: 50, fontSize: 11, fontWeight: 700, border: "1px solid rgba(16,185,129,0.2)" }}>
                   <i className="bi bi-folder-fill" /> {viewMode === "all" ? "ข้อมูลทั้งหมดในระบบ" : "ข้อมูลของฉัน"}
                 </div>
               </div>
-              <h1 style={{ fontSize: 30, fontWeight: 800, color: "#064e3b", marginBottom: 8, lineHeight: 1.2 }}>
+              <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 800, color: "#064e3b", marginBottom: 8, lineHeight: 1.2 }}>
                 {viewMode === "all" ? "การจัดการแปลงยางพาราทั้งหมด" : "แปลงยางพาราของฉัน"}
               </h1>
-              <p style={{ fontSize: 14, color: "#475569", margin: "0 0 18px", lineHeight: 1.6 }}>
+              <p style={{ fontSize: isMobile ? 13 : 14, color: "#475569", margin: "0 0 18px", lineHeight: 1.6 }}>
                 {viewMode === "all" 
-                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ พร้อมพยากรณ์ข้อมูล" 
-                  : "จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปีที่ 1–7"}
+                  ? "ตรวจสอบและจัดการข้อมูลแปลงยางพาราของผู้ใช้งานทุกคนในระบบ" 
+                  : "จัดการและติดตามข้อมูลแปลงยาง พร้อมพยากรณ์คาร์บอนรายปี"}
               </p>
               {/* Search */}
-              <div style={{ position: "relative", maxWidth: 440 }}>
-                <i className="bi bi-search" style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: searchFocused ? "#059669" : "#94a3b8", fontSize: 14, pointerEvents: "none", transition: "color 0.15s" }} />
+              <div style={{ position: "relative", maxWidth: isMobile ? "100%" : 440 }}>
+                <i className="bi bi-search" style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: searchFocused ? "#059669" : "#94a3b8", fontSize: 14, pointerEvents: "none" }} />
                 <input
                   type="text"
                   placeholder="ค้นหาแปลง ชื่อเจ้าของ หรือจังหวัด..."
@@ -779,62 +787,66 @@ export default function MyPlotsPage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12 }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", flexWrap: "wrap", alignItems: isMobile ? "center" : "flex-end", gap: isMobile ? 10 : 12, width: isMobile ? "100%" : "auto" }}>
               {isAdmin && (
                 <div style={{ 
-                  background: "rgba(255,255,255,0.8)", 
+                  background: "rgba(255,255,255,0.9)", 
                   padding: 4, 
-                  borderRadius: 14, 
+                  borderRadius: isMobile ? 12 : 14, 
                   display: "flex", 
-                  gap: 4, 
-                  border: "1px solid rgba(16,185,129,0.2)",
-                  boxShadow: "0 4px 15px rgba(0,0,0,0.05)"
+                  gap: isMobile ? 3 : 4, 
+                  border: "1px solid rgba(16,185,129,0.15)",
+                  width: isMobile ? "100%" : "auto",
+                  boxShadow: isMobile ? "none" : "0 4px 15px rgba(0,0,0,0.05)"
                 }}>
                   <button 
                     onClick={() => setViewMode("mine")}
                     style={{
-                      padding: "8px 16px",
-                      borderRadius: 10,
-                      border: "none",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: "pointer",
+                      flex: isMobile ? 1 : "initial",
+                      padding: isMobile ? "7px 12px" : "8px 16px", 
+                      borderRadius: isMobile ? 9 : 10, 
+                      border: "none", 
+                      fontSize: isMobile ? 12 : 13, 
+                      fontWeight: 700, 
+                      cursor: "pointer", 
                       transition: "all 0.2s",
                       background: viewMode === "mine" ? "#10b981" : "transparent",
                       color: viewMode === "mine" ? "#fff" : "#64748b",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      whiteSpace: "nowrap"
                     }}
                   >
-                    <i className="bi bi-person-circle" /> เฉพาะของฉัน
+                    <i className="bi bi-person-circle" /> {isMobile ? "ของฉัน" : "เฉพาะของฉัน"}
                   </button>
                   <button 
                     onClick={() => setViewMode("all")}
                     style={{
-                      padding: "8px 16px",
-                      borderRadius: 10,
-                      border: "none",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: "pointer",
+                      flex: isMobile ? 1 : "initial",
+                      padding: isMobile ? "7px 12px" : "8px 16px", 
+                      borderRadius: isMobile ? 9 : 10, 
+                      border: "none", 
+                      fontSize: isMobile ? 12 : 13, 
+                      fontWeight: 700, 
+                      cursor: "pointer", 
                       transition: "all 0.2s",
                       background: viewMode === "all" ? "#0f172a" : "transparent",
                       color: viewMode === "all" ? "#fff" : "#64748b",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      whiteSpace: "nowrap"
                     }}
                   >
-                    <i className="bi bi-people-fill" /> ดูทั้งหมด
+                    <i className="bi bi-people-fill" /> {isMobile ? "ทั้งหมด" : "ดูทั้งหมด"}
                   </button>
                 </div>
               )}
               <Link
                 href="/map-draw"
-                style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: "13px 26px", borderRadius: 13, fontWeight: 700, fontSize: 14, textDecoration: "none", boxShadow: "0 8px 20px rgba(16,185,129,0.3)", flexShrink: 0 }}
+                style={{ 
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 8 : 9, background: "linear-gradient(135deg,#10b981 0%,#059669 100%)", color: "#fff", padding: isMobile ? "10px 20px" : "13px 26px", borderRadius: isMobile ? 12 : 13, fontWeight: 700, fontSize: isMobile ? 13 : 14, textDecoration: "none", boxShadow: isMobile ? "0 6px 15px rgba(16,185,129,0.25)" : "0 8px 20px rgba(16,185,129,0.3)",
+                  width: isMobile ? "100%" : "auto"
+                }}
               >
-                <i className="bi bi-plus-circle" style={{ fontSize: 17 }} /> วาดแปลงใหม่
+                <i className="bi bi-plus-circle" style={{ fontSize: isMobile ? 15 : 17 }} /> วาดแปลงใหม่
               </Link>
             </div>
           </div>
@@ -842,22 +854,22 @@ export default function MyPlotsPage() {
 
         {/* KPI Cards */}
         {plots.length > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(auto-fit, minmax(190px, 1fr))", gap: isMobile ? 10 : 14, marginBottom: 24 }}>
             {([
               { label: "แปลงทั้งหมด", val: plots.length.toLocaleString("th-TH"), unit: "แปลง", icon: "bi-map", color: "#16a34a", bg: "rgba(22,163,74,0.08)" },
               { label: "พื้นที่รวม", val: totalArea.toFixed(2), unit: "ไร่", icon: "bi-grid-fill", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
               { label: "คาร์บอนปัจจุบัน", val: fmtCompact(totalCarbon), unit: "tCO₂", icon: "bi-cloud-arrow-up-fill", color: "#059669", bg: "rgba(5,150,105,0.08)" },
               ...(totalForecast7 > 0 ? [{ label: "พยากรณ์ +7 ปี", val: fmtCompact(totalForecast7), unit: "tCO₂", icon: "bi-graph-up-arrow", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" }] : []),
             ] as { label: string; val: string; unit: string; icon: string; color: string; bg: string }[]).map(({ label, val, unit, icon, color, bg }) => (
-              <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "16px 18px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
+              <div key={label} style={{ background: "#fff", borderRadius: 16, padding: isMobile ? "12px 14px" : "16px 18px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, color: "#64748b" }}>{label}</span>
-                  <div style={{ width: 30, height: 30, borderRadius: 9, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <i className={`bi ${icon}`} style={{ color, fontSize: 14 }} />
+                  <span style={{ fontSize: isMobile ? 10 : 12, color: "#64748b" }}>{label}</span>
+                  <div style={{ width: 26, height: 26, borderRadius: 8, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <i className={`bi ${icon}`} style={{ color, fontSize: 12 }} />
                   </div>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 800, color }}>{val}</div>
-                <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>{unit}</div>
+                <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color }}>{val}</div>
+                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1 }}>{unit}</div>
               </div>
             ))}
           </div>
@@ -914,58 +926,55 @@ export default function MyPlotsPage() {
                 </button>
               </div>
             ) : viewMode === "all" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 24 : 32 }}>
                 {groupedByUser?.map(group => (
                   <div key={group.userId} style={{ position: 'relative' }}>
                     {/* User Header */}
                     <div style={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: 12, 
+                      gap: isMobile ? 10 : 12, 
                       marginBottom: 16, 
-                      padding: '12px 20px', 
+                      padding: isMobile ? '10px 14px' : '12px 20px', 
                       background: 'rgba(255,255,255,0.7)',
                       backdropFilter: 'blur(10px)',
                       borderRadius: 18,
                       border: '1.5px solid rgba(16,185,129,0.15)',
                       boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
                       position: 'sticky',
-                      top: 100, // Adjust based on navbar height
+                      top: isMobile ? 80 : 100,
                       zIndex: 10
                     }}>
                       <div style={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: 12, 
+                        width: isMobile ? 34 : 40, 
+                        height: isMobile ? 34 : 40, 
+                        borderRadius: 10, 
                         background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
                         color: '#fff', 
                         display: 'flex', 
                         alignItems: 'center', 
                         justifyContent: 'center', 
-                        fontSize: 18, 
+                        fontSize: isMobile ? 15 : 18, 
                         fontWeight: 800,
-                        boxShadow: '0 4px 10px rgba(16,185,129,0.3)'
+                        boxShadow: '0 4px 10px rgba(16,185,129,0.25)'
                       }}>
                         {group.ownerName.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: '#064e3b', display: 'flex', alignItems: 'center', gap: 6 }}>
                           {group.ownerName}
-                          <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: 20 }}>
-                            ผู้ใช้งาน
+                          <span style={{ fontSize: 9, fontWeight: 700, color: '#059669', background: 'rgba(16,185,129,0.1)', padding: '1px 6px', borderRadius: 20 }}>
+                            ผู้ใช้
                           </span>
                         </div>
-                        <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>
-                          <i className="bi bi-stack me-1" /> รายการแปลงทั้งหมด {group.plots.length} แปลง
+                        <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
+                          ทั้งหมด {group.plots.length} แปลง
                         </div>
-                      </div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>
-                        กลุ่มข้อมูล
                       </div>
                     </div>
 
                     {/* Plots in this group */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: 12, borderLeft: '2px dashed rgba(16,185,129,0.1)', marginLeft: 20 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingLeft: isMobile ? 8 : 12, borderLeft: isMobile ? '1.5px dashed rgba(16,185,129,0.12)' : '2px dashed rgba(16,185,129,0.1)', marginLeft: isMobile ? 16 : 20 }}>
                       {group.plots.map(plot => (
                         <PlotCard
                           key={plot.id}
@@ -973,6 +982,7 @@ export default function MyPlotsPage() {
                           onDelete={() => handleDelete(plot.id)}
                           expanded={expandedPlotId === plot.id}
                           onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                          isMobile={isMobile}
                         />
                       ))}
                     </div>
@@ -988,6 +998,7 @@ export default function MyPlotsPage() {
                     onDelete={() => handleDelete(plot.id)}
                     expanded={expandedPlotId === plot.id}
                     onToggle={() => setExpandedPlotId(prev => prev === plot.id ? null : plot.id)}
+                    isMobile={isMobile}
                   />
                 ))}
               </div>
