@@ -88,9 +88,10 @@ function StatCard({ label, value, unit, color }: {
 }
 
 /* ── Donut chart (age distribution) ── */
-function DonutChart({ bucketData, total }: {
+function DonutChart({ bucketData, total, isMobile }: {
   bucketData: { key: string; label: string; color: string; plotCount: number }[];
   total: number;
+  isMobile: boolean;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -140,8 +141,8 @@ function DonutChart({ bucketData, total }: {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%" }}>
-      <div style={{ position: "relative", height: 180, flexShrink: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 16 : 24, height: "100%" }}>
+      <div style={{ position: "relative", height: isMobile ? 180 : 240, flexShrink: 0 }}>
         <canvas ref={ref} />
         <div style={{
           position: "absolute", inset: 0,
@@ -149,10 +150,10 @@ function DonutChart({ bucketData, total }: {
           alignItems: "center", justifyContent: "center",
           pointerEvents: "none",
         }}>
-          <span style={{ fontSize: 26, fontWeight: 900, color: "#1a3d2b", letterSpacing: -1, lineHeight: 1 }}>
+          <span style={{ fontSize: isMobile ? 26 : 38, fontWeight: 900, color: "#1a3d2b", letterSpacing: -1, lineHeight: 1 }}>
             {total.toLocaleString("th-TH")}
           </span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", marginTop: 3 }}>แปลงทั้งหมด</span>
+          <span style={{ fontSize: isMobile ? 11 : 14, fontWeight: 700, color: "#94a3b8", marginTop: 4 }}>แปลงทั้งหมด</span>
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -163,8 +164,8 @@ function DonutChart({ bucketData, total }: {
             borderRadius: 10, border: "1px solid rgba(45,158,95,0.08)",
           }}>
             <span style={{ width: 10, height: 10, borderRadius: "50%", background: b.color, flexShrink: 0 }} />
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: "#374151", flex: 1 }}>{b.label}</span>
-            <span style={{ fontSize: 12.5, fontWeight: 800, color: "#1a3d2b" }}>
+            <span style={{ fontSize: isMobile ? 12.5 : 15, fontWeight: 700, color: "#374151", flex: 1 }}>{b.label}</span>
+            <span style={{ fontSize: isMobile ? 12.5 : 16, fontWeight: 800, color: "#1a3d2b" }}>
               {b.plotCount.toLocaleString("th-TH")}
             </span>
             <span style={{
@@ -186,6 +187,16 @@ export default function DashboardPage() {
 
   const { user, ready } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMobile(window.innerWidth < 768);
+      const h = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener("resize", h);
+      return () => window.removeEventListener("resize", h);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -322,8 +333,8 @@ export default function DashboardPage() {
               <i className="bi bi-pie-chart-fill" style={{ color: "#2d9e5f", fontSize: 15 }} />
               <span style={{ fontSize: 14, fontWeight: 800, color: "#1a3d2b" }}>สัดส่วนแปลงตามช่วงอายุ</span>
             </div>
-            <div style={{ padding: "20px 20px 22px", height: 340 }}>
-              <DonutChart bucketData={bucketData} total={plots.length} />
+            <div style={{ padding: "20px 20px 22px", height: isMobile ? 340 : 480 }}>
+              <DonutChart bucketData={bucketData} total={plots.length} isMobile={isMobile} />
             </div>
           </div>
 
