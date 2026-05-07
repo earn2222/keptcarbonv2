@@ -78,7 +78,7 @@ function StatCard({ label, value, unit, color }: {
     >
       <div style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>{label}</div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-        <div style={{ fontSize: 32, fontWeight: 800, color: "#1a3d2b", letterSpacing: -0.5, lineHeight: 1 }}>
+        <div className="db-stat-num">
           {disp}
         </div>
         <div style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8" }}>{unit}</div>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                     {/* Carbon number */}
                     <div style={{ padding: "4px 18px 8px" }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
-                        <span style={{ fontSize: 28, fontWeight: 900, color: b.dark, letterSpacing: -1.5, lineHeight: 1 }}>
+                        <span className="db-age-num" style={{ color: b.dark }}>
                           {b.carbon.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                         </span>
                         <span style={{ fontSize: 12, fontWeight: 700, color: "#6b7280" }}>tCO₂</span>
@@ -440,6 +440,9 @@ export default function DashboardPage() {
         .db-charts-row { display: grid; grid-template-columns: 1fr 1.6fr; }
         .db-age-grid { display: grid; grid-template-columns: repeat(2,1fr); }
 
+        .db-stat-num { font-size: 32px; font-weight: 800; color: #1a3d2b; letter-spacing: -0.5px; line-height: 1; }
+        .db-age-num { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; line-height: 1; }
+
         @media (max-width: 1024px) {
           .db-charts-row { grid-template-columns: 1fr; }
           .db-age-grid { grid-template-columns: repeat(2,1fr); }
@@ -462,6 +465,8 @@ export default function DashboardPage() {
           .db-age-grid { grid-template-columns: 1fr 1fr; }
           .db-map-legend { display: none !important; }
           .db-map-box { height: 400px !important; }
+          .db-stat-num { font-size: 24px !important; }
+          .db-age-num { font-size: 22px !important; }
         }
         @media (max-width: 400px) {
           .db-stat-grid { grid-template-columns: 1fr; }
