@@ -29,3 +29,25 @@ body {
   color: var(--kc-error);
 }
 
+/* ── MapLibre Popup Overrides (kc-custom-popup) ── */
+
+/* Strip default MapLibre popup chrome */
+.kc-custom-popup .maplibregl-popup-content {
+  padding: 0 !important;
+  border-radius: 20px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  overflow: visible !important;
+}
+
+/* Hide the default triangle tip — card shadow handles depth */
+.kc-custom-popup .maplibregl-popup-tip {
+  display: none !important;
+}
+
+/* Apply depth via filter drop-shadow on the outer wrapper */
+.kc-custom-popup {
+  padding: 0 !important;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.20));
+}

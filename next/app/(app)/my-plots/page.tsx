@@ -524,18 +524,59 @@ function PlotsMapView({ plots, isMobile }: { plots: SavedPlot[], isMobile: boole
         if (!e.features?.length) return;
         const p = e.features[0].properties;
         const isBoundary = p.type === 'boundary';
+        const dot = isBoundary ? '#6366f1' : '#10b981';
         const html = `
-          <div style="font-family: sans-serif; padding: 10px; min-width: 160px;">
-            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 800; margin-bottom: 4px;">
-              ${isBoundary ? 'ขอบเขตที่วาด' : 'แปลงที่ตรวจพบ'}
+          <div style="
+            font-family: 'Noto Sans Thai', 'Noto Sans', system-ui, sans-serif;
+            width: 220px;
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+            overflow: hidden;
+          ">
+            <!-- Accent top bar -->
+            <div style="height: 3px; background: ${dot};"></div>
+
+            <!-- Content -->
+            <div style="padding: 14px 16px 12px;">
+              <!-- Type + Index -->
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <span style="
+                  font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px;
+                  color: ${dot}; text-transform: uppercase;
+                ">${isBoundary ? 'ขอบเขตที่วาด' : 'แปลงที่ตรวจพบ'}</span>
+                <span style="font-size: 10px; color: #cbd5e1; font-weight: 600;">#${p.index}</span>
+              </div>
+
+              <!-- Name -->
+              <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px; line-height: 1.2;">${p.name}</div>
+
+              <!-- Province -->
+              <div style="display:flex; align-items:center; gap:5px; color:#94a3b8; font-size:11.5px; margin-bottom:14px;">
+                <i class="bi bi-geo-alt-fill" style="font-size:10px; color:${dot};"></i>
+                <span>${p.province}</span>
+              </div>
+
+              <!-- Divider -->
+              <div style="height:1px; background:#f1f5f9; margin-bottom:12px;"></div>
+
+              <!-- Stats row -->
+              <div style="display:flex; gap:16px;">
+                <div>
+                  <div style="font-size:15px; font-weight:800; color:#0f172a;">${p.area}</div>
+                  <div style="font-size:9.5px; color:#94a3b8; margin-top:1px;">ไร่</div>
+                </div>
+                <div style="width:1px; background:#f1f5f9;"></div>
+                <div>
+                  <div style="font-size:15px; font-weight:800; color:#059669;">${p.carbon}</div>
+                  <div style="font-size:9.5px; color:#94a3b8; margin-top:1px;">tCO₂</div>
+                </div>
+              </div>
             </div>
-            <div style="font-weight: 800; color: #064e3b; margin-bottom: 5px; font-size: 14px;">${p.name}</div>
-            <div style="font-size: 12px; color: #475569; margin-bottom: 3px;">📍 ${p.province}</div>
-            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">📏 ${p.area} ไร่</div>
-            <div style="font-size: 12px; color: ${isBoundary ? '#3b82f6' : '#ea580c'}; font-weight: 700;">☁️ ${p.carbon} tCO₂</div>
           </div>
         `;
-        new maplibregl.Popup({ closeButton: false })
+        new maplibregl.Popup({ closeButton: false, maxWidth: 'none', className: 'kc-custom-popup' })
           .setLngLat(e.lngLat)
           .setHTML(html)
           .addTo(map);
