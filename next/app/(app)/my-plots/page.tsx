@@ -406,8 +406,7 @@ function PlotCard({ plot, onDelete, expanded, onToggle }: { plot: SavedPlot; onD
       onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 12px 36px rgba(16,185,129,0.16)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.05)"; e.currentTarget.style.transform = ""; }}
     >
-      {/* Gradient top accent */}
-      <div style={{ height: 5, background: "linear-gradient(90deg,#059669 0%,#10b981 45%,#34d399 80%,#6ee7b7 100%)", flexShrink: 0 }} />
+      {/* Removed Gradient top accent */}
 
       {/* Header row */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "20px 24px 14px" }}>
