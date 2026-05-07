@@ -666,7 +666,9 @@ function PlotCard({ plot, index, onDelete, expanded, onToggle, isMobile }: { plo
                 <i className="bi bi-calendar-event" style={{ color: "#0284c7", fontSize: 10 }} />ปีปลูก พ.ศ. {plot.plantYearBE}
               </span>
             )}
-            <span style={{ fontSize: 10.5, color: "#94a3b8" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#64748b", background: "rgba(148,163,184,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(148,163,184,0.2)" }}>
+              <i className="bi bi-clock-history" style={{ color: "#94a3b8", fontSize: 10 }} />
+              <span style={{ opacity: 0.7, fontSize: 10 }}>บันทึกเมื่อ:</span>
               {new Date(plot.date).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
             </span>
           </div>
