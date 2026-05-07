@@ -78,7 +78,7 @@ function ForecastBody({
   const uid = rawId.replace(/:/g, "-");
 
   // SVG dimensions - Enlarged for better desktop visibility
-  const W = isMobile ? 400 : 600, H = isMobile ? 240 : 220, PL = 12, PT = 24, PB = 36;
+  const W = isMobile ? 400 : 900, H = isMobile ? 240 : 380, PL = 12, PT = 24, PB = 36;
   const iW = W - PL * 2, iH = H - PT - PB;
   const n = chartPts.length;
 
@@ -258,7 +258,7 @@ function ForecastBody({
             {/* Year labels along x-axis */}
             {svgPts.map((p, i) => (
               <text key={i} x={p.x} y={H - 10}
-                textAnchor="middle" fontSize={isMobile ? 12 : 11}
+                textAnchor="middle" fontSize={isMobile ? 12 : 14}
                 fontWeight={i === 0 ? 700 : 400}
                 fill={i === 0 ? "#059669" : "#94a3b8"}
               >
@@ -271,7 +271,7 @@ function ForecastBody({
               const isFirst = hoveredPt === 0;
               const changeAbs = hp.co2 - base;
               const changePct = base > 0 ? (changeAbs / base) * 100 : 0;
-              const ttW = 112, ttH = isFirst ? 38 : 52;
+              const ttW = isMobile ? 112 : 140, ttH = isFirst ? (isMobile ? 38 : 46) : (isMobile ? 52 : 64);
               const ttX = Math.min(Math.max(hp.x - ttW / 2, PL), PL + iW - ttW);
               const ttY = hp.y - ttH - 12;
               return (
@@ -280,19 +280,19 @@ function ForecastBody({
                   <rect x={ttX} y={ttY} width={ttW + 10} height={ttH + 10} rx={9}
                     fill="#064e3b" opacity={0.95}
                   />
-                  <text x={ttX + (ttW + 10) / 2} y={ttY + 16}
-                    textAnchor="middle" fontSize={11} fill="#6ee7b7" fontWeight={600}
+                  <text x={ttX + (ttW + 10) / 2} y={ttY + (isMobile ? 16 : 20)}
+                    textAnchor="middle" fontSize={isMobile ? 11 : 13} fill="#6ee7b7" fontWeight={600}
                   >
                     {isFirst ? "ณ ปัจจุบัน" : `อีก ${hp.yr} ปีข้างหน้า`}
                   </text>
-                  <text x={ttX + (ttW + 10) / 2} y={ttY + 34}
-                    textAnchor="middle" fontSize={13} fill="#ffffff" fontWeight={800}
+                  <text x={ttX + (ttW + 10) / 2} y={ttY + (isMobile ? 34 : 40)}
+                    textAnchor="middle" fontSize={isMobile ? 13 : 16} fill="#ffffff" fontWeight={800}
                   >
                     {hp.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })} tCO₂
                   </text>
                   {!isFirst && (
-                    <text x={ttX + (ttW + 10) / 2} y={ttY + 50}
-                      textAnchor="middle" fontSize={11}
+                    <text x={ttX + (ttW + 10) / 2} y={ttY + (isMobile ? 50 : 58)}
+                      textAnchor="middle" fontSize={isMobile ? 11 : 12}
                       fill={changePct >= 0 ? "#34d399" : "#f87171"} fontWeight={700}
                     >
                       {changePct >= 0 ? "▲" : "▼"} {Math.abs(changePct).toFixed(1)}% จากปัจจุบัน
@@ -370,13 +370,13 @@ function ForecastSection({
     <div style={{ marginTop: 14, borderRadius: 14, border: "1px solid rgba(16,185,129,0.18)", overflow: "hidden", background: "#fff" }}>
       {/* Header */}
       <div style={{ padding: "10px 16px", background: "linear-gradient(135deg,rgba(16,185,129,0.07) 0%,rgba(5,150,105,0.04) 100%)", borderBottom: "1px solid rgba(16,185,129,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#059669", display: "flex", alignItems: "center", gap: 6 }}>
-          <i className="bi bi-graph-up-arrow" style={{ fontSize: 13 }} />
+        <span style={{ fontSize: isMobile ? 12 : 14, fontWeight: 700, color: "#059669", display: "flex", alignItems: "center", gap: 6 }}>
+          <i className="bi bi-graph-up-arrow" style={{ fontSize: isMobile ? 13 : 15 }} />
           พยากรณ์การกักเก็บคาร์บอน (tCO₂)
         </span>
         {growthPct > 0 && (
-          <span style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", background: "rgba(22,163,74,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(22,163,74,0.25)", display: "flex", alignItems: "center", gap: 3 }}>
-            <span style={{ fontSize: 9 }}>▲</span> {growthPct.toFixed(1)}% ใน {milestones[milestones.length - 1].yr} ปี
+          <span style={{ fontSize: isMobile ? 10 : 12, fontWeight: 700, color: "#16a34a", background: "rgba(22,163,74,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(22,163,74,0.25)", display: "flex", alignItems: "center", gap: 3 }}>
+            <span style={{ fontSize: isMobile ? 9 : 11 }}>▲</span> {growthPct.toFixed(1)}% ใน {milestones[milestones.length - 1].yr} ปี
           </span>
         )}
       </div>
