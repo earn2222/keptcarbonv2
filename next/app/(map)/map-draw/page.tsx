@@ -287,7 +287,7 @@ export default function MapDrawPage() {
           .setLngLat(e.lngLat)
           .setHTML(html)
           .addTo(map);
-          
+
         if (p.plot_index) {
           const idx = parseInt(String(p.plot_index), 10) - 1;
           setSelectedPlotIndex(idx);
@@ -695,7 +695,8 @@ export default function MapDrawPage() {
       setSearchCount(data.count ?? features.length);
       setSearchTruncated(Boolean(data.truncated));
       if ((data.count ?? 0) === 0) {
-        setStatus("ไม่พบแปลงในฐานข้อมูลที่ตรงเงื่อนไข");
+        setSearchErr("ไม่พบข้อมูลแปลงยางในพื้นที่ที่กำหนด กรุณาวาดขอบเขตใหม่ให้ครอบคลุมพื้นที่สวนยาง");
+        setStatus("ไม่พบแปลงในฐานข้อมูล");
       } else {
         setStatus(`พบ ${data.count} แปลงในฐานข้อมูล (ตัดกับพื้นที่)`);
       }
@@ -812,7 +813,7 @@ export default function MapDrawPage() {
         });
       }
       fitPlot();
-      
+
       // Auto process - ONLY if total area is >= 1 Rai
       if (totalRai >= 1) {
         void runParcelSearch();
@@ -1168,7 +1169,7 @@ export default function MapDrawPage() {
                               style={{ background: "linear-gradient(135deg, #059669, #10b981)" }}
                               onClick={runParcelSearch}
                             >
-                              <i className="bi bi-check2-circle" /> ยืนยันและประมวลผล ({(totalDrawnArea / 1600).toFixed(2)} ไร่)
+                              <i className="bi bi-check2-circle" /> ยืนยัน ({(totalDrawnArea / 1600).toFixed(2)} ไร่)
                             </button>
                           )}
                         </div>
