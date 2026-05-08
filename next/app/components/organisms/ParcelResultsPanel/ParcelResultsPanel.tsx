@@ -779,14 +779,13 @@ export function ParcelResultsPanel({
                     {isTotal ? (
                         <>
                             {/* Total summary */}
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 8, marginBottom: 14 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 8, marginBottom: 14 }}>
                                 {[
-                                    { label: "จำนวนต้นรวม", val: summaryTotalTrees.toLocaleString("th-TH"), color: "#7c3aed" },
                                     { label: "คาร์บอนรวมปัจจุบัน", val: `${summaryTotalCo2.toFixed(1)} tCO₂`, color: "#0d9488" },
                                 ].map(({ label, val, color }) => (
-                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "10px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
-                                        <div style={{ fontSize: isMobile ? 14 : 13, fontWeight: 800, color }}>{val}</div>
-                                        <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 2 }}>{label}</div>
+                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
+                                        <div style={{ fontSize: isMobile ? 16 : 15, fontWeight: 800, color }}>{val}</div>
+                                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{label}</div>
                                     </div>
                                 ))}
                             </div>
@@ -798,15 +797,13 @@ export function ParcelResultsPanel({
                     ) : cr ? (
                         <>
                             {/* Plot info summary */}
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 14 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 8, marginBottom: 14 }}>
                                 {[
-                                    { label: "อายุปัจจุบัน", val: `${cr.age} ปี`, color: "#059669" },
-                                    { label: "จำนวนต้น", val: cr.trees.toLocaleString("th-TH"), color: "#7c3aed" },
                                     { label: "คาร์บอนปัจจุบัน", val: `${cr.co2Now.toFixed(1)} tCO₂`, color: "#0d9488" },
                                 ].map(({ label, val, color }) => (
-                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "10px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
-                                        <div style={{ fontSize: isMobile ? 14 : 13, fontWeight: 800, color }}>{val}</div>
-                                        <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 2 }}>{label}</div>
+                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
+                                        <div style={{ fontSize: isMobile ? 16 : 15, fontWeight: 800, color }}>{val}</div>
+                                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{label}</div>
                                     </div>
                                 ))}
                             </div>
