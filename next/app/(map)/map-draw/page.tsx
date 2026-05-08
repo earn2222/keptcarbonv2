@@ -89,6 +89,7 @@ export default function MapDrawPage() {
 
   // Drawn boundary geometry (set when search is confirmed)
   const [drawnGeometry, setDrawnGeometry] = useState<GeoJSON.Geometry | null>(null);
+  const [selectedPlotIndex, setSelectedPlotIndex] = useState<number | "total">("total");
 
   const runParcelSearchRef = useRef<() => void>(() => { });
 
@@ -275,6 +276,11 @@ export default function MapDrawPage() {
           .setLngLat(e.lngLat)
           .setHTML(html)
           .addTo(map);
+          
+        if (p.plot_index) {
+          const idx = parseInt(String(p.plot_index), 10) - 1;
+          setSelectedPlotIndex(idx);
+        }
       });
       map.on("mouseenter", "matched-parcels-fill", () => {
         if (!drawingRef.current) map.getCanvas().style.cursor = "pointer";
@@ -1015,8 +1021,8 @@ export default function MapDrawPage() {
             </div>
             {([
               { n: 1 as const, label: "กำหนดพื้นที่" },
-              { n: 2 as const, label: "ผลวิเคราะห์" },
-              { n: 3 as const, label: "บันทึก" },
+              { n: 2 as const, label: "กรอกข้อมูล" },
+              { n: 3 as const, label: "ผลคาร์บอน/บันทึก" },
             ]).map(({ n, label }) => {
               const isActive = currentStep === n;
               const isDone = currentStep > n;
@@ -1180,6 +1186,8 @@ export default function MapDrawPage() {
                 onCancel={cancelSearch}
                 currentStep={currentStep}
                 onStepChange={setCurrentStep}
+                selectedMapPlotIndex={selectedPlotIndex}
+                onMapPlotSelected={setSelectedPlotIndex}
               />
             </div>
           )}
