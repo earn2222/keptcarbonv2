@@ -756,25 +756,60 @@ export function ParcelResultsPanel({
 
             return (
                 <div className="prp-shell">
-                    <div className="prp-header-block">
-                        <div className="prp-main-title" style={{ fontSize: isMobile ? 16 : 18 }}>
-                            <i className="bi bi-bar-chart-fill me-2" style={{ color: "#10b981" }} />ผลการประมวลผลคาร์บอน
+                    {/* New Integrated Header Design */}
+                    <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: 12, 
+                        marginBottom: 20, 
+                        paddingBottom: 16,
+                        borderBottom: "1px solid rgba(16,185,129,0.1)"
+                    }}>
+                        <div style={{ 
+                            width: 38, 
+                            height: 38, 
+                            borderRadius: 12, 
+                            background: "linear-gradient(135deg,#10b981,#059669)", 
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center",
+                            color: "#fff",
+                            boxShadow: "0 3px 8px rgba(16,185,129,0.2)",
+                            fontSize: 18
+                        }}>
+                            <i className={`bi bi-${isTotal ? "pie-chart-fill" : "geo-fill"}`} />
                         </div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: isMobile ? 15 : 16, fontWeight: 800, color: "#0f172a", lineHeight: 1.2 }}>
+                                {isTotal ? "สรุปผลคาร์บอนรวม" : `ผลคาร์บอน: แปลงที่ ${(selectedMapPlotIndex as number) + 1}`}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#64748b", marginTop: 2, fontWeight: 500 }}>
+                                {isTotal ? "ภาพรวมการคำนวณจากทุกแปลง" : "แสดงข้อมูลเฉพาะแปลงที่เลือก"}
+                            </div>
+                        </div>
+                        {!isTotal && (
+                            <div 
+                                onClick={() => onMapPlotSelected?.("total")}
+                                style={{ 
+                                    fontSize: 11, 
+                                    fontWeight: 700, 
+                                    color: "#059669", 
+                                    cursor: "pointer", 
+                                    padding: "6px 12px", 
+                                    borderRadius: 20, 
+                                    background: "rgba(16,185,129,0.08)",
+                                    border: "1px solid rgba(16,185,129,0.2)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    transition: "all 0.2s"
+                                }}
+                            >
+                                <i className="bi bi-arrow-left-circle-fill" />
+                                กลับหน้ารวม
+                            </div>
+                        )}
                     </div>
-
-                    {/* Plot selector */}
-                    {carbonResults.length > 1 && (
-                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                            <button onClick={() => onMapPlotSelected?.("total")} style={{ padding: "5px 12px", borderRadius: 8, border: `1.5px solid ${isTotal ? "#10b981" : "rgba(16,185,129,0.25)"}`, background: isTotal ? "#10b981" : "transparent", color: isTotal ? "#fff" : "#059669", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
-                                รวมทุกแปลง
-                            </button>
-                            {carbonResults.map((_, i) => (
-                                <button key={i} onClick={() => onMapPlotSelected?.(i)} style={{ padding: "5px 12px", borderRadius: 8, border: `1.5px solid ${selectedMapPlotIndex === i ? "#10b981" : "rgba(16,185,129,0.25)"}`, background: selectedMapPlotIndex === i ? "#10b981" : "transparent", color: selectedMapPlotIndex === i ? "#fff" : "#059669", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
-                                    แปลงที่ {i + 1}
-                                </button>
-                            ))}
-                        </div>
-                    )}
 
                     {isTotal ? (
                         <>
