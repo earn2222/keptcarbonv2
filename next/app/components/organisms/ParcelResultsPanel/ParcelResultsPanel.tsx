@@ -586,7 +586,7 @@ export function ParcelResultsPanel({
                                         <div style={{ width: 28, height: 28, borderRadius: 8, background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>{i + 1}</div>
                                         <div>
                                             <div style={{ fontWeight: 700, fontSize: 13, color: "#0f172a" }}>แปลงที่ {i + 1}</div>
-                                            <div style={{ fontSize: 11, color: "#64748b" }}>{p.areaRai > 0 ? `${p.areaRai.toFixed(2)} ไร่` : "—"}{p.age > 0 ? ` · อายุ ${p.age} ปี (ข้อมูลระบบ)` : ""}</div>
+                                            <div style={{ fontSize: 11, color: "#64748b" }}>{p.areaRai > 0 ? `${p.areaRai.toFixed(2)} ไร่` : "—"}</div>
                                         </div>
                                     </div>
                                     {/* Fields grid */}
