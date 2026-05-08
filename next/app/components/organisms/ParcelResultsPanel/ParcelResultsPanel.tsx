@@ -719,7 +719,6 @@ export function ParcelResultsPanel({
                         <div className="prp-main-title" style={{ fontSize: isMobile ? 16 : 18 }}>
                             <i className="bi bi-bar-chart-fill me-2" style={{ color: "#10b981" }} />ผลการประมวลผลคาร์บอน
                         </div>
-                        <div className="prp-subtitle">กราฟแท่งคาร์บอนทุก 7 ปี ถึงอายุ 35 ปี</div>
                     </div>
 
                     {/* Plot selector */}
