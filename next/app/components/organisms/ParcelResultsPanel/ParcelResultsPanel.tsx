@@ -94,12 +94,34 @@ function parseRai(v: unknown): number {
 function computePlot(feat: GeoJSON.Feature): PlotInfo {
     const p = (feat.properties ?? {}) as Record<string, unknown>;
     const areaRai = parseRai(p.grow_area);
+    
+    // Determine backend plant year
+    let bPlantYear = Number(p.gee_plant_year || p.grow_year || 0);
+    // Determine backend age
+    let bAge = Number(p.gee_age || p.rubber_age || 0);
+    
+    const CURRENT_BE = new Date().getFullYear() + 543;
+    
+    // Normalize plant year to BE
+    if (bPlantYear > 0 && bPlantYear < 2300) {
+        bPlantYear += 543;
+    }
+    
+    // If we have plantYear but no age, compute age
+    if (bAge === 0 && bPlantYear > 0) {
+        bAge = Math.max(0, CURRENT_BE - bPlantYear);
+    }
+    // If we have age but no plantYear, compute plantYear
+    if (bPlantYear === 0 && bAge > 0) {
+        bPlantYear = CURRENT_BE - bAge;
+    }
+
     return {
-        age: 0,
-        plantYearBE: 0,
+        age: bAge,
+        plantYearBE: bPlantYear,
         areaRai,
         trees: 0,
-        co2: 0,
+        co2: Number(p.gee_carbon ?? 0),
         confidence: Number(p.gee_confidence ?? 0),
         province: String(p.province ?? ""),
     };
@@ -418,24 +440,31 @@ export function ParcelResultsPanel({
             const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
             const userSpacing = form?.spacing || "";
             const userVariety = form?.variety || "";
+            
             const userAge = userPlantYear > 0 ? CURRENT_BE_NOW - userPlantYear : 0;
-            const backendAge = p.age;
-            // Has user data
-            const hasUserData = userPlantYear > 0 || userTrees > 0;
-            const finalAge = userAge > 0 ? userAge : 0;
-            const finalTrees = userTrees > 0 ? userTrees : 0;
-            const finalPlantYear = userPlantYear > 0 ? userPlantYear : 0;
-            const co2Now = (finalAge > 0 && finalTrees > 0) ? carbonCo2(finalAge, finalTrees, userSpacing) : 0;
+            
+            // Priority: User Input > Backend Data > Fallback (e.g. 5 years)
+            const finalAge = userAge > 0 ? userAge : (p.age > 0 ? p.age : 5);
+            const finalPlantYear = userPlantYear > 0 ? userPlantYear : (p.plantYearBE > 0 ? p.plantYearBE : CURRENT_BE_NOW - finalAge);
+            
+            // Priority: User Input > Estimation (area * 76)
+            const estimatedTrees = Math.round(p.areaRai * 76);
+            const finalTrees = userTrees > 0 ? userTrees : estimatedTrees;
+            
+            const finalSpacing = userSpacing || "3*7";
+            const finalVariety = userVariety || "RRIM 600";
+            
+            const co2Now = (finalAge > 0 && finalTrees > 0) ? carbonCo2(finalAge, finalTrees, finalSpacing) : 0;
             
             return {
                 plotIdx: i,
                 age: finalAge,
                 plantYearBE: finalPlantYear,
                 trees: finalTrees,
-                spacing: userSpacing,
-                variety: userVariety,
+                spacing: finalSpacing,
+                variety: finalVariety,
                 co2Now,
-                source: userPlantYear > 0 ? "user" : "backend",
+                source: (userPlantYear > 0 || userTrees > 0) ? "user" : "backend",
             };
         });
         setCarbonResults(results);
@@ -474,7 +503,7 @@ export function ParcelResultsPanel({
                 const finalPlantYear = cr?.plantYearBE ?? (userPlantYear > 0 ? userPlantYear : 0);
                 
                 // If saved directly without processing, set carbon to 0
-                const co2 = hasCarbonResults ? (cr?.co2Now ?? p.co2) : 0;
+                const co2 = hasCarbonResults ? (cr?.co2Now ?? 0) : 0;
 
                 return {
                     id: props.id || Math.random().toString(36).substring(7),
@@ -665,7 +694,7 @@ export function ParcelResultsPanel({
                     </button>
                     <button
                         className="prp-btn-primary"
-                        onClick={() => handleSave()}
+                        onClick={() => handleSave([])}
                         disabled={!projectName.trim() || saveState === "saving"}
                         style={{
                             background: projectName.trim() ? "linear-gradient(135deg,#0369a1,#0284c7)" : "#cbd5e1",
