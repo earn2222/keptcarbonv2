@@ -59,18 +59,18 @@ export function CarbonBarChart({
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
-  const W = isMobile ? 380 : 700;
-  const H = isMobile ? 280 : 340;
-  const PL = isMobile ? 12 : 20;
-  const PT = 50;
-  const PB = isMobile ? 65 : 60;
-  const PR = 15;
+  const W = isMobile ? 450 : 850;
+  const H = isMobile ? 300 : 420;
+  const PL = isMobile ? 25 : 30;
+  const PT = isMobile ? 35 : 60;
+  const PB = isMobile ? 75 : 80;
+  const PR = isMobile ? 25 : 30;
   const iW = W - PL - PR;
   const iH = H - PT - PB;
 
   const maxCo2 = Math.max(...pts.map((p) => p.co2), 1) * 1.15;
-  const barW = iW / pts.length - (isMobile ? 1.5 : 3);
-  const gap = isMobile ? 1.5 : 3;
+  const barW = iW / pts.length - (isMobile ? 1.5 : 4);
+  const gap = isMobile ? 1.5 : 4;
 
   // Find cycle boundaries for labels
   const cycleStarts: { idx: number; name: string; color: string }[] = [];
@@ -95,11 +95,34 @@ export function CarbonBarChart({
   return (
     <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 20, padding: "16px 8px 12px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
       {/* Legend */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 12px", padding: "0 12px 14px", justifyContent: "center" }}>
+      <div style={{ 
+        display: "flex", 
+        flexWrap: isMobile ? "nowrap" : "wrap", 
+        overflowX: isMobile ? "auto" : "visible",
+        gap: isMobile ? "8px" : "8px 12px", 
+        padding: isMobile ? "0 8px 12px" : "0 12px 14px", 
+        justifyContent: isMobile ? "flex-start" : "center",
+        msOverflowStyle: "none",
+        scrollbarWidth: "none",
+        WebkitOverflowScrolling: "touch"
+      }}>
         {cycleStarts.map((cs, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: "#475569", background: "rgba(255,255,255,0.7)", padding: "4px 10px", borderRadius: 20, border: "1px solid rgba(0,0,0,0.03)" }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: cs.color, boxShadow: `0 0 8px ${cs.color}66` }} />
-            {cs.name} ({pts[cs.idx].age}–{i < cycleStarts.length - 1 ? pts[cycleStarts[i + 1].idx - 1].age : pts[pts.length - 1].age} ปี)
+          <div key={i} style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            gap: isMobile ? 4 : 5, 
+            fontSize: isMobile ? 10 : 11, 
+            fontWeight: 700, 
+            color: "#475569", 
+            background: "rgba(255,255,255,0.8)", 
+            padding: isMobile ? "4px 10px" : "4px 10px", 
+            borderRadius: 20, 
+            border: "1px solid rgba(0,0,0,0.05)",
+            flexShrink: 0,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+          }}>
+            <div style={{ width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: "50%", background: cs.color, boxShadow: `0 0 6px ${cs.color}66` }} />
+            {cs.name} ({pts[cs.idx].age}–{i < cycleStarts.length - 1 ? pts[cycleStarts[i + 1].idx - 1].age : pts[pts.length - 1].age})
           </div>
         ))}
       </div>
@@ -107,7 +130,7 @@ export function CarbonBarChart({
       <div style={{ overflowX: "auto", paddingBottom: 4 }}>
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          style={{ width: Math.max(W, pts.length * (isMobile ? 18 : 24)), height: H, display: "block", overflow: "visible" }}
+          style={{ width: isMobile ? Math.max(W, pts.length * 18) : "100%", height: "auto", minHeight: H, display: "block", overflow: "visible" }}
         >
           <defs>
             {CYCLE_COLORS.map((c, i) => (
