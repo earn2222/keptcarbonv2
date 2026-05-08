@@ -93,23 +93,14 @@ function parseRai(v: unknown): number {
 
 function computePlot(feat: GeoJSON.Feature): PlotInfo {
     const p = (feat.properties ?? {}) as Record<string, unknown>;
-    const age = Number(
-        p.rubber_age ?? p.gee_age ??
-        (p.grow_year ? CURRENT_BE - Number(p.grow_year) : 0)
-    );
-    const rawPlantYear = p.gee_plant_year
-        ? Number(p.gee_plant_year) + 543
-        : Number(p.grow_year ?? 0);
     const areaRai = parseRai(p.grow_area);
-    const trees = Math.max(Math.round(areaRai * 80), 0);
-    const co2 = age > 0 && trees > 0 ? carbonForAge(age, trees).co2 : 0;
     return {
-        age,
-        plantYearBE: rawPlantYear,
+        age: 0,
+        plantYearBE: 0,
         areaRai,
-        trees,
-        co2,
-        confidence: Number(p.gee_confidence ?? 0.65),
+        trees: 0,
+        co2: 0,
+        confidence: Number(p.gee_confidence ?? 0),
         province: String(p.province ?? ""),
     };
 }
@@ -425,39 +416,26 @@ export function ParcelResultsPanel({
             const form = plotForms[i];
             const userPlantYear = form?.plantYear ? parseInt(form.plantYear) : 0;
             const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
-            const userSpacing = form?.spacing || "2.5*8";
+            const userSpacing = form?.spacing || "";
             const userVariety = form?.variety || "";
             const userAge = userPlantYear > 0 ? CURRENT_BE_NOW - userPlantYear : 0;
             const backendAge = p.age;
             // Has user data
             const hasUserData = userPlantYear > 0 || userTrees > 0;
-            let finalAge = backendAge;
-            let finalTrees = userTrees > 0 ? userTrees : p.trees;
-            let source: "user" | "backend" = "backend";
-            if (hasUserData && userAge > 0) {
-                const ageDiff = Math.abs(userAge - backendAge);
-                if (ageDiff > 3) {
-                    // Use user's data (backend likely wrong)
-                    finalAge = userAge;
-                    source = "user";
-                } else {
-                    // Within 3 years - use user data for validation
-                    finalAge = userAge;
-                    source = "user";
-                }
-            }
-            if (userTrees > 0) finalTrees = userTrees;
-            const finalPlantYear = userPlantYear > 0 ? userPlantYear : (CURRENT_BE_NOW - backendAge);
-            const co2Now = carbonCo2(Math.max(finalAge, 1), finalTrees, userSpacing);
+            const finalAge = userAge > 0 ? userAge : 0;
+            const finalTrees = userTrees > 0 ? userTrees : 0;
+            const finalPlantYear = userPlantYear > 0 ? userPlantYear : 0;
+            const co2Now = (finalAge > 0 && finalTrees > 0) ? carbonCo2(finalAge, finalTrees, userSpacing) : 0;
+            
             return {
                 plotIdx: i,
-                age: Math.max(finalAge, 1),
+                age: finalAge,
                 plantYearBE: finalPlantYear,
                 trees: finalTrees,
                 spacing: userSpacing,
                 variety: userVariety,
                 co2Now,
-                source,
+                source: userPlantYear > 0 ? "user" : "backend",
             };
         });
         setCarbonResults(results);
@@ -471,10 +449,8 @@ export function ParcelResultsPanel({
 
     const handleSave = async (overrideResults?: CarbonResult[]) => {
         const resultsToSave = overrideResults || carbonResults;
-        if (!resultsToSave.length) {
-            // If no results, process first
-            return;
-        }
+        const hasCarbonResults = resultsToSave.length > 0;
+        
         setSaveState("saving");
 
         await new Promise(r => setTimeout(r, 900));
@@ -488,11 +464,17 @@ export function ParcelResultsPanel({
                 const props = (feat?.properties || {}) as any;
                 const cr = resultsToSave[i];
                 const form = plotForms[i];
-                const age = cr?.age ?? p.age;
-                const trees = cr?.trees ?? p.trees;
-                const spacing = cr?.spacing || "2.5*8";
-                const finalPlantYear = cr?.plantYearBE ?? p.plantYearBE;
-                const co2 = cr?.co2Now ?? p.co2;
+                
+                const userPlantYear = form?.plantYear ? parseInt(form.plantYear) : 0;
+                const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
+                
+                const age = cr?.age ?? (userPlantYear > 0 ? (CURRENT_BE_NOW - userPlantYear) : 0);
+                const trees = cr?.trees ?? (userTrees > 0 ? userTrees : 0);
+                const spacing = cr?.spacing || form?.spacing || "";
+                const finalPlantYear = cr?.plantYearBE ?? (userPlantYear > 0 ? userPlantYear : 0);
+                
+                // If saved directly without processing, set carbon to 0
+                const co2 = hasCarbonResults ? (cr?.co2Now ?? p.co2) : 0;
 
                 return {
                     id: props.id || Math.random().toString(36).substring(7),
@@ -511,11 +493,11 @@ export function ParcelResultsPanel({
                     date: new Date().toISOString(),
                     geojson: feat?.geometry || null,
                     boundaryGeojson: drawnGeometry || null,
-                    forecast: {
+                    forecast: hasCarbonResults ? {
                         yr3: carbonCo2(age + 3, trees, spacing),
                         yr5: carbonCo2(age + 5, trees, spacing),
                         yr7: carbonCo2(age + 7, trees, spacing),
-                    },
+                    } : { yr3: 0, yr5: 0, yr7: 0 },
                 };
             });
             localStorage.setItem(key, JSON.stringify([...newPlots, ...existing]));
@@ -683,30 +665,7 @@ export function ParcelResultsPanel({
                     </button>
                     <button
                         className="prp-btn-primary"
-                        onClick={() => {
-                            // Process and then save directly
-                            const results: CarbonResult[] = plots.map((p, i) => {
-                                const form = plotForms[i];
-                                const userPlantYear = form?.plantYear ? parseInt(form.plantYear) : 0;
-                                const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
-                                const userSpacing = form?.spacing || "2.5*8";
-                                const userAge = userPlantYear > 0 ? (new Date().getFullYear() + 543) - userPlantYear : 0;
-                                const finalAge = userAge > 0 ? userAge : p.age;
-                                const finalTrees = userTrees > 0 ? userTrees : p.trees;
-                                return {
-                                    plotIdx: i,
-                                    age: Math.max(finalAge, 1),
-                                    plantYearBE: userPlantYear > 0 ? userPlantYear : (new Date().getFullYear() + 543 - p.age),
-                                    trees: finalTrees,
-                                    spacing: userSpacing,
-                                    variety: form?.variety || "",
-                                    co2Now: carbonCo2(Math.max(finalAge, 1), finalTrees, userSpacing),
-                                    source: (userPlantYear > 0 ? "user" : "backend") as "user" | "backend",
-                                };
-                            });
-                            setCarbonResults(results);
-                            handleSave(results);
-                        }}
+                        onClick={() => handleSave()}
                         disabled={!projectName.trim() || saveState === "saving"}
                         style={{
                             background: projectName.trim() ? "linear-gradient(135deg,#0369a1,#0284c7)" : "#cbd5e1",

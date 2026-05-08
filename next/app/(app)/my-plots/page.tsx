@@ -349,8 +349,9 @@ function ForecastSection({
 
   if (milestones.length === 0) {
     return (
-      <div style={{ marginTop: 12, padding: "10px 14px", background: "rgba(148,163,184,0.05)", borderRadius: 10, fontSize: 11, color: "#94a3b8", textAlign: "center", border: "1px dashed rgba(148,163,184,0.2)" }}>
-        <i className="bi bi-graph-up me-1" /> ไม่มีข้อมูลพยากรณ์ (บันทึกใหม่เพื่อรับข้อมูลนี้)
+      <div style={{ marginTop: 12, padding: "16px", background: "rgba(148,163,184,0.03)", borderRadius: 14, fontSize: 12, color: "#94a3b8", textAlign: "center", border: "1.5px dashed rgba(148,163,184,0.15)" }}>
+        <i className="bi bi-graph-up-arrow me-2" style={{ opacity: 0.6 }} /> 
+        ยังไม่มีข้อมูลการประมวลผลคาร์บอน
       </div>
     );
   }
@@ -817,8 +818,9 @@ function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile 
   const plantYearBE = plot.plantYearBE && plot.plantYearBE > 0
     ? plot.plantYearBE
     : (currentYearBE - (plot.rubberAge || 0));
-  const barPts = (plot.rubberAge > 0 && (plot.trees ?? 0) > 0)
-    ? buildBarPoints(plot.rubberAge, plantYearBE + (plot.rubberAge || 0), plot.trees ?? 0, "2.5*8")
+
+  const barPts = (plot.carbonTotal > 0 && plot.rubberAge > 0 && (plot.trees ?? 0) > 0)
+    ? buildBarPoints(plot.rubberAge, plantYearBE, plot.trees ?? 0, plot.spacing || "2.5*8")
     : [];
 
   // 4 key metrics — same fields as the map-draw input panel
@@ -898,9 +900,13 @@ function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile 
           justifyContent: "space-between"
         }}>
           <div>
-            <div style={{ fontSize: 9, color: "#059669", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>คาร์บอนรวม</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "#064e3b", lineHeight: 1 }}>
-              {plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—"} <span style={{ fontSize: 11, fontWeight: 700 }}>tCO₂</span>
+            <div style={{ fontSize: 9, color: plot.carbonTotal > 0 ? "#059669" : "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
+              {plot.carbonTotal > 0 ? "คาร์บอนรวม" : "สถานะ"}
+            </div>
+            <div style={{ fontSize: plot.carbonTotal > 0 ? 20 : 16, fontWeight: 900, color: plot.carbonTotal > 0 ? "#064e3b" : "#94a3b8", lineHeight: 1 }}>
+              {plot.carbonTotal > 0 ? (
+                <>{fmtCompact(plot.carbonTotal)} <span style={{ fontSize: 11, fontWeight: 700 }}>tCO₂</span></>
+              ) : "รอการประมวลผล"}
             </div>
           </div>
           <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#10b981", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -992,8 +998,9 @@ function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile 
               <CarbonBarChart pts={barPts} isMobile={isMobile} />
             </div>
           ) : (
-            <div style={{ textAlign: "center", padding: "20px", background: "#f8fafc", borderRadius: 12, color: "#94a3b8", fontSize: 12, marginBottom: 20 }}>
-              กรุณาบันทึก อายุยาง และ จำนวนต้น เพื่อแสดงกราฟ
+            <div style={{ textAlign: "center", padding: "30px 20px", background: "#f8fafc", borderRadius: 16, border: "1.5px dashed #e2e8f0", color: "#94a3b8", fontSize: 13, marginBottom: 20 }}>
+              <i className="bi bi-bar-chart-line" style={{ fontSize: 24, display: "block", marginBottom: 10, opacity: 0.5 }} />
+              {plot.carbonTotal > 0 ? "ข้อมูลไม่เพียงพอในการสร้างกราฟ" : "ยังไม่ได้ประมวลผลคาร์บอนสำหรับแปลงนี้"}
             </div>
           )}
 
