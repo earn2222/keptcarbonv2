@@ -2327,7 +2327,7 @@ body.map-draw-active.scrolled .header {
 .mds-panel-body {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 28px;
+  padding: 24px 20px;
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 200px);
 }
 

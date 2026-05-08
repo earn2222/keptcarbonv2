@@ -59,12 +59,12 @@ export function CarbonBarChart({
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
-  const W = isMobile ? 450 : 850;
-  const H = isMobile ? 300 : 420;
-  const PL = isMobile ? 25 : 30;
-  const PT = isMobile ? 35 : 60;
-  const PB = isMobile ? 75 : 80;
-  const PR = isMobile ? 25 : 30;
+  const W = isMobile ? 450 : 940;
+  const H = isMobile ? 300 : 660;
+  const PL = isMobile ? 25 : 38;
+  const PT = isMobile ? 35 : 36;
+  const PB = isMobile ? 75 : 58;
+  const PR = isMobile ? 25 : 38;
   const iW = W - PL - PR;
   const iH = H - PT - PB;
 
@@ -93,44 +93,43 @@ export function CarbonBarChart({
   const linePath = linePoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
 
   return (
-    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 20, padding: "16px 8px 12px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
-      {/* Legend */}
+    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "6px 4px 4px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)" }}>
+      {/* Legend — compact single row */}
       <div style={{ 
         display: "flex", 
-        flexWrap: isMobile ? "nowrap" : "wrap", 
-        overflowX: isMobile ? "auto" : "visible",
-        gap: isMobile ? "8px" : "8px 12px", 
-        padding: isMobile ? "0 8px 12px" : "0 12px 14px", 
-        justifyContent: isMobile ? "flex-start" : "center",
+        flexWrap: "nowrap",
+        overflowX: "auto",
+        gap: "6px", 
+        padding: isMobile ? "0 8px 10px" : "0 8px 6px", 
+        justifyContent: "center",
         msOverflowStyle: "none",
-        scrollbarWidth: "none",
-        WebkitOverflowScrolling: "touch"
+        scrollbarWidth: "none"
       }}>
         {cycleStarts.map((cs, i) => (
           <div key={i} style={{ 
             display: "flex", 
             alignItems: "center", 
-            gap: isMobile ? 4 : 5, 
-            fontSize: isMobile ? 10 : 11, 
-            fontWeight: 700, 
-            color: "#475569", 
-            background: "rgba(255,255,255,0.8)", 
-            padding: isMobile ? "4px 10px" : "4px 10px", 
+            gap: 4, 
+            fontSize: 10, 
+            fontWeight: 600, 
+            color: "#64748b", 
+            background: "rgba(255,255,255,0.7)", 
+            padding: "3px 8px", 
             borderRadius: 20, 
-            border: "1px solid rgba(0,0,0,0.05)",
+            border: "1px solid rgba(0,0,0,0.04)",
             flexShrink: 0,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+            whiteSpace: "nowrap"
           }}>
-            <div style={{ width: isMobile ? 8 : 10, height: isMobile ? 8 : 10, borderRadius: "50%", background: cs.color, boxShadow: `0 0 6px ${cs.color}66` }} />
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: cs.color }} />
             {cs.name} ({pts[cs.idx].age}–{i < cycleStarts.length - 1 ? pts[cycleStarts[i + 1].idx - 1].age : pts[pts.length - 1].age})
           </div>
         ))}
       </div>
 
-      <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+      <div style={{ overflowX: "auto" }}>
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          style={{ width: isMobile ? Math.max(W, pts.length * 18) : "100%", height: "auto", minHeight: H, display: "block", overflow: "visible" }}
+          style={{ width: isMobile ? Math.max(W, pts.length * 18) : "100%", height: "auto", display: "block", overflow: "visible" }}
         >
           <defs>
             {CYCLE_COLORS.map((c, i) => (
