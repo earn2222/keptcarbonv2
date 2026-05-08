@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { carbonForAge } from "@/lib/map-utils";
 import { useAuth } from "@/lib/auth-context";
+import { CarbonBarChart, buildBarPoints, carbonCo2 } from "./CarbonBarChart";
 
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -24,6 +25,32 @@ type Props = {
 
 type PlotTab = "analyze" | "forecast";
 type ForecastYr = 3 | 5 | 7;
+type SubStep = "form" | "carbon" | "save";
+
+interface PlotFormData {
+    plantYear: string;
+    treeCount: string;
+    variety: string;
+    spacing: string;
+}
+
+const VARIETY_OPTIONS = [
+    "RRIM 600", "GT1", "BPM 24", "PB 235", "PB 260",
+    "RRIT 408", "RRIT 251", "สงขลา 36", "RRIM 712", "อื่นๆ",
+];
+const SPACING_OPTIONS = ["2.5*8", "3*7", "2.5*7", "3*6"];
+const YEAR_OPTIONS = Array.from({ length: 50 }, (_, i) => String(new Date().getFullYear() + 543 - i));
+
+interface CarbonResult {
+    plotIdx: number;
+    age: number;
+    plantYearBE: number;
+    trees: number;
+    spacing: string;
+    variety: string;
+    co2Now: number;
+    source: "user" | "backend";
+}
 
 interface PlotInfo {
     age: number;
@@ -352,10 +379,74 @@ export function ParcelResultsPanel({
 
 
     // Step 3 form
+    const [subStep, setSubStep] = useState<SubStep>("form");
     const [projectName, setProjectName] = useState("");
     const [ownerName, setOwnerName] = useState(userDisplayName);
     const [province, setProvince] = useState("");
     const [saveState, setSaveState] = useState<"idle" | "saving" | "done">("idle");
+    const [plotForms, setPlotForms] = useState<PlotFormData[]>([]);
+    const [carbonResults, setCarbonResults] = useState<CarbonResult[]>([]);
+    const [selectedCarbonIdx, setSelectedCarbonIdx] = useState(0);
+
+    // Initialize plotForms when entering step 3
+    const initPlotForms = () => {
+        setPlotForms(plots.map(p => ({
+            plantYear: p.plantYearBE > 0 ? String(p.plantYearBE) : "",
+            treeCount: p.trees > 0 ? String(p.trees) : "",
+            variety: "",
+            spacing: "2.5*8",
+        })));
+        setSubStep("form");
+        setProjectName("");
+        onStepChange(3);
+    };
+
+    const handleProcessCarbon = () => {
+        const CURRENT_BE_NOW = new Date().getFullYear() + 543;
+        const results: CarbonResult[] = plots.map((p, i) => {
+            const form = plotForms[i];
+            const userPlantYear = form?.plantYear ? parseInt(form.plantYear) : 0;
+            const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
+            const userSpacing = form?.spacing || "2.5*8";
+            const userVariety = form?.variety || "";
+            const userAge = userPlantYear > 0 ? CURRENT_BE_NOW - userPlantYear : 0;
+            const backendAge = p.age;
+            // Has user data
+            const hasUserData = userPlantYear > 0 || userTrees > 0;
+            let finalAge = backendAge;
+            let finalTrees = userTrees > 0 ? userTrees : p.trees;
+            let source: "user" | "backend" = "backend";
+            if (hasUserData && userAge > 0) {
+                const ageDiff = Math.abs(userAge - backendAge);
+                if (ageDiff > 3) {
+                    // Use user's data (backend likely wrong)
+                    finalAge = userAge;
+                    source = "user";
+                } else {
+                    // Within 3 years - use user data for validation
+                    finalAge = userAge;
+                    source = "user";
+                }
+            }
+            if (userTrees > 0) finalTrees = userTrees;
+            const finalPlantYear = userPlantYear > 0 ? userPlantYear : (CURRENT_BE_NOW - backendAge);
+            const co2Now = carbonCo2(Math.max(finalAge, 1), finalTrees, userSpacing);
+            return {
+                plotIdx: i,
+                age: Math.max(finalAge, 1),
+                plantYearBE: finalPlantYear,
+                trees: finalTrees,
+                spacing: userSpacing,
+                variety: userVariety,
+                co2Now,
+                source,
+            };
+        });
+        setCarbonResults(results);
+        setSelectedCarbonIdx(0);
+        setSubStep("carbon");
+    };
+
 
     const plots = useMemo(() => parcelFeatures.map(computePlot), [parcelFeatures]);
     const totalArea = useMemo(() => plots.reduce((s, p) => s + p.areaRai, 0), [plots]);
@@ -378,27 +469,32 @@ export function ParcelResultsPanel({
     const handleSave = async () => {
         setSaveState("saving");
         await new Promise(r => setTimeout(r, 900));
-
         try {
-            if (!user) {
-                console.error("No user found, cannot save plots");
-                return;
-            }
+            if (!user) return;
             const key = `user_saved_plots_${user.id}`;
-            const existingStr = localStorage.getItem(key);
-            const existing = existingStr ? JSON.parse(existingStr) : [];
+            const existing = JSON.parse(localStorage.getItem(key) || "[]");
+            const CURRENT_BE_NOW = new Date().getFullYear() + 543;
             const newPlots = plots.map((p, i) => {
                 const feat = parcelFeatures[i];
                 const props = (feat?.properties || {}) as any;
+                const cr = carbonResults[i];
+                const form = plotForms[i];
+                const age = cr?.age ?? p.age;
+                const trees = cr?.trees ?? p.trees;
+                const spacing = cr?.spacing || "2.5*8";
+                const finalPlantYear = cr?.plantYearBE ?? p.plantYearBE;
+                const co2 = cr?.co2Now ?? p.co2;
                 return {
                     id: props.id || Math.random().toString(36).substring(7),
-                    userId: user.id, // Add userId to the plot record
+                    userId: user.id,
                     name: projectName || props.farm_name || "แปลงยางใหม่",
                     areaRai: p.areaRai,
-                    carbonTotal: p.co2,
-                    rubberAge: p.age,
-                    plantYearBE: p.plantYearBE,
-                    trees: p.trees,
+                    carbonTotal: co2,
+                    rubberAge: age,
+                    plantYearBE: finalPlantYear,
+                    trees,
+                    variety: form?.variety || cr?.variety || "",
+                    spacing,
                     confidence: p.confidence,
                     ownerName: ownerName || props.owner_name || "",
                     province: province || dominantProvince,
@@ -406,31 +502,21 @@ export function ParcelResultsPanel({
                     geojson: feat?.geometry || null,
                     boundaryGeojson: drawnGeometry || null,
                     forecast: {
-                        yr3: p.trees > 0 ? carbonForAge(p.age + 3, p.trees).co2 : 0,
-                        yr5: p.trees > 0 ? carbonForAge(p.age + 5, p.trees).co2 : 0,
-                        yr7: p.trees > 0 ? carbonForAge(p.age + 7, p.trees).co2 : 0,
+                        yr3: carbonCo2(age + 3, trees, spacing),
+                        yr5: carbonCo2(age + 5, trees, spacing),
+                        yr7: carbonCo2(age + 7, trees, spacing),
                     },
                 };
             });
             localStorage.setItem(key, JSON.stringify([...newPlots, ...existing]));
-
-            // Save to global list for dashboard (Admin will see real names)
-            const globalKey = 'global_saved_plots';
-            const globalExistingStr = localStorage.getItem(globalKey);
-            const globalExisting = globalExistingStr ? JSON.parse(globalExistingStr) : [];
+            const globalKey = "global_saved_plots";
+            const globalExisting = JSON.parse(localStorage.getItem(globalKey) || "[]");
             localStorage.setItem(globalKey, JSON.stringify([...newPlots, ...globalExisting]));
-
-        } catch (e) {
-            console.error("Failed to save plots to localStorage", e);
-        }
-
+        } catch (e) { console.error(e); }
         setSaveState("done");
-        
-        // Redirect to dashboard page after a short delay
-        setTimeout(() => {
-            router.push("/dashboard");
-        }, 1500);
+        setTimeout(() => router.push("/my-plots"), 1500);
     };
+
 
     // ── Loading ────────────────────────────────────────────────────────────
     if (searchRunning) {
@@ -467,27 +553,173 @@ export function ParcelResultsPanel({
 
     if (searchCount === null) return null;
 
-    // ── Step 3: Save form ──────────────────────────────────────────────────
+    // ── Step 3: Data entry + Carbon + Save ────────────────────────────────
     if (currentStep === 3) {
+        // ── sub: form ──
+        if (subStep === "form") {
+            const updateForm = (idx: number, field: keyof PlotFormData, val: string) => {
+                setPlotForms(prev => prev.map((f, i) => i === idx ? { ...f, [field]: val } : f));
+            };
+            return (
+                <div className="prp-shell">
+                    <div className="prp-header-block">
+                        <div className="prp-main-title" style={{ fontSize: isMobile ? 16 : 18 }}>
+                            <i className="bi bi-pencil-square me-2" style={{ color: "#10b981" }} />กรอกข้อมูลแปลง
+                        </div>
+                        <div className="prp-subtitle">กรอกหรือข้ามได้ — ข้อมูลจะนำไปประมวลผลคาร์บอน</div>
+                    </div>
+
+                    {/* Project name — shared */}
+                    <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)", borderRadius: 14, padding: isMobile ? "14px 14px" : "16px 20px", marginBottom: 16, border: "1px solid rgba(16,185,129,0.18)" }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#059669", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                            <i className="bi bi-folder2-open" /> ชื่อโครงการ (ใช้ร่วมกันทุกแปลง)
+                        </div>
+                        <input className="prp-input" style={{ marginBottom: 0 }} placeholder="เช่น สวนยางบ้านนาดี" value={projectName} onChange={e => setProjectName(e.target.value)} />
+                    </div>
+
+                    {/* Per-plot fields */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        {plots.map((p, i) => {
+                            const form = plotForms[i] || { plantYear: "", treeCount: "", variety: "", spacing: "2.5*8" };
+                            return (
+                                <div key={i} style={{ background: "#fff", borderRadius: 14, border: "1px solid rgba(16,185,129,0.15)", overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
+                                    {/* Plot header */}
+                                    <div style={{ background: "linear-gradient(135deg,rgba(16,185,129,0.08),rgba(5,150,105,0.04))", padding: "10px 14px", borderBottom: "1px solid rgba(16,185,129,0.1)", display: "flex", alignItems: "center", gap: 10 }}>
+                                        <div style={{ width: 28, height: 28, borderRadius: 8, background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>{i + 1}</div>
+                                        <div>
+                                            <div style={{ fontWeight: 700, fontSize: 13, color: "#0f172a" }}>แปลงที่ {i + 1}</div>
+                                            <div style={{ fontSize: 11, color: "#64748b" }}>{p.areaRai > 0 ? `${p.areaRai.toFixed(2)} ไร่` : "—"}{p.age > 0 ? ` · อายุ ${p.age} ปี (ข้อมูลระบบ)` : ""}</div>
+                                        </div>
+                                    </div>
+                                    {/* Fields grid */}
+                                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr", gap: 10, padding: "12px 14px" }}>
+                                        <div>
+                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>ปีที่ปลูก (พ.ศ.)</div>
+                                            <select className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} value={form.plantYear} onChange={e => updateForm(i, "plantYear", e.target.value)}>
+                                                <option value="">— เลือกปี —</option>
+                                                {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>จำนวนต้นยาง</div>
+                                            <input className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} type="number" placeholder="เช่น 200" value={form.treeCount} onChange={e => updateForm(i, "treeCount", e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>พันธุ์ยาง</div>
+                                            <select className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} value={form.variety} onChange={e => updateForm(i, "variety", e.target.value)}>
+                                                <option value="">— เลือกพันธุ์ —</option>
+                                                {VARIETY_OPTIONS.map(v => <option key={v} value={v}>{v}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>ระยะห่างปลูก (ม.)</div>
+                                            <select className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} value={form.spacing} onChange={e => updateForm(i, "spacing", e.target.value)}>
+                                                {SPACING_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18 }}>
+                        <button className="prp-btn-primary" onClick={handleProcessCarbon} style={{ background: "linear-gradient(135deg,#10b981,#059669)" }}>
+                            <i className="bi bi-graph-up-arrow me-2" />ประมวลผลคาร์บอน
+                        </button>
+                        <button className="prp-btn-primary" onClick={() => { setSubStep("save"); }} style={{ background: "linear-gradient(135deg,#0369a1,#0284c7)" }}>
+                            <i className="bi bi-floppy-disk me-2" />บันทึกลงฐานข้อมูล
+                        </button>
+                        <button className="prp-btn-ghost" onClick={() => { onStepChange(2); }}>← กลับผลการวิเคราะห์</button>
+                        <button className="prp-btn-text" onClick={onReset}><i className="bi bi-x-circle me-1" />ยกเลิก</button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ── sub: carbon results ──
+        if (subStep === "carbon") {
+            const cr = carbonResults[selectedCarbonIdx];
+            const pts = cr ? buildBarPoints(cr.age, cr.plantYearBE, cr.trees, cr.spacing) : [];
+            return (
+                <div className="prp-shell">
+                    <div className="prp-header-block">
+                        <div className="prp-main-title" style={{ fontSize: isMobile ? 16 : 18 }}>
+                            <i className="bi bi-bar-chart-fill me-2" style={{ color: "#10b981" }} />ผลการประมวลผลคาร์บอน
+                        </div>
+                        <div className="prp-subtitle">กราฟแท่งคาร์บอนทุก 7 ปี ถึงอายุ 35 ปี</div>
+                    </div>
+
+                    {/* Plot selector */}
+                    {carbonResults.length > 1 && (
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+                            {carbonResults.map((cr, i) => (
+                                <button key={i} onClick={() => setSelectedCarbonIdx(i)} style={{ padding: "5px 12px", borderRadius: 8, border: `1.5px solid ${selectedCarbonIdx === i ? "#10b981" : "rgba(16,185,129,0.25)"}`, background: selectedCarbonIdx === i ? "#10b981" : "transparent", color: selectedCarbonIdx === i ? "#fff" : "#059669", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+                                    แปลงที่ {i + 1}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {cr && (
+                        <>
+                            {/* Plot info summary */}
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 14 }}>
+                                {[
+                                    { label: "อายุปัจจุบัน", val: `${cr.age} ปี`, color: "#059669" },
+                                    { label: "จำนวนต้น", val: cr.trees.toLocaleString("th-TH"), color: "#7c3aed" },
+                                    { label: "คาร์บอนปัจจุบัน", val: `${cr.co2Now.toFixed(1)} tCO₂`, color: "#0d9488" },
+                                ].map(({ label, val, color }) => (
+                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "10px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
+                                        <div style={{ fontSize: isMobile ? 14 : 13, fontWeight: 800, color }}>{val}</div>
+                                        <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 2 }}>{label}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Source badge */}
+                            <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: cr.source === "user" ? "#059669" : "#0369a1", background: cr.source === "user" ? "rgba(16,185,129,0.08)" : "rgba(3,105,161,0.08)", padding: "5px 12px", borderRadius: 20, border: `1px solid ${cr.source === "user" ? "rgba(16,185,129,0.25)" : "rgba(3,105,161,0.25)"}`, width: "fit-content" }}>
+                                <i className={`bi bi-${cr.source === "user" ? "person-check-fill" : "database-fill"}`} />
+                                {cr.source === "user" ? "ใช้ข้อมูลที่กรอก" : "ใช้ข้อมูลระบบ"}
+                                {cr.variety && <span style={{ marginLeft: 4, opacity: 0.7 }}>· {cr.variety}</span>}
+                                <span style={{ marginLeft: 4, opacity: 0.7 }}>· ระยะ {cr.spacing} ม.</span>
+                            </div>
+
+                            {/* Bar chart */}
+                            <CarbonBarChart pts={pts} isMobile={isMobile} />
+
+                            <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 6 }}>
+                                hover บนแท่งเพื่อดูรายละเอียด · แบ่งทุก 7 ปี (โคลนต้นยาง)
+                            </div>
+                        </>
+                    )}
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18 }}>
+                        <button className="prp-btn-primary" onClick={() => setSubStep("save")} style={{ background: "linear-gradient(135deg,#0369a1,#0284c7)" }}>
+                            <i className="bi bi-floppy-disk me-2" />บันทึกผลลงฐานข้อมูล
+                        </button>
+                        <button className="prp-btn-ghost" onClick={() => setSubStep("form")}>← กลับแก้ไขข้อมูล</button>
+                        <button className="prp-btn-text" onClick={onReset}><i className="bi bi-x-circle me-1" />ไม่บันทึก</button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ── sub: save form ──
         return (
             <div className="prp-shell">
                 <div className="prp-section-title" style={{ marginTop: 16 }}>
-                    <i className="bi bi-pencil-square me-2" />บันทึกแปลง
-                </div>
-                <div className="prp-warn-banner">
-                    <i className="bi bi-info-circle me-2" />
-                    ขั้นตอนนี้ไม่บังคับ — กด &ldquo;เสร็จสิ้น ไม่บันทึก&rdquo; หากไม่ต้องการบันทึก
+                    <i className="bi bi-floppy-disk me-2" />บันทึกแปลงในระบบ
                 </div>
                 <div className="prp-save-summary">
-                    สรุปแปลงที่จะบันทึก: <strong>{plots.length} แปลง</strong> · รวม <strong>{totalArea.toFixed(1)} ไร่</strong>
+                    บันทึก <strong>{plots.length} แปลง</strong> · รวม <strong>{totalArea.toFixed(1)} ไร่</strong>
                 </div>
                 {saveState === "done" ? (
-                    <div className="prp-save-success">
-                        <i className="bi bi-check-circle-fill me-2" />บันทึกแปลงสำเร็จ!
-                    </div>
+                    <div className="prp-save-success"><i className="bi bi-check-circle-fill me-2" />บันทึกแปลงสำเร็จ!</div>
                 ) : (
                     <div className="prp-form">
-                        <label className="prp-label">ชื่อโครงการ / แปลง <span className="prp-required">*</span></label>
+                        <label className="prp-label">ชื่อโครงการ <span className="prp-required">*</span></label>
                         <input className="prp-input" placeholder="เช่น สวนยางบ้านนาดี" value={projectName} onChange={e => setProjectName(e.target.value)} />
                         <label className="prp-label">เจ้าของแปลง</label>
                         <input className="prp-input" placeholder="ชื่อเจ้าของ" value={ownerName} onChange={e => setOwnerName(e.target.value)} />
@@ -499,12 +731,12 @@ export function ParcelResultsPanel({
                         <button className="prp-btn-primary" onClick={handleSave} disabled={!projectName.trim() || saveState === "saving"}>
                             {saveState === "saving"
                                 ? <><span className="s1-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }} /> กำลังบันทึก...</>
-                                : <><i className="bi bi-pencil-square me-2" />บันทึกแปลงในระบบ</>}
+                                : <><i className="bi bi-floppy-disk me-2" />บันทึก</>}
                         </button>
                     </div>
                 )}
-                <button className="prp-btn-ghost" onClick={() => { setSaveState("idle"); setSummaryFcYrs(7); onStepChange(2); }}>← กลับ</button>
-                <button className="prp-btn-text" onClick={onReset}><i className="bi bi-check2-circle me-1" />เสร็จสิ้น ไม่บันทึก</button>
+                <button className="prp-btn-ghost" onClick={() => setSubStep(carbonResults.length > 0 ? "carbon" : "form")}>← กลับ</button>
+                <button className="prp-btn-text" onClick={onReset}><i className="bi bi-x-circle me-1" />ยกเลิก</button>
             </div>
         );
     }
@@ -765,8 +997,8 @@ export function ParcelResultsPanel({
                     </div>
 
                     {/* Actions */}
-                    <button className="prp-btn-primary" onClick={() => onStepChange(3)}>
-                        <i className="bi bi-pencil-square me-2" />บันทึกแปลงในระบบ
+                    <button className="prp-btn-primary" onClick={initPlotForms}>
+                        <i className="bi bi-pencil-square me-2" />กรอกข้อมูล / ประมวลผลคาร์บอน
                     </button>
                     <button className="prp-btn-ghost" onClick={onReset}>
                         <i className="bi bi-check2-circle me-1" />เสร็จสิ้น (ไม่บันทึก)
