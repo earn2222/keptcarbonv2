@@ -91,6 +91,17 @@ export default function MapDrawPage() {
   const [drawnGeometry, setDrawnGeometry] = useState<GeoJSON.Geometry | null>(null);
   const [selectedPlotIndex, setSelectedPlotIndex] = useState<number | "total">("total");
 
+  // Multi-parcel support
+  const [drawnParcels, setDrawnParcels] = useState<GeoJSON.Feature[]>([]);
+  const totalDrawnArea = useMemo(() => {
+    return drawnParcels.reduce((acc, p) => {
+      if (p.geometry.type === "Polygon") {
+        return acc + polygonAreaM2(p.geometry.coordinates[0] as LngLat[]);
+      }
+      return acc;
+    }, 0);
+  }, [drawnParcels]);
+
   const runParcelSearchRef = useRef<() => void>(() => { });
 
 
@@ -371,44 +382,50 @@ export default function MapDrawPage() {
     drawingRef.current = false;
     setDrawing(false);
     const ring = [...verts, verts[0]];
-    const final: GeoJSON.Feature = {
+    const newFeature: GeoJSON.Feature = {
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [ring] },
-      properties: {},
+      properties: { id: Math.random().toString(36).substring(7) },
     };
-    finalGJRef.current = final;
 
-    // We keep draw-line and draw-verts visible so the user can edit them
-    // Clear plot so it doesn't double-render
-    const map = mapRef.current;
-    if (map && mapLoadedRef.current) {
-      (map.getSource("plot") as maplibregl.GeoJSONSource).setData(emptyFC());
-    }
+    setDrawnParcels(prev => {
+      const next = [...prev, newFeature];
+      const map = mapRef.current;
+      if (map && mapLoadedRef.current) {
+        (map.getSource("plot") as maplibregl.GeoJSONSource).setData({
+          type: "FeatureCollection",
+          features: next,
+        });
+        // Clear draw layers once added to plot list
+        (map.getSource("draw-line") as maplibregl.GeoJSONSource).setData(emptyFC());
+        (map.getSource("draw-fill") as maplibregl.GeoJSONSource).setData(emptyFC());
+        (map.getSource("draw-verts") as maplibregl.GeoJSONSource).setData(emptyFC());
+      }
+      return next;
+    });
 
     const sqm = polygonAreaM2(ring);
     const rai = sqm / 1600;
 
-    // Validation: 1 Rai minimum
-    if (rai < 1) {
-      setAreaError({ rai, sqm });
-    } else {
-      setAreaError(null);
-    }
-
     setDrawPreview(`${rai.toFixed(2)} ไร่ · ${verts.length} จุด`);
     setDrawDone(true);
     setHasGeom(true);
-    setStatus(`✓ วาดแปลงเสร็จ — ลากจุดเพื่อแก้ไข หรือคลิกเส้นเพื่อเพิ่มจุด`);
-    if (!skipFit) fitPlot();
+    setStatus(`✓ วาดแปลงเสร็จ — สามารถวาดแปลงเพิ่มหรือกดประมวลผล`);
 
-    // Auto process - ONLY if area is >= 1 Rai
-    if (rai >= 1) {
-      runParcelSearchRef.current();
-    } else {
-      // If area too small, ensure we stay on step 1 and don't process
-      setCurrentStep(1);
+    // Reset current drawing vertices
+    vertsRef.current = [];
+    setVertCount(0);
+
+    if (!skipFit) {
+      // Fit to the new feature
+      const lngs = ring.map((p) => p[0]);
+      const lats = ring.map((p) => p[1]);
+      mapRef.current?.fitBounds(
+        [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+        { padding: 60, duration: 600 }
+      );
     }
-  }, [fitPlot]);
+  }, []);
 
   // Map click / dblclick / Escape handlers — keep refs in sync
   useEffect(() => {
@@ -443,22 +460,9 @@ export default function MapDrawPage() {
 
     // Custom edit logic
     const onLineClick = (e: maplibregl.MapMouseEvent) => {
-      if (drawingRef.current || vertsRef.current.length < 3) return;
-      const pts = vertsRef.current;
-      const pt = [e.lngLat.lng, e.lngLat.lat];
-      let minDist = Infinity;
-      let insertIdx = -1;
-      for (let i = 0; i < pts.length; i++) {
-        const a = pts[i];
-        const b = pts[(i + 1) % pts.length];
-        const d = Math.hypot(a[0] - pt[0], a[1] - pt[1]) + Math.hypot(b[0] - pt[0], b[1] - pt[1]) - Math.hypot(a[0] - b[0], a[1] - b[1]);
-        if (d < minDist) { minDist = d; insertIdx = i + 1; }
-      }
-      if (insertIdx !== -1) {
-        pts.splice(insertIdx, 0, [e.lngLat.lng, e.lngLat.lat] as LngLat);
-        previewDraw();
-        finishDraw(true);
-      }
+      // Edit logic is disabled for multi-parcel for now to keep it simple, 
+      // but we could implement it by finding which parcel was clicked.
+      if (drawingRef.current) return;
     };
 
     let dragIdx = -1;
@@ -494,17 +498,9 @@ export default function MapDrawPage() {
     map.on("click", onClick);
     map.on("dblclick", onDbl);
 
-    // Attach edit handlers
-    map.on('click', 'draw-line-l', onLineClick);
-    map.on('mouseenter', 'draw-verts-l', () => { map.getCanvas().style.cursor = 'grab'; });
-    map.on('mouseleave', 'draw-verts-l', () => { map.getCanvas().style.cursor = ''; });
-    map.on('mousedown', 'draw-verts-l', onVertsDown);
-
     return () => {
       map.off("click", onClick);
       map.off("dblclick", onDbl);
-      map.off('click', 'draw-line-l', onLineClick);
-      map.off('mousedown', 'draw-verts-l', onVertsDown);
     };
   }, [previewDraw, finishDraw]);
 
@@ -523,7 +519,6 @@ export default function MapDrawPage() {
   const startDrawFlow = () => {
     const map = mapRef.current;
     if (!map) return;
-    clearDraw();
     setIsPanelOpen(true);
     drawingRef.current = true;
     setDrawing(true);
@@ -550,6 +545,7 @@ export default function MapDrawPage() {
     setParcelFeatures([]);
     setShpFile(null);
     setShpStatus(null);
+    setDrawnParcels([]);
     const map = mapRef.current;
     if (map && mapLoadedRef.current) {
       (map.getSource("draw-line") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
@@ -590,17 +586,30 @@ export default function MapDrawPage() {
 
   // ===== PARCEL DB SEARCH =====
   const runParcelSearch = useCallback(async () => {
-    const final = finalGJRef.current;
-    if (!final?.geometry) {
+    if (drawnParcels.length === 0) {
       setSearchErr("กรุณาวาดแปลงหรืออัปโหลด Shapefile ก่อน");
       return;
     }
+
+    const totalRai = totalDrawnArea / 1600;
+    if (totalRai < 1) {
+      setAreaError({ rai: totalRai, sqm: totalDrawnArea });
+      return;
+    }
+
     // Abort any previous in-flight search
     searchAbortRef.current?.abort();
     const abort = new AbortController();
     searchAbortRef.current = abort;
 
-    setDrawnGeometry(final.geometry);
+    // Combine all polygons into a MultiPolygon
+    const rings = drawnParcels.map(p => (p.geometry as GeoJSON.Polygon).coordinates);
+    const combinedGeom: GeoJSON.MultiPolygon = {
+      type: "MultiPolygon",
+      coordinates: rings,
+    };
+
+    setDrawnGeometry(combinedGeom);
     setSearchRunning(true);
     setCurrentStep(2);
     setSearchErr(null);
@@ -612,7 +621,7 @@ export default function MapDrawPage() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         signal: abort.signal,
-        body: JSON.stringify({ geometry: truncateCoords(final.geometry), relation: "intersects" }),
+        body: JSON.stringify({ geometry: truncateCoords(combinedGeom), relation: "intersects" }),
       });
       const data: {
         features?: GeoJSON.Feature[];
@@ -659,15 +668,13 @@ export default function MapDrawPage() {
             for (const c of coords) walk(c);
           };
           features.forEach((f) => walk((f.geometry as { coordinates?: unknown })?.coordinates));
-          const finalCoords =
-            final.geometry.type === "Polygon"
-              ? (final.geometry.coordinates[0] as [number, number][])
-              : [];
-          finalCoords.forEach(([x, y]) => {
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-            if (x > maxX) maxX = x;
-            if (y > maxY) maxY = y;
+          combinedGeom.coordinates.forEach((poly) => {
+            poly[0].forEach(([x, y]) => {
+              if (x < minX) minX = x;
+              if (y < minY) minY = y;
+              if (x > maxX) maxX = x;
+              if (y > maxY) maxY = y;
+            });
           });
           if (Number.isFinite(minX) && Number.isFinite(minY)) {
             map.fitBounds(
@@ -698,7 +705,7 @@ export default function MapDrawPage() {
     } finally {
       setSearchRunning(false);
     }
-  }, []);
+  }, [drawnParcels, totalDrawnArea]);
 
   useEffect(() => {
     runParcelSearchRef.current = runParcelSearch;
@@ -1103,17 +1110,72 @@ export default function MapDrawPage() {
                       <>
                         <div className="mds-instr-note">
                           <i className="bi bi-info-circle" />
-                          ขนาดแปลงต้องไม่น้อยกว่า 1 ไร่ / 40×40 เมตร
+                          ขนาดแปลงรวมต้องไม่น้อยกว่า 1 ไร่
                         </div>
-                        <ol className="mds-instr-list">
-                          <li>คลิกปุ่ม <strong>&ldquo;เริ่มวาดแปลง&rdquo;</strong> ด้านล่าง</li>
-                          <li>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต (อย่างน้อย 3 จุด)</li>
-                          <li>กดปุ่ม <strong>&ldquo;เสร็จสิ้น วาดแปลง&rdquo;</strong> หรือ Double-click เพื่อจบการวาด</li>
-                          <li>แก้ไข: ลากจุดเพื่อย้ายตำแหน่ง</li>
-                        </ol>
-                        <button className="mds-btn mds-btn-solid" onClick={startDrawFlow}>
-                          <i className="bi bi-pencil" /> เริ่มวาดแปลง
-                        </button>
+
+                        {drawnParcels.length === 0 && (
+                          <ol className="mds-instr-list">
+                            <li>คลิกปุ่ม <strong>&ldquo;เริ่มวาดแปลง&rdquo;</strong> ด้านล่าง</li>
+                            <li>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต (อย่างน้อย 3 จุด)</li>
+                            <li>กดปุ่ม <strong>&ldquo;เสร็จสิ้น วาดแปลง&rdquo;</strong> หรือ Double-click เพื่อจบการวาด</li>
+                            <li>แก้ไข: ลากจุดเพื่อย้ายตำแหน่ง</li>
+                          </ol>
+                        )}
+
+                        {drawnParcels.length > 0 && (
+                          <div className="mds-parcel-list" style={{ marginBottom: 12 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: "#1e293b", display: "flex", justifyContent: "space-between" }}>
+                              <span>แปลงที่วาดแล้ว ({drawnParcels.length})</span>
+                              <span style={{ color: "#059669" }}>{(totalDrawnArea / 1600).toFixed(2)} ไร่</span>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                              {drawnParcels.map((p, i) => {
+                                const area = polygonAreaM2((p.geometry as any).coordinates[0]) / 1600;
+                                return (
+                                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                      <div style={{ width: 20, height: 20, borderRadius: 4, background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
+                                      <span style={{ fontSize: 13, color: "#475569" }}>{area.toFixed(2)} ไร่</span>
+                                    </div>
+                                    <button
+                                      onClick={() => {
+                                        const next = drawnParcels.filter((_, idx) => idx !== i);
+                                        setDrawnParcels(next);
+                                        const map = mapRef.current;
+                                        if (map && mapLoadedRef.current) {
+                                          (map.getSource("plot") as maplibregl.GeoJSONSource).setData({
+                                            type: "FeatureCollection",
+                                            features: next,
+                                          });
+                                        }
+                                        if (next.length === 0) setHasGeom(false);
+                                      }}
+                                      style={{ border: "none", background: "none", color: "#94a3b8", cursor: "pointer", fontSize: 16 }}
+                                    >
+                                      <i className="bi bi-trash" />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          <button className="mds-btn mds-btn-solid" onClick={startDrawFlow}>
+                            <i className="bi bi-pencil" /> {drawnParcels.length > 0 ? "วาดแปลงเพิ่ม" : "เริ่มวาดแปลง"}
+                          </button>
+
+                          {drawnParcels.length > 0 && (
+                            <button
+                              className="mds-btn mds-btn-primary"
+                              style={{ background: "linear-gradient(135deg, #059669, #10b981)" }}
+                              onClick={runParcelSearch}
+                            >
+                              <i className="bi bi-check2-circle" /> ยืนยันและประมวลผล ({(totalDrawnArea / 1600).toFixed(2)} ไร่)
+                            </button>
+                          )}
+                        </div>
                       </>
                     )}
                   </div>

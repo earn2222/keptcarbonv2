@@ -1,6 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { carbonForAge } from "@/lib/map-utils";
 import { useAuth } from "@/lib/auth-context";
 import { CarbonBarChart, buildBarPoints, carbonCo2 } from "./CarbonBarChart";
@@ -385,7 +385,7 @@ export function ParcelResultsPanel({
 
     // Responsive detection
     const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
-    useMemo(() => {
+    useEffect(() => {
         if (typeof window === "undefined") return;
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener("resize", handleResize);
@@ -395,7 +395,9 @@ export function ParcelResultsPanel({
 
     // Step 3 form
     const [subStep, setSubStep] = useState<SubStep>("carbon"); // used only for step 3 now
-    const [projectName, setProjectName] = useState("");
+    const searchParams = useSearchParams();
+    const initialProjectName = searchParams.get("project") || "";
+    const [projectName, setProjectName] = useState(initialProjectName);
     const [ownerName, setOwnerName] = useState(userDisplayName);
     const [province, setProvince] = useState("");
     const [saveState, setSaveState] = useState<"idle" | "saving" | "done">("idle");
@@ -403,7 +405,7 @@ export function ParcelResultsPanel({
     const [carbonResults, setCarbonResults] = useState<CarbonResult[]>([]);
 
     // Initialize plotForms automatically when ready
-    useMemo(() => {
+    useEffect(() => {
         if (searchCount !== null && !searchRunning && !searchErr && plots.length > 0 && plotForms.length === 0) {
             setPlotForms(plots.map(p => ({
                 plantYear: p.plantYearBE > 0 ? String(p.plantYearBE) : "",
