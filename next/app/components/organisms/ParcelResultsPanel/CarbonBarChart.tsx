@@ -10,6 +10,8 @@ const CYCLE_COLORS = [
   { bar: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: "#4c1d95", name: "รอบที่ 5" },
 ];
 
+const getCycleColor = (cycle: number) => CYCLE_COLORS[Math.min(Math.max(0, cycle), CYCLE_COLORS.length - 1)];
+
 function carbonCo2(age: number, trees: number, spacing: string): number {
   // Adjust density based on spacing
   const spacingMap: Record<string, number> = {
@@ -74,7 +76,8 @@ export function CarbonBarChart({
   const cycleStarts: { idx: number; name: string; color: string }[] = [];
   pts.forEach((p, i) => {
     if (i === 0 || pts[i - 1].cycle !== p.cycle) {
-      cycleStarts.push({ idx: i, name: CYCLE_COLORS[p.cycle].name, color: CYCLE_COLORS[p.cycle].bar });
+      const col = getCycleColor(p.cycle);
+      cycleStarts.push({ idx: i, name: col.name, color: col.bar });
     }
   });
 
@@ -118,7 +121,7 @@ export function CarbonBarChart({
             return (
               <line key={cs.idx}
                 x1={x - gap / 2} y1={PT - 8} x2={x - gap / 2} y2={PT + iH + 4}
-                stroke={CYCLE_COLORS[pts[cs.idx].cycle].bar}
+                stroke={getCycleColor(pts[cs.idx].cycle).bar}
                 strokeWidth={1.5} strokeDasharray="4,3" opacity={0.4}
               />
             );
@@ -129,8 +132,9 @@ export function CarbonBarChart({
             const bh = Math.max((p.co2 / maxCo2) * iH, 2);
             const x = PL + i * (barW + gap);
             const y = PT + iH - bh;
-            const col = CYCLE_COLORS[p.cycle];
+            const col = getCycleColor(p.cycle);
             const isHov = hoverIdx === i;
+            const cycleClamp = Math.min(Math.max(0, p.cycle), CYCLE_COLORS.length - 1);
             return (
               <g key={i} onMouseEnter={() => setHoverIdx(i)} onMouseLeave={() => setHoverIdx(null)} style={{ cursor: "pointer" }}>
                 {/* Hover glow */}
@@ -139,7 +143,7 @@ export function CarbonBarChart({
                     fill={col.bar} opacity={0.18} />
                 )}
                 <rect x={x} y={y} width={barW} height={bh} rx={isMobile ? 2 : 3}
-                  fill={`url(#cycleGrad${p.cycle})`}
+                  fill={`url(#cycleGrad${cycleClamp})`}
                   opacity={isHov ? 1 : 0.85}
                 />
                 {/* Cycle renewal marker (age 8, 15, 22, 29) */}
@@ -159,7 +163,7 @@ export function CarbonBarChart({
               <g key={i}>
                 <text x={x} y={PT + iH + 16} textAnchor="middle"
                   fontSize={isMobile ? 10 : 11} fontWeight={700}
-                  fill={CYCLE_COLORS[p.cycle].bar}>
+                  fill={getCycleColor(p.cycle).bar}>
                   อายุ {p.age}
                 </text>
                 <text x={x} y={PT + iH + (isMobile ? 30 : 29)} textAnchor="middle"
@@ -173,7 +177,7 @@ export function CarbonBarChart({
           {/* Tooltip */}
           {hoverIdx !== null && (() => {
             const p = pts[hoverIdx];
-            const col = CYCLE_COLORS[p.cycle];
+            const col = getCycleColor(p.cycle);
             const bh = Math.max((p.co2 / maxCo2) * iH, 2);
             const x = PL + hoverIdx * (barW + gap) + barW / 2;
             const y = PT + iH - bh;
