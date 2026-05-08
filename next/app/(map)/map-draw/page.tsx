@@ -1059,15 +1059,13 @@ export default function MapDrawPage() {
               <div className="mds-s1-card">
                 <div className="mds-s1-hd">
                   <div>
-                    <div className="mds-section-tag">
-                      <i className="bi bi-pencil-square" /> ขั้นตอนที่ 1
-                    </div>
+
                     <h2 className="mds-s1-title">กำหนดขอบเขตแปลง</h2>
                     <p className="mds-s1-sub">
                       วาดหรือนำเข้าพื้นที่บนแผนที่เพื่อค้นหาแปลงยางในฐานข้อมูล
                     </p>
                   </div>
-                  <div className="mds-s1-num">01</div>
+
                 </div>
 
                 {/* Method selector */}

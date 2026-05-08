@@ -394,7 +394,10 @@ export function ParcelResultsPanel({
 
 
     // Step 3 form
-    const [subStep, setSubStep] = useState<SubStep>("carbon"); // used only for step 3 now
+    // Sub-step tracking for Step 3 results view
+    // (Formerly used for a separate save form, now removed for direct saving)
+    const [subStep, setSubStep] = useState<SubStep>("carbon"); 
+
     const searchParams = useSearchParams();
     const initialProjectName = searchParams.get("project") || "";
     const [projectName, setProjectName] = useState(initialProjectName);
@@ -466,8 +469,14 @@ export function ParcelResultsPanel({
 
     if (!(searchRunning || searchErr || searchCount !== null)) return null;
 
-    const handleSave = async () => {
+    const handleSave = async (overrideResults?: CarbonResult[]) => {
+        const resultsToSave = overrideResults || carbonResults;
+        if (!resultsToSave.length) {
+            // If no results, process first
+            return;
+        }
         setSaveState("saving");
+
         await new Promise(r => setTimeout(r, 900));
         try {
             if (!user) return;
@@ -477,13 +486,14 @@ export function ParcelResultsPanel({
             const newPlots = plots.map((p, i) => {
                 const feat = parcelFeatures[i];
                 const props = (feat?.properties || {}) as any;
-                const cr = carbonResults[i];
+                const cr = resultsToSave[i];
                 const form = plotForms[i];
                 const age = cr?.age ?? p.age;
                 const trees = cr?.trees ?? p.trees;
                 const spacing = cr?.spacing || "2.5*8";
                 const finalPlantYear = cr?.plantYearBE ?? p.plantYearBE;
                 const co2 = cr?.co2Now ?? p.co2;
+
                 return {
                     id: props.id || Math.random().toString(36).substring(7),
                     userId: user.id,
@@ -663,8 +673,40 @@ export function ParcelResultsPanel({
                     <button className="prp-btn-primary" onClick={handleProcessCarbon} style={{ background: "linear-gradient(135deg,#10b981,#059669)" }}>
                         <i className="bi bi-graph-up-arrow me-2" />ประมวลผลคาร์บอน
                     </button>
-                    <button className="prp-btn-primary" onClick={() => { setSubStep("save"); onStepChange(3); }} style={{ background: "linear-gradient(135deg,#0369a1,#0284c7)" }}>
-                        <i className="bi bi-floppy-disk me-2" />บันทึกลงฐานข้อมูล
+                    <button 
+                        className="prp-btn-primary" 
+                        onClick={() => {
+                            // Process and then save directly
+                            const results = plots.map((p, i) => {
+                                const form = plotForms[i];
+                                const userPlantYear = form?.plantYear ? parseInt(form.plantYear) : 0;
+                                const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
+                                const userSpacing = form?.spacing || "2.5*8";
+                                const userAge = userPlantYear > 0 ? (new Date().getFullYear() + 543) - userPlantYear : 0;
+                                const finalAge = userAge > 0 ? userAge : p.age;
+                                const finalTrees = userTrees > 0 ? userTrees : p.trees;
+                                return {
+                                    plotIdx: i,
+                                    age: Math.max(finalAge, 1),
+                                    plantYearBE: userPlantYear > 0 ? userPlantYear : (new Date().getFullYear() + 543 - p.age),
+                                    trees: finalTrees,
+                                    spacing: userSpacing,
+                                    variety: form?.variety || "",
+                                    co2Now: carbonCo2(Math.max(finalAge, 1), finalTrees, userSpacing),
+                                    source: userPlantYear > 0 ? "user" : "backend" as const,
+                                };
+                            });
+                            setCarbonResults(results);
+                            handleSave(results);
+                        }} 
+                        disabled={!projectName.trim() || saveState === "saving"}
+                        style={{ background: "linear-gradient(135deg,#0369a1,#0284c7)" }}
+                    >
+                        {saveState === "saving" ? (
+                            <><span className="s1-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", marginRight: 8 }} /> กำลังบันทึก...</>
+                        ) : (
+                            <><i className="bi bi-floppy-disk me-2" />บันทึกลงฐานข้อมูล</>
+                        )}
                     </button>
                     <button className="prp-btn-ghost" onClick={onReset}>
                         <i className="bi bi-x-circle me-1" />ยกเลิก
@@ -788,8 +830,19 @@ export function ParcelResultsPanel({
                     ) : null}
 
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18 }}>
-                        <button className="prp-btn-primary" onClick={() => setSubStep("save")} style={{ background: "linear-gradient(135deg,#0369a1,#0284c7)" }}>
-                            <i className="bi bi-floppy-disk me-2" />บันทึกผลลงฐานข้อมูล
+                        <button 
+                            className="prp-btn-primary" 
+                            onClick={handleSave} 
+                            disabled={!projectName.trim() || saveState === "saving"}
+                            style={{ background: "linear-gradient(135deg,#0369a1,#0284c7)" }}
+                        >
+                            {saveState === "saving" ? (
+                                <><span className="s1-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", marginRight: 8 }} /> กำลังบันทึก...</>
+                            ) : saveState === "done" ? (
+                                <><i className="bi bi-check-circle-fill me-2" />บันทึกสำเร็จ!</>
+                            ) : (
+                                <><i className="bi bi-floppy-disk me-2" />บันทึกผลลงฐานข้อมูล</>
+                            )}
                         </button>
                         <button className="prp-btn-ghost" onClick={() => onStepChange(2)}>← กลับแก้ไขข้อมูล</button>
                         <button className="prp-btn-text" onClick={onReset}><i className="bi bi-x-circle me-1" />ไม่บันทึก</button>
@@ -797,40 +850,6 @@ export function ParcelResultsPanel({
                 </div>
             );
         }
-
-        // ── sub: save form ──
-        return (
-            <div className="prp-shell">
-                <div className="prp-section-title" style={{ marginTop: 16 }}>
-                    <i className="bi bi-floppy-disk me-2" />บันทึกแปลงในระบบ
-                </div>
-                <div className="prp-save-summary">
-                    บันทึก <strong>{plots.length} แปลง</strong> · รวม <strong>{totalArea.toFixed(1)} ไร่</strong>
-                </div>
-                {saveState === "done" ? (
-                    <div className="prp-save-success"><i className="bi bi-check-circle-fill me-2" />บันทึกแปลงสำเร็จ!</div>
-                ) : (
-                    <div className="prp-form">
-                        <label className="prp-label">ชื่อโครงการ <span className="prp-required">*</span></label>
-                        <input className="prp-input" placeholder="เช่น สวนยางบ้านนาดี" value={projectName} onChange={e => setProjectName(e.target.value)} />
-                        <label className="prp-label">เจ้าของแปลง</label>
-                        <input className="prp-input" placeholder="ชื่อเจ้าของ" value={ownerName} onChange={e => setOwnerName(e.target.value)} />
-                        <label className="prp-label">จังหวัดหลัก</label>
-                        <select className="prp-input" value={province || dominantProvince} onChange={e => setProvince(e.target.value)}>
-                            <option value="">— เลือกจังหวัด —</option>
-                            {THAI_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                        <button className="prp-btn-primary" onClick={handleSave} disabled={!projectName.trim() || saveState === "saving"}>
-                            {saveState === "saving"
-                                ? <><span className="s1-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }} /> กำลังบันทึก...</>
-                                : <><i className="bi bi-floppy-disk me-2" />บันทึก</>}
-                        </button>
-                    </div>
-                )}
-                <button className="prp-btn-ghost" onClick={() => carbonResults.length > 0 ? setSubStep("carbon") : onStepChange(2)}>← กลับ</button>
-                <button className="prp-btn-text" onClick={onReset}><i className="bi bi-x-circle me-1" />ยกเลิก</button>
-            </div>
-        );
     }
     
     return null;
