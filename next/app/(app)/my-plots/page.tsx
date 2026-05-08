@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { CarbonBarChart, buildBarPoints } from "@/app/components/organisms/ParcelResultsPanel/CarbonBarChart";
 
 const HERO_BG =
-  "radial-gradient(1200px 500px at -10% -10%, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0) 60%)," +
-  "radial-gradient(900px 450px at 110% 0%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0) 58%)," +
-  "radial-gradient(700px 360px at 30% 120%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 55%)," +
-  "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.86) 100%)";
+  "radial-gradient(1000px 400px at -5% -5%, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0) 60%)," +
+  "radial-gradient(800px 400px at 105% 0%, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0) 58%)," +
+  "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)";
 
 function carbonCo2(age: number, trees: number): number {
   const H = Math.min(2.0 + 1.8 * age, 28);
@@ -77,8 +77,8 @@ function ForecastBody({
   const rawId = useId();
   const uid = rawId.replace(/:/g, "-");
 
-  // SVG dimensions - Enlarged for better desktop visibility
-  const W = isMobile ? 400 : 800, H = isMobile ? 240 : 300, PL = 12, PT = 24, PB = 36;
+  // SVG dimensions - Compacted for better density
+  const W = isMobile ? 400 : 800, H = isMobile ? 180 : 220, PL = 12, PT = 20, PB = 30;
   const iW = W - PL * 2, iH = H - PT - PB;
   const n = chartPts.length;
 
@@ -133,11 +133,11 @@ function ForecastBody({
                 {!isLast && (
                   <div style={{ position: "absolute", top: isMobile ? 12 : 10, left: "50%", right: "-50%", height: 2, background: "linear-gradient(90deg,rgba(16,185,129,0.35),rgba(16,185,129,0.1))", zIndex: 0 }} />
                 )}
-                <div style={{ width: isMobile ? 24 : 20, height: isMobile ? 24 : 20, borderRadius: "50%", flexShrink: 0, background: isFirst ? dotColor : "#fff", border: `2.5px solid ${dotColor}`, boxShadow: isFirst ? "0 0 0 4px rgba(5,150,105,0.12)" : "none", zIndex: 1, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {isFirst && <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#fff" }} />}
+                <div style={{ width: isMobile ? 20 : 16, height: isMobile ? 20 : 16, borderRadius: "50%", flexShrink: 0, background: isFirst ? dotColor : "#fff", border: `2px solid ${dotColor}`, boxShadow: isFirst ? "0 0 0 3px rgba(5,150,105,0.1)" : "none", zIndex: 1, marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {isFirst && <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff" }} />}
                 </div>
-                <div style={{ fontSize: isMobile ? 11 : 11.5, fontWeight: isFirst ? 800 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 3, textAlign: "center" }}>{m.label}</div>
-                <div style={{ fontSize: isMobile ? 16 : 14, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
+                <div style={{ fontSize: isMobile ? 10 : 10.5, fontWeight: isFirst ? 700 : 500, color: isFirst ? "#059669" : "#64748b", marginBottom: 2, textAlign: "center" }}>{m.label}</div>
+                <div style={{ fontSize: isMobile ? 14 : 13, fontWeight: 800, color: isFirst ? "#059669" : isLast ? "#15803d" : "#0f172a", textAlign: "center" }}>{fmtCompact(m.co2)}</div>
                 <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 1, textAlign: "center" }}>tCO₂</div>
                 {!isFirst && changeFromBase !== 0 && (
                   <div style={{ marginTop: 5, fontSize: isMobile ? 10.5 : 10, fontWeight: 700, color: changeFromBase > 0 ? "#16a34a" : "#dc2626", background: changeFromBase > 0 ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)", padding: isMobile ? "2px 6px" : "1px 5px", borderRadius: 6, textAlign: "center" }}>
@@ -808,173 +808,196 @@ function EditPlotModal({ plot, onClose, onSave, isMobile }: { plot: SavedPlot; o
 function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile }: { plot: SavedPlot; index: number; onDelete: () => void; onEdit?: (p: SavedPlot) => void; expanded: boolean; onToggle: () => void; isMobile: boolean }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const carbonPerTree = plot.trees && plot.trees > 0
-    ? (plot.carbonTotal / plot.trees)
-    : null;
+  const carbonPerTree = plot.trees && plot.trees > 0 ? (plot.carbonTotal / plot.trees) : null;
 
-  const statItems = [
-    { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
-    { label: "ปีที่ปลูก", val: plot.plantYearBE && plot.plantYearBE > 0 ? String(plot.plantYearBE) : "—", unit: "พ.ศ.", color: "#0369a1", bg: "rgba(3,105,161,0.08)" },
-    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", color: "#0891b2", bg: "rgba(8,145,178,0.08)" },
-    { label: "ต้นยาง", val: plot.trees && plot.trees > 0 ? plot.trees.toLocaleString("th-TH") : "—", unit: "ต้น", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" },
-    { label: "คาร์บอน/ต้น", val: carbonPerTree !== null ? carbonPerTree < 0.001 ? carbonPerTree.toExponential(2) : carbonPerTree.toFixed(4) : "—", unit: "tCO₂/ต้น", color: "#0e7490", bg: "rgba(14,116,144,0.08)" },
-    { label: "คาร์บอนทั้งแปลง", val: plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—", unit: "tCO₂", color: "#059669", bg: "rgba(5,150,105,0.08)" },
+  // Build CarbonBarChart data points
+  const currentYearBE = new Date().getFullYear() + 543;
+  const plantYearBE = plot.plantYearBE && plot.plantYearBE > 0
+    ? plot.plantYearBE
+    : (currentYearBE - (plot.rubberAge || 0));
+  const barPts = (plot.rubberAge > 0 && (plot.trees ?? 0) > 0)
+    ? buildBarPoints(plot.rubberAge, plantYearBE + (plot.rubberAge || 0), plot.trees ?? 0, "2.5*8")
+    : [];
+
+  // 4 key metrics — same fields as the map-draw input panel
+  const mainMetrics = [
+    { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", icon: "bi-grid-3x3", color: "#0d9488", grd: "linear-gradient(135deg,rgba(13,148,136,0.14),rgba(13,148,136,0.05))", border: "rgba(13,148,136,0.22)" },
+    { label: "ปีที่ปลูก", val: plot.plantYearBE && plot.plantYearBE > 0 ? String(plot.plantYearBE) : "—", unit: "พ.ศ.", icon: "bi-calendar2-check", color: "#0369a1", grd: "linear-gradient(135deg,rgba(3,105,161,0.14),rgba(3,105,161,0.05))", border: "rgba(3,105,161,0.22)" },
+    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", icon: "bi-hourglass-split", color: "#7c3aed", grd: "linear-gradient(135deg,rgba(124,58,237,0.14),rgba(124,58,237,0.05))", border: "rgba(124,58,237,0.22)" },
+    { label: "จำนวนต้น", val: plot.trees && plot.trees > 0 ? plot.trees.toLocaleString("th-TH") : "—", unit: "ต้น", icon: "bi-tree-fill", color: "#16a34a", grd: "linear-gradient(135deg,rgba(22,163,74,0.14),rgba(22,163,74,0.05))", border: "rgba(22,163,74,0.22)" },
   ];
 
   return (
     <div
       style={{
         background: "#fff",
-        borderRadius: 22,
-        border: "1px solid rgba(16,185,129,0.13)",
+        borderRadius: 20,
+        border: "1px solid rgba(16,185,129,0.12)",
         boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
         overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        transition: "box-shadow 0.25s ease, transform 0.2s ease",
+        transition: "all 0.25s ease",
+        position: "relative"
       }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 12px 36px rgba(16,185,129,0.16)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.05)"; e.currentTarget.style.transform = ""; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = "0 12px 30px rgba(16,185,129,0.12)";
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.05)";
+        e.currentTarget.style.transform = "";
+      }}
     >
-      {/* Removed Gradient top accent */}
-
-      {/* Header row */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 12 : 14, padding: isMobile ? "16px 18px 12px" : "20px 24px 14px" }}>
-        {/* Plot Index Number */}
-        <div style={{
-          width: isMobile ? 38 : 42, height: isMobile ? 38 : 42, borderRadius: isMobile ? 10 : 12, flexShrink: 0,
-          background: "rgba(16,185,129,0.1)",
-          border: "2px solid #10b981",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(16,185,129,0.08)",
-          fontSize: isMobile ? 18 : 20, fontWeight: 900, color: "#059669",
-        }}>
-          {index}
+      {/* ── Top Header Area ── */}
+      <div style={{
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: isMobile ? "flex-start" : "center",
+        justifyContent: "space-between",
+        padding: isMobile ? "16px 18px 12px" : "16px 20px 14px",
+        gap: isMobile ? 12 : 16,
+        background: "linear-gradient(to bottom, #fff, #f9fafb)"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0, flex: 1 }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+            background: "linear-gradient(135deg,#10b981,#059669)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(16,185,129,0.25)",
+            fontSize: 18, fontWeight: 900, color: "#fff"
+          }}>
+            {index}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {plot.name}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+              {plot.province && (
+                <span style={{ fontSize: 11, color: "#64748b", display: "flex", alignItems: "center", gap: 3 }}>
+                  <i className="bi bi-geo-alt-fill" style={{ color: "#10b981", fontSize: 10 }} />{plot.province}
+                </span>
+              )}
+              <span style={{ fontSize: 11, color: "#94a3b8" }}>•</span>
+              <span style={{ fontSize: 10.5, color: "#94a3b8" }}>
+                {new Date(plot.date).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Name + meta */}
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: isMobile ? 15 : 17, fontWeight: 800, color: "#0f172a", lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
-            {plot.name}
+        {/* Total Carbon Badge - Always visible, prominent but compact */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "8px 14px", background: "rgba(16,185,129,0.06)",
+          borderRadius: 14, border: "1px solid rgba(16,185,129,0.15)",
+          alignSelf: isMobile ? "stretch" : "center",
+          justifyContent: "space-between"
+        }}>
+          <div>
+            <div style={{ fontSize: 9, color: "#059669", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>คาร์บอนรวม</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "#064e3b", lineHeight: 1 }}>
+              {plot.carbonTotal > 0 ? fmtCompact(plot.carbonTotal) : "—"} <span style={{ fontSize: 11, fontWeight: 700 }}>tCO₂</span>
+            </div>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? 6 : 7, alignItems: "center" }}>
-            {plot.ownerName && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#475569", background: "#f1f5f9", padding: "3px 10px", borderRadius: 20, border: "1px solid #e2e8f0" }}>
-                <i className="bi bi-person-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.ownerName}
-              </span>
-            )}
-            {plot.province && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#475569", background: "#f1f5f9", padding: "3px 10px", borderRadius: 20, border: "1px solid #e2e8f0" }}>
-                <i className="bi bi-pin-map-fill" style={{ color: "#64748b", fontSize: 10 }} />{plot.province}
-              </span>
-            )}
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "#64748b", background: "rgba(148,163,184,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(148,163,184,0.2)" }}>
-              <i className="bi bi-clock-history" style={{ color: "#94a3b8", fontSize: 10 }} />
-              <span style={{ opacity: 0.7, fontSize: 10 }}>บันทึกเมื่อ:</span>
-              {new Date(plot.date).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
-            </span>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#10b981", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <i className="bi bi-cloud-check-fill" style={{ color: "#fff", fontSize: 14 }} />
           </div>
         </div>
       </div>
 
-      {/* Stats row — Responsive grid */}
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(6,1fr)", gap: isMobile ? 8 : 10, padding: isMobile ? "0 18px 12px" : "0 24px 14px" }}>
-        {statItems.map(({ label, val, unit, color, bg }) => (
-          <div key={label} style={{
-            borderRadius: 14, padding: isMobile ? "10px 4px" : "12px 6px", textAlign: "center",
-            background: bg, border: `1px solid ${color}22`,
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-          }}>
-            <div style={{ fontSize: 8.5, color: "#94a3b8", marginBottom: 1 }}>{label}</div>
-            <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 900, color, letterSpacing: -0.5, lineHeight: 1 }}>{val}</div>
-            <div style={{ fontSize: 9, fontWeight: 700, color: color + "bb", lineHeight: 1 }}>{unit}</div>
+      {/* ── Condensed Metrics Grid ── */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+        gap: 1,
+        background: "rgba(16,185,129,0.1)",
+        borderTop: "1px solid rgba(16,185,129,0.1)",
+        borderBottom: "1px solid rgba(16,185,129,0.1)"
+      }}>
+        {[
+          { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", icon: "bi-grid-3x3" },
+          { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", icon: "bi-hourglass-split" },
+          { label: "จำนวนต้น", val: plot.trees && plot.trees > 0 ? plot.trees.toLocaleString("th-TH") : "—", unit: "ต้น", icon: "bi-tree-fill" },
+          { label: "คาร์บอน/ต้น", val: carbonPerTree !== null ? (carbonPerTree < 0.01 ? carbonPerTree.toFixed(4) : carbonPerTree.toFixed(3)) : "—", unit: "tCO₂", icon: "bi-droplet-fill" },
+        ].map(({ label, val, unit, icon }) => (
+          <div key={label} style={{ background: "#fff", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 1 }}>
+            <div style={{ fontSize: 9.5, color: "#94a3b8", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+              <i className={`bi ${icon}`} style={{ fontSize: 10, color: "#10b981" }} /> {label}
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: 16, fontWeight: 800, color: "#334155" }}>{val}</span>
+              <span style={{ fontSize: 9.5, color: "#94a3b8", fontWeight: 500 }}>{unit}</span>
+            </div>
           </div>
         ))}
       </div>
 
-
-
-      {/* Divider */}
-      <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(16,185,129,0.15),transparent)", margin: "0 24px" }} />
-
-      {/* Footer: expand + delete */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isMobile ? "10px 16px 14px" : "11px 20px 15px" }}>
+      {/* ── Simple Action Footer ── */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "10px 16px", background: "#fff"
+      }}>
         <button
           onClick={onToggle}
           style={{
-            display: "flex", alignItems: "center", gap: 5, padding: isMobile ? "5px 10px" : "6px 15px",
-            background: expanded ? "rgba(16,185,129,0.09)" : "transparent",
-            border: "1.5px solid rgba(16,185,129,0.28)",
-            borderRadius: 10, cursor: "pointer", fontSize: isMobile ? 11 : 12, fontWeight: 700,
-            color: "#059669", transition: "all 0.15s",
+            display: "flex", alignItems: "center", gap: 6, padding: "6px 12px",
+            background: expanded ? "rgba(16,185,129,0.08)" : "transparent",
+            border: "none", borderRadius: 8, cursor: "pointer",
+            fontSize: 12, fontWeight: 700, color: "#059669", transition: "all 0.15s"
           }}
         >
-          <i className={`bi bi-chevron-${expanded ? "up" : "down"}`} />
-          {expanded ? (isMobile ? "ซ่อน" : "ซ่อนรายละเอียด") : (isMobile ? "ดูเพิ่ม" : "ดูรายละเอียดเพิ่มเติม")}
+          <i className={`bi bi-bar-chart-line${expanded ? "-fill" : ""}`} />
+          {expanded ? "ซ่อนรายละเอียด" : "ดูพยากรณ์และกราฟ"}
+          <i className={`bi bi-chevron-${expanded ? "up" : "down"}`} style={{ fontSize: 10, opacity: 0.7 }} />
         </button>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {confirmDelete ? (
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <span style={{ fontSize: 12, color: "#ef4444", fontWeight: 600 }}>ยืนยันลบ?</span>
-              <button onClick={onDelete} style={{ padding: "5px 14px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12 }}>ลบ</button>
-              <button onClick={() => setConfirmDelete(false)} style={{ padding: "5px 12px", background: "rgba(0,0,0,0.06)", color: "#64748b", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12 }}>ยกเลิก</button>
-            </div>
-          ) : (
+        <div style={{ display: "flex", gap: 6 }}>
+          {!confirmDelete ? (
             <>
-              <button
-                onClick={() => onEdit?.(plot)}
-                style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 14px", background: "rgba(14,165,233,0.07)", color: "#0ea5e9", border: "1px solid rgba(14,165,233,0.2)", borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,165,233,0.13)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(14,165,233,0.07)"; }}
-              >
-                <i className="bi bi-pencil-square" /> แก้ไข
+              <button onClick={() => onEdit?.(plot)} style={{ width: 32, height: 32, borderRadius: 8, background: "#f1f5f9", color: "#475569", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }} title="แก้ไข">
+                <i className="bi bi-pencil-square" style={{ fontSize: 14 }} />
               </button>
-              <button
-                onClick={() => setConfirmDelete(true)}
-                style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 14px", background: "rgba(239,68,68,0.07)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.13)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.07)"; }}
-              >
-                <i className="bi bi-trash3" /> ลบแปลงนี้
+              <button onClick={() => setConfirmDelete(true)} style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(239,68,68,0.06)", color: "#ef4444", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }} title="ลบ">
+                <i className="bi bi-trash3" style={{ fontSize: 14 }} />
               </button>
             </>
+          ) : (
+            <div style={{ display: "flex", gap: 4 }}>
+              <button onClick={onDelete} style={{ padding: "4px 10px", background: "#ef4444", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: 700, fontSize: 11 }}>ลบ</button>
+              <button onClick={() => setConfirmDelete(false)} style={{ padding: "4px 10px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 11 }}>ยกเลิก</button>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Expanded details */}
       {expanded && (
-        <div style={{ padding: isMobile ? "4px 12px 22px" : "4px 24px 22px", borderTop: "1px dashed rgba(16,185,129,0.15)" }}>
-          <ForecastSection
-            rubberAge={plot.rubberAge}
-            trees={plot.trees ?? 0}
-            carbonTotal={plot.carbonTotal}
-            forecast={plot.forecast}
-            isMobile={isMobile}
-          />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 8, marginTop: 14 }}>
-            {[
-              { k: "ID", v: plot.id },
-              { k: "วันที่บันทึก", v: new Date(plot.date).toLocaleString("th-TH") },
-              { k: "พื้นที่ (ไร่)", v: plot.areaRai.toFixed(4) },
-              { k: "อายุยาง", v: `${plot.rubberAge} ปี` },
-              { k: "จำนวนต้น", v: plot.trees?.toLocaleString("th-TH") ?? "—" },
-              { k: "ปีปลูก (พ.ศ.)", v: plot.plantYearBE ? String(plot.plantYearBE) : "—" },
-              { k: "คาร์บอนปัจจุบัน", v: `${plot.carbonTotal.toFixed(2)} tCO₂` },
-              { k: "คาร์บอน/ต้น", v: plot.trees && plot.trees > 0 ? `${(plot.carbonTotal / plot.trees).toFixed(4)} tCO₂` : "—" },
-            ].map(({ k, v }) => (
-              <div key={k} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.025)", borderRadius: 10, border: "1px solid rgba(0,0,0,0.04)" }}>
-                <div style={{ color: "#94a3b8", fontSize: 9.5, fontWeight: 600, letterSpacing: 0.3 }}>{k}</div>
-                <div style={{ color: "#0f172a", fontWeight: 700, marginTop: 2, fontSize: 12, wordBreak: "break-all" }}>{v}</div>
-              </div>
-            ))}
+        <div style={{ padding: "0 16px 20px", background: "#fff" }}>
+          <div style={{ height: 1, background: "#f1f5f9", marginBottom: 16 }} />
+          
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(16,185,129,0.1)", color: "#059669", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <i className="bi bi-bar-chart-line-fill" style={{ fontSize: 12 }} />
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#064e3b" }}>กราฟการกักเก็บคาร์บอนรายปี (tCO₂)</div>
           </div>
+
+          {barPts.length > 0 ? (
+            <div style={{ marginBottom: 20 }}>
+              <CarbonBarChart pts={barPts} isMobile={isMobile} />
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "20px", background: "#f8fafc", borderRadius: 12, color: "#94a3b8", fontSize: 12, marginBottom: 20 }}>
+              กรุณาบันทึก อายุยาง และ จำนวนต้น เพื่อแสดงกราฟ
+            </div>
+          )}
+
         </div>
       )}
     </div>
   );
 }
+
+
 
 export default function MyPlotsPage() {
   const { user, ready } = useAuth();
@@ -1195,8 +1218,8 @@ export default function MyPlotsPage() {
 
         {/* Hero */}
         <div style={{
-          background: HERO_BG, borderRadius: isMobile ? 20 : 24, padding: isMobile ? "24px 20px" : "36px 48px", marginBottom: 24,
-          border: "1px solid rgba(16,185,129,0.15)", boxShadow: "0 20px 40px rgba(0,0,0,0.03)",
+          background: HERO_BG, borderRadius: isMobile ? 18 : 20, padding: isMobile ? "20px 18px" : "28px 40px", marginBottom: 20,
+          border: "1px solid rgba(16,185,129,0.15)", boxShadow: "0 10px 30px rgba(0,0,0,0.02)",
           position: "relative", overflow: "hidden",
         }}>
           <div style={{ position: "absolute", top: -50, left: -50, width: isMobile ? 150 : 200, height: isMobile ? 150 : 200, background: "rgba(16,185,129,0.2)", filter: "blur(60px)", borderRadius: "50%", pointerEvents: "none" }} />
@@ -1318,17 +1341,15 @@ export default function MyPlotsPage() {
               { label: "แปลงทั้งหมด", val: plots.length.toLocaleString("th-TH"), unit: "แปลง", icon: "bi-map", color: "#16a34a", bg: "rgba(22,163,74,0.08)" },
               { label: "พื้นที่รวม", val: totalArea.toFixed(2), unit: "ไร่", icon: "bi-grid-fill", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
               { label: "คาร์บอนปัจจุบัน", val: fmtCompact(totalCarbon), unit: "tCO₂", icon: "bi-cloud-arrow-up-fill", color: "#059669", bg: "rgba(5,150,105,0.08)" },
-              ...(totalForecast7 > 0 ? [{ label: "พยากรณ์ +7 ปี", val: fmtCompact(totalForecast7), unit: "tCO₂", icon: "bi-graph-up-arrow", color: "#7c3aed", bg: "rgba(124,58,237,0.08)" }] : []),
             ] as { label: string; val: string; unit: string; icon: string; color: string; bg: string }[]).map(({ label, val, unit, icon, color, bg }) => (
-              <div key={label} style={{ background: "#fff", borderRadius: 16, padding: isMobile ? "12px 14px" : "16px 18px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 2px 10px rgba(0,0,0,0.03)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                  <span style={{ fontSize: isMobile ? 10 : 12, color: "#64748b" }}>{label}</span>
-                  <div style={{ width: 26, height: 26, borderRadius: 8, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <i className={`bi ${icon}`} style={{ color, fontSize: 12 }} />
+              <div key={label} style={{ background: "#fff", borderRadius: 14, padding: isMobile ? "10px 12px" : "12px 14px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                  <span style={{ fontSize: 10, color: "#64748b" }}>{label}</span>
+                  <div style={{ width: 22, height: 22, borderRadius: 6, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <i className={`bi ${icon}`} style={{ color, fontSize: 10 }} />
                   </div>
                 </div>
-                <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color }}>{val}</div>
-                <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1 }}>{unit}</div>
+                <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 800, color }}>{val} <span style={{ fontSize: 9, color: "#94a3b8", fontWeight: 400 }}>{unit}</span></div>
               </div>
             ))}
           </div>
@@ -1435,7 +1456,7 @@ export default function MyPlotsPage() {
               {projectGroups.map((group, gIdx) => (
                 <div key={`${group.projectName}-${gIdx}`} style={{ background: "#fff", borderRadius: 24, border: "1px solid rgba(16,185,129,0.2)", overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.03)" }}>
                   {/* Project Header */}
-                  <div style={{ padding: isMobile ? "16px 20px" : "20px 28px", background: "linear-gradient(135deg,rgba(16,185,129,0.05),rgba(5,150,105,0.02))", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 16 }}>
+                  <div style={{ padding: isMobile ? "14px 16px" : "16px 24px", background: "linear-gradient(135deg,rgba(16,185,129,0.04),rgba(5,150,105,0.01))", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: 12 }}>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                         <div style={{ width: 32, height: 32, borderRadius: 10, background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
