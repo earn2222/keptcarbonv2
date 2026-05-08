@@ -61,16 +61,16 @@ export function CarbonBarChart({
 
   const W = isMobile ? 380 : 700;
   const H = isMobile ? 280 : 340;
-  const PL = isMobile ? 8 : 12;
-  const PT = 36;
-  const PB = isMobile ? 60 : 54;
-  const PR = 8;
+  const PL = isMobile ? 12 : 20;
+  const PT = 50;
+  const PB = isMobile ? 65 : 60;
+  const PR = 15;
   const iW = W - PL - PR;
   const iH = H - PT - PB;
 
-  const maxCo2 = Math.max(...pts.map((p) => p.co2), 1);
-  const barW = iW / pts.length - (isMobile ? 1 : 2);
-  const gap = isMobile ? 1 : 2;
+  const maxCo2 = Math.max(...pts.map((p) => p.co2), 1) * 1.15;
+  const barW = iW / pts.length - (isMobile ? 1.5 : 3);
+  const gap = isMobile ? 1.5 : 3;
 
   // Find cycle boundaries for labels
   const cycleStarts: { idx: number; name: string; color: string }[] = [];
@@ -81,51 +81,59 @@ export function CarbonBarChart({
     }
   });
 
+  // Calculate line path points
+  const linePoints = pts.map((p, i) => {
+    const bh = Math.max((p.co2 / maxCo2) * iH, 2);
+    const x = PL + i * (barW + gap) + barW / 2;
+    const y = PT + iH - bh;
+    return { x, y };
+  });
+
+  // Simple spline or line path
+  const linePath = linePoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
+
   return (
-    <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)", borderRadius: 16, padding: "12px 4px 8px", overflowX: "auto" }}>
+    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 20, padding: "16px 8px 12px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
       {/* Legend */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "0 8px 10px", justifyContent: "center" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 12px", padding: "0 12px 14px", justifyContent: "center" }}>
         {cycleStarts.map((cs, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: "#374151" }}>
-            <div style={{ width: 10, height: 10, borderRadius: 3, background: cs.color }} />
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: "#475569", background: "rgba(255,255,255,0.7)", padding: "4px 10px", borderRadius: 20, border: "1px solid rgba(0,0,0,0.03)" }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: cs.color, boxShadow: `0 0 8px ${cs.color}66` }} />
             {cs.name} ({pts[cs.idx].age}–{i < cycleStarts.length - 1 ? pts[cycleStarts[i + 1].idx - 1].age : pts[pts.length - 1].age} ปี)
           </div>
         ))}
       </div>
-      <div style={{ overflowX: "auto" }}>
+
+      <div style={{ overflowX: "auto", paddingBottom: 4 }}>
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          style={{ width: Math.max(W, pts.length * (isMobile ? 16 : 22)), height: H, display: "block" }}
+          style={{ width: Math.max(W, pts.length * (isMobile ? 18 : 24)), height: H, display: "block", overflow: "visible" }}
         >
           <defs>
             {CYCLE_COLORS.map((c, i) => (
               <linearGradient key={i} id={`cycleGrad${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={c.bar} stopOpacity="0.95" />
-                <stop offset="100%" stopColor={c.bar} stopOpacity="0.6" />
+                <stop offset="0%" stopColor={c.bar} stopOpacity="1" />
+                <stop offset="100%" stopColor={c.bar} stopOpacity="0.75" />
               </linearGradient>
             ))}
+            <filter id="barShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
+            </filter>
+            <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#10b981" />
+              <stop offset="50%" stopColor="#3b82f6" />
+              <stop offset="100%" stopColor="#8b5cf6" />
+            </linearGradient>
           </defs>
 
           {/* Grid lines */}
-          {[0.25, 0.5, 0.75, 1].map((t) => (
+          {[0, 0.25, 0.5, 0.75, 1].map((t) => (
             <line key={t}
               x1={PL} y1={PT + t * iH} x2={PL + iW} y2={PT + t * iH}
-              stroke="rgba(0,0,0,0.06)" strokeWidth={t === 1 ? 1 : 0.5}
-              strokeDasharray={t < 1 ? "3,3" : undefined}
+              stroke="rgba(0,0,0,0.05)" strokeWidth={1}
+              strokeDasharray={t < 1 && t > 0 ? "4,4" : undefined}
             />
           ))}
-
-          {/* Cycle separator lines */}
-          {cycleStarts.slice(1).map((cs) => {
-            const x = PL + cs.idx * (barW + gap);
-            return (
-              <line key={cs.idx}
-                x1={x - gap / 2} y1={PT - 8} x2={x - gap / 2} y2={PT + iH + 4}
-                stroke={getCycleColor(pts[cs.idx].cycle).bar}
-                strokeWidth={1.5} strokeDasharray="4,3" opacity={0.4}
-              />
-            );
-          })}
 
           {/* Bars */}
           {pts.map((p, i) => {
@@ -135,44 +143,82 @@ export function CarbonBarChart({
             const col = getCycleColor(p.cycle);
             const isHov = hoverIdx === i;
             const cycleClamp = Math.min(Math.max(0, p.cycle), CYCLE_COLORS.length - 1);
+            
+            // +- indicators (error bars)
+            const errorSize = bh * 0.08; // 8% error margin
+            const lineX = x + barW / 2;
+
             return (
               <g key={i} onMouseEnter={() => setHoverIdx(i)} onMouseLeave={() => setHoverIdx(null)} style={{ cursor: "pointer" }}>
-                {/* Hover glow */}
+                {/* Hover effect bg */}
                 {isHov && (
-                  <rect x={x - 2} y={y - 4} width={barW + 4} height={bh + 4} rx={4}
-                    fill={col.bar} opacity={0.18} />
+                  <rect x={x - 2} y={PT} width={barW + 4} height={iH} rx={4}
+                    fill={col.bar} opacity={0.06} />
                 )}
-                <rect x={x} y={y} width={barW} height={bh} rx={isMobile ? 2 : 3}
+                
+                {/* Main Bar */}
+                <rect x={x} y={y} width={barW} height={bh} rx={isMobile ? 2 : 4}
                   fill={`url(#cycleGrad${cycleClamp})`}
-                  opacity={isHov ? 1 : 0.85}
+                  filter={isHov ? "url(#barShadow)" : undefined}
+                  style={{ transition: "all 0.2s" }}
                 />
-                {/* Cycle renewal marker (age 8, 15, 22, 29) */}
-                {p.cycleAge === 1 && p.age > 1 && (
-                  <circle cx={x + barW / 2} cy={y - 8} r={3} fill={col.bar} opacity={0.7} />
-                )}
+
+                {/* +- (Error Bars) */}
+                <line 
+                  x1={lineX} y1={y - errorSize} x2={lineX} y2={y + errorSize} 
+                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} 
+                />
+                <line 
+                  x1={lineX - 2} y1={y - errorSize} x2={lineX + 2} y2={y - errorSize} 
+                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} 
+                />
+                <line 
+                  x1={lineX - 2} y1={y + errorSize} x2={lineX + 2} y2={y + errorSize} 
+                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} 
+                />
               </g>
             );
           })}
 
-          {/* X-axis age labels (every 7 years + start) */}
+          {/* Trend Line */}
+          <path 
+            d={linePath} 
+            fill="none" 
+            stroke="url(#lineGrad)" 
+            strokeWidth={2.5} 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            opacity={0.8}
+            style={{ pointerEvents: "none" }}
+          />
+          
+          {/* Trend Line Points */}
+          {linePoints.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="#fff" stroke={getCycleColor(pts[i].cycle).bar} strokeWidth={1.5} opacity={0.9} style={{ pointerEvents: "none" }} />
+          ))}
+
+          {/* X-axis age labels */}
           {pts.map((p, i) => {
-            const showLabel = p.age === pts[0].age || p.age % 7 === 0;
+            const showLabel = p.age === pts[0].age || p.age === pts[pts.length - 1].age || p.age % 7 === 0;
             if (!showLabel) return null;
             const x = PL + i * (barW + gap) + barW / 2;
             return (
               <g key={i}>
-                <text x={x} y={PT + iH + 16} textAnchor="middle"
-                  fontSize={isMobile ? 10 : 11} fontWeight={700}
+                <text x={x} y={PT + iH + 18} textAnchor="middle"
+                  fontSize={isMobile ? 10 : 12} fontWeight={800}
                   fill={getCycleColor(p.cycle).bar}>
-                  อายุ {p.age}
+                  {p.age} ปี
                 </text>
-                <text x={x} y={PT + iH + (isMobile ? 30 : 29)} textAnchor="middle"
-                  fontSize={isMobile ? 9 : 9.5} fill="#94a3b8">
-                  พ.ศ.{p.yearBE}
+                <text x={x} y={PT + iH + (isMobile ? 32 : 34)} textAnchor="middle"
+                  fontSize={isMobile ? 9 : 10} fill="#64748b" fontWeight={500}>
+                  {p.yearBE}
                 </text>
               </g>
             );
           })}
+
+          {/* Y-axis labels */}
+          <text x={PL - 5} y={PT + 4} textAnchor="end" fontSize={10} fill="#94a3b8" fontWeight={600}>tCO₂</text>
 
           {/* Tooltip */}
           {hoverIdx !== null && (() => {
@@ -181,20 +227,20 @@ export function CarbonBarChart({
             const bh = Math.max((p.co2 / maxCo2) * iH, 2);
             const x = PL + hoverIdx * (barW + gap) + barW / 2;
             const y = PT + iH - bh;
-            const ttW = 110, ttH = 58;
-            const ttX = Math.min(Math.max(x - ttW / 2, 0), W - ttW - 2);
-            const ttY = Math.max(y - ttH - 8, 2);
+            const ttW = 120, ttH = 64;
+            const ttX = Math.min(Math.max(x - ttW / 2, 4), W - ttW - 4);
+            const ttY = Math.max(y - ttH - 12, 4);
             return (
               <g pointerEvents="none">
-                <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={8} fill="#0f172a" opacity={0.94} />
-                <text x={ttX + ttW / 2} y={ttY + 15} textAnchor="middle" fontSize={10} fill={col.bar} fontWeight={700}>
-                  {col.name} · อายุ {p.age} ปี
+                <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={12} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
+                <text x={ttX + ttW / 2} y={ttY + 18} textAnchor="middle" fontSize={11} fill={col.bar} fontWeight={800}>
+                  {col.name} · {p.age} ปี
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + 32} textAnchor="middle" fontSize={13} fill="#fff" fontWeight={800}>
-                  {p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })} tCO₂
+                <text x={ttX + ttW / 2} y={ttY + 38} textAnchor="middle" fontSize={15} fill="#fff" fontWeight={900}>
+                  ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + 48} textAnchor="middle" fontSize={9.5} fill="#94a3b8">
-                  พ.ศ. {p.yearBE}
+                <text x={ttX + ttW / 2} y={ttY + 54} textAnchor="middle" fontSize={10} fill="#94a3b8" fontWeight={600}>
+                   ตันคาร์บอน (tCO₂)
                 </text>
               </g>
             );
