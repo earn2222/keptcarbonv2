@@ -734,20 +734,21 @@ export function ParcelResultsPanel({
                 // Average age just for labeling purposes
                 const avgAge = Math.round(carbonResults.reduce((sum, c) => sum + c.age, 0) / carbonResults.length);
 
-                for (let i = 0; i <= 35; i++) {
+                // Loop only until age 35 max
+                const maxSteps = Math.max(0, 35 - avgAge);
+                for (let i = 0; i <= maxSteps; i++) {
+                    const currentAge = avgAge + i;
                     const yearBE = CURRENT_BE + i;
                     let totalCo2 = 0;
                     carbonResults.forEach(c => {
                         totalCo2 += carbonCo2(c.age + i, c.trees, c.spacing);
                     });
-
-                    // Use a unified cycle based on progression from now
                     pts.push({
-                        age: avgAge + i,
+                        age: currentAge,
                         yearBE,
                         co2: totalCo2,
-                        cycle: Math.floor(i / 7),
-                        cycleAge: (i % 7) + 1
+                        cycle: Math.min(Math.floor((currentAge - 1) / 7), 4),
+                        cycleAge: ((currentAge - 1) % 7) + 1
                     });
                 }
             } else if (cr) {
@@ -760,9 +761,9 @@ export function ParcelResultsPanel({
                     <div style={{ 
                         display: "flex", 
                         alignItems: "center", 
-                        gap: 12, 
-                        marginBottom: 20, 
-                        paddingBottom: 16,
+                        gap: 10, 
+                        marginBottom: 12, 
+                        paddingBottom: 12,
                         borderBottom: "1px solid rgba(16,185,129,0.1)"
                     }}>
                         <div style={{ 
@@ -814,31 +815,31 @@ export function ParcelResultsPanel({
                     {isTotal ? (
                         <>
                             {/* Total summary */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 8, marginBottom: 14 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 6, marginBottom: 10 }}>
                                 {[
                                     { label: "คาร์บอนรวมปัจจุบัน", val: `${summaryTotalCo2.toFixed(1)} tCO₂`, color: "#0d9488" },
                                 ].map(({ label, val, color }) => (
-                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
-                                        <div style={{ fontSize: isMobile ? 16 : 15, fontWeight: 800, color }}>{val}</div>
-                                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{label}</div>
+                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "8px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                                        <div style={{ fontSize: isMobile ? 16 : 17, fontWeight: 800, color }}>{val}</div>
+                                        <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 500 }}>{label}</div>
                                     </div>
                                 ))}
                             </div>
                             <CarbonBarChart pts={pts} isMobile={isMobile} />
-                            <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 6 }}>
+                            <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>
                                 hover บนแท่งเพื่อดูรายละเอียด · แนวโน้มคาร์บอนรวม (35 ปี)
                             </div>
                         </>
                     ) : cr ? (
                         <>
                             {/* Plot info summary */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 8, marginBottom: 14 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 6, marginBottom: 10 }}>
                                 {[
                                     { label: "คาร์บอนปัจจุบัน", val: `${cr.co2Now.toFixed(1)} tCO₂`, color: "#0d9488" },
                                 ].map(({ label, val, color }) => (
-                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
-                                        <div style={{ fontSize: isMobile ? 16 : 15, fontWeight: 800, color }}>{val}</div>
-                                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{label}</div>
+                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "8px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                                        <div style={{ fontSize: isMobile ? 16 : 17, fontWeight: 800, color }}>{val}</div>
+                                        <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 500 }}>{label}</div>
                                     </div>
                                 ))}
                             </div>
@@ -847,13 +848,13 @@ export function ParcelResultsPanel({
                             {/* Bar chart */}
                             <CarbonBarChart pts={pts} isMobile={isMobile} />
 
-                            <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 6 }}>
+                            <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>
                                 hover บนแท่งเพื่อดูรายละเอียด · แบ่งทุก 7 ปี (โคลนต้นยาง)
                             </div>
                         </>
                     ) : null}
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
                         <button
                             className="prp-btn-primary"
                             onClick={() => handleSave()}
