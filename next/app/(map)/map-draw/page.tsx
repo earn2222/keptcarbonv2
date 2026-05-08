@@ -277,21 +277,6 @@ export default function MapDrawPage() {
         if (drawingRef.current) return;
         if (!e.features?.length) return;
         const p = (e.features[0].properties ?? {}) as Record<string, unknown>;
-        const html = `
-          <div style="font-family:var(--font,inherit); font-size:14px; line-height:1.6; color:#222; min-width:240px;">
-            <div style="font-weight:700; font-size:16px; margin-bottom:6px; color:#1e7a47;">${fmt(p.farm_name)}</div>
-            <div><b>เลขประจำตัว:</b> ${fmt(p.farm_idc)}</div>
-            <div><b>เลขคำขอ:</b> ${fmt(p.app_no)} (แปลงที่ ${fmt(p.land_seq)})</div>
-            <div><b>หมู่ ${fmt(p.land_moo)}</b> ต.${fmt(p.tambon)} อ.${fmt(p.amphoe_t)} จ.${fmt(p.province)}</div>
-            <div><b>ปีปลูก:</b> ${fmt(p.grow_year)}</div>
-            <div><b>พื้นที่:</b> ${fmt(p.grow_area)}</div>
-            <div><b>ประเภท:</b> ${fmt(p.rip_type)}</div>
-          </div>`;
-        new maplibregl.Popup({ closeButton: true, maxWidth: "320px" })
-          .setLngLat(e.lngLat)
-          .setHTML(html)
-          .addTo(map);
-
         if (p.plot_index) {
           const idx = parseInt(String(p.plot_index), 10) - 1;
           setSelectedPlotIndex(idx);
