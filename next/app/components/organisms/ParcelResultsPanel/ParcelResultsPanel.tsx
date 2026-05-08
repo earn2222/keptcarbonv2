@@ -580,7 +580,7 @@ export function ParcelResultsPanel({
                 {/* Project name — shared */}
                 <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfdf5)", borderRadius: 14, padding: isMobile ? "14px 14px" : "16px 20px", marginBottom: 16, border: "1px solid rgba(16,185,129,0.18)" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#059669", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
-                        <i className="bi bi-folder2-open" /> ชื่อโครงการ (ใช้ร่วมกันทุกแปลง)
+                        <i className="bi bi-folder2-open" /> ชื่อโครงการ (ใช้ร่วมกันทุกแปลง) <span style={{ color: "#ef4444" }}>*</span>
                     </div>
                     <input className="prp-input" style={{ marginBottom: 0 }} placeholder="เช่น สวนยางบ้านนาดี" value={projectName} onChange={e => setProjectName(e.target.value)} />
                 </div>
@@ -670,7 +670,15 @@ export function ParcelResultsPanel({
 
                 {/* Action buttons */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18 }}>
-                    <button className="prp-btn-primary" onClick={handleProcessCarbon} style={{ background: "linear-gradient(135deg,#10b981,#059669)" }}>
+                    <button 
+                        className="prp-btn-primary" 
+                        onClick={handleProcessCarbon} 
+                        disabled={!projectName.trim()}
+                        style={{ 
+                            background: projectName.trim() ? "linear-gradient(135deg,#10b981,#059669)" : "#cbd5e1",
+                            cursor: projectName.trim() ? "pointer" : "not-allowed"
+                        }}
+                    >
                         <i className="bi bi-graph-up-arrow me-2" />ประมวลผลคาร์บอน
                     </button>
                     <button 
@@ -700,7 +708,10 @@ export function ParcelResultsPanel({
                             handleSave(results);
                         }} 
                         disabled={!projectName.trim() || saveState === "saving"}
-                        style={{ background: "linear-gradient(135deg,#0369a1,#0284c7)" }}
+                        style={{ 
+                            background: projectName.trim() ? "linear-gradient(135deg,#0369a1,#0284c7)" : "#cbd5e1",
+                            cursor: projectName.trim() ? "pointer" : "not-allowed"
+                        }}
                     >
                         {saveState === "saving" ? (
                             <><span className="s1-spin" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", marginRight: 8 }} /> กำลังบันทึก...</>
