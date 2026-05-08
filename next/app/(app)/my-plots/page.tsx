@@ -33,6 +33,8 @@ type SavedPlot = {
   rubberAge: number;
   plantYearBE?: number;
   trees?: number;
+  variety?: string;
+  spacing?: string;
   confidence?: number;
   userId?: string;
   ownerName?: string;
@@ -823,8 +825,10 @@ function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile 
   const mainMetrics = [
     { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", icon: "bi-grid-3x3", color: "#0d9488", grd: "linear-gradient(135deg,rgba(13,148,136,0.14),rgba(13,148,136,0.05))", border: "rgba(13,148,136,0.22)" },
     { label: "ปีที่ปลูก", val: plot.plantYearBE && plot.plantYearBE > 0 ? String(plot.plantYearBE) : "—", unit: "พ.ศ.", icon: "bi-calendar2-check", color: "#0369a1", grd: "linear-gradient(135deg,rgba(3,105,161,0.14),rgba(3,105,161,0.05))", border: "rgba(3,105,161,0.22)" },
-    { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", icon: "bi-hourglass-split", color: "#7c3aed", grd: "linear-gradient(135deg,rgba(124,58,237,0.14),rgba(124,58,237,0.05))", border: "rgba(124,58,237,0.22)" },
+    { label: "พันธุ์ยาง", val: plot.variety || "—", unit: "", icon: "bi-patch-check", color: "#7c3aed", grd: "linear-gradient(135deg,rgba(124,58,237,0.14),rgba(124,58,237,0.05))", border: "rgba(124,58,237,0.22)" },
     { label: "จำนวนต้น", val: plot.trees && plot.trees > 0 ? plot.trees.toLocaleString("th-TH") : "—", unit: "ต้น", icon: "bi-tree-fill", color: "#16a34a", grd: "linear-gradient(135deg,rgba(22,163,74,0.14),rgba(22,163,74,0.05))", border: "rgba(22,163,74,0.22)" },
+    { label: "ระยะปลูก", val: plot.spacing || "—", unit: "ม.", icon: "bi-arrows-expand", color: "#ea580c", grd: "linear-gradient(135deg,rgba(234,88,12,0.14),rgba(234,88,12,0.05))", border: "rgba(234,88,12,0.22)" },
+    { label: "คาร์บอน/ต้น", val: carbonPerTree !== null ? (carbonPerTree < 0.01 ? carbonPerTree.toFixed(4) : carbonPerTree.toFixed(3)) : "—", unit: "tCO₂", icon: "bi-droplet-fill", color: "#059669", grd: "linear-gradient(135deg,rgba(5,150,105,0.14),rgba(5,150,105,0.05))", border: "rgba(5,150,105,0.22)" },
   ];
 
   return (
@@ -869,7 +873,7 @@ function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile 
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {plot.name}
+              แปลงที่ {index}
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
               {plot.province && (
@@ -908,7 +912,7 @@ function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile 
       {/* ── Condensed Metrics Grid ── */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+        gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
         gap: 1,
         background: "rgba(16,185,129,0.1)",
         borderTop: "1px solid rgba(16,185,129,0.1)",
@@ -916,8 +920,10 @@ function PlotCard({ plot, index, onDelete, onEdit, expanded, onToggle, isMobile 
       }}>
         {[
           { label: "พื้นที่", val: plot.areaRai > 0 ? plot.areaRai.toFixed(2) : "—", unit: "ไร่", icon: "bi-grid-3x3" },
-          { label: "อายุยาง", val: plot.rubberAge > 0 ? String(plot.rubberAge) : "—", unit: "ปี", icon: "bi-hourglass-split" },
+          { label: "ปีที่ปลูก", val: plot.plantYearBE && plot.plantYearBE > 0 ? String(plot.plantYearBE) : "—", unit: "พ.ศ.", icon: "bi-calendar2-check" },
+          { label: "พันธุ์ยาง", val: plot.variety || "—", unit: "", icon: "bi-patch-check" },
           { label: "จำนวนต้น", val: plot.trees && plot.trees > 0 ? plot.trees.toLocaleString("th-TH") : "—", unit: "ต้น", icon: "bi-tree-fill" },
+          { label: "ระยะปลูก", val: plot.spacing || "—", unit: "ม.", icon: "bi-arrows-expand" },
           { label: "คาร์บอน/ต้น", val: carbonPerTree !== null ? (carbonPerTree < 0.01 ? carbonPerTree.toFixed(4) : carbonPerTree.toFixed(3)) : "—", unit: "tCO₂", icon: "bi-droplet-fill" },
         ].map(({ label, val, unit, icon }) => (
           <div key={label} style={{ background: "#fff", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 1 }}>
@@ -1340,7 +1346,6 @@ export default function MyPlotsPage() {
             {([
               { label: "แปลงทั้งหมด", val: plots.length.toLocaleString("th-TH"), unit: "แปลง", icon: "bi-map", color: "#16a34a", bg: "rgba(22,163,74,0.08)" },
               { label: "พื้นที่รวม", val: totalArea.toFixed(2), unit: "ไร่", icon: "bi-grid-fill", color: "#0d9488", bg: "rgba(13,148,136,0.08)" },
-              { label: "คาร์บอนปัจจุบัน", val: fmtCompact(totalCarbon), unit: "tCO₂", icon: "bi-cloud-arrow-up-fill", color: "#059669", bg: "rgba(5,150,105,0.08)" },
             ] as { label: string; val: string; unit: string; icon: string; color: string; bg: string }[]).map(({ label, val, unit, icon, color, bg }) => (
               <div key={label} style={{ background: "#fff", borderRadius: 14, padding: isMobile ? "10px 12px" : "12px 14px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
