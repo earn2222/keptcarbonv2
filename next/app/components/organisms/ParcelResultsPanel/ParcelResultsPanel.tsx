@@ -407,11 +407,11 @@ export function ParcelResultsPanel({
     // Initialize plotForms automatically when ready
     useEffect(() => {
         if (searchCount !== null && !searchRunning && !searchErr && plots.length > 0 && plotForms.length === 0) {
-            setPlotForms(plots.map(p => ({
-                plantYear: p.plantYearBE > 0 ? String(p.plantYearBE) : "",
-                treeCount: p.trees > 0 ? String(p.trees) : "",
+            setPlotForms(plots.map(() => ({
+                plantYear: "",
+                treeCount: "",
                 variety: "",
-                spacing: "2.5*8",
+                spacing: "",
             })));
         }
     }, [searchCount, searchRunning, searchErr, plots, plotForms.length]);
@@ -590,28 +590,65 @@ export function ParcelResultsPanel({
                                         </div>
                                     </div>
                                     {/* Fields grid */}
-                                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr", gap: 10, padding: "12px 14px" }}>
-                                        <div>
-                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>ปีที่ปลูก (พ.ศ.)</div>
-                                            <select className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} value={form.plantYear} onChange={e => updateForm(i, "plantYear", e.target.value)}>
-                                                <option value="">— เลือกปี —</option>
+                                    <div style={{ 
+                                        display: "grid", 
+                                        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", 
+                                        gap: "16px 20px", 
+                                        padding: isMobile ? "16px" : "20px 24px",
+                                        background: "#fff"
+                                    }}>
+                                        <div className="prp-field-group">
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                                                <i className="bi bi-calendar-event" style={{ color: "#10b981" }} /> ปีที่ปลูก (พ.ศ.)
+                                            </div>
+                                            <select 
+                                                className="prp-input" 
+                                                style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }} 
+                                                value={form.plantYear} 
+                                                onChange={e => updateForm(i, "plantYear", e.target.value)}
+                                            >
+                                                <option value="">— เลือกปีที่เริ่มปลูก —</option>
                                                 {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
                                             </select>
                                         </div>
-                                        <div>
-                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>จำนวนต้นยาง</div>
-                                            <input className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} type="number" placeholder="เช่น 200" value={form.treeCount} onChange={e => updateForm(i, "treeCount", e.target.value)} />
+                                        <div className="prp-field-group">
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                                                <i className="bi bi-tree" style={{ color: "#10b981" }} /> จำนวนต้นยาง
+                                            </div>
+                                            <input 
+                                                className="prp-input" 
+                                                style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }} 
+                                                type="number" 
+                                                placeholder="ระบุจำนวนต้น เช่น 200" 
+                                                value={form.treeCount} 
+                                                onChange={e => updateForm(i, "treeCount", e.target.value)} 
+                                            />
                                         </div>
-                                        <div>
-                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>พันธุ์ยาง</div>
-                                            <select className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} value={form.variety} onChange={e => updateForm(i, "variety", e.target.value)}>
-                                                <option value="">— เลือกพันธุ์ —</option>
+                                        <div className="prp-field-group">
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                                                <i className="bi bi-tags" style={{ color: "#10b981" }} /> พันธุ์ยาง
+                                            </div>
+                                            <select 
+                                                className="prp-input" 
+                                                style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }} 
+                                                value={form.variety} 
+                                                onChange={e => updateForm(i, "variety", e.target.value)}
+                                            >
+                                                <option value="">— เลือกสายพันธุ์ยาง —</option>
                                                 {VARIETY_OPTIONS.map(v => <option key={v} value={v}>{v}</option>)}
                                             </select>
                                         </div>
-                                        <div>
-                                            <div style={{ fontSize: 11, fontWeight: 600, color: "#475569", marginBottom: 4 }}>ระยะห่างปลูก (ม.)</div>
-                                            <select className="prp-input" style={{ marginBottom: 0, fontSize: isMobile ? 13 : 12 }} value={form.spacing} onChange={e => updateForm(i, "spacing", e.target.value)}>
+                                        <div className="prp-field-group">
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                                                <i className="bi bi-arrows-expand" style={{ color: "#10b981" }} /> ระยะห่างปลูก (ม.)
+                                            </div>
+                                            <select 
+                                                className="prp-input" 
+                                                style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }} 
+                                                value={form.spacing} 
+                                                onChange={e => updateForm(i, "spacing", e.target.value)}
+                                            >
+                                                <option value="">— เลือกระยะปลูก —</option>
                                                 {SPACING_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                         </div>

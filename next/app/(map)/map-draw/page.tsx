@@ -1108,10 +1108,6 @@ export default function MapDrawPage() {
                     ) : (
                       /* ── Default: show instructions + start button ── */
                       <>
-                        <div className="mds-instr-note">
-                          <i className="bi bi-info-circle" />
-                          ขนาดแปลงรวมต้องไม่น้อยกว่า 1 ไร่
-                        </div>
 
                         {drawnParcels.length === 0 && (
                           <ol className="mds-instr-list">
