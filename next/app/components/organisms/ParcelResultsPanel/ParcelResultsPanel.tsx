@@ -808,13 +808,6 @@ export function ParcelResultsPanel({
                                 ))}
                             </div>
 
-                            {/* Source badge */}
-                            <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: cr.source === "user" ? "#059669" : "#0369a1", background: cr.source === "user" ? "rgba(16,185,129,0.08)" : "rgba(3,105,161,0.08)", padding: "5px 12px", borderRadius: 20, border: `1px solid ${cr.source === "user" ? "rgba(16,185,129,0.25)" : "rgba(3,105,161,0.25)"}`, width: "fit-content" }}>
-                                <i className={`bi bi-${cr.source === "user" ? "person-check-fill" : "database-fill"}`} />
-                                {cr.source === "user" ? "ใช้ข้อมูลที่กรอก" : "ใช้ข้อมูลระบบ"}
-                                {cr.variety && <span style={{ marginLeft: 4, opacity: 0.7 }}>· {cr.variety}</span>}
-                                <span style={{ marginLeft: 4, opacity: 0.7 }}>· ระยะ {cr.spacing} ม.</span>
-                            </div>
 
                             {/* Bar chart */}
                             <CarbonBarChart pts={pts} isMobile={isMobile} />
