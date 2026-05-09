@@ -731,24 +731,31 @@ export function ParcelResultsPanel({
                 summaryTotalTrees = carbonResults.reduce((sum, c) => sum + c.trees, 0);
                 summaryTotalCo2 = carbonResults.reduce((sum, c) => sum + c.co2Now, 0);
 
-                // Average age just for labeling purposes
-                const avgAge = Math.round(carbonResults.reduce((sum, c) => sum + c.age, 0) / carbonResults.length);
+                // Track each plot independently through 35-year multi-cycle simulation
+                const plotStates = carbonResults.map(c => ({ currentCycleAge: c.age, continuousAge: c.age, plantCycle: 0 }));
+                const N = plotStates.length;
 
-                // Loop only until age 35 max
-                const maxSteps = Math.max(0, 35 - avgAge);
-                for (let i = 0; i <= maxSteps; i++) {
-                    const currentAge = avgAge + i;
+                for (let i = 0; i < 35; i++) {
                     const yearBE = CURRENT_BE + i;
-                    let totalCo2 = 0;
-                    carbonResults.forEach(c => {
-                        totalCo2 += carbonCo2(c.age + i, c.trees, c.spacing);
+                    let totalCo2 = 0, totalCycle = 0, totalContinuousAge = 0, totalCycleAge = 0;
+                    plotStates.forEach((state, idx) => {
+                        if (state.currentCycleAge > 27) { state.currentCycleAge = 1; state.plantCycle++; }
+                        totalCo2 += carbonCo2(state.currentCycleAge, carbonResults[idx].trees, carbonResults[idx].spacing);
+                        totalCycle += state.plantCycle;
+                        totalContinuousAge += state.continuousAge;
+                        totalCycleAge += state.currentCycleAge;
+                        state.currentCycleAge++;
+                        state.continuousAge++;
                     });
+                    const avgContinuousAge = Math.round(totalContinuousAge / N);
+                    if (avgContinuousAge > 35) break;
+
                     pts.push({
-                        age: currentAge,
+                        age: avgContinuousAge,
                         yearBE,
                         co2: totalCo2,
-                        cycle: Math.min(Math.floor((currentAge - 1) / 7), 4),
-                        cycleAge: ((currentAge - 1) % 7) + 1
+                        cycle: Math.min(Math.round(totalCycle / N), 3),
+                        cycleAge: Math.round(totalCycleAge / N),
                     });
                 }
             } else if (cr) {
@@ -849,7 +856,7 @@ export function ParcelResultsPanel({
                             <CarbonBarChart pts={pts} isMobile={isMobile} />
 
                             <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>
-                                hover บนแท่งเพื่อดูรายละเอียด · แบ่งทุก 7 ปี (โคลนต้นยาง)
+                                hover บนแท่งเพื่อดูรายละเอียด · แนวโน้มคาร์บอนรายแปลง (35 ปี) · โค่น/ปลูกใหม่เมื่ออายุ 27 ปี
                             </div>
                         </>
                     ) : null}

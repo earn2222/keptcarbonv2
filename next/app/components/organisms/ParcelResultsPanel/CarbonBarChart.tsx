@@ -1,14 +1,16 @@
 "use client";
 import { useState } from "react";
 
-// Colors for each 7-year cycle
+// Colors for each rubber plantation cycle (~27 years each)
 const CYCLE_COLORS = [
-  { bar: "#10b981", bg: "rgba(16,185,129,0.12)", label: "#065f46", name: "รอบที่ 1" },
-  { bar: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: "#1e40af", name: "รอบที่ 2" },
-  { bar: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "#92400e", name: "รอบที่ 3" },
-  { bar: "#ec4899", bg: "rgba(236,72,153,0.12)", label: "#9d174d", name: "รอบที่ 4" },
-  { bar: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: "#4c1d95", name: "รอบที่ 5" },
+  { bar: "#10b981", bg: "rgba(16,185,129,0.12)", label: "#065f46", name: "รอบปลูกที่ 1" },
+  { bar: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: "#1e40af", name: "รอบปลูกที่ 2" },
+  { bar: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "#92400e", name: "รอบปลูกที่ 3" },
+  { bar: "#ec4899", bg: "rgba(236,72,153,0.12)", label: "#9d174d", name: "รอบปลูกที่ 4" },
 ];
+
+export const CUT_AGE = 27;   // โค่นและปลูกใหม่ที่ 27 ปี
+export const TOTAL_PROJ_YEARS = 35; // จำลองไปข้างหน้า 35 ปี
 
 const getCycleColor = (cycle: number) => CYCLE_COLORS[Math.min(Math.max(0, cycle), CYCLE_COLORS.length - 1)];
 
@@ -33,18 +35,28 @@ export function buildBarPoints(
   trees: number,
   spacing: string
 ): BarPoint[] {
-  const MAX_AGE = 35;
   const pts: BarPoint[] = [];
-  for (let age = startAge; age <= MAX_AGE; age++) {
-    const cycleNum = Math.floor((age - 1) / 7); // 0-indexed cycle
-    const cycleAge = ((age - 1) % 7) + 1; // 1-7 within cycle
+  let currentCycleAge = startAge;
+  let continuousAge = startAge;
+  let plantCycle = 0;
+
+  for (let i = 0; i < TOTAL_PROJ_YEARS; i++) {
+    if (continuousAge > 35) break;
+
+    // Time to cut and replant?
+    if (currentCycleAge > CUT_AGE) {
+      currentCycleAge = 1;
+      plantCycle++;
+    }
     pts.push({
-      age,
-      yearBE: startYearBE + (age - startAge),
-      co2: carbonCo2(age, trees, spacing),
-      cycle: Math.min(cycleNum, CYCLE_COLORS.length - 1),
-      cycleAge,
+      age: continuousAge,
+      yearBE: startYearBE + i,
+      co2: carbonCo2(currentCycleAge, trees, spacing),
+      cycle: Math.min(plantCycle, CYCLE_COLORS.length - 1),
+      cycleAge: currentCycleAge,
     });
+    currentCycleAge++;
+    continuousAge++;
   }
   return pts;
 }
@@ -72,12 +84,12 @@ export function CarbonBarChart({
   const barW = iW / pts.length - (isMobile ? 1.5 : 4);
   const gap = isMobile ? 1.5 : 4;
 
-  // Find cycle boundaries for labels
-  const cycleStarts: { idx: number; name: string; color: string }[] = [];
+  // Find plantation-cycle boundaries (รอบปลูก)
+  const cycleStarts: { idx: number; name: string; color: string; yearStart: number }[] = [];
   pts.forEach((p, i) => {
     if (i === 0 || pts[i - 1].cycle !== p.cycle) {
       const col = getCycleColor(p.cycle);
-      cycleStarts.push({ idx: i, name: col.name, color: col.bar });
+      cycleStarts.push({ idx: i, name: col.name, color: col.bar, yearStart: p.yearBE });
     }
   });
 
@@ -116,12 +128,12 @@ export function CarbonBarChart({
             background: "rgba(255,255,255,0.7)", 
             padding: "3px 8px", 
             borderRadius: 20, 
-            border: "1px solid rgba(0,0,0,0.04)",
+            border: `1px solid ${cs.color}33`,
             flexShrink: 0,
             whiteSpace: "nowrap"
           }}>
             <div style={{ width: 7, height: 7, borderRadius: "50%", background: cs.color }} />
-            {cs.name} ({pts[cs.idx].age}–{i < cycleStarts.length - 1 ? pts[cycleStarts[i + 1].idx - 1].age : pts[pts.length - 1].age})
+            {cs.name} ({cs.yearStart}–{i < cycleStarts.length - 1 ? pts[cycleStarts[i + 1].idx - 1].yearBE : pts[pts.length - 1].yearBE})
           </div>
         ))}
       </div>
@@ -219,20 +231,36 @@ export function CarbonBarChart({
             <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="#fff" stroke={getCycleColor(pts[i].cycle).bar} strokeWidth={1.5} opacity={0.9} style={{ pointerEvents: "none" }} />
           ))}
 
-          {/* X-axis age labels */}
+          {/* Cut-line dividers between plantation cycles */}
+          {cycleStarts.slice(1).map((cs) => {
+            const x = PL + cs.idx * (barW + gap) - gap / 2;
+            return (
+              <g key={cs.idx} pointerEvents="none">
+                <line x1={x} y1={PT - 8} x2={x} y2={PT + iH + 6}
+                  stroke={cs.color} strokeWidth={1.5} strokeDasharray="4,3" opacity={0.5} />
+                <rect x={x - 35} y={PT - 22} width={70} height={16} rx={8} fill={cs.color} opacity={0.85} />
+                <text x={x} y={PT - 11} textAnchor="middle" fontSize={10} fill="#fff" fontWeight={800}>
+                  โค่น/ปลูกใหม่
+                </text>
+              </g>
+            );
+          })}
+
+          {/* X-axis labels: show at cycle starts + every 5 years */}
           {pts.map((p, i) => {
-            const showLabel = p.age === pts[0].age || p.age === pts[pts.length - 1].age || p.age % 7 === 0;
+            const isCycleStart = cycleStarts.some(cs => cs.idx === i);
+            const showLabel = isCycleStart || p.age === CUT_AGE || (p.age % 5 === 0);
             if (!showLabel) return null;
             const x = PL + i * (barW + gap) + barW / 2;
             return (
               <g key={i}>
-                <text x={x} y={PT + iH + 18} textAnchor="middle"
-                  fontSize={isMobile ? 10 : 12} fontWeight={800}
+                <text x={x} y={PT + iH + 20} textAnchor="middle"
+                  fontSize={isMobile ? 11 : 13} fontWeight={isCycleStart ? 800 : 600}
                   fill={getCycleColor(p.cycle).bar}>
-                  {p.age} ปี
+                  {isCycleStart && p.age === 1 ? "ปี 1" : `${p.age} ปี`}
                 </text>
-                <text x={x} y={PT + iH + (isMobile ? 32 : 34)} textAnchor="middle"
-                  fontSize={isMobile ? 9 : 10} fill="#64748b" fontWeight={500}>
+                <text x={x} y={PT + iH + (isMobile ? 34 : 38)} textAnchor="middle"
+                  fontSize={isMobile ? 10 : 11} fill="#94a3b8" fontWeight={500}>
                   {p.yearBE}
                 </text>
               </g>
@@ -240,7 +268,7 @@ export function CarbonBarChart({
           })}
 
           {/* Y-axis labels */}
-          <text x={PL - 5} y={PT + 4} textAnchor="end" fontSize={10} fill="#94a3b8" fontWeight={600}>tCO₂</text>
+          <text x={PL - 5} y={PT + 4} textAnchor="end" fontSize={12} fill="#94a3b8" fontWeight={600}>tCO₂</text>
 
           {/* Tooltip */}
           {hoverIdx !== null && (() => {
