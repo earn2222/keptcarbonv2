@@ -56,6 +56,7 @@ export default function MapDrawPage() {
   const [basemapOpen, setBasemapOpen] = useState(false);
   const [basemap, setBasemap] = useState<"sat" | "street" | "topo">("sat");
   const [status, setStatus] = useState("🌍 แผนที่ลูกโลก — กด \"เริ่มวาดแปลง\" เพื่อบินไปยังประเทศไทย");
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   // SHP state
   const [shpFile, setShpFile] = useState<File | null>(null);
@@ -171,6 +172,7 @@ export default function MapDrawPage() {
     map.on("load", () => {
       map.setProjection({ type: "globe" });
       mapLoadedRef.current = true;
+      setMapLoaded(true);
 
       // ── Rayong Province Boundary ──────────────────────────────────────────
       map.addSource("rayong-boundary", {
@@ -296,6 +298,66 @@ export default function MapDrawPage() {
       mapLoadedRef.current = false;
     };
   }, []);
+
+  // ===== AUTO-LOAD EXISTING PROJECT FOR CALCULATION =====
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !user) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const projName = params.get("project");
+    const action = params.get("action");
+    
+    if (projName && action === "calc" && parcelFeatures.length === 0) {
+      try {
+        const key = `user_saved_plots_${user.id}`;
+        const stored = JSON.parse(localStorage.getItem(key) || "[]");
+        const projectPlots = stored.filter((p: any) => p.name === projName);
+        
+        if (projectPlots.length > 0) {
+          const feats: GeoJSON.Feature[] = projectPlots.map((p: any, i: number) => ({
+            type: "Feature",
+            geometry: p.geojson,
+            properties: {
+              ...p,
+              plot_index: String(i + 1),
+              grow_area: p.areaRai,
+              gee_carbon: p.carbonTotal,
+              gee_confidence: p.confidence,
+              province: p.province
+            }
+          }));
+          
+          setParcelFeatures(feats);
+          setSearchCount(feats.length);
+          if (projectPlots[0].boundaryGeojson) {
+            setDrawnGeometry(projectPlots[0].boundaryGeojson as GeoJSON.Geometry);
+          }
+          setCurrentStep(2);
+          setStatus(`เตรียมประมวลผลคาร์บอนสำหรับโครงการ: ${projName}`);
+          
+          (map.getSource("matched-parcels") as maplibregl.GeoJSONSource)?.setData({ type: "FeatureCollection", features: feats });
+          
+          const bounds = new maplibregl.LngLatBounds();
+          feats.forEach(f => {
+            if (!f.geometry) return;
+            const processCoords = (coords: any) => {
+              if (typeof coords[0] === "number") bounds.extend(coords as [number, number]);
+              else if (Array.isArray(coords)) coords.forEach(processCoords);
+            };
+            processCoords((f.geometry as any).coordinates);
+          });
+          if (!bounds.isEmpty()) {
+            map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 }, duration: 1000, maxZoom: 16 });
+          }
+          
+          setIsPanelOpen(true);
+        }
+      } catch (err) {
+        console.error("Failed to auto-load project for calculation", err);
+      }
+    }
+  }, [user, mapLoaded]);
 
   // ===== DRAW HELPERS =====
   const previewDraw = useCallback(() => {

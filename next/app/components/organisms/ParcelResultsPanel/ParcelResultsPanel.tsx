@@ -529,10 +529,13 @@ export function ParcelResultsPanel({
                     } : { yr3: 0, yr5: 0, yr7: 0 },
                 };
             });
-            localStorage.setItem(key, JSON.stringify([...newPlots, ...existing]));
+            const newPlotIds = new Set(newPlots.map(p => p.id));
+            const filteredExisting = existing.filter((p: any) => !newPlotIds.has(p.id));
+            localStorage.setItem(key, JSON.stringify([...newPlots, ...filteredExisting]));
             const globalKey = "global_saved_plots";
             const globalExisting = JSON.parse(localStorage.getItem(globalKey) || "[]");
-            localStorage.setItem(globalKey, JSON.stringify([...newPlots, ...globalExisting]));
+            const filteredGlobalExisting = globalExisting.filter((p: any) => !newPlotIds.has(p.id));
+            localStorage.setItem(globalKey, JSON.stringify([...newPlots, ...filteredGlobalExisting]));
         } catch (e) { console.error(e); }
         setSaveState("done");
         setTimeout(() => router.push("/my-plots"), 1500);
