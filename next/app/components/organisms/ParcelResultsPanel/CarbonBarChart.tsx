@@ -36,26 +36,20 @@ export function buildBarPoints(
   spacing: string
 ): BarPoint[] {
   const pts: BarPoint[] = [];
-  let currentCycleAge = startAge;
   let continuousAge = startAge;
-  let plantCycle = 0;
 
   for (let i = 0; i < TOTAL_PROJ_YEARS; i++) {
     if (continuousAge > 35) break;
 
-    // Time to cut and replant?
-    if (currentCycleAge > CUT_AGE) {
-      currentCycleAge = 1;
-      plantCycle++;
-    }
+    const plantCycle = continuousAge > CUT_AGE ? 1 : 0;
+
     pts.push({
       age: continuousAge,
       yearBE: startYearBE + i,
-      co2: carbonCo2(currentCycleAge, trees, spacing),
+      co2: carbonCo2(continuousAge, trees, spacing),
       cycle: Math.min(plantCycle, CYCLE_COLORS.length - 1),
-      cycleAge: currentCycleAge,
+      cycleAge: continuousAge,
     });
-    currentCycleAge++;
     continuousAge++;
   }
   return pts;
@@ -64,9 +58,11 @@ export function buildBarPoints(
 export function CarbonBarChart({
   pts,
   isMobile,
+  title = "ปริมาณการกักเก็บคาร์บอนสะสม",
 }: {
   pts: BarPoint[];
   isMobile?: boolean;
+  title?: string;
 }) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
@@ -105,38 +101,19 @@ export function CarbonBarChart({
   const linePath = linePoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
 
   return (
-    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "6px 4px 4px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)" }}>
-      {/* Legend — compact single row */}
-      <div style={{ 
-        display: "flex", 
-        flexWrap: "nowrap",
-        overflowX: "auto",
-        gap: "6px", 
-        padding: isMobile ? "0 8px 10px" : "0 8px 6px", 
-        justifyContent: "center",
-        msOverflowStyle: "none",
-        scrollbarWidth: "none"
-      }}>
-        {cycleStarts.map((cs, i) => (
-          <div key={i} style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            gap: 4, 
-            fontSize: 10, 
-            fontWeight: 600, 
-            color: "#64748b", 
-            background: "rgba(255,255,255,0.7)", 
-            padding: "3px 8px", 
-            borderRadius: 20, 
-            border: `1px solid ${cs.color}33`,
-            flexShrink: 0,
-            whiteSpace: "nowrap"
-          }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: cs.color }} />
-            {cs.name} ({cs.yearStart}–{i < cycleStarts.length - 1 ? pts[cycleStarts[i + 1].idx - 1].yearBE : pts[pts.length - 1].yearBE})
-          </div>
-        ))}
-      </div>
+    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "12px 10px 8px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)" }}>
+      {/* Chart Title */}
+      {title && (
+        <div style={{
+          textAlign: "center",
+          fontSize: isMobile ? 14 : 16,
+          fontWeight: 800,
+          color: "#334155",
+          marginBottom: 10,
+        }}>
+          {title}
+        </div>
+      )}
 
       <div style={{ overflowX: "auto" }}>
         <svg
@@ -177,7 +154,7 @@ export function CarbonBarChart({
             const col = getCycleColor(p.cycle);
             const isHov = hoverIdx === i;
             const cycleClamp = Math.min(Math.max(0, p.cycle), CYCLE_COLORS.length - 1);
-            
+
             // +- indicators (error bars)
             const errorSize = bh * 0.08; // 8% error margin
             const lineX = x + barW / 2;
@@ -189,7 +166,7 @@ export function CarbonBarChart({
                   <rect x={x - 2} y={PT} width={barW + 4} height={iH} rx={4}
                     fill={col.bar} opacity={0.06} />
                 )}
-                
+
                 {/* Main Bar */}
                 <rect x={x} y={y} width={barW} height={bh} rx={isMobile ? 2 : 4}
                   fill={`url(#cycleGrad${cycleClamp})`}
@@ -198,34 +175,34 @@ export function CarbonBarChart({
                 />
 
                 {/* +- (Error Bars) */}
-                <line 
-                  x1={lineX} y1={y - errorSize} x2={lineX} y2={y + errorSize} 
-                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} 
+                <line
+                  x1={lineX} y1={y - errorSize} x2={lineX} y2={y + errorSize}
+                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6}
                 />
-                <line 
-                  x1={lineX - 2} y1={y - errorSize} x2={lineX + 2} y2={y - errorSize} 
-                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} 
+                <line
+                  x1={lineX - 2} y1={y - errorSize} x2={lineX + 2} y2={y - errorSize}
+                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6}
                 />
-                <line 
-                  x1={lineX - 2} y1={y + errorSize} x2={lineX + 2} y2={y + errorSize} 
-                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} 
+                <line
+                  x1={lineX - 2} y1={y + errorSize} x2={lineX + 2} y2={y + errorSize}
+                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6}
                 />
               </g>
             );
           })}
 
           {/* Trend Line */}
-          <path 
-            d={linePath} 
-            fill="none" 
-            stroke="url(#lineGrad)" 
-            strokeWidth={2.5} 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
+          <path
+            d={linePath}
+            fill="none"
+            stroke="url(#lineGrad)"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
             opacity={0.8}
             style={{ pointerEvents: "none" }}
           />
-          
+
           {/* Trend Line Points */}
           {linePoints.map((p, i) => (
             <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="#fff" stroke={getCycleColor(pts[i].cycle).bar} strokeWidth={1.5} opacity={0.9} style={{ pointerEvents: "none" }} />
@@ -238,8 +215,8 @@ export function CarbonBarChart({
               <g key={cs.idx} pointerEvents="none">
                 <line x1={x} y1={PT - 8} x2={x} y2={PT + iH + 6}
                   stroke={cs.color} strokeWidth={1.5} strokeDasharray="4,3" opacity={0.5} />
-                <rect x={x - 35} y={PT - 22} width={70} height={16} rx={8} fill={cs.color} opacity={0.85} />
-                <text x={x} y={PT - 11} textAnchor="middle" fontSize={10} fill="#fff" fontWeight={800}>
+                <rect x={x - 42} y={PT - 24} width={84} height={20} rx={10} fill={cs.color} opacity={0.85} />
+                <text x={x} y={PT - 10} textAnchor="middle" fontSize={12} fill="#fff" fontWeight={800}>
                   โค่น/ปลูกใหม่
                 </text>
               </g>
@@ -290,7 +267,7 @@ export function CarbonBarChart({
                   ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                 </text>
                 <text x={ttX + ttW / 2} y={ttY + 54} textAnchor="middle" fontSize={10} fill="#94a3b8" fontWeight={600}>
-                   ตันคาร์บอน (tCO₂)
+                  ตันคาร์บอน (tCO₂)
                 </text>
               </g>
             );
