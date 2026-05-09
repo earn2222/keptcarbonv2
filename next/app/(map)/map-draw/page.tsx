@@ -113,7 +113,7 @@ export default function MapDrawPage() {
       container: mapContainerRef.current,
       style: {
         version: 8,
-        glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+        glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
         sources: {
           sat: {
             type: "raster",
