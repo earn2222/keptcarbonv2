@@ -646,7 +646,7 @@ export function ParcelResultsPanel({
                                             className="prp-input"
                                             style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }}
                                             type="number"
-                                            placeholder="ระบุจำนวนต้น เช่น 200"
+                                            placeholder="ระบุจำนวนต้น เช่น 70"
                                             value={form.treeCount}
                                             onChange={e => updateForm(i, "treeCount", e.target.value)}
                                         />
@@ -667,7 +667,7 @@ export function ParcelResultsPanel({
                                     </div>
                                     <div className="prp-field-group">
                                         <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                                            <i className="bi bi-arrows-expand" style={{ color: "#10b981" }} /> ระยะห่างปลูก (ม.)
+                                            <i className="bi bi-arrows-expand" style={{ color: "#10b981" }} /> ระยะปลูก (ม.)
                                         </div>
                                         <select
                                             className="prp-input"
