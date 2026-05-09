@@ -254,19 +254,20 @@ export function CarbonBarChart({
             const bh = Math.max((p.co2 / maxCo2) * iH, 2);
             const x = PL + hoverIdx * (barW + gap) + barW / 2;
             const y = PT + iH - bh;
-            const ttW = 120, ttH = 64;
+            const ttW = isMobile ? 120 : 180;
+            const ttH = isMobile ? 64 : 96;
             const ttX = Math.min(Math.max(x - ttW / 2, 4), W - ttW - 4);
             const ttY = Math.max(y - ttH - 12, 4);
             return (
               <g pointerEvents="none">
                 <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={12} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
-                <text x={ttX + ttW / 2} y={ttY + 18} textAnchor="middle" fontSize={11} fill={col.bar} fontWeight={800}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 28)} textAnchor="middle" fontSize={isMobile ? 11 : 16} fill={col.bar} fontWeight={800}>
                   {col.name} · {p.age} ปี
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + 38} textAnchor="middle" fontSize={15} fill="#fff" fontWeight={900}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 58)} textAnchor="middle" fontSize={isMobile ? 15 : 26} fill="#fff" fontWeight={900}>
                   ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + 54} textAnchor="middle" fontSize={10} fill="#94a3b8" fontWeight={600}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 80)} textAnchor="middle" fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={600}>
                   ตันคาร์บอน (tCO₂)
                 </text>
               </g>
