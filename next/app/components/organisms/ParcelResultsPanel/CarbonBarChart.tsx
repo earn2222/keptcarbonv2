@@ -68,7 +68,7 @@ export function CarbonBarChart({
   if (!pts.length) return null;
 
   const W = isMobile ? 450 : 940;
-  const H = isMobile ? 300 : 660;
+  const H = isMobile ? 300 : 320;
   const PL = isMobile ? 25 : 38;
   const PT = isMobile ? 35 : 36;
   const PB = isMobile ? 75 : 58;
@@ -213,7 +213,13 @@ export function CarbonBarChart({
           {/* X-axis labels: show at cycle starts + every 5 years */}
           {pts.map((p, i) => {
             const isCycleStart = cycleStarts.some(cs => cs.idx === i);
-            const showLabel = isCycleStart || p.age === CUT_AGE || (p.age % 5 === 0);
+            let showLabel = isCycleStart || p.age === CUT_AGE || (p.age % 5 === 0);
+            
+            // Prevent overlapping of 27 and 28 on mobile
+            if (isMobile && p.age === CUT_AGE + 1) {
+              showLabel = false;
+            }
+
             if (!showLabel) return null;
             const x = PL + i * (barW + gap) + barW / 2;
             return (
@@ -241,20 +247,20 @@ export function CarbonBarChart({
             const bh = Math.max((p.co2 / maxCo2) * iH, 2);
             const x = PL + hoverIdx * (barW + gap) + barW / 2;
             const y = PT + iH - bh;
-            const ttW = isMobile ? 120 : 180;
-            const ttH = isMobile ? 64 : 96;
+            const ttW = isMobile ? 120 : 150;
+            const ttH = isMobile ? 64 : 80;
             const ttX = Math.min(Math.max(x - ttW / 2, 4), W - ttW - 4);
             const ttY = Math.max(y - ttH - 12, 4);
             return (
               <g pointerEvents="none">
                 <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={12} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 28)} textAnchor="middle" fontSize={isMobile ? 11 : 16} fill={col.bar} fontWeight={800}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 22)} textAnchor="middle" fontSize={isMobile ? 11 : 13} fill={col.bar} fontWeight={800}>
                   {col.name} · {p.age} ปี
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 58)} textAnchor="middle" fontSize={isMobile ? 15 : 26} fill="#fff" fontWeight={900}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 46)} textAnchor="middle" fontSize={isMobile ? 15 : 22} fill="#fff" fontWeight={900}>
                   ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 80)} textAnchor="middle" fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={600}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 66)} textAnchor="middle" fontSize={isMobile ? 10 : 12} fill="#94a3b8" fontWeight={600}>
                   ตันคาร์บอน (tCO₂)
                 </text>
               </g>

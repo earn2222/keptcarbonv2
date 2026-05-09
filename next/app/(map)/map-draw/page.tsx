@@ -359,7 +359,7 @@ export default function MapDrawPage() {
       {
         padding: { top: 60, bottom: 60, left: 60, right: 60 },
         duration: 900,
-        pitch: 18,
+        pitch: 0,
       },
     );
   }, []);
@@ -513,7 +513,7 @@ export default function MapDrawPage() {
     setDrawing(true);
     setStatus("โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click หรือกดเสร็จสิ้น เพื่อปิดแปลง | Esc ยกเลิก");
     if (map.getZoom() < 8) {
-      map.flyTo({ center: [101.258, 12.682], zoom: 10, pitch: 20, bearing: 0, duration: 2000 });
+      map.flyTo({ center: [101.258, 12.682], zoom: 10, pitch: 0, bearing: 0, duration: 2000 });
     }
   };
 
