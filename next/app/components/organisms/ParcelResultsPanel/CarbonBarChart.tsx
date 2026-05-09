@@ -67,12 +67,12 @@ export function CarbonBarChart({
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
-  const W = isMobile ? 450 : 940;
-  const H = isMobile ? 300 : 320;
-  const PL = isMobile ? 32 : 46;
-  const PT = isMobile ? 35 : 36;
-  const PB = isMobile ? 75 : 58;
-  const PR = isMobile ? 25 : 38;
+  const W = isMobile ? 450 : 650;
+  const H = isMobile ? 300 : 400;
+  const PL = isMobile ? 32 : 55;
+  const PT = isMobile ? 35 : 45;
+  const PB = isMobile ? 75 : 70;
+  const PR = isMobile ? 25 : 30;
   const iW = W - PL - PR;
   const iH = H - PT - PB;
 
@@ -106,7 +106,7 @@ export function CarbonBarChart({
       {title && (
         <div style={{
           textAlign: "center",
-          fontSize: isMobile ? 14 : 16,
+          fontSize: isMobile ? 14 : 20,
           fontWeight: 800,
           color: "#334155",
           marginBottom: 10,
@@ -224,13 +224,13 @@ export function CarbonBarChart({
             const x = PL + i * (barW + gap) + barW / 2;
             return (
               <g key={i}>
-                <text x={x} y={PT + iH + 20} textAnchor="middle"
-                  fontSize={isMobile ? 11 : 13} fontWeight={isCycleStart ? 800 : 600}
+                <text x={x} y={PT + iH + (isMobile ? 20 : 24)} textAnchor="middle"
+                  fontSize={isMobile ? 11 : 16} fontWeight={isCycleStart ? 800 : 600}
                   fill={getCycleColor(p.cycle).bar}>
                   {isCycleStart && p.age === 1 ? "ปี 1" : `${p.age} ปี`}
                 </text>
-                <text x={x} y={PT + iH + (isMobile ? 34 : 38)} textAnchor="middle"
-                  fontSize={isMobile ? 10 : 11} fill="#94a3b8" fontWeight={500}>
+                <text x={x} y={PT + iH + (isMobile ? 34 : 44)} textAnchor="middle"
+                  fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>
                   {p.yearBE}
                 </text>
               </g>
@@ -238,11 +238,11 @@ export function CarbonBarChart({
           })}
 
           {/* Y-axis labels */}
-          <text x={isMobile ? 2 : PL - 5} y={PT + 4} textAnchor={isMobile ? "start" : "end"} fontSize={12} fill="#94a3b8" fontWeight={600}>tCO₂</text>
+          <text x={isMobile ? 2 : PL - 6} y={PT + 5} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 12 : 16} fill="#94a3b8" fontWeight={600}>tCO₂</text>
 
           {/* X-axis Row Indicators */}
-          <text x={isMobile ? 4 : PL - 8} y={PT + iH + 20} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 11} fill="#475569" fontWeight={700}>อายุ</text>
-          <text x={isMobile ? 4 : PL - 8} y={PT + iH + (isMobile ? 34 : 38)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 11} fill="#94a3b8" fontWeight={500}>พ.ศ.</text>
+          <text x={isMobile ? 4 : PL - 10} y={PT + iH + (isMobile ? 20 : 24)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 16} fill="#475569" fontWeight={700}>อายุ</text>
+          <text x={isMobile ? 4 : PL - 10} y={PT + iH + (isMobile ? 34 : 44)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>พ.ศ.</text>
 
           {/* Tooltip */}
           {hoverIdx !== null && (() => {
@@ -251,20 +251,20 @@ export function CarbonBarChart({
             const bh = Math.max((p.co2 / maxCo2) * iH, 2);
             const x = PL + hoverIdx * (barW + gap) + barW / 2;
             const y = PT + iH - bh;
-            const ttW = isMobile ? 120 : 150;
-            const ttH = isMobile ? 64 : 80;
+            const ttW = isMobile ? 120 : 200;
+            const ttH = isMobile ? 64 : 100;
             const ttX = Math.min(Math.max(x - ttW / 2, 4), W - ttW - 4);
             const ttY = Math.max(y - ttH - 12, 4);
             return (
               <g pointerEvents="none">
                 <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={12} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 22)} textAnchor="middle" fontSize={isMobile ? 11 : 13} fill={col.bar} fontWeight={800}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 26)} textAnchor="middle" fontSize={isMobile ? 11 : 16} fill={col.bar} fontWeight={800}>
                   {col.name} · {p.age} ปี
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 46)} textAnchor="middle" fontSize={isMobile ? 15 : 22} fill="#fff" fontWeight={900}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 58)} textAnchor="middle" fontSize={isMobile ? 15 : 28} fill="#fff" fontWeight={900}>
                   ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 66)} textAnchor="middle" fontSize={isMobile ? 10 : 12} fill="#94a3b8" fontWeight={600}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 80)} textAnchor="middle" fontSize={isMobile ? 10 : 15} fill="#94a3b8" fontWeight={600}>
                   ตันคาร์บอน (tCO₂)
                 </text>
               </g>
