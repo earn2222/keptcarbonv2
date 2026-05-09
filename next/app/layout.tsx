@@ -35,7 +35,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="th" className={notoSansThai.variable}>
+    <html lang="th" className={notoSansThai.variable} data-scroll-behavior="smooth">
       <head>
         <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css" />
         <link rel="stylesheet" href="/assets/vendor/bootstrap-icons/bootstrap-icons.css" />
