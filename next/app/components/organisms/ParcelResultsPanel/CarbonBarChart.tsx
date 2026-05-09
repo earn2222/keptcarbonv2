@@ -69,7 +69,7 @@ export function CarbonBarChart({
 
   const W = isMobile ? 450 : 940;
   const H = isMobile ? 300 : 320;
-  const PL = isMobile ? 25 : 38;
+  const PL = isMobile ? 32 : 46;
   const PT = isMobile ? 35 : 36;
   const PB = isMobile ? 75 : 58;
   const PR = isMobile ? 25 : 38;
@@ -239,6 +239,10 @@ export function CarbonBarChart({
 
           {/* Y-axis labels */}
           <text x={isMobile ? 2 : PL - 5} y={PT + 4} textAnchor={isMobile ? "start" : "end"} fontSize={12} fill="#94a3b8" fontWeight={600}>tCO₂</text>
+
+          {/* X-axis Row Indicators */}
+          <text x={isMobile ? 4 : PL - 8} y={PT + iH + 20} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 11} fill="#475569" fontWeight={700}>อายุ</text>
+          <text x={isMobile ? 4 : PL - 8} y={PT + iH + (isMobile ? 34 : 38)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 11} fill="#94a3b8" fontWeight={500}>พ.ศ.</text>
 
           {/* Tooltip */}
           {hoverIdx !== null && (() => {
