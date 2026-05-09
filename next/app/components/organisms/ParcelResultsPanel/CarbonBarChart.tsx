@@ -208,20 +208,7 @@ export function CarbonBarChart({
             <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="#fff" stroke={getCycleColor(pts[i].cycle).bar} strokeWidth={1.5} opacity={0.9} style={{ pointerEvents: "none" }} />
           ))}
 
-          {/* Cut-line dividers between plantation cycles */}
-          {cycleStarts.slice(1).map((cs) => {
-            const x = PL + cs.idx * (barW + gap) - gap / 2;
-            return (
-              <g key={cs.idx} pointerEvents="none">
-                <line x1={x} y1={PT - 8} x2={x} y2={PT + iH + 6}
-                  stroke={cs.color} strokeWidth={1.5} strokeDasharray="4,3" opacity={0.5} />
-                <rect x={x - 42} y={PT - 24} width={84} height={20} rx={10} fill={cs.color} opacity={0.85} />
-                <text x={x} y={PT - 10} textAnchor="middle" fontSize={12} fill="#fff" fontWeight={800}>
-                  โค่น/ปลูกใหม่
-                </text>
-              </g>
-            );
-          })}
+
 
           {/* X-axis labels: show at cycle starts + every 5 years */}
           {pts.map((p, i) => {
