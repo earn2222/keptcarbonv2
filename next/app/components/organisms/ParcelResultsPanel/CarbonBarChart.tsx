@@ -67,7 +67,7 @@ export function CarbonBarChart({
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
-  const W = isMobile ? 450 : 650;
+  const W = isMobile ? 450 : 850;
   const H = isMobile ? 300 : 400;
   const PL = isMobile ? 32 : 55;
   const PT = isMobile ? 35 : 45;
@@ -210,32 +210,42 @@ export function CarbonBarChart({
 
 
 
-          {/* X-axis labels: show at cycle starts + every 5 years */}
-          {pts.map((p, i) => {
-            const isCycleStart = cycleStarts.some(cs => cs.idx === i);
-            let showLabel = isCycleStart || p.age === CUT_AGE || (p.age % 5 === 0);
-            
-            // Prevent overlapping of 27 and 28 on mobile
-            if (isMobile && p.age === CUT_AGE + 1) {
-              showLabel = false;
-            }
+          {/* X-axis labels: show at cycle starts + every 5 years with overlap prevention */}
+          {(() => {
+            let lastShownIdx = -10;
+            return pts.map((p, i) => {
+              const isCycleStart = cycleStarts.some(cs => cs.idx === i);
+              const isCutAge = p.age === CUT_AGE;
+              const isEvery5 = p.age % 5 === 0;
+              
+              let showLabel = isCycleStart || isCutAge || isEvery5;
+              
+              // Overlap prevention: 
+              // Always show cycle starts. 
+              // Others only if at least 3 bars away from the last shown label.
+              if (showLabel && !isCycleStart && (i - lastShownIdx < 3)) {
+                showLabel = false;
+              }
 
-            if (!showLabel) return null;
-            const x = PL + i * (barW + gap) + barW / 2;
-            return (
-              <g key={i}>
-                <text x={x} y={PT + iH + (isMobile ? 20 : 24)} textAnchor="middle"
-                  fontSize={isMobile ? 11 : 16} fontWeight={isCycleStart ? 800 : 600}
-                  fill={getCycleColor(p.cycle).bar}>
-                  {isCycleStart && p.age === 1 ? "ปี 1" : `${p.age} ปี`}
-                </text>
-                <text x={x} y={PT + iH + (isMobile ? 34 : 44)} textAnchor="middle"
-                  fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>
-                  {p.yearBE}
-                </text>
-              </g>
-            );
-          })}
+              if (!showLabel) return null;
+              lastShownIdx = i;
+
+              const x = PL + i * (barW + gap) + barW / 2;
+              return (
+                <g key={i}>
+                  <text x={x} y={PT + iH + (isMobile ? 20 : 24)} textAnchor="middle"
+                    fontSize={isMobile ? 11 : 16} fontWeight={isCycleStart ? 800 : 600}
+                    fill={getCycleColor(p.cycle).bar}>
+                    {isCycleStart && p.age === 1 ? "ปี 1" : `${p.age} ปี`}
+                  </text>
+                  <text x={x} y={PT + iH + (isMobile ? 34 : 44)} textAnchor="middle"
+                    fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>
+                    {p.yearBE}
+                  </text>
+                </g>
+              );
+            });
+          })()}
 
           {/* Y-axis labels */}
           <text x={isMobile ? 2 : PL - 6} y={PT + 5} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 12 : 16} fill="#94a3b8" fontWeight={600}>tCO₂</text>
