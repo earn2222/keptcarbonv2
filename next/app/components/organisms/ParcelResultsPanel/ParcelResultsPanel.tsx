@@ -423,14 +423,17 @@ export function ParcelResultsPanel({
     // Initialize plotForms automatically when ready
     useEffect(() => {
         if (searchCount !== null && !searchRunning && !searchErr && plots.length > 0 && plotForms.length === 0) {
-            setPlotForms(plots.map(() => ({
-                plantYear: "",
-                treeCount: "",
-                variety: "",
-                spacing: "",
-            })));
+            setPlotForms(parcelFeatures.map((feat) => {
+                const props = feat.properties as any || {};
+                return {
+                    plantYear: props.plantYearBE ? String(props.plantYearBE) : "",
+                    treeCount: props.trees ? String(props.trees) : "",
+                    variety: props.variety || "",
+                    spacing: props.spacing || "",
+                };
+            }));
         }
-    }, [searchCount, searchRunning, searchErr, plots, plotForms.length]);
+    }, [searchCount, searchRunning, searchErr, plots, plotForms.length, parcelFeatures]);
 
     const handleProcessCarbon = () => {
         const CURRENT_BE_NOW = new Date().getFullYear() + 543;
