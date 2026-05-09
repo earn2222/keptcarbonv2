@@ -245,7 +245,7 @@ export function CarbonBarChart({
           })}
 
           {/* Y-axis labels */}
-          <text x={PL - 5} y={PT + 4} textAnchor="end" fontSize={12} fill="#94a3b8" fontWeight={600}>tCO₂</text>
+          <text x={isMobile ? 2 : PL - 5} y={PT + 4} textAnchor={isMobile ? "start" : "end"} fontSize={12} fill="#94a3b8" fontWeight={600}>tCO₂</text>
 
           {/* Tooltip */}
           {hoverIdx !== null && (() => {
