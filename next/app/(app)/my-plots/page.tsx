@@ -1482,7 +1482,10 @@ export default function MyPlotsPage() {
                         <span><i className="bi bi-cloud-arrow-up-fill me-1" style={{color:"#8b5cf6"}}/> {fmtCompact(group.totalCarbon)} tCO₂</span>
                       </div>
                     </div>
-                    <div style={{ display: "flex", gap: 10, width: isMobile ? "100%" : "auto" }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10, width: isMobile ? "100%" : "auto" }}>
+                      <Link href={`/map-draw?project=${encodeURIComponent(group.projectName)}&action=calc`} style={{ flex: isMobile ? "1 1 100%" : "auto", textAlign: "center", padding: "8px 16px", borderRadius: 12, background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "0 4px 15px rgba(14,165,233,0.3)" }}>
+                        <i className="bi bi-magic" /> ประมวลผลคาร์บอน
+                      </Link>
                       <Link href={`/map-draw?project=${encodeURIComponent(group.projectName)}`} style={{ flex: isMobile ? 1 : "auto", textAlign: "center", padding: "8px 16px", borderRadius: 12, background: "rgba(16,185,129,0.1)", color: "#059669", fontWeight: 700, fontSize: 13, textDecoration: "none", border: "1px solid rgba(16,185,129,0.2)", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
                         <i className="bi bi-plus-lg" /> เพิ่มแปลง
                       </Link>

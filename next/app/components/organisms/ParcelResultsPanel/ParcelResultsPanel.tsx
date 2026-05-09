@@ -94,19 +94,19 @@ function parseRai(v: unknown): number {
 function computePlot(feat: GeoJSON.Feature): PlotInfo {
     const p = (feat.properties ?? {}) as Record<string, unknown>;
     const areaRai = parseRai(p.grow_area);
-    
+
     // Determine backend plant year
     let bPlantYear = Number(p.gee_plant_year || p.grow_year || 0);
     // Determine backend age
     let bAge = Number(p.gee_age || p.rubber_age || 0);
-    
+
     const CURRENT_BE = new Date().getFullYear() + 543;
-    
+
     // Normalize plant year to BE
     if (bPlantYear > 0 && bPlantYear < 2300) {
         bPlantYear += 543;
     }
-    
+
     // If we have plantYear but no age, compute age
     if (bAge === 0 && bPlantYear > 0) {
         bAge = Math.max(0, CURRENT_BE - bPlantYear);
@@ -423,14 +423,17 @@ export function ParcelResultsPanel({
     // Initialize plotForms automatically when ready
     useEffect(() => {
         if (searchCount !== null && !searchRunning && !searchErr && plots.length > 0 && plotForms.length === 0) {
-            setPlotForms(plots.map(() => ({
-                plantYear: "",
-                treeCount: "",
-                variety: "",
-                spacing: "",
-            })));
+            setPlotForms(parcelFeatures.map((feat) => {
+                const props = feat.properties as any || {};
+                return {
+                    plantYear: props.plantYearBE ? String(props.plantYearBE) : "",
+                    treeCount: props.trees ? String(props.trees) : "",
+                    variety: props.variety || "",
+                    spacing: props.spacing || "",
+                };
+            }));
         }
-    }, [searchCount, searchRunning, searchErr, plots, plotForms.length]);
+    }, [searchCount, searchRunning, searchErr, plots, plotForms.length, parcelFeatures]);
 
     const handleProcessCarbon = () => {
         const CURRENT_BE_NOW = new Date().getFullYear() + 543;
@@ -440,22 +443,22 @@ export function ParcelResultsPanel({
             const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
             const userSpacing = form?.spacing || "";
             const userVariety = form?.variety || "";
-            
+
             const userAge = userPlantYear > 0 ? CURRENT_BE_NOW - userPlantYear : 0;
-            
+
             // Priority: User Input > Backend Data > Fallback (e.g. 5 years)
             const finalAge = userAge > 0 ? userAge : (p.age > 0 ? p.age : 5);
             const finalPlantYear = userPlantYear > 0 ? userPlantYear : (p.plantYearBE > 0 ? p.plantYearBE : CURRENT_BE_NOW - finalAge);
-            
+
             // Priority: User Input > Estimation (area * 76)
             const estimatedTrees = Math.round(p.areaRai * 76);
             const finalTrees = userTrees > 0 ? userTrees : estimatedTrees;
-            
+
             const finalSpacing = userSpacing || "3*7";
             const finalVariety = userVariety || "RRIM 600";
-            
+
             const co2Now = (finalAge > 0 && finalTrees > 0) ? carbonCo2(finalAge, finalTrees, finalSpacing) : 0;
-            
+
             return {
                 plotIdx: i,
                 age: finalAge,
@@ -479,7 +482,7 @@ export function ParcelResultsPanel({
     const handleSave = async (overrideResults?: CarbonResult[]) => {
         const resultsToSave = overrideResults || carbonResults;
         const hasCarbonResults = resultsToSave.length > 0;
-        
+
         setSaveState("saving");
 
         await new Promise(r => setTimeout(r, 900));
@@ -493,15 +496,15 @@ export function ParcelResultsPanel({
                 const props = (feat?.properties || {}) as any;
                 const cr = resultsToSave[i];
                 const form = plotForms[i];
-                
+
                 const userPlantYear = form?.plantYear ? parseInt(form.plantYear) : 0;
                 const userTrees = form?.treeCount ? parseInt(form.treeCount) : 0;
-                
+
                 const age = cr?.age ?? (userPlantYear > 0 ? (CURRENT_BE_NOW - userPlantYear) : 0);
                 const trees = cr?.trees ?? (userTrees > 0 ? userTrees : 0);
                 const spacing = cr?.spacing || form?.spacing || "";
                 const finalPlantYear = cr?.plantYearBE ?? (userPlantYear > 0 ? userPlantYear : 0);
-                
+
                 // If saved directly without processing, set carbon to 0
                 const co2 = hasCarbonResults ? (cr?.co2Now ?? 0) : 0;
 
@@ -529,10 +532,13 @@ export function ParcelResultsPanel({
                     } : { yr3: 0, yr5: 0, yr7: 0 },
                 };
             });
-            localStorage.setItem(key, JSON.stringify([...newPlots, ...existing]));
+            const newPlotIds = new Set(newPlots.map(p => p.id));
+            const filteredExisting = existing.filter((p: any) => !newPlotIds.has(p.id));
+            localStorage.setItem(key, JSON.stringify([...newPlots, ...filteredExisting]));
             const globalKey = "global_saved_plots";
             const globalExisting = JSON.parse(localStorage.getItem(globalKey) || "[]");
-            localStorage.setItem(globalKey, JSON.stringify([...newPlots, ...globalExisting]));
+            const filteredGlobalExisting = globalExisting.filter((p: any) => !newPlotIds.has(p.id));
+            localStorage.setItem(globalKey, JSON.stringify([...newPlots, ...filteredGlobalExisting]));
         } catch (e) { console.error(e); }
         setSaveState("done");
         setTimeout(() => router.push("/my-plots"), 1500);
@@ -731,24 +737,29 @@ export function ParcelResultsPanel({
                 summaryTotalTrees = carbonResults.reduce((sum, c) => sum + c.trees, 0);
                 summaryTotalCo2 = carbonResults.reduce((sum, c) => sum + c.co2Now, 0);
 
-                // Average age just for labeling purposes
-                const avgAge = Math.round(carbonResults.reduce((sum, c) => sum + c.age, 0) / carbonResults.length);
+                // Track each plot independently through 35-year simulation
+                const plotStates = carbonResults.map(c => ({ continuousAge: c.age, plantCycle: 0 }));
+                const N = plotStates.length;
 
-                // Loop only until age 35 max
-                const maxSteps = Math.max(0, 35 - avgAge);
-                for (let i = 0; i <= maxSteps; i++) {
-                    const currentAge = avgAge + i;
+                for (let i = 0; i < 35; i++) {
                     const yearBE = CURRENT_BE + i;
-                    let totalCo2 = 0;
-                    carbonResults.forEach(c => {
-                        totalCo2 += carbonCo2(c.age + i, c.trees, c.spacing);
+                    let totalCo2 = 0, totalCycle = 0, totalContinuousAge = 0;
+                    plotStates.forEach((state, idx) => {
+                        state.plantCycle = state.continuousAge > 27 ? 1 : 0;
+                        totalCo2 += carbonCo2(state.continuousAge, carbonResults[idx].trees, carbonResults[idx].spacing);
+                        totalCycle += state.plantCycle;
+                        totalContinuousAge += state.continuousAge;
+                        state.continuousAge++;
                     });
+                    const avgContinuousAge = Math.round(totalContinuousAge / N);
+                    if (avgContinuousAge > 35) break;
+
                     pts.push({
-                        age: currentAge,
+                        age: avgContinuousAge,
                         yearBE,
                         co2: totalCo2,
-                        cycle: Math.min(Math.floor((currentAge - 1) / 7), 4),
-                        cycleAge: ((currentAge - 1) % 7) + 1
+                        cycle: Math.min(Math.round(totalCycle / N), 3),
+                        cycleAge: avgContinuousAge,
                     });
                 }
             } else if (cr) {
@@ -758,21 +769,21 @@ export function ParcelResultsPanel({
             return (
                 <div className="prp-shell">
                     {/* New Integrated Header Design */}
-                    <div style={{ 
-                        display: "flex", 
-                        alignItems: "center", 
-                        gap: 10, 
-                        marginBottom: 12, 
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        marginBottom: 12,
                         paddingBottom: 12,
                         borderBottom: "1px solid rgba(16,185,129,0.1)"
                     }}>
-                        <div style={{ 
-                            width: 38, 
-                            height: 38, 
-                            borderRadius: 12, 
-                            background: "linear-gradient(135deg,#10b981,#059669)", 
-                            display: "flex", 
-                            alignItems: "center", 
+                        <div style={{
+                            width: 38,
+                            height: 38,
+                            borderRadius: 12,
+                            background: "linear-gradient(135deg,#10b981,#059669)",
+                            display: "flex",
+                            alignItems: "center",
                             justifyContent: "center",
                             color: "#fff",
                             boxShadow: "0 3px 8px rgba(16,185,129,0.2)",
@@ -789,15 +800,15 @@ export function ParcelResultsPanel({
                             </div>
                         </div>
                         {!isTotal && (
-                            <div 
+                            <div
                                 onClick={() => onMapPlotSelected?.("total")}
-                                style={{ 
-                                    fontSize: 11, 
-                                    fontWeight: 700, 
-                                    color: "#059669", 
-                                    cursor: "pointer", 
-                                    padding: "6px 12px", 
-                                    borderRadius: 20, 
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: "#059669",
+                                    cursor: "pointer",
+                                    padding: "6px 12px",
+                                    borderRadius: 20,
                                     background: "rgba(16,185,129,0.08)",
                                     border: "1px solid rgba(16,185,129,0.2)",
                                     display: "flex",
@@ -819,15 +830,15 @@ export function ParcelResultsPanel({
                                 {[
                                     { label: "คาร์บอนรวมปัจจุบัน", val: `${summaryTotalCo2.toFixed(1)} tCO₂`, color: "#0d9488" },
                                 ].map(({ label, val, color }) => (
-                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "8px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                                        <div style={{ fontSize: isMobile ? 16 : 17, fontWeight: 800, color }}>{val}</div>
-                                        <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 500 }}>{label}</div>
+                                    <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                                        <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>{label}</div>
+                                        <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color }}>{val}</div>
                                     </div>
                                 ))}
                             </div>
                             <CarbonBarChart pts={pts} isMobile={isMobile} />
                             <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>
-                                hover บนแท่งเพื่อดูรายละเอียด · แนวโน้มคาร์บอนรวม (35 ปี)
+                                hover บนแท่งเพื่อดูรายละเอียด
                             </div>
                         </>
                     ) : cr ? (
@@ -849,7 +860,7 @@ export function ParcelResultsPanel({
                             <CarbonBarChart pts={pts} isMobile={isMobile} />
 
                             <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>
-                                hover บนแท่งเพื่อดูรายละเอียด · แบ่งทุก 7 ปี (โคลนต้นยาง)
+                                hover บนแท่งเพื่อดูรายละเอียด · แนวโน้มคาร์บอนรายแปลง
                             </div>
                         </>
                     ) : null}
