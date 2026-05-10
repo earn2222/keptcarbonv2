@@ -72,10 +72,10 @@ const fmtC = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 0
 
 // ── District carbon comparison chart ─────────────────────────────────────────
 const DIST_STACKS = [
-  { key: "1-5",   color: "#bbf7d0", label: "1–5 ปี" },
-  { key: "6-12",  color: "#4ade80", label: "6–12 ปี" },
-  { key: "13-18", color: "#16a34a", label: "13–18 ปี" },
-  { key: "19+",   color: "#166534", label: "19+ ปี" },
+  { key: "1-5",   color: "#bbf7d0", label: "1–5 ปี",   stage: "ระยะเริ่มต้น" },
+  { key: "6-12",  color: "#4ade80", label: "6–12 ปี",  stage: "ระยะเปิดกรีด" },
+  { key: "13-18", color: "#16a34a", label: "13–18 ปี", stage: "ระยะสูงสุด" },
+  { key: "19+",   color: "#166534", label: "19+ ปี",   stage: "ระยะคงที่" },
 ];
 
 function DistrictCarbonChart({
@@ -94,7 +94,7 @@ function DistrictCarbonChart({
   const gap = isMobile ? 8 : 9;
   const PL = isMobile ? 84 : 118;
   const PR = isMobile ? 8 : 105;
-  const PT = 46;
+  const PT = isMobile ? 52 : 60;  // extra for 2-line legend
   const PB = 12;
 
   const maxCarbon = Math.max(...DISTRICTS.map(d => d.carbon));
@@ -107,7 +107,7 @@ function DistrictCarbonChart({
     const segs = DIST_STACKS.map(s => {
       const carbon = d.ageDist.find(a => a.key === s.key)?.carbon ?? 0;
       const sw = (carbon / maxCarbon) * iW;
-      const seg = { key: s.key, x: PL + xOff, w: sw, color: s.color };
+      const seg = { key: s.key, x: PL + xOff, w: sw, color: s.color, carbon };
       xOff += sw;
       return seg;
     });
@@ -135,11 +135,15 @@ function DistrictCarbonChart({
         </defs>
 
         {/* Legend */}
+        <text x={PL} y={isMobile ? 10 : 12} fontSize={isMobile ? 9 : 10} fill="#059669" fontWeight={700}>
+          อายุยางพารา (ปี)
+        </text>
         <g>
           {DIST_STACKS.map((s, i) => (
-            <g key={s.key} transform={`translate(${PL + i * (isMobile ? 86 : 114)}, 14)`}>
+            <g key={s.key} transform={`translate(${PL + i * (isMobile ? 90 : 118)}, ${isMobile ? 16 : 19})`}>
               <rect width={11} height={11} rx={3} fill={s.color} />
-              <text x={15} y={9.5} fontSize={isMobile ? 10 : 11} fill="#64748b" fontWeight={600}>{s.label}</text>
+              <text x={15} y={9.5} fontSize={isMobile ? 10 : 11} fill="#334155" fontWeight={700}>{s.label}</text>
+              <text x={15} y={isMobile ? 22 : 24} fontSize={isMobile ? 9 : 10} fill="#94a3b8" fontWeight={500}>{s.stage}</text>
             </g>
           ))}
         </g>
@@ -198,7 +202,7 @@ function DistrictCarbonChart({
                     x={seg.x} y={y} width={seg.w} height={barH}
                     clipPath={`url(#dbClip-${d.id})`}
                     fill={seg.color}
-                    opacity={isActive ? 1 : isHov ? 0.88 : 0.72}
+                    opacity={isActive ? 1 : isHov ? 0.9 : 0.72}
                     style={{ transition: "opacity 0.2s" }} />
                 )
               ))}
@@ -215,6 +219,63 @@ function DistrictCarbonChart({
             </g>
           );
         })}
+
+        {/* Tooltip */}
+        {hoverId !== null && (() => {
+          const row = rows.find(r => r.d.id === hoverId);
+          if (!row) return null;
+          const { d, y, bw } = row;
+          const ttW = isMobile ? 190 : 226;
+          const lineH = isMobile ? 19 : 21;
+          const ttH = (isMobile ? 46 : 52) + DIST_STACKS.length * lineH + 8;
+          const midX = PL + bw / 2;
+          const ttX = Math.min(Math.max(midX - ttW / 2, 4), W - ttW - 4);
+          const ttY = y > totalH / 2 ? y - ttH - 10 : y + barH + 10;
+          const pad = 14;
+
+          return (
+            <g pointerEvents="none">
+              <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={12}
+                fill="#0f172a" style={{ filter: "drop-shadow(0 10px 28px rgba(0,0,0,0.4))" }} />
+              <rect x={ttX} y={ttY} width={ttW} height={4} rx={2} fill="#10b981" />
+
+              {/* Header */}
+              <text x={ttX + pad} y={ttY + 22}
+                fontSize={isMobile ? 12 : 13} fontWeight={800} fill="#fff">{d.name}</text>
+              <text x={ttX + ttW - pad} y={ttY + 22}
+                textAnchor="end" fontSize={isMobile ? 12 : 13} fontWeight={800} fill="#4ade80">
+                {fmtC(d.carbon)}
+                <tspan fontSize={9} fill="#64748b" dx={3}>tCO₂</tspan>
+              </text>
+
+              {/* Divider */}
+              <line x1={ttX + pad} y1={ttY + (isMobile ? 30 : 34)}
+                x2={ttX + ttW - pad} y2={ttY + (isMobile ? 30 : 34)}
+                stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+
+              {/* Age breakdown */}
+              {DIST_STACKS.map((s, i) => {
+                const carbon = d.ageDist.find(a => a.key === s.key)?.carbon ?? 0;
+                const rowY = ttY + (isMobile ? 36 : 42) + i * lineH;
+                return (
+                  <g key={s.key}>
+                    <rect x={ttX + pad} y={rowY} width={8} height={8} rx={2} fill={s.color} />
+                    <text x={ttX + pad + 12} y={rowY + 8}
+                      fontSize={isMobile ? 9.5 : 10.5} fill="#94a3b8" fontWeight={600}>
+                      {s.label}
+                      <tspan fill="#64748b" fontSize={isMobile ? 8.5 : 9.5} dx={4}>{s.stage}</tspan>
+                    </text>
+                    <text x={ttX + ttW - pad} y={rowY + 8}
+                      textAnchor="end" fontSize={isMobile ? 10 : 11} fill="#e2e8f0" fontWeight={700}>
+                      {fmtC(carbon)}
+                      <tspan fontSize={8.5} fill="#475569" dx={2}>tCO₂</tspan>
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          );
+        })()}
       </svg>
     </div>
   );
