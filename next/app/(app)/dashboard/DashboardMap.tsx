@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl, { type Map as MLMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -49,9 +49,20 @@ export default function DashboardMap({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
-  // Ref so the click handler always has the latest callback (avoids stale closure)
   const onSelectRef = useRef(onSelectDistrict);
   onSelectRef.current = onSelectDistrict;
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [legendOpen, setLegendOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    setMounted(true);
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // ── Map initialisation (runs once) ──────────────────────────────────────────
   useEffect(() => {
@@ -265,55 +276,123 @@ export default function DashboardMap({
     <div style={{ position: "relative", height: "100%" }}>
       <div ref={containerRef} style={{ height: "100%" }} />
 
-      {/* ── Map legend ──────────────────────────────────────────────────────── */}
-      <div style={{
-        position: "absolute",
-        bottom: 48,
-        left: 12,
-        background: "rgba(10,18,35,0.9)",
-        backdropFilter: "blur(12px)",
-        borderRadius: 13,
-        padding: "12px 16px",
-        border: "1px solid rgba(255,255,255,0.1)",
-        boxShadow: "0 6px 24px rgba(0,0,0,0.4)",
-        fontFamily: "'Noto Sans Thai','Inter',sans-serif",
-        minWidth: 168,
-      }}>
-        {/* Header */}
-        <div style={{ fontSize: 10, fontWeight: 800, color: "#6ee7b7", marginBottom: 8, letterSpacing: 0.6 }}>
-          ระดับคาร์บอนต่อแปลง (tCO₂)
-        </div>
-
-        {/* Carbon level rows */}
-        {([
-          { color: "#d1fae5", label: "ต่ำมาก",   range: "< 30" },
-          { color: "#6ee7b7", label: "ต่ำ",       range: "30–80" },
-          { color: "#34d399", label: "ปานกลาง",  range: "80–150" },
-          { color: "#10b981", label: "สูง",       range: "150–280" },
-          { color: "#059669", label: "สูงมาก",   range: "> 280" },
-        ] as const).map(s => (
-          <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5 }}>
-            <div style={{ width: 12, height: 12, borderRadius: 3, flexShrink: 0, background: s.color, border: "1px solid rgba(255,255,255,0.15)" }} />
-            <span style={{ fontSize: 10, color: "#94a3b8", flex: 1 }}>{s.label}</span>
-            <span style={{ fontSize: 9, color: "#475569", fontWeight: 600 }}>{s.range}</span>
+      {/* ── Legend: desktop (always visible) ───────────────────────────────── */}
+      {mounted && !isMobile && (
+        <div style={{
+          position: "absolute", bottom: 48, left: 12,
+          background: "rgba(10,18,35,0.9)", backdropFilter: "blur(12px)",
+          borderRadius: 13, padding: "12px 16px",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 6px 24px rgba(0,0,0,0.4)",
+          fontFamily: "'Noto Sans Thai','Inter',sans-serif", minWidth: 168,
+        }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: "#6ee7b7", marginBottom: 8, letterSpacing: 0.6 }}>
+            ระดับคาร์บอนต่อแปลง (tCO₂)
           </div>
-        ))}
-
-        {/* Divider */}
-        <div style={{ height: 1, background: "rgba(255,255,255,0.07)", margin: "8px 0" }} />
-
-        {/* District markers */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <div style={{ width: 12, height: 12, borderRadius: "50%", flexShrink: 0, background: "linear-gradient(135deg,#4ade80,#14532d)", border: "1.5px solid rgba(255,255,255,0.6)" }} />
-            <span style={{ fontSize: 10, color: "#94a3b8" }}>สรุปรายอำเภอ</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <div style={{ width: 12, height: 12, borderRadius: "50%", flexShrink: 0, background: "transparent", border: "2px solid #fbbf24" }} />
-            <span style={{ fontSize: 10, color: "#94a3b8" }}>อำเภอที่เลือก</span>
+          {([
+            { color: "#d1fae5", label: "ต่ำมาก",  range: "< 30" },
+            { color: "#6ee7b7", label: "ต่ำ",      range: "30–80" },
+            { color: "#34d399", label: "ปานกลาง", range: "80–150" },
+            { color: "#10b981", label: "สูง",      range: "150–280" },
+            { color: "#059669", label: "สูงมาก",  range: "> 280" },
+          ] as const).map(s => (
+            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5 }}>
+              <div style={{ width: 12, height: 12, borderRadius: 3, flexShrink: 0, background: s.color, border: "1px solid rgba(255,255,255,0.15)" }} />
+              <span style={{ fontSize: 10, color: "#94a3b8", flex: 1 }}>{s.label}</span>
+              <span style={{ fontSize: 9, color: "#475569", fontWeight: 600 }}>{s.range}</span>
+            </div>
+          ))}
+          <div style={{ height: 1, background: "rgba(255,255,255,0.07)", margin: "8px 0" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ width: 12, height: 12, borderRadius: "50%", flexShrink: 0, background: "linear-gradient(135deg,#4ade80,#14532d)", border: "1.5px solid rgba(255,255,255,0.6)" }} />
+              <span style={{ fontSize: 10, color: "#94a3b8" }}>สรุปรายอำเภอ</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ width: 12, height: 12, borderRadius: "50%", flexShrink: 0, background: "transparent", border: "2px solid #fbbf24" }} />
+              <span style={{ fontSize: 10, color: "#94a3b8" }}>อำเภอที่เลือก</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* ── Legend: mobile (collapsible) ────────────────────────────────────── */}
+      {mounted && isMobile && (
+        <div style={{
+          position: "absolute", bottom: 48, left: 10,
+          fontFamily: "'Noto Sans Thai','Inter',sans-serif",
+          display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6,
+        }}>
+          {/* Expanded panel */}
+          {legendOpen && (
+            <div style={{
+              background: "rgba(10,18,35,0.92)", backdropFilter: "blur(14px)",
+              borderRadius: 12, padding: "10px 12px",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
+              minWidth: 190,
+            }}>
+              <div style={{ fontSize: 9.5, fontWeight: 800, color: "#6ee7b7", marginBottom: 7, letterSpacing: 0.5 }}>
+                ระดับคาร์บอนต่อแปลง (tCO₂)
+              </div>
+
+              {/* Gradient bar */}
+              <div style={{ height: 8, borderRadius: 4, background: "linear-gradient(90deg,#d1fae5,#6ee7b7,#34d399,#10b981,#059669)", marginBottom: 3 }} />
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8.5, color: "#475569", marginBottom: 9 }}>
+                <span>น้อย (&lt;30)</span><span>มาก (&gt;280)</span>
+              </div>
+
+              {/* Rows — compact flex rows */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
+                {([
+                  { color: "#d1fae5", label: "ต่ำมาก",  range: "< 30" },
+                  { color: "#6ee7b7", label: "ต่ำ",      range: "30–80" },
+                  { color: "#34d399", label: "ปานกลาง", range: "80–150" },
+                  { color: "#10b981", label: "สูง",      range: "150–280" },
+                  { color: "#059669", label: "สูงมาก",  range: "> 280" },
+                ] as const).map(s => (
+                  <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: 2.5, background: s.color, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
+                    <span style={{ fontSize: 9.5, color: "#94a3b8", flex: 1 }}>{s.label}</span>
+                    <span style={{ fontSize: 9, color: "#475569", fontWeight: 600 }}>{s.range}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ height: 1, background: "rgba(255,255,255,0.07)", marginBottom: 7 }} />
+
+              {/* District markers — horizontal */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "linear-gradient(135deg,#4ade80,#14532d)", border: "1.5px solid rgba(255,255,255,0.6)", flexShrink: 0 }} />
+                  <span style={{ fontSize: 9.5, color: "#94a3b8" }}>สรุปอำเภอ</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "transparent", border: "2px solid #fbbf24", flexShrink: 0 }} />
+                  <span style={{ fontSize: 9.5, color: "#94a3b8" }}>เลือกอยู่</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toggle button */}
+          <button
+            onClick={() => setLegendOpen(o => !o)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "rgba(10,18,35,0.88)", backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 20, padding: "6px 12px",
+              color: "#6ee7b7", fontSize: 11, fontWeight: 700,
+              cursor: "pointer", boxShadow: "0 3px 12px rgba(0,0,0,0.35)",
+              fontFamily: "'Noto Sans Thai','Inter',sans-serif",
+            }}>
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: "linear-gradient(135deg,#34d399,#059669)", flexShrink: 0 }} />
+            สัญลักษณ์
+            <span style={{ fontSize: 9, opacity: 0.7 }}>{legendOpen ? "▲" : "▼"}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

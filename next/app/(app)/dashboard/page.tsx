@@ -90,13 +90,13 @@ function DistrictCarbonChart({
 }) {
   const [hoverId, setHoverId] = useState<string | null>(null);
 
-  const W = isMobile ? 460 : 860;
-  const barH = isMobile ? 24 : 34;
-  const gap = isMobile ? 7 : 9;
-  const PL = isMobile ? 72 : 118;
-  const PR = isMobile ? 78 : 105;
-  const PT = isMobile ? 44 : 60;
-  const PB = 12;
+  const W = isMobile ? 460 : 800;
+  const barH = isMobile ? 24 : 26;
+  const gap = isMobile ? 7 : 7;
+  const PL = isMobile ? 72 : 108;
+  const PR = isMobile ? 78 : 98;
+  const PT = isMobile ? 44 : 48;
+  const PB = 10;
 
   const maxCarbon = Math.max(...DISTRICTS.map(d => d.carbon));
   const iW = W - PL - PR;
@@ -136,15 +136,15 @@ function DistrictCarbonChart({
         </defs>
 
         {/* Legend */}
-        <text x={PL} y={isMobile ? 10 : 12} fontSize={isMobile ? 9 : 10} fill="#059669" fontWeight={700}>
+        <text x={PL} y={isMobile ? 10 : 11} fontSize={isMobile ? 9 : 9.5} fill="#059669" fontWeight={700}>
           อายุยางพารา (ปี)
         </text>
         <g>
           {DIST_STACKS.map((s, i) => (
-            <g key={s.key} transform={`translate(${PL + i * (isMobile ? 90 : 118)}, ${isMobile ? 16 : 19})`}>
-              <rect width={11} height={11} rx={3} fill={s.color} />
-              <text x={15} y={9.5} fontSize={isMobile ? 10 : 11} fill="#334155" fontWeight={700}>{s.label}</text>
-              <text x={15} y={isMobile ? 22 : 24} fontSize={isMobile ? 9 : 10} fill="#94a3b8" fontWeight={500}>{s.stage}</text>
+            <g key={s.key} transform={`translate(${PL + i * (isMobile ? 90 : 108)}, ${isMobile ? 16 : 17})`}>
+              <rect width={10} height={10} rx={2.5} fill={s.color} />
+              <text x={14} y={9} fontSize={isMobile ? 10 : 10} fill="#334155" fontWeight={700}>{s.label}</text>
+              <text x={14} y={isMobile ? 22 : 21} fontSize={isMobile ? 9 : 9} fill="#94a3b8" fontWeight={500}>{s.stage}</text>
             </g>
           ))}
         </g>
@@ -184,9 +184,9 @@ function DistrictCarbonChart({
               )}
 
               {/* District name */}
-              <text x={PL - 12} y={y + barH / 2 + 5}
+              <text x={PL - 10} y={y + barH / 2 + 5}
                 textAnchor="end"
-                fontSize={isMobile ? 11 : 13}
+                fontSize={isMobile ? 11 : 12}
                 fontWeight={isActive ? 800 : 600}
                 fill={isActive ? "#059669" : isHov ? "#334155" : "#475569"}>
                 {d.name}
@@ -209,13 +209,13 @@ function DistrictCarbonChart({
               ))}
 
               {/* Value label */}
-              <text x={PL + bw + 10} y={y + barH / 2 + 5}
+              <text x={PL + bw + 8} y={y + barH / 2 + 5}
                 textAnchor="start"
-                fontSize={isMobile ? 11 : 12}
+                fontSize={isMobile ? 11 : 11}
                 fontWeight={isActive ? 800 : 700}
                 fill={isActive ? "#059669" : "#64748b"}>
                 {fmtC(d.carbon)}
-                <tspan fontSize={9} fill="#94a3b8" fontWeight={500} dx={4}>tCO₂</tspan>
+                <tspan fontSize={8.5} fill="#94a3b8" fontWeight={500} dx={3}>tCO₂</tspan>
               </text>
             </g>
           );
