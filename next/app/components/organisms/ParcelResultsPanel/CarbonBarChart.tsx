@@ -271,7 +271,7 @@ export function CarbonBarChart({
               <g pointerEvents="none">
                 <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={10} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
                 <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 20)} textAnchor="middle" fontSize={isMobile ? 11 : 12} fill={col.bar} fontWeight={800}>
-                  {col.name} · {p.age} ปี
+                  อายุยางพารา · {p.age} ปี
                 </text>
                 <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 46)} textAnchor="middle" fontSize={isMobile ? 15 : 20} fill="#fff" fontWeight={900}>
                   ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
