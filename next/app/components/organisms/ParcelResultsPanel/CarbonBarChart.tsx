@@ -59,20 +59,22 @@ export function CarbonBarChart({
   pts,
   isMobile,
   title = "ปริมาณการกักเก็บคาร์บอนสะสม",
+  narrowMode = false,
 }: {
   pts: BarPoint[];
   isMobile?: boolean;
   title?: string;
+  narrowMode?: boolean;
 }) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
-  const W = isMobile ? 450 : 850;
-  const H = isMobile ? 300 : 400;
-  const PL = isMobile ? 32 : 55;
+  const W = isMobile ? 450 : (narrowMode ? 560 : 850);
+  const H = isMobile ? 300 : (narrowMode ? 380 : 340);
+  const PL = isMobile ? 32 : (narrowMode ? 48 : 55);
   const PT = isMobile ? 35 : 45;
-  const PB = isMobile ? 75 : 70;
-  const PR = isMobile ? 25 : 30;
+  const PB = isMobile ? 75 : (narrowMode ? 75 : 70);
+  const PR = isMobile ? 25 : (narrowMode ? 24 : 30);
   const iW = W - PL - PR;
   const iH = H - PT - PB;
 
@@ -101,12 +103,12 @@ export function CarbonBarChart({
   const linePath = linePoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
 
   return (
-    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "12px 10px 8px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)" }}>
+    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "12px 10px 8px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)", maxWidth: (isMobile || narrowMode) ? undefined : 860, margin: (isMobile || narrowMode) ? undefined : "0 auto" }}>
       {/* Chart Title */}
       {title && (
         <div style={{
           textAlign: "center",
-          fontSize: isMobile ? 14 : 20,
+          fontSize: isMobile ? 14 : (narrowMode ? 17 : 20),
           fontWeight: 800,
           color: "#334155",
           marginBottom: 10,
@@ -261,20 +263,20 @@ export function CarbonBarChart({
             const bh = Math.max((p.co2 / maxCo2) * iH, 2);
             const x = PL + hoverIdx * (barW + gap) + barW / 2;
             const y = PT + iH - bh;
-            const ttW = isMobile ? 120 : 200;
-            const ttH = isMobile ? 64 : 100;
+            const ttW = isMobile ? 120 : 160;
+            const ttH = isMobile ? 64 : 76;
             const ttX = Math.min(Math.max(x - ttW / 2, 4), W - ttW - 4);
             const ttY = Math.max(y - ttH - 12, 4);
             return (
               <g pointerEvents="none">
-                <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={12} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 26)} textAnchor="middle" fontSize={isMobile ? 11 : 16} fill={col.bar} fontWeight={800}>
-                  {col.name} · {p.age} ปี
+                <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={10} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 20)} textAnchor="middle" fontSize={isMobile ? 11 : 12} fill={col.bar} fontWeight={800}>
+                  อายุยางพารา · {p.age} ปี
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 58)} textAnchor="middle" fontSize={isMobile ? 15 : 28} fill="#fff" fontWeight={900}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 46)} textAnchor="middle" fontSize={isMobile ? 15 : 20} fill="#fff" fontWeight={900}>
                   ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 80)} textAnchor="middle" fontSize={isMobile ? 10 : 15} fill="#94a3b8" fontWeight={600}>
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 63)} textAnchor="middle" fontSize={isMobile ? 10 : 11} fill="#94a3b8" fontWeight={600}>
                   ตันคาร์บอน (tCO₂)
                 </text>
               </g>

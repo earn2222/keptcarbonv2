@@ -836,7 +836,7 @@ export function ParcelResultsPanel({
                                     </div>
                                 ))}
                             </div>
-                            <CarbonBarChart pts={pts} isMobile={isMobile} />
+                            <CarbonBarChart pts={pts} isMobile={isMobile} narrowMode={!isMobile} />
                             <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>
                                 hover บนแท่งเพื่อดูรายละเอียด
                             </div>
@@ -857,7 +857,7 @@ export function ParcelResultsPanel({
 
 
                             {/* Bar chart */}
-                            <CarbonBarChart pts={pts} isMobile={isMobile} />
+                            <CarbonBarChart pts={pts} isMobile={isMobile} narrowMode={!isMobile} />
 
                             <div style={{ fontSize: 10, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>
                                 hover บนแท่งเพื่อดูรายละเอียด · แนวโน้มคาร์บอนรายแปลง
