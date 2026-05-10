@@ -340,7 +340,7 @@ export default function DashboardPage() {
   const maxAgeDist = useMemo(() => Math.max(...selected.ageDist.map(a => a.plots), 1), [selected]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg,#ecfdf5 0%,#f8fafc 60%)", paddingTop: 110, paddingBottom: 60, fontFamily: "'Noto Sans Thai','Inter',sans-serif" }}>
+    <div className="db2-page" style={{ minHeight: "100vh", background: "linear-gradient(180deg,#ecfdf5 0%,#f8fafc 60%)", paddingTop: 110, paddingBottom: 60, fontFamily: "'Noto Sans Thai','Inter',sans-serif" }}>
       <div className="db2-wrap">
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
@@ -448,7 +448,15 @@ export default function DashboardPage() {
               </span>
             </div>
             <div className="db2-map-body">
-              <DashboardMap plots={[]} bbox={null} flyToCenter={flyTo} flyZoom={flyZoom} />
+              <DashboardMap
+                plots={[]}
+                bbox={null}
+                flyToCenter={flyTo}
+                flyZoom={flyZoom}
+                districts={DISTRICTS}
+                selectedDistrictId={selectedId}
+                onSelectDistrict={setSelectedId}
+              />
             </div>
           </div>
 
@@ -609,17 +617,28 @@ export default function DashboardPage() {
 
         @media (max-width: 1024px) {
           .db2-main-row { grid-template-columns: 1fr; }
-          .db2-map-body { height: 380px; }
+          .db2-map-body { height: 400px; }
           .db2-stat-row { grid-template-columns: repeat(2,1fr); }
         }
-        @media (max-width: 768px) {
-          .db2-wrap { padding: 0 14px; }
-          .db2-hero { padding: 24px 20px; border-radius: 16px; }
-          .db2-stat-row { grid-template-columns: repeat(2,1fr); }
-          .db2-map-body { height: 300px; }
+
+        /* ── Mobile (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .db2-page { padding-top: 76px !important; padding-bottom: 36px !important; }
+          .db2-wrap { padding: 0 12px; }
+          .db2-hero { padding: 18px 16px; border-radius: 14px; margin-bottom: 14px; }
+          .db2-hero h1 { font-size: 17px !important; }
+          .db2-hero p  { font-size: 12px !important; }
+          .db2-stat-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+          .db2-stat-card { padding: 14px 12px; border-radius: 11px; }
+          .db2-main-row { gap: 12px; margin-bottom: 12px; }
+          .db2-map-body { height: 260px; }
+          .db2-card { border-radius: 12px; margin-bottom: 12px; }
+          .db2-card-header { padding: 10px 14px; font-size: 12px; gap: 7px; }
         }
-        @media (max-width: 480px) {
-          .db2-stat-row { grid-template-columns: 1fr 1fr; }
+
+        @media (max-width: 400px) {
+          .db2-stat-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+          .db2-stat-card { padding: 12px 10px; }
         }
       `}</style>
     </div>
