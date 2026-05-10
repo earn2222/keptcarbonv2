@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import DashboardMap from "./DashboardMap";
+import DashboardMap, { type MapPlot } from "./DashboardMap";
 
 // ── Rayong province system database ──────────────────────────────────────────
 const AGE_CONFIG = [
@@ -70,6 +70,7 @@ const ALL_ROWS = [PROVINCE_TOTAL, ...DISTRICTS];
 const fmt = (n: number) => n.toLocaleString("th-TH");
 const fmtC = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 0 });
 
+
 // ── District carbon comparison chart ─────────────────────────────────────────
 const DIST_STACKS = [
   { key: "1-5",   color: "#bbf7d0", label: "1–5 ปี",   stage: "ระยะเริ่มต้น" },
@@ -89,12 +90,12 @@ function DistrictCarbonChart({
 }) {
   const [hoverId, setHoverId] = useState<string | null>(null);
 
-  const W = 860;
-  const barH = isMobile ? 30 : 34;
-  const gap = isMobile ? 8 : 9;
-  const PL = isMobile ? 84 : 118;
-  const PR = isMobile ? 8 : 105;
-  const PT = isMobile ? 52 : 60;  // extra for 2-line legend
+  const W = isMobile ? 460 : 860;
+  const barH = isMobile ? 24 : 34;
+  const gap = isMobile ? 7 : 9;
+  const PL = isMobile ? 72 : 118;
+  const PR = isMobile ? 78 : 105;
+  const PT = isMobile ? 44 : 60;
   const PB = 12;
 
   const maxCarbon = Math.max(...DISTRICTS.map(d => d.carbon));
@@ -117,10 +118,10 @@ function DistrictCarbonChart({
   const totalH = PT + DISTRICTS.length * (barH + gap) - gap + PB;
 
   return (
-    <div style={{ overflowX: isMobile ? "auto" : undefined }}>
+    <div>
       <svg
         viewBox={`0 0 ${W} ${totalH}`}
-        style={{ width: isMobile ? 560 : "100%", height: "auto", display: "block", overflow: "visible" }}
+        style={{ width: "100%", height: "auto", display: "block", overflow: "visible" }}
       >
         <defs>
           {rows.map(({ d, y, bw }) => (
@@ -323,6 +324,8 @@ function StatCard({ icon, label, value, unit, color }: {
 export default function DashboardPage() {
   const [selectedId, setSelectedId] = useState("all");
   const [isMobile, setIsMobile] = useState(false);
+  const [mapPlots, setMapPlots] = useState<MapPlot[]>([]);
+  const [mapBbox, setMapBbox] = useState<{ minLng: number; minLat: number; maxLng: number; maxLat: number } | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -330,6 +333,17 @@ export default function DashboardPage() {
     const h = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", h);
     return () => window.removeEventListener("resize", h);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/dashboard/stats")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        setMapPlots(data.mapPlots ?? []);
+        setMapBbox(data.bbox ?? null);
+      })
+      .catch(console.error);
   }, []);
 
   const selected = useMemo(() => ALL_ROWS.find(d => d.id === selectedId) ?? PROVINCE_TOTAL, [selectedId]);
@@ -449,8 +463,8 @@ export default function DashboardPage() {
             </div>
             <div className="db2-map-body">
               <DashboardMap
-                plots={[]}
-                bbox={null}
+                plots={mapPlots}
+                bbox={mapBbox}
                 flyToCenter={flyTo}
                 flyZoom={flyZoom}
                 districts={DISTRICTS}

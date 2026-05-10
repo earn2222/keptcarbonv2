@@ -119,8 +119,20 @@ export default function DashboardMap({
       map.addLayer({ id: "plots-boundary-fill", type: "fill", source: "plots-boundary", paint: { "fill-color": "#f97316", "fill-opacity": 0.12 } });
       map.addLayer({ id: "plots-boundary-line", type: "line", source: "plots-boundary", paint: { "line-color": "#ea580c", "line-width": 2.5 } });
       map.addSource("plots-detected", { type: "geojson", data: { type: "FeatureCollection", features: detectedFeatures } });
-      map.addLayer({ id: "plots-detected-fill", type: "fill", source: "plots-detected", paint: { "fill-color": "#2d9e5f", "fill-opacity": 0.55 } });
-      map.addLayer({ id: "plots-detected-line", type: "line", source: "plots-detected", paint: { "line-color": "#15803d", "line-width": 1.2, "line-opacity": 0.7 } });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map.addLayer({ id: "plots-detected-fill", type: "fill", source: "plots-detected", paint: {
+        "fill-color": ["interpolate", ["linear"], ["get", "carbon"],
+          0,   "#d1fae5",
+          30,  "#6ee7b7",
+          80,  "#34d399",
+          150, "#10b981",
+          280, "#059669",
+          500, "#047857",
+        ] as any,
+        "fill-opacity": 0.85,
+      } } as any); // eslint-disable-line
+      map.addLayer({ id: "plots-detected-line", type: "line", source: "plots-detected", paint: { "line-color": "#065f46", "line-width": 0.6, "line-opacity": 0.45 } });
+
 
       // ── District markers ───────────────────────────────────────────────────
       if (districts.length > 0) {
@@ -268,53 +280,37 @@ export default function DashboardMap({
         minWidth: 168,
       }}>
         {/* Header */}
-        <div style={{ fontSize: 10, fontWeight: 800, color: "#6ee7b7", marginBottom: 9, letterSpacing: 0.6 }}>
-          คาร์บอนสะสม (tCO₂)
+        <div style={{ fontSize: 10, fontWeight: 800, color: "#6ee7b7", marginBottom: 8, letterSpacing: 0.6 }}>
+          ระดับคาร์บอนต่อแปลง (tCO₂)
         </div>
 
-        {/* Carbon gradient bar */}
-        <div style={{ width: "100%", height: 7, borderRadius: 4, background: "linear-gradient(90deg,#4ade80,#22c55e,#16a34a,#14532d)", marginBottom: 4 }} />
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#64748b", marginBottom: 12 }}>
-          <span>27k (น้อย)</span>
-          <span>118k (มาก)</span>
-        </div>
+        {/* Carbon level rows */}
+        {([
+          { color: "#d1fae5", label: "ต่ำมาก",   range: "< 30" },
+          { color: "#6ee7b7", label: "ต่ำ",       range: "30–80" },
+          { color: "#34d399", label: "ปานกลาง",  range: "80–150" },
+          { color: "#10b981", label: "สูง",       range: "150–280" },
+          { color: "#059669", label: "สูงมาก",   range: "> 280" },
+        ] as const).map(s => (
+          <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 3, flexShrink: 0, background: s.color, border: "1px solid rgba(255,255,255,0.15)" }} />
+            <span style={{ fontSize: 10, color: "#94a3b8", flex: 1 }}>{s.label}</span>
+            <span style={{ fontSize: 9, color: "#475569", fontWeight: 600 }}>{s.range}</span>
+          </div>
+        ))}
 
-        {/* Symbol descriptions */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{
-              width: 14, height: 14, borderRadius: "50%", flexShrink: 0,
-              background: "linear-gradient(135deg,#4ade80,#14532d)",
-              border: "2px solid rgba(255,255,255,0.7)",
-            }} />
-            <span style={{ fontSize: 10, color: "#94a3b8", fontWeight: 500 }}>แปลงยางพาราต่ออำเภอ</span>
+        {/* Divider */}
+        <div style={{ height: 1, background: "rgba(255,255,255,0.07)", margin: "8px 0" }} />
+
+        {/* District markers */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <div style={{ width: 12, height: 12, borderRadius: "50%", flexShrink: 0, background: "linear-gradient(135deg,#4ade80,#14532d)", border: "1.5px solid rgba(255,255,255,0.6)" }} />
+            <span style={{ fontSize: 10, color: "#94a3b8" }}>สรุปรายอำเภอ</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{
-              width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-              background: "rgba(74,222,128,0.15)",
-              border: "1.5px solid rgba(74,222,128,0.35)",
-              marginLeft: 3,
-            }} />
-            <span style={{ fontSize: 10, color: "#94a3b8", fontWeight: 500 }}>ขนาดวงกลม ∝ ปริมาณคาร์บอน</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{
-              width: 13, height: 13, borderRadius: "50%", flexShrink: 0,
-              background: "transparent",
-              border: "2.5px solid #fbbf24",
-              marginLeft: 1,
-            }} />
-            <span style={{ fontSize: 10, color: "#94a3b8", fontWeight: 500 }}>อำเภอที่เลือกอยู่</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{
-              width: 13, height: 13, borderRadius: "50%", flexShrink: 0,
-              background: "rgba(74,222,128,0.2)",
-              border: "1px solid rgba(74,222,128,0.3)",
-              marginLeft: 1,
-            }} />
-            <span style={{ fontSize: 10, color: "#94a3b8", fontWeight: 500 }}>คลิกเพื่อเลือกอำเภอ</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <div style={{ width: 12, height: 12, borderRadius: "50%", flexShrink: 0, background: "transparent", border: "2px solid #fbbf24" }} />
+            <span style={{ fontSize: 10, color: "#94a3b8" }}>อำเภอที่เลือก</span>
           </div>
         </div>
       </div>
