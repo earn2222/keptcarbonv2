@@ -20,9 +20,13 @@ type Bbox = { minLng: number; minLat: number; maxLng: number; maxLat: number };
 export default function DashboardMap({
   plots,
   bbox,
+  flyToCenter,
+  flyZoom = 11,
 }: {
   plots: MapPlot[];
   bbox?: Bbox | null;
+  flyToCenter?: [number, number] | null;
+  flyZoom?: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
@@ -174,6 +178,11 @@ export default function DashboardMap({
       mapRef.current = null;
     };
   }, [plots, bbox]);
+
+  useEffect(() => {
+    if (!mapRef.current || !flyToCenter) return;
+    mapRef.current.flyTo({ center: flyToCenter, zoom: flyZoom, duration: 1000 });
+  }, [flyToCenter, flyZoom]);
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
