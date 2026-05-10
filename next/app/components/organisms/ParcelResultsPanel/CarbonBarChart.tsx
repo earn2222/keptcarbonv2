@@ -59,20 +59,22 @@ export function CarbonBarChart({
   pts,
   isMobile,
   title = "ปริมาณการกักเก็บคาร์บอนสะสม",
+  narrowMode = false,
 }: {
   pts: BarPoint[];
   isMobile?: boolean;
   title?: string;
+  narrowMode?: boolean;
 }) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
-  const W = isMobile ? 450 : 850;
-  const H = isMobile ? 300 : 340;
-  const PL = isMobile ? 32 : 55;
+  const W = isMobile ? 450 : (narrowMode ? 560 : 850);
+  const H = isMobile ? 300 : (narrowMode ? 380 : 340);
+  const PL = isMobile ? 32 : (narrowMode ? 48 : 55);
   const PT = isMobile ? 35 : 45;
-  const PB = isMobile ? 75 : 70;
-  const PR = isMobile ? 25 : 30;
+  const PB = isMobile ? 75 : (narrowMode ? 75 : 70);
+  const PR = isMobile ? 25 : (narrowMode ? 24 : 30);
   const iW = W - PL - PR;
   const iH = H - PT - PB;
 
@@ -101,12 +103,12 @@ export function CarbonBarChart({
   const linePath = linePoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
 
   return (
-    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "12px 10px 8px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)", maxWidth: isMobile ? undefined : 860, margin: isMobile ? undefined : "0 auto" }}>
+    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "12px 10px 8px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)", maxWidth: (isMobile || narrowMode) ? undefined : 860, margin: (isMobile || narrowMode) ? undefined : "0 auto" }}>
       {/* Chart Title */}
       {title && (
         <div style={{
           textAlign: "center",
-          fontSize: isMobile ? 14 : 20,
+          fontSize: isMobile ? 14 : (narrowMode ? 17 : 20),
           fontWeight: 800,
           color: "#334155",
           marginBottom: 10,
