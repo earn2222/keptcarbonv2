@@ -91,10 +91,13 @@ export default function DashboardMap({
     });
     mapRef.current = map;
 
-    map.addControl(
-      new maplibregl.NavigationControl({ visualizePitch: false }),
-      "bottom-right",
-    );
+    // Only add zoom controls on desktop. Mobile users use pinch-to-zoom.
+    if (window.innerWidth >= 640) {
+      map.addControl(
+        new maplibregl.NavigationControl({ visualizePitch: false }),
+        "bottom-right",
+      );
+    }
 
     map.on("load", () => {
       // ── User plot layers (for reuse on other pages) ────────────────────────
@@ -319,57 +322,51 @@ export default function DashboardMap({
       {/* ── Legend: mobile (collapsible) ────────────────────────────────────── */}
       {mounted && isMobile && (
         <div style={{
-          position: "absolute", bottom: 48, left: 10,
+          position: "absolute", bottom: 24, left: 12,
           fontFamily: "'Noto Sans Thai','Inter',sans-serif",
-          display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6,
+          display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8,
+          zIndex: 10,
         }}>
           {/* Expanded panel */}
           {legendOpen && (
             <div style={{
-              background: "rgba(10,18,35,0.92)", backdropFilter: "blur(14px)",
-              borderRadius: 12, padding: "10px 12px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
-              minWidth: 190,
+              background: "rgba(15,23,42,0.92)", backdropFilter: "blur(12px)",
+              borderRadius: 14, padding: "12px 14px",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 8px 24px -4px rgba(0,0,0,0.5)",
+              minWidth: 180,
+              animation: "fadeIn 0.2s ease-out",
             }}>
-              <div style={{ fontSize: 9.5, fontWeight: 800, color: "#6ee7b7", marginBottom: 7, letterSpacing: 0.5 }}>
-                ระดับคาร์บอนต่อแปลง (tCO₂)
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#a7f3d0", marginBottom: 8, letterSpacing: 0.3 }}>
+                คาร์บอนต่อแปลง (tCO₂)
               </div>
 
-              {/* Gradient bar */}
-              <div style={{ height: 8, borderRadius: 4, background: "linear-gradient(90deg,#d1fae5,#6ee7b7,#34d399,#10b981,#059669)", marginBottom: 3 }} />
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8.5, color: "#475569", marginBottom: 9 }}>
-                <span>น้อย (&lt;30)</span><span>มาก (&gt;280)</span>
+              {/* Segmented bar for mobile */}
+              <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden", marginBottom: 5 }}>
+                <div style={{ flex: 1, background: "#d1fae5" }} />
+                <div style={{ flex: 1, background: "#6ee7b7" }} />
+                <div style={{ flex: 1, background: "#34d399" }} />
+                <div style={{ flex: 1, background: "#10b981" }} />
+                <div style={{ flex: 1, background: "#059669" }} />
+              </div>
+              
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8.5, color: "#94a3b8", fontWeight: 600, marginBottom: 10 }}>
+                <span>&lt;30</span>
+                <span>150</span>
+                <span>&gt;280</span>
               </div>
 
-              {/* Rows — compact flex rows */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
-                {([
-                  { color: "#d1fae5", label: "ต่ำมาก",  range: "< 30" },
-                  { color: "#6ee7b7", label: "ต่ำ",      range: "30–80" },
-                  { color: "#34d399", label: "ปานกลาง", range: "80–150" },
-                  { color: "#10b981", label: "สูง",      range: "150–280" },
-                  { color: "#059669", label: "สูงมาก",  range: "> 280" },
-                ] as const).map(s => (
-                  <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 10, height: 10, borderRadius: 2.5, background: s.color, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
-                    <span style={{ fontSize: 9.5, color: "#94a3b8", flex: 1 }}>{s.label}</span>
-                    <span style={{ fontSize: 9, color: "#475569", fontWeight: 600 }}>{s.range}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ height: 1, background: "rgba(255,255,255,0.07)", marginBottom: 7 }} />
+              <div style={{ height: 1, background: "rgba(255,255,255,0.08)", marginBottom: 10 }} />
 
               {/* District markers — horizontal */}
-              <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ display: "flex", gap: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "linear-gradient(135deg,#4ade80,#14532d)", border: "1.5px solid rgba(255,255,255,0.6)", flexShrink: 0 }} />
-                  <span style={{ fontSize: 9.5, color: "#94a3b8" }}>สรุปอำเภอ</span>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "linear-gradient(135deg,#4ade80,#14532d)", border: "1px solid rgba(255,255,255,0.7)", flexShrink: 0 }} />
+                  <span style={{ fontSize: 9.5, color: "#cbd5e1" }}>สรุปอำเภอ</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "transparent", border: "2px solid #fbbf24", flexShrink: 0 }} />
-                  <span style={{ fontSize: 9.5, color: "#94a3b8" }}>เลือกอยู่</span>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "transparent", border: "1.5px solid #fbbf24", flexShrink: 0 }} />
+                  <span style={{ fontSize: 9.5, color: "#cbd5e1" }}>เลือกอยู่</span>
                 </div>
               </div>
             </div>
@@ -380,16 +377,17 @@ export default function DashboardMap({
             onClick={() => setLegendOpen(o => !o)}
             style={{
               display: "flex", alignItems: "center", gap: 6,
-              background: "rgba(10,18,35,0.88)", backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.15)",
-              borderRadius: 20, padding: "6px 12px",
-              color: "#6ee7b7", fontSize: 11, fontWeight: 700,
-              cursor: "pointer", boxShadow: "0 3px 12px rgba(0,0,0,0.35)",
-              fontFamily: "'Noto Sans Thai','Inter',sans-serif",
+              background: legendOpen ? "rgba(15,23,42,0.95)" : "rgba(15,23,42,0.85)", 
+              backdropFilter: "blur(8px)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 20, padding: "6px 14px",
+              color: "#a7f3d0", fontSize: 11, fontWeight: 600,
+              cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+              fontFamily: "inherit", transition: "all 0.2s",
             }}>
             <div style={{ width: 10, height: 10, borderRadius: 2, background: "linear-gradient(135deg,#34d399,#059669)", flexShrink: 0 }} />
             สัญลักษณ์
-            <span style={{ fontSize: 9, opacity: 0.7 }}>{legendOpen ? "▲" : "▼"}</span>
+            <span style={{ fontSize: 9, opacity: 0.6, marginLeft: 2, transform: legendOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▼</span>
           </button>
         </div>
       )}

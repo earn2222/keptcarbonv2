@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 3000
 
 # Run in development mode
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "if [ ! -f package.json ]; then echo 'Error: package.json not found in /app'; pwd; ls -la; exit 1; fi && npm run dev"]
