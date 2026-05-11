@@ -168,7 +168,7 @@ function AgeBarChart({ age, conf, trees, isMobile }: { age: number; conf: number
                 <defs>
                     <linearGradient id="barGradMain" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#10b981" />
-                        <stop offset="100%" stopColor="#047857" />
+                        <stop offset="100%" stopColor="#059669" />
                     </linearGradient>
                     <filter id="barShadow">
                         <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#059669" floodOpacity="0.3" />
@@ -266,8 +266,8 @@ function ForecastChart({ pts, isMobile }: { pts: Array<{ yearBE: number; co2: nu
         <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H, display: "block", overflow: "visible" }}>
             <defs>
                 <linearGradient id="fcAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.28" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+                    <stop offset="0%" stopColor="#0d9488" stopOpacity="0.28" />
+                    <stop offset="100%" stopColor="#0d9488" stopOpacity="0.02" />
                 </linearGradient>
                 <filter id="ptShadow">
                     <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#059669" floodOpacity="0.4" />
@@ -291,7 +291,7 @@ function ForecastChart({ pts, isMobile }: { pts: Array<{ yearBE: number; co2: nu
             <polygon points={fillPath} fill="url(#fcAreaGrad)" />
 
             {/* Line */}
-            <polyline points={line} fill="none" stroke="#059669" strokeWidth={2.2}
+            <polyline points={line} fill="none" stroke="#0d9488" strokeWidth={2.2}
                 strokeLinejoin="round" strokeLinecap="round" />
 
             {/* Invisible wide hit targets per segment */}
