@@ -168,7 +168,7 @@ function AgeBarChart({ age, conf, trees, isMobile }: { age: number; conf: number
                 <defs>
                     <linearGradient id="barGradMain" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#10b981" />
-                        <stop offset="100%" stopColor="#047857" />
+                        <stop offset="100%" stopColor="#059669" />
                     </linearGradient>
                     <filter id="barShadow">
                         <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#059669" floodOpacity="0.3" />
@@ -266,8 +266,8 @@ function ForecastChart({ pts, isMobile }: { pts: Array<{ yearBE: number; co2: nu
         <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H, display: "block", overflow: "visible" }}>
             <defs>
                 <linearGradient id="fcAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.28" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+                    <stop offset="0%" stopColor="#0d9488" stopOpacity="0.28" />
+                    <stop offset="100%" stopColor="#0d9488" stopOpacity="0.02" />
                 </linearGradient>
                 <filter id="ptShadow">
                     <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#059669" floodOpacity="0.4" />
@@ -291,7 +291,7 @@ function ForecastChart({ pts, isMobile }: { pts: Array<{ yearBE: number; co2: nu
             <polygon points={fillPath} fill="url(#fcAreaGrad)" />
 
             {/* Line */}
-            <polyline points={line} fill="none" stroke="#059669" strokeWidth={2.2}
+            <polyline points={line} fill="none" stroke="#0d9488" strokeWidth={2.2}
                 strokeLinejoin="round" strokeLinecap="round" />
 
             {/* Invisible wide hit targets per segment */}
@@ -738,16 +738,14 @@ export function ParcelResultsPanel({
                 summaryTotalCo2 = carbonResults.reduce((sum, c) => sum + c.co2Now, 0);
 
                 // Track each plot independently through 35-year simulation
-                const plotStates = carbonResults.map(c => ({ continuousAge: c.age, plantCycle: 0 }));
+                const plotStates = carbonResults.map(c => ({ continuousAge: c.age }));
                 const N = plotStates.length;
 
                 for (let i = 0; i < 35; i++) {
                     const yearBE = CURRENT_BE + i;
-                    let totalCo2 = 0, totalCycle = 0, totalContinuousAge = 0;
+                    let totalCo2 = 0, totalContinuousAge = 0;
                     plotStates.forEach((state, idx) => {
-                        state.plantCycle = state.continuousAge > 27 ? 1 : 0;
                         totalCo2 += carbonCo2(state.continuousAge, carbonResults[idx].trees, carbonResults[idx].spacing);
-                        totalCycle += state.plantCycle;
                         totalContinuousAge += state.continuousAge;
                         state.continuousAge++;
                     });
@@ -758,7 +756,7 @@ export function ParcelResultsPanel({
                         age: avgContinuousAge,
                         yearBE,
                         co2: totalCo2,
-                        cycle: Math.min(Math.round(totalCycle / N), 3),
+                        cycle: Math.floor(i / 7),
                         cycleAge: avgContinuousAge,
                     });
                 }

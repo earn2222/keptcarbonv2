@@ -1,18 +1,19 @@
 "use client";
 import { useState } from "react";
 
-// Colors for each rubber plantation cycle (~27 years each)
-const CYCLE_COLORS = [
-  { bar: "#10b981", bg: "rgba(16,185,129,0.12)", label: "#065f46", name: "รอบปลูกที่ 1" },
-  { bar: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: "#1e40af", name: "รอบปลูกที่ 2" },
-  { bar: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "#92400e", name: "รอบปลูกที่ 3" },
-  { bar: "#ec4899", bg: "rgba(236,72,153,0.12)", label: "#9d174d", name: "รอบปลูกที่ 4" },
+// All-green theme: lime → mint → emerald → forest → teal
+const GREEN_THEME_COLORS = [
+  { bar: "#a3e635", bg: "rgba(163,230,53,0.15)",  label: "#3f6212", name: "รอบที่ 1" }, // Lime
+  { bar: "#4ade80", bg: "rgba(74,222,128,0.15)",  label: "#14532d", name: "รอบที่ 2" }, // Mint
+  { bar: "#10b981", bg: "rgba(16,185,129,0.15)",  label: "#064e3b", name: "รอบที่ 3" }, // Emerald
+  { bar: "#059669", bg: "rgba(5,150,105,0.15)",   label: "#064e3b", name: "รอบที่ 4" }, // Forest
+  { bar: "#0d9488", bg: "rgba(13,148,136,0.15)",  label: "#134e4a", name: "รอบที่ 5" }, // Teal
 ];
 
 export const CUT_AGE = 27;   // โค่นและปลูกใหม่ที่ 27 ปี
 export const TOTAL_PROJ_YEARS = 35; // จำลองไปข้างหน้า 35 ปี
 
-const getCycleColor = (cycle: number) => CYCLE_COLORS[Math.min(Math.max(0, cycle), CYCLE_COLORS.length - 1)];
+const getCycleColor = (cycle: number) => GREEN_THEME_COLORS[Math.min(Math.max(0, cycle), GREEN_THEME_COLORS.length - 1)];
 
 function carbonCo2(age: number, trees: number, spacing: string): number {
   // Adjust density based on spacing
@@ -41,13 +42,13 @@ export function buildBarPoints(
   for (let i = 0; i < TOTAL_PROJ_YEARS; i++) {
     if (continuousAge > 35) break;
 
-    const plantCycle = continuousAge > CUT_AGE ? 1 : 0;
+    const period = Math.floor(i / 7);
 
     pts.push({
       age: continuousAge,
       yearBE: startYearBE + i,
       co2: carbonCo2(continuousAge, trees, spacing),
-      cycle: Math.min(plantCycle, CYCLE_COLORS.length - 1),
+      cycle: period,
       cycleAge: continuousAge,
     });
     continuousAge++;
@@ -66,6 +67,7 @@ export function CarbonBarChart({
   title?: string;
   narrowMode?: boolean;
 }) {
+  console.log("CarbonBarChart rendered with green theme");
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
@@ -103,17 +105,17 @@ export function CarbonBarChart({
   const linePath = linePoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
 
   return (
-    <div style={{ background: "linear-gradient(135deg,#f8fafc,#f1f5f9)", borderRadius: 16, padding: isMobile ? "12px 6px 8px" : "12px 10px 8px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 6px 20px -4px rgba(0,0,0,0.07)", maxWidth: (isMobile || narrowMode) ? undefined : 860, margin: (isMobile || narrowMode) ? undefined : "0 auto" }}>
+    <div style={{ background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius: 20, padding: isMobile ? "16px 8px 10px" : "20px 16px 12px", boxShadow: "0 10px 30px -5px rgba(5,150,105,0.12)", maxWidth: (isMobile || narrowMode) ? undefined : 860, margin: (isMobile || narrowMode) ? undefined : "0 auto", border: "1px solid rgba(16,185,129,0.15)" }}>
       {/* Chart Title */}
       {title && (
         <div style={{
           textAlign: "center",
           fontSize: isMobile ? 14 : (narrowMode ? 17 : 20),
           fontWeight: 800,
-          color: "#334155",
+          color: "#064e3b",
           marginBottom: 10,
         }}>
-          {title}
+          {title} •
         </div>
       )}
 
@@ -123,19 +125,21 @@ export function CarbonBarChart({
           style={{ width: isMobile ? Math.max(W, pts.length * 18) : "100%", height: "auto", display: "block", overflow: "visible" }}
         >
           <defs>
-            {CYCLE_COLORS.map((c, i) => (
-              <linearGradient key={i} id={`cycleGrad${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={c.bar} stopOpacity="1" />
-                <stop offset="100%" stopColor={c.bar} stopOpacity="0.75" />
+            {GREEN_THEME_COLORS.map((c, i) => (
+              <linearGradient key={i} id={`cycleGradGreen${i}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={c.bar} stopOpacity="0.95" />
+                <stop offset="100%" stopColor={c.bar} stopOpacity="0.65" />
               </linearGradient>
             ))}
             <filter id="barShadow" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
             </filter>
             <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="50%" stopColor="#3b82f6" />
-              <stop offset="100%" stopColor="#8b5cf6" />
+              <stop offset="0%"   stopColor="#a3e635" />
+              <stop offset="25%"  stopColor="#4ade80" />
+              <stop offset="50%"  stopColor="#10b981" />
+              <stop offset="75%"  stopColor="#059669" />
+              <stop offset="100%" stopColor="#0d9488" />
             </linearGradient>
           </defs>
 
@@ -155,7 +159,7 @@ export function CarbonBarChart({
             const y = PT + iH - bh;
             const col = getCycleColor(p.cycle);
             const isHov = hoverIdx === i;
-            const cycleClamp = Math.min(Math.max(0, p.cycle), CYCLE_COLORS.length - 1);
+            const cycleClamp = Math.min(Math.max(0, p.cycle), GREEN_THEME_COLORS.length - 1);
 
             // +- indicators (error bars)
             const errorSize = bh * 0.08; // 8% error margin
@@ -171,7 +175,7 @@ export function CarbonBarChart({
 
                 {/* Main Bar */}
                 <rect x={x} y={y} width={barW} height={bh} rx={isMobile ? 2 : 4}
-                  fill={`url(#cycleGrad${cycleClamp})`}
+                  fill={`url(#cycleGradGreen${cycleClamp})`}
                   filter={isHov ? "url(#barShadow)" : undefined}
                   style={{ transition: "all 0.2s" }}
                 />
@@ -207,7 +211,7 @@ export function CarbonBarChart({
 
           {/* Trend Line Points */}
           {linePoints.map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="#fff" stroke={getCycleColor(pts[i].cycle).bar} strokeWidth={1.5} opacity={0.9} style={{ pointerEvents: "none" }} />
+            <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="#fff" stroke={getCycleColor(pts[i].cycle).label} strokeWidth={1.5} opacity={0.9} style={{ pointerEvents: "none" }} />
           ))}
 
 
@@ -222,11 +226,18 @@ export function CarbonBarChart({
               
               let showLabel = isCycleStart || isCutAge || isEvery5;
               
-              // Overlap prevention: 
-              // Always show cycle starts. 
-              // Others only if at least 3 bars away from the last shown label.
-              if (showLabel && !isCycleStart && (i - lastShownIdx < 3)) {
-                showLabel = false;
+              if (showLabel && !isCycleStart && !isCutAge) {
+                // If it's just a 5-year mark, ensure it's not too close to the previous or next important label
+                if (i - lastShownIdx < 3) showLabel = false;
+                const nextImportant = pts.findIndex((pt, idx) => idx > i && (cycleStarts.some(cs => cs.idx === idx) || pt.age === CUT_AGE));
+                if (nextImportant !== -1 && (nextImportant - i < 3)) showLabel = false;
+              }
+              
+              // If it's a cut age but not a cycle start, ensure it doesn't overlap with a cycle start
+              if (showLabel && isCutAge && !isCycleStart) {
+                if (i - lastShownIdx < 2) showLabel = false;
+                const nextCycle = cycleStarts.find(cs => cs.idx > i);
+                if (nextCycle && (nextCycle.idx - i < 2)) showLabel = false;
               }
 
               if (!showLabel) return null;
@@ -237,7 +248,7 @@ export function CarbonBarChart({
                 <g key={i}>
                   <text x={x} y={PT + iH + (isMobile ? 20 : 24)} textAnchor="middle"
                     fontSize={isMobile ? 11 : 16} fontWeight={isCycleStart ? 800 : 600}
-                    fill={getCycleColor(p.cycle).bar}>
+                    fill={getCycleColor(p.cycle).label}>
                     {isCycleStart && p.age === 1 ? "ปี 1" : `${p.age} ปี`}
                   </text>
                   <text x={x} y={PT + iH + (isMobile ? 34 : 44)} textAnchor="middle"
@@ -269,7 +280,7 @@ export function CarbonBarChart({
             const ttY = Math.max(y - ttH - 12, 4);
             return (
               <g pointerEvents="none">
-                <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={10} fill="#1e293b" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
+                <rect x={ttX} y={ttY} width={ttW} height={ttH} rx={10} fill="#022c22" style={{ filter: "drop-shadow(0 4px 12px rgba(5,150,105,0.35))" }} />
                 <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 20)} textAnchor="middle" fontSize={isMobile ? 11 : 12} fill={col.bar} fontWeight={800}>
                   อายุยางพารา · {p.age} ปี
                 </text>

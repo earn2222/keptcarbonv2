@@ -1,7 +1,9 @@
 services:
   # ── Next.js application ────────────────────────
   nextjs:
-    build: ./next
+    build:
+      context: ./next
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     container_name: keptcarbon-nextjs
@@ -13,9 +15,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - GEE_SERVICE_URL=http://gee:8000
     volumes:
-      - ./next:/app
       - /app/node_modules
       - /app/.next
+    working_dir: /app
     depends_on:
       postgis:
         condition: service_healthy
