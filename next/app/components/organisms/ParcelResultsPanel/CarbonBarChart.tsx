@@ -3,10 +3,11 @@ import { useState } from "react";
 
 // Colors for each rubber plantation cycle (~27 years each)
 const CYCLE_COLORS = [
-  { bar: "#10b981", bg: "rgba(16,185,129,0.12)", label: "#065f46", name: "รอบปลูกที่ 1" },
-  { bar: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: "#1e40af", name: "รอบปลูกที่ 2" },
-  { bar: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "#92400e", name: "รอบปลูกที่ 3" },
-  { bar: "#ec4899", bg: "rgba(236,72,153,0.12)", label: "#9d174d", name: "รอบปลูกที่ 4" },
+  { bar: "#10b981", bg: "rgba(16,185,129,0.12)", label: "#065f46", name: "รอบที่ 1" },
+  { bar: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: "#1e40af", name: "รอบที่ 2" },
+  { bar: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "#92400e", name: "รอบที่ 3" },
+  { bar: "#ec4899", bg: "rgba(236,72,153,0.12)", label: "#9d174d", name: "รอบที่ 4" },
+  { bar: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: "#5b21b6", name: "รอบที่ 5" },
 ];
 
 export const CUT_AGE = 27;   // โค่นและปลูกใหม่ที่ 27 ปี
@@ -41,13 +42,13 @@ export function buildBarPoints(
   for (let i = 0; i < TOTAL_PROJ_YEARS; i++) {
     if (continuousAge > 35) break;
 
-    const plantCycle = continuousAge > CUT_AGE ? 1 : 0;
+    const period = Math.floor(i / 7);
 
     pts.push({
       age: continuousAge,
       yearBE: startYearBE + i,
       co2: carbonCo2(continuousAge, trees, spacing),
-      cycle: Math.min(plantCycle, CYCLE_COLORS.length - 1),
+      cycle: period,
       cycleAge: continuousAge,
     });
     continuousAge++;
@@ -222,11 +223,18 @@ export function CarbonBarChart({
               
               let showLabel = isCycleStart || isCutAge || isEvery5;
               
-              // Overlap prevention: 
-              // Always show cycle starts. 
-              // Others only if at least 3 bars away from the last shown label.
-              if (showLabel && !isCycleStart && (i - lastShownIdx < 3)) {
-                showLabel = false;
+              if (showLabel && !isCycleStart && !isCutAge) {
+                // If it's just a 5-year mark, ensure it's not too close to the previous or next important label
+                if (i - lastShownIdx < 3) showLabel = false;
+                const nextImportant = pts.findIndex((pt, idx) => idx > i && (cycleStarts.some(cs => cs.idx === idx) || pt.age === CUT_AGE));
+                if (nextImportant !== -1 && (nextImportant - i < 3)) showLabel = false;
+              }
+              
+              // If it's a cut age but not a cycle start, ensure it doesn't overlap with a cycle start
+              if (showLabel && isCutAge && !isCycleStart) {
+                if (i - lastShownIdx < 2) showLabel = false;
+                const nextCycle = cycleStarts.find(cs => cs.idx > i);
+                if (nextCycle && (nextCycle.idx - i < 2)) showLabel = false;
               }
 
               if (!showLabel) return null;

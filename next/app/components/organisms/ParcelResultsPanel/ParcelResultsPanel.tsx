@@ -738,16 +738,14 @@ export function ParcelResultsPanel({
                 summaryTotalCo2 = carbonResults.reduce((sum, c) => sum + c.co2Now, 0);
 
                 // Track each plot independently through 35-year simulation
-                const plotStates = carbonResults.map(c => ({ continuousAge: c.age, plantCycle: 0 }));
+                const plotStates = carbonResults.map(c => ({ continuousAge: c.age }));
                 const N = plotStates.length;
 
                 for (let i = 0; i < 35; i++) {
                     const yearBE = CURRENT_BE + i;
-                    let totalCo2 = 0, totalCycle = 0, totalContinuousAge = 0;
+                    let totalCo2 = 0, totalContinuousAge = 0;
                     plotStates.forEach((state, idx) => {
-                        state.plantCycle = state.continuousAge > 27 ? 1 : 0;
                         totalCo2 += carbonCo2(state.continuousAge, carbonResults[idx].trees, carbonResults[idx].spacing);
-                        totalCycle += state.plantCycle;
                         totalContinuousAge += state.continuousAge;
                         state.continuousAge++;
                     });
@@ -758,7 +756,7 @@ export function ParcelResultsPanel({
                         age: avgContinuousAge,
                         yearBE,
                         co2: totalCo2,
-                        cycle: Math.min(Math.round(totalCycle / N), 3),
+                        cycle: Math.floor(i / 7),
                         cycleAge: avgContinuousAge,
                     });
                 }
