@@ -448,6 +448,7 @@ export function ParcelResultsPanel({
     const [ownerName, setOwnerName] = useState(userDisplayName);
     const [province, setProvince] = useState("");
     const [saveState, setSaveState] = useState<"idle" | "saving" | "done">("idle");
+    const [showInputDetails, setShowInputDetails] = useState(false);
     const [plotForms, setPlotForms] = useState<PlotFormData[]>([]);
     const [carbonResults, setCarbonResults] = useState<CarbonResult[]>([]);
 
@@ -1080,51 +1081,69 @@ export function ParcelResultsPanel({
                         </>
                     ) : null}
 
-                    {/* Input Details Summary */}
-                    <div style={{ marginTop: 16, background: "#f8fafc", padding: "12px 14px", borderRadius: 12, border: "1px solid #e2e8f0" }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 10 }}>
-                            <i className="bi bi-file-text" style={{ color: "#0ea5e9" }} /> ข้อมูลที่ใช้ประมวลผล
-                        </div>
-                        <div style={{ fontSize: 12, color: "#475569" }}>
-                            <div><strong>ชื่อโครงการ:</strong> {projectName || "-"}</div>
-                            <div><strong>พื้นที่รวม:</strong> {totalArea.toFixed(2)} ไร่</div>
-                            <div style={{ marginTop: 8 }}><strong>รายละเอียดแปลง:</strong></div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
-                                {plots.map((p, i) => {
-                                    if (!isTotal && selectedMapPlotIndex !== i) return null;
-                                    const f = plotForms[i];
-                                    const crInfo = carbonResults[i];
-                                    if (!f || !crInfo) return null;
-                                    return (
-                                        <div 
-                                            key={i} 
-                                            onClick={() => {
-                                                if (parcelFeatures[i]) {
-                                                    onFlyTo(parcelFeatures[i]);
-                                                    onMapPlotSelected?.(i);
-                                                }
-                                            }}
-                                            style={{ padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid rgba(0,0,0,0.05)", cursor: "pointer" }}
-                                        >
-                                            <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4 }}>แปลงที่ {i + 1} ({p.areaRai.toFixed(2)} ไร่)</div>
-                                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, fontSize: 11, color: "#64748b" }}>
-                                                <div>• ปีที่ปลูก: พ.ศ. {crInfo.plantYearBE}</div>
-                                                <div>• พันธุ์ยาง: {crInfo.variety}</div>
-                                                <div>• จำนวนต้น: {crInfo.trees} ต้น</div>
-                                                <div>• ระยะปลูก: {crInfo.spacing} ม.</div>
-                                            </div>
-                                            {f.luMockData && Object.keys(f.luMockData).length > 0 && (
-                                                <div style={{ marginTop: 4, fontSize: 11, color: "#10b981", display: "flex", flexWrap: "wrap", gap: 6 }}>
-                                                    {Object.entries(f.luMockData).map(([k, v]) => (
-                                                        <span key={k}>{k}: {v.pct}%</span>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                    {/* Input Details Summary (Collapsible) */}
+                    <div style={{ marginTop: 16, background: "#f8fafc", borderRadius: 12, border: "1px solid #e2e8f0", overflow: "hidden" }}>
+                        <div 
+                            onClick={() => setShowInputDetails(!showInputDetails)}
+                            style={{ 
+                                padding: "12px 14px", 
+                                cursor: "pointer", 
+                                display: "flex", 
+                                alignItems: "center", 
+                                justifyContent: "space-between",
+                                background: showInputDetails ? "rgba(14,165,233,0.04)" : "transparent"
+                            }}
+                        >
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", display: "flex", alignItems: "center", gap: 8 }}>
+                                <i className="bi bi-file-text" style={{ color: "#0ea5e9" }} /> ข้อมูลที่ใช้ประมวลผล
                             </div>
+                            <i className={`bi bi-chevron-${showInputDetails ? "up" : "down"}`} style={{ fontSize: 12, color: "#64748b" }} />
                         </div>
+
+                        {showInputDetails && (
+                            <div style={{ padding: "0 14px 14px", fontSize: 12, color: "#475569", borderTop: "1px solid rgba(226,232,240,0.6)" }}>
+                                <div style={{ paddingTop: 10 }}>
+                                    <div><strong>ชื่อโครงการ:</strong> {projectName || "-"}</div>
+                                    <div><strong>พื้นที่รวม:</strong> {totalArea.toFixed(2)} ไร่</div>
+                                    <div style={{ marginTop: 8 }}><strong>รายละเอียดแปลง:</strong></div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                                        {plots.map((p, i) => {
+                                            if (!isTotal && selectedMapPlotIndex !== i) return null;
+                                            const f = plotForms[i];
+                                            const crInfo = carbonResults[i];
+                                            if (!f || !crInfo) return null;
+                                            return (
+                                                <div 
+                                                    key={i} 
+                                                    onClick={() => {
+                                                        if (parcelFeatures[i]) {
+                                                            onFlyTo(parcelFeatures[i]);
+                                                            onMapPlotSelected?.(i);
+                                                        }
+                                                    }}
+                                                    style={{ padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid rgba(0,0,0,0.05)", cursor: "pointer" }}
+                                                >
+                                                    <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4 }}>แปลงที่ {i + 1} ({p.areaRai.toFixed(2)} ไร่)</div>
+                                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, fontSize: 11, color: "#64748b" }}>
+                                                        <div>• ปีที่ปลูก: พ.ศ. {crInfo.plantYearBE}</div>
+                                                        <div>• พันธุ์ยาง: {crInfo.variety}</div>
+                                                        <div>• จำนวนต้น: {crInfo.trees} ต้น</div>
+                                                        <div>• ระยะปลูก: {crInfo.spacing} ม.</div>
+                                                    </div>
+                                                    {f.luMockData && Object.keys(f.luMockData).length > 0 && (
+                                                        <div style={{ marginTop: 4, fontSize: 11, color: "#10b981", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                                            {Object.entries(f.luMockData).map(([k, v]) => (
+                                                                <span key={k}>{k}: {v.pct}%</span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
