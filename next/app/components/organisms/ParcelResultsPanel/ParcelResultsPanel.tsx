@@ -673,7 +673,13 @@ export function ParcelResultsPanel({
                             <div key={i} style={{ background: "#fff", borderRadius: 14, border: "1px solid rgba(16,185,129,0.15)", overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
                                 {/* Plot header */}
                                 <div 
-                                    onClick={() => setExpandedIdx(expandedIdx === i ? null : i)}
+                                    onClick={() => {
+                                        setExpandedIdx(expandedIdx === i ? null : i);
+                                        if (parcelFeatures[i]) {
+                                            onFlyTo(parcelFeatures[i]);
+                                            onMapPlotSelected?.(i);
+                                        }
+                                    }}
                                     style={{ 
                                         background: "linear-gradient(135deg,rgba(16,185,129,0.08),rgba(5,150,105,0.04))", 
                                         padding: "10px 14px", 
@@ -826,18 +832,14 @@ export function ParcelResultsPanel({
                                                         }}
                                                     />
                                                     <span style={{ flex: 1, color: lu.disabled ? "#000" : "#334155", fontWeight: isChecked ? 600 : 400 }}>{lu.label}</span>
-                                                    {isChecked && mockData && (
-                                                        <span style={{ color: "#059669", fontSize: 12, fontWeight: 700 }}>
-                                                            {mockData.rai.toFixed(2)} ไร่ <span style={{ opacity: 0.7, fontSize: 11 }}>({mockData.pct}%)</span>
-                                                        </span>
-                                                    )}
+                                                    <span style={{ color: (mockData && mockData.rai > 0) ? "#059669" : "#94a3b8", fontSize: 12, fontWeight: 700 }}>
+                                                        {(mockData?.rai || 0).toFixed(2)} ไร่ <span style={{ opacity: 0.7, fontSize: 11 }}>({mockData?.pct || 0}%)</span>
+                                                    </span>
                                                 </label>
                                             );
                                         })}
                                     </div>
-                                    <div style={{ marginTop: 12, padding: "8px 12px", background: "#f8fafc", borderRadius: 8, fontSize: 12, color: "#64748b" }}>
-                                        <i className="bi bi-info-circle me-1" /> จำลองพื้นที่ตามสัดส่วนการลากแปลง (Mockup)
-                                    </div>
+
                                 </div>
                                     </>
                                 )}
@@ -1080,7 +1082,16 @@ export function ParcelResultsPanel({
                                     const crInfo = carbonResults[i];
                                     if (!f || !crInfo) return null;
                                     return (
-                                        <div key={i} style={{ padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid rgba(0,0,0,0.05)" }}>
+                                        <div 
+                                            key={i} 
+                                            onClick={() => {
+                                                if (parcelFeatures[i]) {
+                                                    onFlyTo(parcelFeatures[i]);
+                                                    onMapPlotSelected?.(i);
+                                                }
+                                            }}
+                                            style={{ padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid rgba(0,0,0,0.05)", cursor: "pointer" }}
+                                        >
                                             <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4 }}>แปลงที่ {i + 1} ({p.areaRai.toFixed(2)} ไร่)</div>
                                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, fontSize: 11, color: "#64748b" }}>
                                                 <div>• ปีที่ปลูก: พ.ศ. {crInfo.plantYearBE}</div>
