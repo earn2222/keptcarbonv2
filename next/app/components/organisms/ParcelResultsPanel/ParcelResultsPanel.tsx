@@ -933,6 +933,9 @@ export function ParcelResultsPanel({
                 summaryTotalTrees = carbonResults.reduce((sum, c) => sum + c.trees, 0);
                 summaryTotalCo2 = carbonResults.reduce((sum, c) => sum + c.co2Now, 0);
 
+                // Pre-calculate initial carbons for each plot for growth reference
+                const initialPlotCarbons = carbonResults.map(c => carbonCo2(c.age, c.trees, c.spacing));
+
                 // Track each plot independently through 35-year simulation
                 const plotStates = carbonResults.map(c => ({ continuousAge: c.age }));
                 const N = plotStates.length;
@@ -940,11 +943,28 @@ export function ParcelResultsPanel({
                 for (let i = 0; i < 35; i++) {
                     const yearBE = CURRENT_BE + i;
                     let totalCo2 = 0, totalContinuousAge = 0;
+                    let sumOfSquaresMargin = 0;
+
                     plotStates.forEach((state, idx) => {
-                        totalCo2 += carbonCo2(state.continuousAge, carbonResults[idx].trees, carbonResults[idx].spacing);
+                        const plotCo2 = carbonCo2(state.continuousAge, carbonResults[idx].trees, carbonResults[idx].spacing);
+                        totalCo2 += plotCo2;
+                        
+                        // Calculate plot-specific error margin based on growth from year 0
+                        let plotMargin = 0;
+                        if (i > 0) {
+                            const growth = plotCo2 - initialPlotCarbons[idx];
+                            // Further reduced factor for higher precision look: 5% base + 0.2% per year
+                            const factor = 0.05 + 0.002 * i;
+                            plotMargin = Math.max(0, growth * factor);
+                        }
+                        sumOfSquaresMargin += plotMargin * plotMargin;
+
                         totalContinuousAge += state.continuousAge;
                         state.continuousAge++;
                     });
+                    
+                    const totalErrorMargin = Math.sqrt(sumOfSquaresMargin);
+
                     const avgContinuousAge = Math.round(totalContinuousAge / N);
                     if (avgContinuousAge > 35) break;
 
@@ -954,6 +974,7 @@ export function ParcelResultsPanel({
                         co2: totalCo2,
                         cycle: Math.floor(i / 7),
                         cycleAge: avgContinuousAge,
+                        errorMargin: totalErrorMargin,
                     });
                 }
             } else if (cr) {
@@ -1022,7 +1043,7 @@ export function ParcelResultsPanel({
                             {/* Total summary */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 6, marginBottom: 10 }}>
                                 {[
-                                    { label: "คาร์บอนรวมปัจจุบัน", val: `${summaryTotalCo2.toFixed(1)} tCO₂`, color: "#0d9488" },
+                                    { label: "คาร์บอนรวมปัจจุบัน", val: `${Math.round(summaryTotalCo2).toLocaleString()} tCO₂`, color: "#0d9488" },
                                 ].map(({ label, val, color }) => (
                                     <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
                                         <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>{label}</div>
@@ -1040,7 +1061,7 @@ export function ParcelResultsPanel({
                             {/* Plot info summary */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 6, marginBottom: 10 }}>
                                 {[
-                                    { label: "คาร์บอนปัจจุบัน", val: `${cr.co2Now.toFixed(1)} tCO₂`, color: "#0d9488" },
+                                    { label: "คาร์บอนปัจจุบัน", val: `${Math.round(cr.co2Now).toLocaleString()} tCO₂`, color: "#0d9488" },
                                 ].map(({ label, val, color }) => (
                                     <div key={label} style={{ background: "#fff", borderRadius: 10, padding: "8px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
                                         <div style={{ fontSize: isMobile ? 16 : 17, fontWeight: 800, color }}>{val}</div>

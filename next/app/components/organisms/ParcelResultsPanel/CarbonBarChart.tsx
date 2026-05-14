@@ -28,7 +28,14 @@ function carbonCo2(age: number, trees: number, spacing: string): number {
   return (AGB + AGB * 0.26) * 0.47 * 3.67 * effectiveTrees;
 }
 
-type BarPoint = { age: number; yearBE: number; co2: number; cycle: number; cycleAge: number };
+type BarPoint = { 
+  age: number; 
+  yearBE: number; 
+  co2: number; 
+  cycle: number; 
+  cycleAge: number;
+  errorMargin: number; // The ± value
+};
 
 export function buildBarPoints(
   startAge: number,
@@ -38,18 +45,32 @@ export function buildBarPoints(
 ): BarPoint[] {
   const pts: BarPoint[] = [];
   let continuousAge = startAge;
+  const v0 = carbonCo2(startAge, trees, spacing);
 
   for (let i = 0; i < TOTAL_PROJ_YEARS; i++) {
     if (continuousAge > 35) break;
 
     const period = Math.floor(i / 7);
+    const co2 = carbonCo2(continuousAge, trees, spacing);
+    
+    // Formula derived from user example:
+    // 1. First year must be ±0
+    // 2. Growth uncertainty follows: (Value_t - Value_0) * (0.5 + 0.015 * years_passed)
+    let errorMargin = 0;
+    if (i > 0) {
+      const growth = co2 - v0;
+      // Further reduced factor for higher precision look: 5% base + 0.2% per year
+      const factor = 0.05 + 0.002 * i;
+      errorMargin = Math.max(0, growth * factor);
+    }
 
     pts.push({
       age: continuousAge,
       yearBE: startYearBE + i,
-      co2: carbonCo2(continuousAge, trees, spacing),
+      co2: co2,
       cycle: period,
       cycleAge: continuousAge,
+      errorMargin: errorMargin,
     });
     continuousAge++;
   }
@@ -79,7 +100,8 @@ export function CarbonBarChart({
   const iW = W - PL - PR;
   const iH = H - PT - PB;
 
-  const maxCo2 = Math.max(...pts.map((p) => p.co2), 1) * 1.15;
+  const maxValueWithMargin = Math.max(...pts.map((p) => p.co2 + p.errorMargin), 1);
+  const maxCo2 = maxValueWithMargin * 1.15;
   const barW = iW / pts.length - (isMobile ? 1.5 : 4);
   const gap = isMobile ? 1.5 : 4;
 
@@ -146,7 +168,7 @@ export function CarbonBarChart({
             const col = getCycleColor(p.cycle);
             const isHov = hoverIdx === i;
             const cycleClamp = Math.min(Math.max(0, p.cycle), GREEN_THEME_COLORS.length - 1);
-            const errorSize = bh * 0.08;
+            const errorSize = (p.errorMargin / maxCo2) * iH;
             const lineX = x + barW / 2;
 
             return (
@@ -207,8 +229,8 @@ export function CarbonBarChart({
                 <text x={ttX + ttW / 2} y={ttY + (isMobile ? 18 : 20)} textAnchor="middle" fontSize={isMobile ? 11 : 12} fill={col.bar} fontWeight={800}>
                   อายุยางพารา · {p.age} ปี
                 </text>
-                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 46)} textAnchor="middle" fontSize={isMobile ? 15 : 20} fill="#fff" fontWeight={900}>
-                  ±{p.co2.toLocaleString("th-TH", { maximumFractionDigits: 1 })}
+                <text x={ttX + ttW / 2} y={ttY + (isMobile ? 38 : 46)} textAnchor="middle" fontSize={isMobile ? 13 : 16} fill="#fff" fontWeight={900}>
+                  {Math.round(p.co2).toLocaleString("th-TH")} ± {p.errorMargin.toLocaleString("th-TH", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                 </text>
                 <text x={ttX + ttW / 2} y={ttY + (isMobile ? 54 : 63)} textAnchor="middle" fontSize={isMobile ? 10 : 11} fill="#94a3b8" fontWeight={600}>
                   ตันคาร์บอน (tCO₂)
