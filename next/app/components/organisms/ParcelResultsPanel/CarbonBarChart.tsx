@@ -67,7 +67,6 @@ export function CarbonBarChart({
   title?: string;
   narrowMode?: boolean;
 }) {
-  console.log("CarbonBarChart rendered with green theme");
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   if (!pts.length) return null;
 
@@ -84,15 +83,6 @@ export function CarbonBarChart({
   const barW = iW / pts.length - (isMobile ? 1.5 : 4);
   const gap = isMobile ? 1.5 : 4;
 
-  // Find plantation-cycle boundaries (รอบปลูก)
-  const cycleStarts: { idx: number; name: string; color: string; yearStart: number }[] = [];
-  pts.forEach((p, i) => {
-    if (i === 0 || pts[i - 1].cycle !== p.cycle) {
-      const col = getCycleColor(p.cycle);
-      cycleStarts.push({ idx: i, name: col.name, color: col.bar, yearStart: p.yearBE });
-    }
-  });
-
   // Calculate line path points
   const linePoints = pts.map((p, i) => {
     const bh = Math.max((p.co2 / maxCo2) * iH, 2);
@@ -101,20 +91,12 @@ export function CarbonBarChart({
     return { x, y };
   });
 
-  // Simple spline or line path
   const linePath = linePoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(" ");
 
   return (
     <div style={{ background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", borderRadius: 20, padding: isMobile ? "16px 8px 10px" : "20px 16px 12px", boxShadow: "0 10px 30px -5px rgba(5,150,105,0.12)", maxWidth: (isMobile || narrowMode) ? undefined : 860, margin: (isMobile || narrowMode) ? undefined : "0 auto", border: "1px solid rgba(16,185,129,0.15)" }}>
-      {/* Chart Title */}
       {title && (
-        <div style={{
-          textAlign: "center",
-          fontSize: isMobile ? 14 : (narrowMode ? 17 : 20),
-          fontWeight: 800,
-          color: "#064e3b",
-          marginBottom: 10,
-        }}>
+        <div style={{ textAlign: "center", fontSize: isMobile ? 14 : (narrowMode ? 17 : 20), fontWeight: 800, color: "#064e3b", marginBottom: 10 }}>
           {title} •
         </div>
       )}
@@ -145,11 +127,7 @@ export function CarbonBarChart({
 
           {/* Grid lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-            <line key={t}
-              x1={PL} y1={PT + t * iH} x2={PL + iW} y2={PT + t * iH}
-              stroke="rgba(0,0,0,0.05)" strokeWidth={1}
-              strokeDasharray={t < 1 && t > 0 ? "4,4" : undefined}
-            />
+            <line key={t} x1={PL} y1={PT + t * iH} x2={PL + iW} y2={PT + t * iH} stroke="rgba(0,0,0,0.05)" strokeWidth={1} strokeDasharray={t < 1 && t > 0 ? "4,4" : undefined} />
           ))}
 
           {/* Bars */}
@@ -160,112 +138,51 @@ export function CarbonBarChart({
             const col = getCycleColor(p.cycle);
             const isHov = hoverIdx === i;
             const cycleClamp = Math.min(Math.max(0, p.cycle), GREEN_THEME_COLORS.length - 1);
-
-            // +- indicators (error bars)
-            const errorSize = bh * 0.08; // 8% error margin
+            const errorSize = bh * 0.08;
             const lineX = x + barW / 2;
 
             return (
               <g key={i} onMouseEnter={() => setHoverIdx(i)} onMouseLeave={() => setHoverIdx(null)} style={{ cursor: "pointer" }}>
-                {/* Hover effect bg */}
-                {isHov && (
-                  <rect x={x - 2} y={PT} width={barW + 4} height={iH} rx={4}
-                    fill={col.bar} opacity={0.06} />
-                )}
-
-                {/* Main Bar */}
-                <rect x={x} y={y} width={barW} height={bh} rx={isMobile ? 2 : 4}
-                  fill={`url(#cycleGradGreen${cycleClamp})`}
-                  filter={isHov ? "url(#barShadow)" : undefined}
-                  style={{ transition: "all 0.2s" }}
-                />
-
-                {/* +- (Error Bars) */}
-                <line
-                  x1={lineX} y1={y - errorSize} x2={lineX} y2={y + errorSize}
-                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6}
-                />
-                <line
-                  x1={lineX - 2} y1={y - errorSize} x2={lineX + 2} y2={y - errorSize}
-                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6}
-                />
-                <line
-                  x1={lineX - 2} y1={y + errorSize} x2={lineX + 2} y2={y + errorSize}
-                  stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6}
-                />
+                {isHov && <rect x={x - 2} y={PT} width={barW + 4} height={iH} rx={4} fill={col.bar} opacity={0.06} />}
+                <rect x={x} y={y} width={barW} height={bh} rx={isMobile ? 2 : 4} fill={`url(#cycleGradGreen${cycleClamp})`} filter={isHov ? "url(#barShadow)" : undefined} style={{ transition: "all 0.2s" }} />
+                <line x1={lineX} y1={y - errorSize} x2={lineX} y2={y + errorSize} stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} />
+                <line x1={lineX - 2} y1={y - errorSize} x2={lineX + 2} y2={y - errorSize} stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} />
+                <line x1={lineX - 2} y1={y + errorSize} x2={lineX + 2} y2={y + errorSize} stroke={isHov ? col.bar : "#94a3b8"} strokeWidth={1} opacity={0.6} />
               </g>
             );
           })}
 
           {/* Trend Line */}
-          <path
-            d={linePath}
-            fill="none"
-            stroke="url(#lineGrad)"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity={0.8}
-            style={{ pointerEvents: "none" }}
-          />
+          <path d={linePath} fill="none" stroke="url(#lineGrad)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.8} style={{ pointerEvents: "none" }} />
 
           {/* Trend Line Points */}
           {linePoints.map((p, i) => (
             <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="#fff" stroke={getCycleColor(pts[i].cycle).label} strokeWidth={1.5} opacity={0.9} style={{ pointerEvents: "none" }} />
           ))}
 
-
-
-          {/* X-axis labels: show at cycle starts + every 5 years with overlap prevention */}
-          {(() => {
-            let lastShownIdx = -10;
-            return pts.map((p, i) => {
-              const isCycleStart = cycleStarts.some(cs => cs.idx === i);
-              const isCutAge = p.age === CUT_AGE;
-              const isEvery5 = p.age % 5 === 0;
-              
-              let showLabel = isCycleStart || isCutAge || isEvery5;
-              
-              if (showLabel && !isCycleStart && !isCutAge) {
-                // If it's just a 5-year mark, ensure it's not too close to the previous or next important label
-                if (i - lastShownIdx < 3) showLabel = false;
-                const nextImportant = pts.findIndex((pt, idx) => idx > i && (cycleStarts.some(cs => cs.idx === idx) || pt.age === CUT_AGE));
-                if (nextImportant !== -1 && (nextImportant - i < 3)) showLabel = false;
-              }
-              
-              // If it's a cut age but not a cycle start, ensure it doesn't overlap with a cycle start
-              if (showLabel && isCutAge && !isCycleStart) {
-                if (i - lastShownIdx < 2) showLabel = false;
-                const nextCycle = cycleStarts.find(cs => cs.idx > i);
-                if (nextCycle && (nextCycle.idx - i < 2)) showLabel = false;
-              }
-
-              if (!showLabel) return null;
-              lastShownIdx = i;
-
-              const x = PL + i * (barW + gap) + barW / 2;
-              return (
-                <g key={i}>
-                  <text x={x} y={PT + iH + (isMobile ? 20 : 24)} textAnchor="middle"
-                    fontSize={isMobile ? 11 : 16} fontWeight={isCycleStart ? 800 : 600}
-                    fill={getCycleColor(p.cycle).label}>
-                    {isCycleStart && p.age === 1 ? "ปี 1" : `${p.age} ปี`}
-                  </text>
-                  <text x={x} y={PT + iH + (isMobile ? 34 : 44)} textAnchor="middle"
-                    fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>
-                    {p.yearBE}
-                  </text>
-                </g>
-              );
-            });
-          })()}
+          {/* X-axis labels: ONLY show at every 7th index (0, 7, 14, 21...) */}
+          {pts.map((p, i) => {
+            if (i % 7 !== 0) return null;
+            const x = PL + i * (barW + gap) + barW / 2;
+            const col = getCycleColor(p.cycle);
+            return (
+              <g key={i}>
+                <text x={x} y={PT + iH + (isMobile ? 20 : 24)} textAnchor="middle" fontSize={isMobile ? 11 : 16} fontWeight={900} fill={col.label}>
+                  {`${p.age} ปี`}
+                </text>
+                <text x={x} y={PT + iH + (isMobile ? 34 : 44)} textAnchor="middle" fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>
+                  {p.yearBE}
+                </text>
+              </g>
+            );
+          })}
 
           {/* Y-axis labels */}
           <text x={isMobile ? 2 : PL - 6} y={PT + 5} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 12 : 16} fill="#94a3b8" fontWeight={600}>tCO₂</text>
 
           {/* X-axis Row Indicators */}
-          <text x={isMobile ? 4 : PL - 10} y={PT + iH + (isMobile ? 20 : 24)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 16} fill="#475569" fontWeight={700}>อายุ</text>
-          <text x={isMobile ? 4 : PL - 10} y={PT + iH + (isMobile ? 34 : 44)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>พ.ศ.</text>
+          <text x={isMobile ? 4 : PL - 12} y={PT + iH + (isMobile ? 20 : 24)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 16} fill="#064e3b" fontWeight={900}>อายุ</text>
+          <text x={isMobile ? 4 : PL - 12} y={PT + iH + (isMobile ? 34 : 44)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 14} fill="#64748b" fontWeight={600}>พ.ศ.</text>
 
           {/* Tooltip */}
           {hoverIdx !== null && (() => {
