@@ -443,6 +443,11 @@ export default function MapDrawPage() {
     drawingRef.current = false;
     setDrawing(false);
     
+    const map = mapRef.current;
+    if (map) {
+      map.getCanvas().style.cursor = "";
+    }
+    
     const newFeature: GeoJSON.Feature = {
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [ring] },
@@ -589,6 +594,9 @@ export default function MapDrawPage() {
         drawingRef.current = false;
         setDrawing(false);
         setStatus("ยกเลิกการวาด");
+        if (mapRef.current) {
+          mapRef.current.getCanvas().style.cursor = "";
+        }
       }
     };
     document.addEventListener("keydown", onKey);
@@ -633,6 +641,7 @@ export default function MapDrawPage() {
       (map.getSource("draw-verts") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
       (map.getSource("plot") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
       (map.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
+      map.getCanvas().style.cursor = "";
     }
     setCurrentStep(1);
   };
