@@ -23,6 +23,11 @@ type Props = {
     onStepChange: (step: 1 | 2 | 3) => void;
     selectedMapPlotIndex?: number | "total";
     onMapPlotSelected?: (idx: number | "total") => void;
+    onDeleteParcel?: (idx: number) => void;
+    onDrawMore?: () => void;
+    isDrawing?: boolean;
+    onFinishDraw?: () => void;
+    onCancelDraw?: () => void;
 };
 
 type PlotTab = "analyze" | "forecast";
@@ -30,18 +35,26 @@ type ForecastYr = 3 | 5 | 7;
 type SubStep = "form" | "carbon" | "save";
 
 interface PlotFormData {
+    plantStatus: "new" | "old" | "";
     plantYear: string;
     treeCount: string;
     variety: string;
     spacing: string;
+    luChecked: Record<string, boolean>;
+    luMockData: Record<string, { rai: number, pct: number }>;
 }
 
 const VARIETY_OPTIONS = [
     "RRIM 600", "GT1", "BPM 24", "PB 235", "PB 260",
     "RRIT 408", "RRIT 251", "สงขลา 36", "RRIM 712", "อื่นๆ",
 ];
-const SPACING_OPTIONS = ["2.5*8", "3*7", "2.5*7", "3*6"];
-const YEAR_OPTIONS = Array.from({ length: 50 }, (_, i) => String(new Date().getFullYear() + 543 - i));
+const SPACING_OPTIONS = ["2.5x8", "3x7", "2.5x7", "2x6", "3x8"];
+
+const CURRENT_CE = new Date().getFullYear();
+const CURRENT_BE = CURRENT_CE + 543;
+
+const NEW_YEAR_OPTIONS = Array.from({ length: 11 }, (_, i) => String(CURRENT_BE + i));
+const OLD_YEAR_OPTIONS = Array.from({ length: 2572 - 2534 + 1 }, (_, i) => String(2572 - i));
 
 interface CarbonResult {
     plotIdx: number;
@@ -65,8 +78,6 @@ interface PlotInfo {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────
-const CURRENT_CE = new Date().getFullYear();
-const CURRENT_BE = CURRENT_CE + 543;
 
 const THAI_PROVINCES = [
     "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร", "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา",
@@ -93,7 +104,7 @@ function parseRai(v: unknown): number {
 
 function computePlot(feat: GeoJSON.Feature): PlotInfo {
     const p = (feat.properties ?? {}) as Record<string, unknown>;
-    const areaRai = parseRai(p.grow_area);
+    const areaRai = parseRai(p.grow_area || p.rai);
 
     // Determine backend plant year
     let bPlantYear = Number(p.gee_plant_year || p.grow_year || 0);
@@ -142,6 +153,28 @@ function forecastPts(age: number, trees: number, years: ForecastYr) {
         yearBE: CURRENT_BE + i,
         co2: trees > 0 ? carbonForAge(age + i, trees).co2 : 0,
     }));
+}
+
+function generateMockLU(totalRai: number, checked: Record<string, boolean>) {
+    const keys = Object.keys(checked).filter(k => checked[k] && !['U', 'W'].includes(k)); // Exclude disabled ones
+    if (keys.length === 0) return {};
+    const res: Record<string, { rai: number, pct: number }> = {};
+    if (keys.length === 1) {
+        res[keys[0]] = { rai: totalRai, pct: 100 };
+        return res;
+    }
+    const basePct = Math.floor(100 / keys.length);
+    let remaining = 100;
+    keys.forEach((k, i) => {
+        if (i === keys.length - 1) {
+            res[k] = { rai: (remaining / 100) * totalRai, pct: remaining };
+        } else {
+            const pct = Math.max(1, basePct + Math.floor(Math.random() * 10 - 5));
+            res[k] = { rai: (pct / 100) * totalRai, pct };
+            remaining -= pct;
+        }
+    });
+    return res;
 }
 
 function summaryForecast(plots: PlotInfo[], years: ForecastYr) {
@@ -378,8 +411,13 @@ export function ParcelResultsPanel({
     onStepChange,
     selectedMapPlotIndex = "total",
     onMapPlotSelected,
+    onDeleteParcel,
+    onDrawMore,
+    isDrawing,
+    onFinishDraw,
+    onCancelDraw,
 }: Props) {
-    const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+    const [expandedIdx, setExpandedIdx] = useState<number | null>(0);
     const [plotTabs, setPlotTabs] = useState<Record<number, PlotTab>>({});
     const [forecastYrs, setForecastYrs] = useState<Record<number, ForecastYr>>({});
     const [summaryFcYrs, setSummaryFcYrs] = useState<ForecastYr>(7);
@@ -422,18 +460,31 @@ export function ParcelResultsPanel({
 
     // Initialize plotForms automatically when ready
     useEffect(() => {
-        if (searchCount !== null && !searchRunning && !searchErr && plots.length > 0 && plotForms.length === 0) {
-            setPlotForms(parcelFeatures.map((feat) => {
-                const props = feat.properties as any || {};
-                return {
-                    plantYear: props.plantYearBE ? String(props.plantYearBE) : "",
-                    treeCount: props.trees ? String(props.trees) : "",
-                    variety: props.variety || "",
-                    spacing: props.spacing || "",
-                };
-            }));
+        if (plots.length !== plotForms.length) {
+            setPlotForms(prev => {
+                if (plots.length > prev.length) {
+                    const next = [...prev];
+                    for (let i = next.length; i < plots.length; i++) {
+                        const feat = parcelFeatures[i];
+                        const props = feat?.properties as any || {};
+                        const initialLU = { A: true, A302: true };
+                        next.push({
+                            plantStatus: "",
+                            plantYear: props.plantYearBE ? String(props.plantYearBE) : "",
+                            treeCount: props.trees ? String(props.trees) : "",
+                            variety: props.variety || "",
+                            spacing: props.spacing || "",
+                            luChecked: initialLU,
+                            luMockData: generateMockLU(plots[i].areaRai, initialLU)
+                        });
+                    }
+                    return next;
+                } else {
+                    return prev.slice(0, plots.length);
+                }
+            });
         }
-    }, [searchCount, searchRunning, searchErr, plots, plotForms.length, parcelFeatures]);
+    }, [plots, plotForms.length, parcelFeatures]);
 
     const handleProcessCarbon = () => {
         const CURRENT_BE_NOW = new Date().getFullYear() + 543;
@@ -477,7 +528,7 @@ export function ParcelResultsPanel({
     };
 
 
-    if (!(searchRunning || searchErr || searchCount !== null)) return null;
+    // Removed: if (!(searchRunning || searchErr || searchCount !== null)) return null;
 
     const handleSave = async (overrideResults?: CarbonResult[]) => {
         const resultsToSave = overrideResults || carbonResults;
@@ -578,7 +629,7 @@ export function ParcelResultsPanel({
         );
     }
 
-    if (searchCount === null) return null;
+    // Removed: if (searchCount === null) return null;
 
     // ── Step 2: Data entry form ────────────────────────────────
     if (currentStep === 2) {
@@ -587,6 +638,8 @@ export function ParcelResultsPanel({
         };
         return (
             <div className="prp-shell">
+
+
                 <div className="prp-header-block">
                     <div className="prp-main-title" style={{ fontSize: isMobile ? 16 : 18 }}>
                         <i className="bi bi-pencil-square me-2" style={{ color: "#10b981" }} />กรอกข้อมูลแปลง
@@ -602,6 +655,16 @@ export function ParcelResultsPanel({
                     <input className="prp-input" style={{ marginBottom: 0 }} placeholder="เช่น โครงการที่1" value={projectName} onChange={e => setProjectName(e.target.value)} />
                 </div>
 
+                {/* Summary of drawn parcels */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, padding: "0 4px" }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#475569" }}>
+                        แปลงที่วาดแล้ว ({plots.length})
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "#10b981" }}>
+                        {totalArea.toFixed(2)} ไร่
+                    </div>
+                </div>
+
                 {/* Per-plot fields */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {plots.map((p, i) => {
@@ -609,13 +672,60 @@ export function ParcelResultsPanel({
                         return (
                             <div key={i} style={{ background: "#fff", borderRadius: 14, border: "1px solid rgba(16,185,129,0.15)", overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
                                 {/* Plot header */}
-                                <div style={{ background: "linear-gradient(135deg,rgba(16,185,129,0.08),rgba(5,150,105,0.04))", padding: "10px 14px", borderBottom: "1px solid rgba(16,185,129,0.1)", display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 28, height: 28, borderRadius: 8, background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>{i + 1}</div>
-                                    <div>
+                                <div 
+                                    onClick={() => setExpandedIdx(expandedIdx === i ? null : i)}
+                                    style={{ 
+                                        background: "linear-gradient(135deg,rgba(16,185,129,0.08),rgba(5,150,105,0.04))", 
+                                        padding: "10px 14px", 
+                                        borderBottom: "none", 
+                                        display: "flex", 
+                                        alignItems: "center", 
+                                        gap: 10,
+                                        cursor: "pointer",
+                                        userSelect: "none"
+                                    }}
+                                >
+                                    <div style={{ pointerEvents: 'none', width: 28, height: 28, borderRadius: 8, background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>{i + 1}</div>
+                                    <div style={{ pointerEvents: 'none', flex: 1 }}>
                                         <div style={{ fontWeight: 700, fontSize: 13, color: "#0f172a" }}>แปลงที่ {i + 1}</div>
-                                        <div style={{ fontSize: 11, color: "#64748b" }}>{p.areaRai > 0 ? `${p.areaRai.toFixed(2)} ไร่` : "—"}</div>
+                                        {p.areaRai > 0 && (
+                                            <div style={{ fontSize: 11, color: "#64748b" }}>{p.areaRai.toFixed(2)} ไร่</div>
+                                        )}
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (confirm(`ลบแปลงที่ ${i + 1} หรือไม่?`)) {
+                                                    onDeleteParcel?.(i);
+                                                }
+                                            }}
+                                            style={{ border: "none", background: "none", color: "#94a3b8", cursor: "pointer", fontSize: 16, padding: 4 }}
+                                        >
+                                            <i className="bi bi-trash" />
+                                        </button>
+                                        <span className={`bi bi-chevron-${expandedIdx === i ? 'up' : 'down'}`} style={{ pointerEvents: 'none', color: "#64748b", fontSize: 14 }} />
                                     </div>
                                 </div>
+                                {expandedIdx === i && (
+                                    <>
+                                {/* Status Selection */}
+                                <div style={{ padding: isMobile ? "16px 16px 0" : "20px 24px 0", background: "#fff" }}>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                                        <i className="bi bi-info-circle" style={{ color: "#10b981" }} /> สถานะแปลง
+                                    </div>
+                                    <div style={{ display: "flex", gap: 16 }}>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
+                                            <input type="radio" name={`status-${i}`} value="new" checked={form.plantStatus === "new"} onChange={() => { updateForm(i, "plantStatus", "new"); updateForm(i, "plantYear", ""); }} />
+                                            เริ่มปลูก
+                                        </label>
+                                        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
+                                            <input type="radio" name={`status-${i}`} value="old" checked={form.plantStatus === "old"} onChange={() => { updateForm(i, "plantStatus", "old"); updateForm(i, "plantYear", ""); }} />
+                                            ปลูกมาแล้ว
+                                        </label>
+                                    </div>
+                                </div>
+
                                 {/* Fields grid */}
                                 <div style={{
                                     display: "grid",
@@ -633,23 +743,11 @@ export function ParcelResultsPanel({
                                             style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }}
                                             value={form.plantYear}
                                             onChange={e => updateForm(i, "plantYear", e.target.value)}
+                                            disabled={!form.plantStatus}
                                         >
-                                            <option value="">— เลือกปีที่เริ่มปลูก —</option>
-                                            {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
+                                            <option value="">— เลือกปีที่ปลูก —</option>
+                                            {(form.plantStatus === "new" ? NEW_YEAR_OPTIONS : form.plantStatus === "old" ? OLD_YEAR_OPTIONS : []).map(y => <option key={y} value={y}>{y}</option>)}
                                         </select>
-                                    </div>
-                                    <div className="prp-field-group">
-                                        <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                                            <i className="bi bi-tree" style={{ color: "#10b981" }} /> จำนวนต้นยาง
-                                        </div>
-                                        <input
-                                            className="prp-input"
-                                            style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }}
-                                            type="number"
-                                            placeholder="ระบุจำนวนต้น เช่น 70"
-                                            value={form.treeCount}
-                                            onChange={e => updateForm(i, "treeCount", e.target.value)}
-                                        />
                                     </div>
                                     <div className="prp-field-group">
                                         <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
@@ -667,6 +765,19 @@ export function ParcelResultsPanel({
                                     </div>
                                     <div className="prp-field-group">
                                         <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                                            <i className="bi bi-tree" style={{ color: "#10b981" }} /> จำนวนต้นยาง
+                                        </div>
+                                        <input
+                                            className="prp-input"
+                                            style={{ marginBottom: 0, height: 46, borderRadius: 10, border: "1.5px solid #e2e8f0", padding: "0 12px" }}
+                                            type="number"
+                                            placeholder="ระบุจำนวนต้น เช่น 70"
+                                            value={form.treeCount}
+                                            onChange={e => updateForm(i, "treeCount", e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="prp-field-group">
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
                                             <i className="bi bi-arrows-expand" style={{ color: "#10b981" }} /> ระยะปลูก (ม.)
                                         </div>
                                         <select
@@ -680,10 +791,95 @@ export function ParcelResultsPanel({
                                         </select>
                                     </div>
                                 </div>
+
+                                {/* Land Use Checkboxes */}
+                                <div style={{ padding: isMobile ? "0 16px 16px" : "0 24px 20px", background: "#fff" }}>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                                        <i className="bi bi-layers" style={{ color: "#10b981" }} /> ชั้นข้อมูลการใช้ประโยชน์ที่ดิน (กรมพัฒนาที่ดิน)
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
+                                        {[
+                                            { id: "F", label: "F พื้นที่ป่าไม้", fixed: false },
+                                            { id: "A", label: "A พื้นที่เกษตรกรรม", fixed: true },
+                                            { id: "A302", label: "A302 ยางพารา (หมวดย่อย A)", fixed: true, indent: true },
+                                            { id: "A303", label: "A303 ปาล์มน้ำมัน (หมวดย่อย A)", fixed: false, indent: true },
+                                            { id: "A304", label: "A304 ไม้ผล (หมวดย่อย A)", fixed: false, indent: true },
+                                            { id: "M", label: "M พื้นที่อื่นๆ", fixed: false },
+                                            { id: "U", label: "U พื้นที่สิ่งปลูกสร้าง", fixed: false, disabled: true },
+                                            { id: "W", label: "W แหล่งน้ำ", fixed: false, disabled: true },
+                                        ].map(lu => {
+                                            const isChecked = form.luChecked?.[lu.id] || false;
+                                            const mockData = form.luMockData?.[lu.id];
+                                            return (
+                                                <label key={lu.id} style={{
+                                                    display: "flex", alignItems: "center", gap: 8, cursor: lu.disabled || lu.fixed ? "not-allowed" : "pointer",
+                                                    opacity: lu.disabled ? 0.5 : 1, paddingLeft: lu.indent ? 24 : 0
+                                                }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isChecked}
+                                                        disabled={lu.fixed || lu.disabled}
+                                                        style={{ accentColor: lu.disabled ? "#000" : "#10b981", width: 16, height: 16 }}
+                                                        onChange={(e) => {
+                                                            const newChecked = { ...form.luChecked, [lu.id]: e.target.checked };
+                                                            setPlotForms(prev => prev.map((f, idx) => idx === i ? { ...f, luChecked: newChecked, luMockData: generateMockLU(p.areaRai, newChecked) } : f));
+                                                        }}
+                                                    />
+                                                    <span style={{ flex: 1, color: lu.disabled ? "#000" : "#334155", fontWeight: isChecked ? 600 : 400 }}>{lu.label}</span>
+                                                    {isChecked && mockData && (
+                                                        <span style={{ color: "#059669", fontSize: 12, fontWeight: 700 }}>
+                                                            {mockData.rai.toFixed(2)} ไร่ <span style={{ opacity: 0.7, fontSize: 11 }}>({mockData.pct}%)</span>
+                                                        </span>
+                                                    )}
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                    <div style={{ marginTop: 12, padding: "8px 12px", background: "#f8fafc", borderRadius: 8, fontSize: 12, color: "#64748b" }}>
+                                        <i className="bi bi-info-circle me-1" /> จำลองพื้นที่ตามสัดส่วนการลากแปลง (Mockup)
+                                    </div>
+                                </div>
+                                    </>
+                                )}
                             </div>
                         );
                     })}
                 </div>
+
+                {/* Drawing placeholder card */}
+                {isDrawing && (
+                    <div style={{ 
+                        background: "rgba(16,185,129,0.03)", 
+                        border: "2px dashed rgba(16,185,129,0.4)", 
+                        borderRadius: 14, 
+                        padding: "24px 16px", 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        alignItems: "center", 
+                        justifyContent: "center", 
+                        gap: 16,
+                    }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                            <div className="mds-dot-pulse" style={{ background: "#10b981", width: 10, height: 10, margin: 0 }} />
+                            <div style={{ fontSize: 14, fontWeight: 700, color: "#059669" }}>กำลังวาดแปลงใหม่บนแผนที่...</div>
+                            <div style={{ fontSize: 12, color: "#64748b", textAlign: "center" }}>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต หรือดับเบิลคลิกเพื่อปิดแปลง</div>
+                        </div>
+                        <div style={{ display: "flex", gap: 12, width: "100%" }}>
+                            <button 
+                                onClick={onCancelDraw}
+                                style={{ flex: 1, background: "#fff", border: "1px solid #cbd5e1", color: "#64748b", padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                            >
+                                <i className="bi bi-x-circle me-1" /> ยกเลิก
+                            </button>
+                            <button 
+                                onClick={onFinishDraw}
+                                style={{ flex: 1, background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 10px rgba(16,185,129,0.2)" }}
+                            >
+                                <i className="bi bi-check-circle me-1" /> วาดเสร็จแล้ว
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Action buttons */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18 }}>
@@ -713,8 +909,13 @@ export function ParcelResultsPanel({
                             <><i className="bi bi-floppy-disk me-2" />บันทึกลงฐานข้อมูล</>
                         )}
                     </button>
+                    {onDrawMore && !isDrawing && (
+                        <button className="prp-btn-ghost" style={{ background: "rgba(16,185,129,0.1)", color: "#059669" }} onClick={onDrawMore}>
+                            <i className="bi bi-pencil-square me-1" /> วาดแปลงเพิ่ม
+                        </button>
+                    )}
                     <button className="prp-btn-ghost" onClick={onReset}>
-                        <i className="bi bi-x-circle me-1" />ยกเลิก
+                        <i className="bi bi-trash me-1" />ล้างแปลงทั้งหมด
                     </button>
                 </div>
             </div>
@@ -862,6 +1063,44 @@ export function ParcelResultsPanel({
                             </div>
                         </>
                     ) : null}
+
+                    {/* Input Details Summary */}
+                    <div style={{ marginTop: 16, background: "#f8fafc", padding: "12px 14px", borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 10 }}>
+                            <i className="bi bi-file-text" style={{ color: "#0ea5e9" }} /> ข้อมูลที่ใช้ประมวลผล
+                        </div>
+                        <div style={{ fontSize: 12, color: "#475569" }}>
+                            <div><strong>ชื่อโครงการ:</strong> {projectName || "-"}</div>
+                            <div><strong>พื้นที่รวม:</strong> {totalArea.toFixed(2)} ไร่</div>
+                            <div style={{ marginTop: 8 }}><strong>รายละเอียดแปลง:</strong></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                                {plots.map((p, i) => {
+                                    if (!isTotal && selectedMapPlotIndex !== i) return null;
+                                    const f = plotForms[i];
+                                    const crInfo = carbonResults[i];
+                                    if (!f || !crInfo) return null;
+                                    return (
+                                        <div key={i} style={{ padding: "8px 10px", background: "#fff", borderRadius: 8, border: "1px solid rgba(0,0,0,0.05)" }}>
+                                            <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4 }}>แปลงที่ {i + 1} ({p.areaRai.toFixed(2)} ไร่)</div>
+                                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, fontSize: 11, color: "#64748b" }}>
+                                                <div>• ปีที่ปลูก: พ.ศ. {crInfo.plantYearBE}</div>
+                                                <div>• พันธุ์ยาง: {crInfo.variety}</div>
+                                                <div>• จำนวนต้น: {crInfo.trees} ต้น</div>
+                                                <div>• ระยะปลูก: {crInfo.spacing} ม.</div>
+                                            </div>
+                                            {f.luMockData && Object.keys(f.luMockData).length > 0 && (
+                                                <div style={{ marginTop: 4, fontSize: 11, color: "#10b981", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                                    {Object.entries(f.luMockData).map(([k, v]) => (
+                                                        <span key={k}>{k}: {v.pct}%</span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
 
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
                         <button
