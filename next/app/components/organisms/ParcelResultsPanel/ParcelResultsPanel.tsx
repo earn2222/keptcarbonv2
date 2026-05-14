@@ -247,14 +247,7 @@ function AgeBarChart({ age, conf, trees, isMobile }: { age: number; conf: number
                                 fill={isMain ? "#065f46" : isHov ? "#059669" : "#94a3b8"}>
                                 {pct}%
                             </text>
-                            {/* age label below */}
-                            <text x={cx} y={BASE_Y + 22} textAnchor="middle" fontSize={isMobile ? 16 : 16}
-                                fontWeight={isMain ? "800" : "500"}
-                                fill={isMain ? "#059669" : isHov ? "#10b981" : "#94a3b8"}>
-                                {a}
-                            </text>
-                            {/* age unit */}
-                            <text x={cx} y={BASE_Y + 40} textAnchor="middle" fontSize={isMobile ? 13 : 12} fill="#cbd5e1" fontWeight="400">ปี</text>
+                            {/* age labels removed per user request */}
 
                             {/* tooltip */}
                             {isHov && (

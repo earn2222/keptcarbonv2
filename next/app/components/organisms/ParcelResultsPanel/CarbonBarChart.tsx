@@ -129,6 +129,14 @@ export function CarbonBarChart({
           {[0, 0.25, 0.5, 0.75, 1].map((t) => (
             <line key={t} x1={PL} y1={PT + t * iH} x2={PL + iW} y2={PT + t * iH} stroke="rgba(0,0,0,0.05)" strokeWidth={1} strokeDasharray={t < 1 && t > 0 ? "4,4" : undefined} />
           ))}
+          
+          {/* Baseline from first bar (Current Level) */}
+          {linePoints[0] && (
+            <line 
+              x1={PL} y1={linePoints[0].y} x2={PL + iW} y2={linePoints[0].y} 
+              stroke="#059669" strokeWidth={1.5} strokeDasharray="6,4" opacity={0.4} 
+            />
+          )}
 
           {/* Bars */}
           {pts.map((p, i) => {
@@ -167,9 +175,7 @@ export function CarbonBarChart({
             const col = getCycleColor(p.cycle);
             return (
               <g key={i}>
-                <text x={x} y={PT + iH + (isMobile ? 20 : 24)} textAnchor="middle" fontSize={isMobile ? 11 : 16} fontWeight={900} fill={col.label}>
-                  {`${p.age} ปี`}
-                </text>
+                {/* Age label removed */}
                 <text x={x} y={PT + iH + (isMobile ? 34 : 44)} textAnchor="middle" fontSize={isMobile ? 10 : 14} fill="#94a3b8" fontWeight={500}>
                   {p.yearBE}
                 </text>
@@ -181,7 +187,7 @@ export function CarbonBarChart({
           <text x={isMobile ? 2 : PL - 6} y={PT + 5} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 12 : 16} fill="#94a3b8" fontWeight={600}>tCO₂</text>
 
           {/* X-axis Row Indicators */}
-          <text x={isMobile ? 4 : PL - 12} y={PT + iH + (isMobile ? 20 : 24)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 16} fill="#064e3b" fontWeight={900}>อายุ</text>
+          {/* Age indicator removed */}
           <text x={isMobile ? 4 : PL - 12} y={PT + iH + (isMobile ? 34 : 44)} textAnchor={isMobile ? "start" : "end"} fontSize={isMobile ? 10 : 14} fill="#64748b" fontWeight={600}>พ.ศ.</text>
 
           {/* Tooltip */}
