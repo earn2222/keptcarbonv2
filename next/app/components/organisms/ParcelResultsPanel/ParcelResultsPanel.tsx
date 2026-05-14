@@ -634,11 +634,33 @@ export function ParcelResultsPanel({
             <div className="prp-shell">
 
 
-                <div className="prp-header-block">
-                    <div className="prp-main-title" style={{ fontSize: isMobile ? 16 : 18 }}>
-                        <i className="bi bi-pencil-square me-2" style={{ color: "#10b981" }} />กรอกข้อมูลแปลง
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+                    <div className="prp-header-block" style={{ marginBottom: 0 }}>
+                        <div className="prp-main-title" style={{ fontSize: isMobile ? 16 : 18 }}>
+                            <i className="bi bi-pencil-square me-2" style={{ color: "#10b981" }} />กรอกข้อมูลแปลง
+                        </div>
+                        <div className="prp-subtitle">กรอกหรือข้ามได้ — ข้อมูลจะนำไปประมวลผลคาร์บอน</div>
                     </div>
-                    <div className="prp-subtitle">กรอกหรือข้ามได้ — ข้อมูลจะนำไปประมวลผลคาร์บอน</div>
+                    {onBack && (
+                        <div 
+                            onClick={onBack}
+                            style={{ 
+                                fontSize: 11, 
+                                fontWeight: 700, 
+                                color: "#64748b", 
+                                cursor: "pointer",
+                                background: "rgba(100,116,139,0.08)",
+                                padding: "6px 10px",
+                                borderRadius: 8,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            <i className="bi bi-arrow-left-circle" /> ย้อนกลับ
+                        </div>
+                    )}
                 </div>
 
                 {/* Project name — shared */}
@@ -910,9 +932,7 @@ export function ParcelResultsPanel({
                             <i className="bi bi-pencil-square me-1" /> วาดแปลงเพิ่ม
                         </button>
                     )}
-                    <button className="prp-btn-ghost" onClick={onReset}>
-                        <i className="bi bi-trash me-1" />ล้างแปลงทั้งหมด
-                    </button>
+
                 </div>
             </div>
         );
