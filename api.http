@@ -1,0 +1,54 @@
+@baseUrl = http://localhost:8080
+
+### Health check
+GET {{baseUrl}}/
+Accept: application/json
+
+### Estimate carbon for one plantation polygon
+POST {{baseUrl}}/api/estimate
+Content-Type: application/json
+Accept: application/json
+
+[
+	{
+		"id": "EXAMPLE_001",
+		"geometry": {
+			"type": "MultiPolygon",
+			"coordinates": [[[[101.438, 12.807], [101.445, 12.809], [101.447, 12.802], [101.439, 12.800], [101.438, 12.807]]]]
+		},
+		"year_of_planting": 2010,
+		"rubber_clone": "RRIM 600",
+		"tree_count": 33300,
+		"spacing_system": "2.5x8"
+	}
+]
+
+### Estimate carbon for multiple polygons
+POST {{baseUrl}}/api/estimate
+Content-Type: application/json
+Accept: application/json
+
+[
+	{
+		"id": "TC_003_PERFECT_INPUT",
+		"geometry": {
+			"type": "MultiPolygon",
+			"coordinates": [[[[101.438, 12.807], [101.445, 12.809], [101.447, 12.802], [101.439, 12.800], [101.438, 12.807]]]]
+		},
+		"year_of_planting": 2010,
+		"spacing_system": "2.5x8",
+		"rubber_clone": "RRIM 600",
+		"tree_count": 33300
+	},
+	{
+		"id": "TC_005_YEAR_NULL_HETEROGENEOUS_TREE_COUNT_NULL",
+		"geometry": {
+			"type": "MultiPolygon",
+			"coordinates": [[[[101.438, 12.807], [101.445, 12.809], [101.447, 12.802], [101.439, 12.800], [101.438, 12.807]]]]
+		},
+		"year_of_planting": null,
+		"spacing_system": "2.5x8",
+		"rubber_clone": "RRIM 600",
+		"tree_count": null
+	}
+]
