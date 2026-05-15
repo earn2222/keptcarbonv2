@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pandas
+geopandas
+rasterio
+shapely
+pyproj
+fiona
+python-multipart

@@ -2,10 +2,10 @@ services:
   # ── Next.js application ────────────────────────
   nextjs:
     build:
-      context: ./next
+      context: ./nextjs
       dockerfile: Dockerfile
     ports:
-      - "3100:3000"
+      - "3000:3000"
     container_name: keptcarbon-nextjs
     environment:
       - DATABASE_URL=${DATABASE_URL}
@@ -26,20 +26,44 @@ services:
   postgis:
     image: postgis/postgis:16-3.4
     ports:
-      - "5433:5432"
+      - "4533:5432"
     container_name: keptcarbon-postgis
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-keptcarbon}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgis/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-keptcarbon}"]
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend  # Ensure this points to the folder containing your 'app' dir
+    platform: linux/arm64
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgis
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_USER:-postgres}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DATABASE_NAME: ${POSTGRES_DB:-keptcarbon}
+      # Added PYTHONPATH to ensure app.services is discoverable
+      PYTHONPATH: /app
+    ports:
+      - '8080:8000'
+    volumes:
+      - ./backend:/app # Useful for live code reloading during dev
+    deploy:
+      resources:
+        limits:
+          memory: 4G
     restart: unless-stopped
 
 volumes:
