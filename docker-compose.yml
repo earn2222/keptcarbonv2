@@ -5,7 +5,7 @@ services:
       context: ./next
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3100:3000"
     container_name: keptcarbon-nextjs
     environment:
       - DATABASE_URL=${DATABASE_URL}
@@ -13,7 +13,6 @@ services:
       - LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
       - LINE_CALLBACK_URL=${LINE_CALLBACK_URL}
       - JWT_SECRET=${JWT_SECRET}
-      - GEE_SERVICE_URL=http://gee:8000
     volumes:
       - /app/node_modules
       - /app/.next
@@ -21,30 +20,13 @@ services:
     depends_on:
       postgis:
         condition: service_healthy
-      gee:
-        condition: service_started
-    restart: unless-stopped
-
-  # ── Google Earth Engine microservice ──────────
-  gee:
-    build: ./gee
-    container_name: keptcarbon-gee
-    ports:
-      - "8001:8000"
-    environment:
-      - GEE_KEY_FILE=/run/secrets/gee_key.json
-      - GEE_PROJECT_ID=${GEE_PROJECT_ID}
-      - GEE_SERVICE_ACCOUNT_JSON=${GEE_SERVICE_ACCOUNT_JSON}
-      - RUBBER_DATA_ROOT=/workspace/data
-    volumes:
-      - ./data:/workspace/data
     restart: unless-stopped
 
   # ── PostgreSQL + PostGIS ───────────────────────
   postgis:
     image: postgis/postgis:16-3.4
     ports:
-      - "5432:5432"
+      - "5433:5432"
     container_name: keptcarbon-postgis
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
