@@ -16,7 +16,6 @@ import {
   truncateCoords,
 } from "@/lib/map-utils";
 import { ParcelResultsPanel } from "@/app/components/organisms";
-import type { CarbonResultForMap } from "@/app/components/organisms/ParcelResultsPanel/ParcelResultsPanel";
 
 type Tab = "draw" | "shp";
 type NdviStatus = number | null | "loading" | "error";
@@ -105,31 +104,6 @@ export default function MapDrawPage() {
   }, [drawnParcels]);
 
   const runParcelSearchRef = useRef<() => void>(() => { });
-
-  // Carbon results from API — keyed by plotIdx
-  const [parcelCo2, setParcelCo2] = useState<Record<number, number>>({});
-
-  const handleCarbonResults = useCallback((results: CarbonResultForMap[]) => {
-    const map: Record<number, number> = {};
-    results.forEach(r => { if (r.co2Now > 0) map[r.plotIdx] = r.co2Now; });
-    setParcelCo2(map);
-  }, []);
-
-  // Re-enrich matched-parcels source with CO2 data when results arrive
-  useEffect(() => {
-    const m = mapRef.current;
-    if (!m || !mapLoadedRef.current || parcelFeatures.length === 0) return;
-    if (Object.keys(parcelCo2).length === 0) return;
-    const enriched = parcelFeatures.map((f, i) => ({
-      ...f,
-      properties: {
-        ...(f.properties ?? {}),
-        ...(parcelCo2[i] != null ? { co2_tco2e: parcelCo2[i] } : {}),
-      },
-    }));
-    (m.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)
-      ?.setData({ type: "FeatureCollection", features: enriched });
-  }, [parcelCo2, parcelFeatures]);
 
 
   // ===== MAP INIT =====
@@ -276,15 +250,7 @@ export default function MapDrawPage() {
         id: "matched-parcels-fill",
         type: "fill",
         source: "matched-parcels",
-        paint: {
-          "fill-color": [
-            "case",
-            ["has", "co2_tco2e"],
-            ["interpolate", ["linear"], ["get", "co2_tco2e"], 0, "#c8e6c9", 30, "#66bb6a", 100, "#2e7d32"],
-            "#ff9100",
-          ],
-          "fill-opacity": 0.65,
-        },
+        paint: { "fill-color": "#ff9100", "fill-opacity": 0.5 },
       });
       map.addLayer({
         id: "matched-parcels-line",
@@ -297,23 +263,13 @@ export default function MapDrawPage() {
         type: "symbol",
         source: "matched-parcels",
         layout: {
-          "text-field": [
-            "case",
-            ["has", "co2_tco2e"],
-            ["concat",
-              ["get", "plot_index"],
-              "\n",
-              ["number-format", ["get", "co2_tco2e"], { "max-fraction-digits": 1 }],
-              " tCO₂e"
-            ],
-            ["get", "plot_index"],
-          ],
-          "text-size": 13,
+          "text-field": "{plot_index}",
+          "text-size": 16,
           "text-allow-overlap": false,
         },
         paint: {
           "text-color": "#ffffff",
-          "text-halo-color": ["case", ["has", "co2_tco2e"], "#1b5e20", "#fa0303ff"],
+          "text-halo-color": "#fa0303ff",
           "text-halo-width": 3,
         },
       });
@@ -347,17 +303,17 @@ export default function MapDrawPage() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || !user) return;
-    
+
     const params = new URLSearchParams(window.location.search);
     const projName = params.get("project");
     const action = params.get("action");
-    
+
     if (projName && action === "calc" && parcelFeatures.length === 0) {
       try {
         const key = `user_saved_plots_${user.id}`;
         const stored = JSON.parse(localStorage.getItem(key) || "[]");
         const projectPlots = stored.filter((p: any) => p.name === projName);
-        
+
         if (projectPlots.length > 0) {
           const feats: GeoJSON.Feature[] = projectPlots.map((p: any, i: number) => ({
             type: "Feature",
@@ -371,7 +327,7 @@ export default function MapDrawPage() {
               province: p.province
             }
           }));
-          
+
           setParcelFeatures(feats);
           setSearchCount(feats.length);
           if (projectPlots[0].boundaryGeojson) {
@@ -379,9 +335,9 @@ export default function MapDrawPage() {
           }
           setCurrentStep(2);
           setStatus(`เตรียมประมวลผลคาร์บอนสำหรับโครงการ: ${projName}`);
-          
+
           (map.getSource("matched-parcels") as maplibregl.GeoJSONSource)?.setData({ type: "FeatureCollection", features: feats });
-          
+
           const bounds = new maplibregl.LngLatBounds();
           feats.forEach(f => {
             if (!f.geometry) return;
@@ -394,7 +350,7 @@ export default function MapDrawPage() {
           if (!bounds.isEmpty()) {
             map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 }, duration: 1000, maxZoom: 16 });
           }
-          
+
           setIsPanelOpen(true);
         }
       } catch (err) {
@@ -474,13 +430,37 @@ export default function MapDrawPage() {
   const finishDraw = useCallback((skipFit = false) => {
     const verts = vertsRef.current;
     if (verts.length < 3) return;
+
+    const ring = [...verts, verts[0]];
+    const sqm = polygonAreaM2(ring);
+    const rai = sqm / 1600;
+
+    if (rai > 500) {
+      setAreaError({ rai, sqm });
+      return; // Do not finish drawing if > 500 Rai
+    }
+
     drawingRef.current = false;
     setDrawing(false);
-    const ring = [...verts, verts[0]];
+
+    const map = mapRef.current;
+    if (map) {
+      map.getCanvas().style.cursor = "";
+    }
+
     const newFeature: GeoJSON.Feature = {
       type: "Feature",
       geometry: { type: "Polygon", coordinates: [ring] },
-      properties: { id: Math.random().toString(36).substring(7) },
+      properties: {
+        id: Math.random().toString(36).substring(7),
+        rai: rai,
+        status: null, // "new" | "old"
+        year: null,
+        variety: null,
+        trees: null,
+        spacing: null,
+        landUse: { A: true, A302: true } // Default
+      },
     };
 
     setDrawnParcels(prev => {
@@ -499,13 +479,14 @@ export default function MapDrawPage() {
       return next;
     });
 
-    const sqm = polygonAreaM2(ring);
-    const rai = sqm / 1600;
-
     setDrawPreview(`${rai.toFixed(2)} ไร่ · ${verts.length} จุด`);
     setDrawDone(true);
     setHasGeom(true);
-    setStatus(`✓ วาดแปลงเสร็จ — สามารถวาดแปลงเพิ่มหรือกดประมวลผล`);
+    setStatus(`✓ วาดแปลงเสร็จ — กำลังเข้าสู่ขั้นตอนกรอกข้อมูล`);
+
+    // Transition to step 2 automatically to fill form
+    setCurrentStep(2);
+
 
     // Reset current drawing vertices
     vertsRef.current = [];
@@ -590,12 +571,20 @@ export default function MapDrawPage() {
       map.on('mouseup', onUp);
     };
 
+    const onContextMenu = (e: maplibregl.MapMouseEvent) => {
+      if (!drawingRef.current || vertsRef.current.length < 3) return;
+      e.preventDefault();
+      finishDraw();
+    };
+
     map.on("click", onClick);
     map.on("dblclick", onDbl);
+    map.on("contextmenu", onContextMenu);
 
     return () => {
       map.off("click", onClick);
       map.off("dblclick", onDbl);
+      map.off("contextmenu", onContextMenu);
     };
   }, [previewDraw, finishDraw]);
 
@@ -605,6 +594,9 @@ export default function MapDrawPage() {
         drawingRef.current = false;
         setDrawing(false);
         setStatus("ยกเลิกการวาด");
+        if (mapRef.current) {
+          mapRef.current.getCanvas().style.cursor = "";
+        }
       }
     };
     document.addEventListener("keydown", onKey);
@@ -617,7 +609,8 @@ export default function MapDrawPage() {
     setIsPanelOpen(true);
     drawingRef.current = true;
     setDrawing(true);
-    setStatus("โหมดวาด — คลิกเพื่อเพิ่มจุด | Double-click หรือกดเสร็จสิ้น เพื่อปิดแปลง | Esc ยกเลิก");
+    map.getCanvas().style.cursor = 'crosshair';
+    setStatus("โหมดวาด — คลิกเพื่อเพิ่มจุด | คลิกขวา หรือ Double-click เพื่อปิดแปลง | Esc ยกเลิก");
     if (map.getZoom() < 8) {
       map.flyTo({ center: [101.258, 12.682], zoom: 10, pitch: 0, bearing: 0, duration: 2000 });
     }
@@ -648,16 +641,44 @@ export default function MapDrawPage() {
       (map.getSource("draw-verts") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
       (map.getSource("plot") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
       (map.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
+      map.getCanvas().style.cursor = "";
     }
-    setSelectedPlotIndex("total");
     setCurrentStep(1);
   };
+
+  const deleteParcel = useCallback((idx: number) => {
+    setDrawnParcels(prev => {
+      const next = prev.filter((_, i) => i !== idx);
+      const map = mapRef.current;
+      if (map && mapLoadedRef.current) {
+        (map.getSource("plot") as maplibregl.GeoJSONSource).setData({
+          type: "FeatureCollection",
+          features: next,
+        });
+      }
+      if (next.length === 0) setHasGeom(false);
+      return next;
+    });
+  }, []);
+
+  const cancelDrawMode = useCallback(() => {
+    drawingRef.current = false;
+    setDrawing(false);
+    vertsRef.current = [];
+    setStatus("ยกเลิกการวาด");
+    const map = mapRef.current;
+    if (map) {
+      map.getCanvas().style.cursor = '';
+      (map.getSource("draw-line") as maplibregl.GeoJSONSource).setData(emptyFC());
+      (map.getSource("draw-fill") as maplibregl.GeoJSONSource).setData(emptyFC());
+      (map.getSource("draw-verts") as maplibregl.GeoJSONSource).setData(emptyFC());
+    }
+  }, []);
 
   const cancelSearch = useCallback(() => {
     searchAbortRef.current?.abort();
     searchAbortRef.current = null;
     setSearchRunning(false);
-    setSelectedPlotIndex("total");
     setCurrentStep(1);
     setSearchCount(null);
     setSearchErr(null);
@@ -671,14 +692,7 @@ export default function MapDrawPage() {
 
   const backToStep1 = useCallback(() => {
     setCurrentStep(1);
-    setSearchCount(null);
-    setSearchErr(null);
-    setSearchTruncated(false);
-    setParcelFeatures([]);
-    const map = mapRef.current;
-    if (map && mapLoadedRef.current) {
-      (map.getSource("matched-parcels") as maplibregl.GeoJSONSource | undefined)?.setData(emptyFC());
-    }
+    setStatus("กลับไปหน้าวาดแปลง — สามารถวาดแปลงเพิ่มได้");
   }, []);
 
   // ===== PARCEL DB SEARCH =====
@@ -707,7 +721,6 @@ export default function MapDrawPage() {
     };
 
     setDrawnGeometry(combinedGeom);
-    setSelectedPlotIndex("total");
     setSearchRunning(true);
     setCurrentStep(2);
     setSearchErr(null);
@@ -1208,66 +1221,16 @@ export default function MapDrawPage() {
 
                         {drawnParcels.length === 0 && (
                           <ol className="mds-instr-list">
-                            <li>คลิกปุ่ม <strong>&ldquo;เริ่มวาดแปลง&rdquo;</strong> ด้านล่าง</li>
+                            <li>คลิกปุ่ม <strong>&ldquo;เริ่มวาดแปลง&rdquo;</strong></li>
                             <li>คลิกบนแผนที่เพื่อเพิ่มจุดขอบเขต (อย่างน้อย 3 จุด)</li>
                             <li>กดปุ่ม <strong>&ldquo;เสร็จสิ้น วาดแปลง&rdquo;</strong> หรือ Double-click เพื่อจบการวาด</li>
-                            <li>แก้ไข: ลากจุดเพื่อย้ายตำแหน่ง</li>
                           </ol>
-                        )}
-
-                        {drawnParcels.length > 0 && (
-                          <div className="mds-parcel-list" style={{ marginBottom: 12 }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: "#1e293b", display: "flex", justifyContent: "space-between" }}>
-                              <span>แปลงที่วาดแล้ว ({drawnParcels.length})</span>
-                              <span style={{ color: "#059669" }}>{(totalDrawnArea / 1600).toFixed(2)} ไร่</span>
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                              {drawnParcels.map((p, i) => {
-                                const area = polygonAreaM2((p.geometry as any).coordinates[0]) / 1600;
-                                return (
-                                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                      <div style={{ width: 20, height: 20, borderRadius: 4, background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
-                                      <span style={{ fontSize: 13, color: "#475569" }}>{area.toFixed(2)} ไร่</span>
-                                    </div>
-                                    <button
-                                      onClick={() => {
-                                        const next = drawnParcels.filter((_, idx) => idx !== i);
-                                        setDrawnParcels(next);
-                                        const map = mapRef.current;
-                                        if (map && mapLoadedRef.current) {
-                                          (map.getSource("plot") as maplibregl.GeoJSONSource).setData({
-                                            type: "FeatureCollection",
-                                            features: next,
-                                          });
-                                        }
-                                        if (next.length === 0) setHasGeom(false);
-                                      }}
-                                      style={{ border: "none", background: "none", color: "#94a3b8", cursor: "pointer", fontSize: 16 }}
-                                    >
-                                      <i className="bi bi-trash" />
-                                    </button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
                         )}
 
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                           <button className="mds-btn mds-btn-solid" onClick={startDrawFlow}>
                             <i className="bi bi-pencil" /> {drawnParcels.length > 0 ? "วาดแปลงเพิ่ม" : "เริ่มวาดแปลง"}
                           </button>
-
-                          {drawnParcels.length > 0 && (
-                            <button
-                              className="mds-btn mds-btn-primary"
-                              style={{ background: "linear-gradient(135deg, #059669, #10b981)" }}
-                              onClick={runParcelSearch}
-                            >
-                              <i className="bi bi-check2-circle" /> ยืนยัน ({(totalDrawnArea / 1600).toFixed(2)} ไร่)
-                            </button>
-                          )}
                         </div>
                       </>
                     )}
@@ -1332,7 +1295,7 @@ export default function MapDrawPage() {
                 searchErr={searchErr}
                 searchCount={searchCount}
                 searchTruncated={searchTruncated}
-                parcelFeatures={parcelFeatures}
+                parcelFeatures={drawnParcels}
                 userDisplayName={user?.fullname ?? ""}
                 drawnGeometry={drawnGeometry}
                 onFlyTo={flyToFeature}
@@ -1343,7 +1306,11 @@ export default function MapDrawPage() {
                 onStepChange={setCurrentStep}
                 selectedMapPlotIndex={selectedPlotIndex}
                 onMapPlotSelected={setSelectedPlotIndex}
-                onCarbonResults={handleCarbonResults}
+                onDeleteParcel={deleteParcel}
+                onDrawMore={startDrawFlow}
+                isDrawing={drawing}
+                onFinishDraw={() => finishDraw()}
+                onCancelDraw={cancelDrawMode}
               />
             </div>
           )}
@@ -1367,13 +1334,13 @@ export default function MapDrawPage() {
               <i className="bi bi-exclamation-triangle-fill" />
             </div>
             <div className="mds-area-popup-content">
-              <h3>พื้นที่แปลงเล็กเกินไป</h3>
+              <h3>พื้นที่แปลงใหญ่เกินไป</h3>
               <p>
                 ขนาดแปลงที่วาดคือ <strong>{areaError.rai.toFixed(2)} ไร่</strong> ({Math.round(areaError.sqm).toLocaleString()} ตร.ม.)
-                ซึ่งน้อยกว่าเกณฑ์ขั้นต่ำ <strong>1 ไร่</strong> (40×40 เมตร)
+                ซึ่งเกินกว่าเกณฑ์สูงสุด <strong>500 ไร่</strong>
               </p>
               <div className="mds-area-popup-hint">
-                กรุณาปรับขยายขอบเขตแปลงให้ครอบคลุมพื้นที่มากขึ้น
+                กรุณาปรับลดขอบเขตแปลง หรือแบ่งเป็นหลายแปลง
               </div>
             </div>
             <button className="mds-area-popup-close" onClick={() => setAreaError(null)}>
